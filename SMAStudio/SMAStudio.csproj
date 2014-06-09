@@ -1,0 +1,337 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{DF860935-27F5-42C9-9332-AF5C89EA03F6}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SMAStudio</RootNamespace>
+    <AssemblyName>SMAStudio</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>settings-icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ICSharpCode.AvalonEdit">
+      <HintPath>..\packages\AvalonEdit.4.4.2.9744\lib\Net40\ICSharpCode.AvalonEdit.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Data.Edm, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Data.Edm.5.6.0\lib\net40\Microsoft.Data.Edm.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Data.OData, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Data.OData.5.6.0\lib\net40\Microsoft.Data.OData.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Data.Services.Client, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Data.Services.Client.5.6.0\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0__31bf3856ad364e35\System.Management.Automation.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Spatial, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\System.Spatial.5.6.0\lib\net40\System.Spatial.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Dispatcher\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="Commands\CloseAllCommand.cs" />
+    <Compile Include="Commands\CloseCommand.cs" />
+    <Compile Include="Commands\DeleteCommand.cs" />
+    <Compile Include="Commands\ExitCommand.cs" />
+    <Compile Include="Commands\NewCredentialCommand.cs" />
+    <Compile Include="Commands\NewRunbookCommand.cs" />
+    <Compile Include="Commands\NewVariableCommand.cs" />
+    <Compile Include="Commands\RefreshCommand.cs" />
+    <Compile Include="Commands\RunCommand.cs" />
+    <Compile Include="Core.cs" />
+    <Compile Include="Editor\CodeCompletion\CompletionEngine.cs" />
+    <Compile Include="Editor\CodeCompletion\CompletionSnippet.cs" />
+    <Compile Include="Commands\CheckInCommand.cs" />
+    <Compile Include="Commands\CheckOutCommand.cs" />
+    <Compile Include="Commands\CompareCommand.cs" />
+    <Compile Include="Commands\FindCommand.cs" />
+    <Compile Include="Commands\LoadCommand.cs" />
+    <Compile Include="Commands\SaveCommand.cs" />
+    <Compile Include="Settings\AppSettings.cs" />
+    <Compile Include="Settings\SettingsManager.cs" />
+    <Compile Include="UI\Windows\CompareWindow.xaml.cs">
+      <DependentUpon>CompareWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Editor\Parsing\ParserService.cs" />
+    <Compile Include="Logging\ILoggingService.cs" />
+    <Compile Include="Logging\log4netLoggingService.cs" />
+    <Compile Include="Models\ErrorListItem.cs" />
+    <Compile Include="UI\Dialogs\NewRunbookDialog.xaml.cs">
+      <DependentUpon>NewRunbookDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Dialogs\PrepareRunWindow.xaml.cs">
+      <DependentUpon>PrepareRunWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Resources\Icons.cs" />
+    <Compile Include="Services\ApiService.cs" />
+    <Compile Include="Services\AutoSaveService.cs" />
+    <Compile Include="Services\AsyncService.cs" />
+    <Compile Include="Services\BaseService.cs" />
+    <Compile Include="Services\CredentialService.cs" />
+    <Compile Include="Services\RunbookService.cs" />
+    <Compile Include="Services\VariableService.cs" />
+    <Compile Include="UI\Windows\ExecutionWindow.xaml.cs">
+      <DependentUpon>ExecutionWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Util\AppHelper.cs" />
+    <Compile Include="Util\ControlHelper.cs" />
+    <Compile Include="Util\JsonConverter.cs" />
+    <Compile Include="Util\ObservableCollectionExtensions.cs" />
+    <Compile Include="Util\PasswordBoxExtensions.cs" />
+    <Compile Include="Util\StringHelper.cs" />
+    <Compile Include="Util\ActionExtensions.cs" />
+    <Compile Include="UI\Dialogs\FindReplaceDialog.xaml.cs">
+      <DependentUpon>FindReplaceDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Util\Converters.cs" />
+    <Compile Include="Editor\MvvmTextEditor.cs" />
+    <Compile Include="Util\ListExtension.cs" />
+    <Compile Include="Util\CustomCommandInvoker.cs" />
+    <Compile Include="Util\ObservableObject.cs" />
+    <Compile Include="Util\RelayCommand.cs" />
+    <Compile Include="PlexDiff\DiffBuilder\Model\DiffPaneModel.cs" />
+    <Compile Include="PlexDiff\DiffBuilder\Model\DiffPiece.cs" />
+    <Compile Include="PlexDiff\DiffBuilder\Model\SideBySideDiffModel.cs" />
+    <Compile Include="PlexDiff\DiffBuilder\SideBySideDiffBuilder.cs" />
+    <Compile Include="PlexDiff\Differ.cs" />
+    <Compile Include="PlexDiff\IDiffer.cs" />
+    <Compile Include="PlexDiff\Model\DiffBlock.cs" />
+    <Compile Include="PlexDiff\Model\DiffResult.cs" />
+    <Compile Include="PlexDiff\Model\EditLengthResult.cs" />
+    <Compile Include="PlexDiff\Model\ModificationData.cs" />
+    <Compile Include="Util\ApiHelpers.cs" />
+    <Compile Include="UI\Dialogs\RevisionsWindow.xaml.cs">
+      <DependentUpon>RevisionsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\SMAWebService\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.datasvcmap</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Colorizing\DiffColorizing.cs" />
+    <Compile Include="Util\WorkspaceTemplateSelector.cs" />
+    <Compile Include="ViewModels\CompareViewModel.cs" />
+    <Compile Include="ViewModels\ComponentsViewModel.cs" />
+    <Compile Include="ViewModels\CredentialViewModel.cs" />
+    <Compile Include="ViewModels\ErrorListViewModel.cs" />
+    <Compile Include="ViewModels\ExecutionViewModel.cs" />
+    <Compile Include="ViewModels\IDocumentViewModel.cs" />
+    <Compile Include="ViewModels\RunbookVersionViewModel.cs" />
+    <Compile Include="ViewModels\RunbookViewModel.cs" />
+    <Compile Include="ViewModels\ToolbarViewModel.cs" />
+    <Compile Include="ViewModels\VariableViewModel.cs" />
+    <Compile Include="ViewModels\WorkspaceViewModel.cs" />
+    <Compile Include="UI\Dialogs\WelcomeDialog.xaml.cs">
+      <DependentUpon>WelcomeDialog.xaml</DependentUpon>
+    </Compile>
+    <Page Include="UI\Windows\CompareWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Dialogs\FindReplaceDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="UI\Dialogs\NewRunbookDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Dialogs\PrepareRunWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Dialogs\RevisionsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Styles\ScrollBar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\Windows\ExecutionWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Dialogs\WelcomeDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+    <None Include="Service References\SMAWebService\service.edmx" />
+    <None Include="Xshd\SMA.xshd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ServiceReferenceMetadataStorage Include="Service References\SMAWebService\">
+      <Type>datasvcmap</Type>
+    </ServiceReferenceMetadataStorage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\SMAWebService\Reference.datasvcmap">
+      <Generator>DataServicesCoreClientGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\Completed.png" />
+    <Resource Include="Icons\Failed.png" />
+    <Resource Include="Icons\Paused.png" />
+    <Resource Include="Icons\_CheckIn.png" />
+    <Resource Include="Icons\_CheckOut.png" />
+    <Resource Include="Icons\_Folder.png" />
+    <Resource Include="Icons\_Keyword.png" />
+    <Resource Include="Icons\_Namespace.png" />
+    <Resource Include="Icons\_Property.png" />
+    <Resource Include="Icons\_Refresh.png" />
+    <Resource Include="Icons\_Resources.png" />
+    <Resource Include="Icons\_Revert.png" />
+    <Resource Include="Icons\_Run.png" />
+    <Resource Include="Icons\_Stop.png" />
+    <Resource Include="Icons\_Test.png" />
+    <Resource Include="Icons\_Workbook.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\disk.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\magnifier.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\error.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\lock.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\blueprint.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="settings-icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\setting-icon-128.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\setting-icon-64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\setting-icon-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\clock-icon-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\zoom-seach-icon-32.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

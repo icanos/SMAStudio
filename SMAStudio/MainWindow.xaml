@@ -1,0 +1,432 @@
+﻿<Window x:Class="SMAStudio.MainWindow" x:Name="mainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+        xmlns:SmaStudioUtil="clr-namespace:SMAStudio.Util"
+        xmlns:SmaStudioEditor="clr-namespace:SMAStudio.Editor"
+        xmlns:SmaStudioVm="clr-namespace:SMAStudio.ViewModels"
+        Title="{Binding Path=WindowTitle}" Height="600" Width="919" Icon="Icons/setting-icon-32.png">
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Control" Key="S" Command="{Binding Path=SaveCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}" />
+        <KeyBinding Modifiers="Control" Key="F" Command="{Binding Path=FindCommand}" />
+        <KeyBinding Modifiers="Control" Key="Q" Command="{Binding Path=CloseCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}" />
+    </Window.InputBindings>
+    <Window.Resources>
+        <SmaStudioUtil:Converters x:Key="Converter"/>
+
+        <Style x:Key="TreeViewItemFocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <PathGeometry x:Key="TreeArrow" Figures="M0,0 L0,6 L6,0 z"/>
+
+        <Style x:Key="ExpandCollapseToggleStyle" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Width" Value="16"/>
+            <Setter Property="Height" Value="16"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border Width="16" Height="16" Background="Transparent" Padding="5,5,5,5">
+                            <Path x:Name="ExpandPath" Fill="Transparent" Stroke="#EEEEEE" Data="{StaticResource TreeArrow}">
+                                <Path.RenderTransform>
+                                    <RotateTransform Angle="135" CenterX="3" CenterY="3"/>
+                                </Path.RenderTransform>
+                            </Path>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Stroke" TargetName="ExpandPath" Value="#EEEEEE"/>
+                                <Setter Property="Fill" TargetName="ExpandPath" Value="Transparent"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="RenderTransform" TargetName="ExpandPath">
+                                    <Setter.Value>
+                                        <RotateTransform Angle="180" CenterX="3" CenterY="3"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="Fill" TargetName="ExpandPath" Value="#EEEEEE"/>
+                                <Setter Property="Stroke" TargetName="ExpandPath" Value="#EEEEEE"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ErrorListHeaderStyle" TargetType="{x:Type GridViewColumnHeader}">
+            <Setter Property="Foreground" Value="#999999" />
+            <Setter Property="Background" Value="#272822" />
+            <Setter Property="BorderBrush" Value="#666666" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <!--<ColumnDefinition Width="300" />-->
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Menu Grid.Row="0" Grid.ColumnSpan="2">
+            <MenuItem Header="File">
+                <MenuItem Header="New">
+                    <MenuItem Header="Credential" Command="{Binding NewCredentialCommand}" />
+                    <MenuItem Header="Runbook" Command="{Binding NewRunbookCommand}" />
+                    <MenuItem Header="Variable" Command="{Binding NewVariableCommand}" />
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="Close" Command="{Binding CloseCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}" />
+                <MenuItem Header="Close All But the Active" Command="{Binding CloseAllCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}" />
+                <Separator />
+                <MenuItem Header="Save" Command="{Binding SaveCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}" />
+                <MenuItem Header="Save As" />
+                <Separator />
+                <MenuItem Header="Exit" Command="{Binding ExitCommand}" />
+            </MenuItem>
+            <MenuItem Header="Edit">
+                <MenuItem Command="Undo"/>
+                <MenuItem Command="Redo"/>
+                <Separator />
+                <MenuItem Command="Cut"/>
+                <MenuItem Command="Copy"/>
+                <MenuItem Command="Paste"/>
+                <Separator />
+                <MenuItem Command="SelectAll"/>
+                <Separator />
+                <MenuItem Header="Find and Replace" Command="{Binding Path=FindCommand}" />
+                <MenuItem Header="Go To..."/>
+                <Separator />
+                <MenuItem Header="Insert File as Text..." />
+            </MenuItem>
+        </Menu>
+
+        <ToolBarTray x:Name="Toolbar" Grid.Row="1" Grid.ColumnSpan="2">
+            <ToolBar>
+                <Button x:Name="btnRefresh" Command="{Binding RefreshCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="Icons/_Refresh.png" Width="16" />
+                        <TextBlock Margin="5,0,0,0">Refresh</TextBlock>
+                    </StackPanel>
+                </Button>
+                <Separator />
+                <Button x:Name="btnStart" Command="{Binding RunCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="Icons/_Run.png" Width="16" />
+                        <TextBlock Margin="5,0,0,0">Run</TextBlock>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="btnStop">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="Icons/_Stop.png" Width="16" />
+                        <TextBlock Margin="5,0,0,0">Stop</TextBlock>
+                    </StackPanel>
+                </Button>
+                <Separator />
+                <Button x:Name="btnSave" Command="{Binding SaveCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="Icons/disk.png" Width="16" />
+                        <TextBlock Margin="5,0,0,0">Save</TextBlock>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="btnCheckIn" Command="{Binding Path=CheckInCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="Icons/_CheckIn.png" Width="16" />
+                        <TextBlock Margin="5,0,0,0">Check In</TextBlock>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="btnCheckOut" Command="{Binding Path=CheckOutCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="Icons/_CheckOut.png" Width="16" />
+                        <TextBlock Margin="5,0,0,0">Check Out</TextBlock>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="btnRevert">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="Icons/_Revert.png" Width="16" />
+                        <TextBlock Margin="5,0,0,0">Revert to Revision...</TextBlock>
+                    </StackPanel>
+                </Button>
+            </ToolBar>
+        </ToolBarTray>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TreeView
+                x:Name="explorerList"
+                Grid.Column="0"
+                Grid.Row="0"
+                Background="#333337" 
+                BorderThickness="0,0,0,0" 
+                Foreground="#eeeeee"
+                PreviewMouseRightButtonDown="OnPreviewMouseRightButtonDown">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectedItemChanged">
+                        <SmaStudioUtil:CustomCommandInvoker Command="{Binding LoadCommand}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+                <TreeView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem x:Name="btnCompare" Header="Compare to..." Click="CompareClicked" />
+                        <Separator />
+                        <MenuItem Header="Check In" Command="{Binding CheckInCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
+                                                                          AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}"/>
+                        <MenuItem Header="Check Out" Command="{Binding CheckOutCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
+                                                                          AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}" />
+                        <Separator />
+                        <MenuItem Header="Delete" Command="{Binding DeleteCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
+                                                                            AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}" />
+                        <Separator />
+                        <MenuItem Header="New Credential" Command="{Binding NewCredentialCommand}" />
+                        <MenuItem Header="New Runbook" Command="{Binding NewRunbookCommand}" />
+                        <MenuItem Header="New Variable" Command="{Binding NewVariableCommand}" />
+                    </ContextMenu>
+                </TreeView.ContextMenu>
+                <TreeView.Resources>
+                    <Style TargetType="{x:Type TreeViewItem}">
+                        <Setter Property="Foreground" Value="#eeeeee" />
+                        <Setter Property="HorizontalContentAlignment" Value="Left" />
+                        <Setter Property="Padding" Value="1,2,0,2"/>
+                        <Setter Property="FocusVisualStyle" Value="{StaticResource TreeViewItemFocusVisual}"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type TreeViewItem}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition MinWidth="19" Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <ToggleButton x:Name="Expander" Style="{StaticResource ExpandCollapseToggleStyle}" ClickMode="Press" IsChecked="{Binding Path=IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                        <Border x:Name="Bd" SnapsToDevicePixels="true" Grid.Column="1" Grid.ColumnSpan="2" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter x:Name="PART_Header" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" ContentSource="Header"/>
+                                        </Border>
+                                        <ItemsPresenter x:Name="ItemsHost" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1"/>
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsExpanded" Value="false">
+                                            <Setter Property="Visibility" TargetName="ItemsHost" Value="Collapsed"/>
+                                        </Trigger>
+                                        <Trigger Property="HasItems" Value="false">
+                                            <Setter Property="Visibility" TargetName="Expander" Value="Hidden"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="true">
+                                            <Setter Property="Background" TargetName="Bd" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
+                                        </Trigger>
+                                        <MultiTrigger>
+                                            <MultiTrigger.Conditions>
+                                                <Condition Property="IsSelected" Value="true"/>
+                                                <Condition Property="IsSelectionActive" Value="false"/>
+                                            </MultiTrigger.Conditions>
+                                            <Setter Property="Background" TargetName="Bd" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
+                                        </MultiTrigger>
+                                        <Trigger Property="IsEnabled" Value="false">
+                                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TreeView.Resources>
+                <TreeViewItem Header="Runbooks" ItemsSource="{Binding Runbooks}" Foreground="#eeeeee">
+                    <TreeViewItem.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="Icons/_Folder.png" Width="16" Height="16" SnapsToDevicePixels="True" Margin="0,0,5,0"/>
+                                <TextBlock Text="Runbooks" Foreground="#eeeeee" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </TreeViewItem.HeaderTemplate>
+                    <TreeViewItem.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{Binding Path=Icon}" Width="16" Height="16" SnapsToDevicePixels="True" Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding Path=Title}" Foreground="#eeeeee" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </TreeViewItem.ItemTemplate>
+                </TreeViewItem>
+                <TreeViewItem Header="Credentials" ItemsSource="{Binding Credentials}" Foreground="#eeeeee">
+                    <TreeViewItem.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="Icons/lock.png" Width="16" Height="16" SnapsToDevicePixels="True" Margin="0,0,5,0"/>
+                                <TextBlock Text="Credentials" Foreground="#eeeeee" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </TreeViewItem.HeaderTemplate>
+                    <TreeViewItem.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{Binding Path=Icon}" Width="16" Height="16" SnapsToDevicePixels="True" Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding Path=Title}" Foreground="#eeeeee" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </TreeViewItem.ItemTemplate>
+                </TreeViewItem>
+                <TreeViewItem Header="Variables" ItemsSource="{Binding Variables}" Foreground="#eeeeee">
+                    <TreeViewItem.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="Icons/_Folder.png" Width="16" Height="16" SnapsToDevicePixels="True" Margin="0,0,5,0"/>
+                                <TextBlock Text="Variables" Foreground="#eeeeee" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </TreeViewItem.HeaderTemplate>
+                    <TreeViewItem.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{Binding Path=Icon}" Width="16" Height="16" SnapsToDevicePixels="True" Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding Path=Title}" Foreground="#eeeeee" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </TreeViewItem.ItemTemplate>
+                </TreeViewItem>
+            </TreeView>
+            <GridSplitter HorizontalAlignment="Right" 
+                  VerticalAlignment="Stretch" 
+                  Grid.Column="1" ResizeBehavior="PreviousAndNext"
+                  Width="3" Background="#FFBCBCBC"/>
+            <Grid Grid.Column="2" Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="120" />
+                </Grid.RowDefinitions>
+            <TabControl
+                x:Name="tabDocuments"
+                Grid.Column="0"
+                Grid.Row="0"
+                SelectedIndex="{Binding Path=SelectedIndex}"
+                ItemsSource="{Binding Path=Documents}">
+                <TabControl.ItemContainerStyle>
+                    <Style TargetType="{x:Type TabItem}">
+                        <Setter Property="ContextMenu">
+                            <Setter.Value>
+                                <ContextMenu>
+                                    <MenuItem Header="Close" Command="{Binding Source={x:Static Application.Current}, Path=MainWindow.DataContext.CloseCommand}" CommandParameter="{Binding}" />
+                                    <MenuItem Header="Close All But This" Command="{Binding Source={x:Static Application.Current}, Path=MainWindow.DataContext.CloseAllCommand}" CommandParameter="{Binding}" />
+                                    <Separator />
+                                    <MenuItem Header="Properties" />
+                                </ContextMenu>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TabControl.ItemContainerStyle>
+                <TabControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,5,0" />
+                            <TextBlock Text="{Binding Title}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </TabControl.ItemTemplate>
+                <TabControl.ContentTemplateSelector>
+                    <SmaStudioUtil:WorkspaceTemplateSelector>
+                        <SmaStudioUtil:WorkspaceTemplateSelector.RunbookTemplate>
+                            <DataTemplate>
+                                <DockPanel>
+                                    <DockPanel DockPanel.Dock="Top" Margin="5,5,5,5">
+                                        <TextBlock Text="Tags" Margin="0,0,5,0" DockPanel.Dock="Left" />
+                                        <TextBox x:Name="txtTags" DockPanel.Dock="Left" Text="{Binding Path=Tags}" />
+                                    </DockPanel>
+                                    <SmaStudioEditor:MvvmTextEditor
+                                        x:Name="textEditor"
+                                        IsReadOnly="{Binding Path=CheckedIn}"
+                                        FontFamily="Consolas"
+                                        SyntaxHighlighting="SMA"
+                                        FontSize="10pt"
+                                        Padding="5,5,5,5"
+                                        Foreground="#F8F8F2"
+                                        Background="#272822"
+                                        Text="{Binding Path=Content}"
+                                        TextChanged="textEditor_TextChanged"
+                                        DockPanel.Dock="Top"
+                                        />
+                                </DockPanel>
+                            </DataTemplate>
+                        </SmaStudioUtil:WorkspaceTemplateSelector.RunbookTemplate>
+                        <SmaStudioUtil:WorkspaceTemplateSelector.VariableTemplate>
+                            <DataTemplate>
+                                <GroupBox Header="Variable Configuration">
+                                    <DockPanel LastChildFill="False">
+                                        <Label Content="Name" DockPanel.Dock="Top" />
+                                        <TextBox DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Name}" TextChanged="textEditor_TextChanged" />
+
+                                        <Label Content="Value" DockPanel.Dock="Top" Margin="0,5,0,0" />
+                                        <TextBox DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Content}" TextChanged="textEditor_TextChanged" />
+
+                                        <Label Content="Is Encrypted" DockPanel.Dock="Top" Margin="0,5,0,0" />
+                                        <CheckBox DockPanel.Dock="Top" Margin="5,0,5,0" IsChecked="{Binding Path=IsEncrypted}" />
+                                    </DockPanel>
+                                </GroupBox>
+                             </DataTemplate>
+                        </SmaStudioUtil:WorkspaceTemplateSelector.VariableTemplate>
+                            <SmaStudioUtil:WorkspaceTemplateSelector.CredentialTemplate>
+                                <DataTemplate>
+                                    <GroupBox Header="Credential Configuration">
+                                        <DockPanel LastChildFill="False">
+                                            <Label Content="Name" DockPanel.Dock="Top" />
+                                            <TextBox x:Name="txtName" DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Name}" TextChanged="textEditor_TextChanged" />
+
+                                            <Label Content="Username" DockPanel.Dock="Top" Margin="0,5,0,0" />
+                                            <TextBox x:Name="txtUsername" DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Username}" TextChanged="textEditor_TextChanged" />
+                                            
+                                            <Label Content="Password" DockPanel.Dock="Top" Margin="0,5,0,0" />
+                                            <PasswordBox x:Name="txtPassword" DockPanel.Dock="Top" Margin="5,0,5,0" SmaStudioUtil:PasswordBoxExtensions.BindPassword="true" SmaStudioUtil:PasswordBoxExtensions.BoundPassword="{Binding Path=Password, Mode=OneWayToSource}" />
+                                        </DockPanel>
+                                    </GroupBox>
+                                </DataTemplate>
+                            </SmaStudioUtil:WorkspaceTemplateSelector.CredentialTemplate>
+                    </SmaStudioUtil:WorkspaceTemplateSelector>
+                </TabControl.ContentTemplateSelector>
+            </TabControl>
+                <GridSplitter Grid.Row="1"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Center"
+                      Background="#FFBCBCBC"
+                      ShowsPreview="True"
+                      Height="3"
+                   />
+                <ListView x:Name="errorList" ItemsSource="{Binding Items}" Grid.Column="0" Grid.Row="2" Foreground="#F8F8F2" Background="#272822">
+                    <ListView.View>
+                        <GridView ColumnHeaderContainerStyle="{DynamicResource ErrorListHeaderStyle}">
+                            <GridViewColumn Width="30" DisplayMemberBinding="{Binding LineNumber}" />
+                            <GridViewColumn Width="400" Header="Description" DisplayMemberBinding="{Binding Description}" />
+                            <GridViewColumn Width="100" Header="Runbook" DisplayMemberBinding="{Binding Runbook}" />
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </Grid>
+        </Grid>
+        <StatusBar Grid.ColumnSpan="2" Grid.Row="3" x:Name="statusBar">
+            <StatusBarItem>
+                <TextBlock x:Name="statusBarInfo" Text="{Binding StatusBarText}" />
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>
