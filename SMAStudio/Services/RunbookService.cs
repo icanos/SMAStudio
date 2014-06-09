@@ -74,7 +74,7 @@ namespace SMAStudio.Services
         {
             try
             {
-                var versions = _api.Current.RunbookVersions.Where(rv => rv.RunbookID.Equals(runbookViewModel.Runbook.RunbookID)).ToList();
+                var versions = _api.Current.RunbookVersions.Where(rv => rv.RunbookID.Equals(runbookViewModel.Runbook.RunbookID) && !rv.IsDraft).ToList();
                 var versionsViewModels = new List<RunbookVersionViewModel>();
 
                 foreach (var version in versions)
