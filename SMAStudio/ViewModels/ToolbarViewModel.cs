@@ -14,7 +14,9 @@ namespace SMAStudio.ViewModels
         private ICommand _checkInCommand;
         private ICommand _checkOutCommand;
         private ICommand _runCommand;
+        private ICommand _stopCommand;
         private ICommand _refreshCommand;
+        private ICommand _revertCommand;
 
         public ToolbarViewModel(ComponentsViewModel componentsViewModel)
         {
@@ -22,7 +24,9 @@ namespace SMAStudio.ViewModels
             _checkInCommand = new CheckInCommand();
             _checkOutCommand = new CheckOutCommand();
             _runCommand = new RunCommand();
+            _stopCommand = new StopCommand();
             _refreshCommand = new RefreshCommand(componentsViewModel);
+            _revertCommand = new RevertCommand();
         }
 
         public ICommand SaveCommand
@@ -45,9 +49,19 @@ namespace SMAStudio.ViewModels
             get { return _runCommand; }
         }
 
+        public ICommand StopCommand
+        {
+            get { return _stopCommand; }
+        }
+
         public ICommand RefreshCommand
         {
             get { return _refreshCommand; }
+        }
+
+        public ICommand RevertCommand
+        {
+            get { return _revertCommand; }
         }
     }
 }

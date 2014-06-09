@@ -97,7 +97,9 @@
     <Compile Include="Commands\NewRunbookCommand.cs" />
     <Compile Include="Commands\NewVariableCommand.cs" />
     <Compile Include="Commands\RefreshCommand.cs" />
+    <Compile Include="Commands\RevertCommand.cs" />
     <Compile Include="Commands\RunCommand.cs" />
+    <Compile Include="Commands\StopCommand.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="Editor\CodeCompletion\CompletionEngine.cs" />
     <Compile Include="Editor\CodeCompletion\CompletionSnippet.cs" />

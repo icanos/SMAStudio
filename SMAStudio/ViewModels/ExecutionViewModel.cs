@@ -100,6 +100,7 @@ namespace SMAStudio.ViewModels
 
                 Console.WriteLine("Execution is complete.");
                 base.RaisePropertyChanged("ExecutionProperties");
+                _runbookViewModel.JobID = Guid.Empty;
             }));
 
             _thread.Start();

@@ -129,7 +129,7 @@
                         <TextBlock Margin="5,0,0,0">Run</TextBlock>
                     </StackPanel>
                 </Button>
-                <Button x:Name="btnStop">
+                <Button x:Name="btnStop" Command="{Binding StopCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="Icons/_Stop.png" Width="16" />
                         <TextBlock Margin="5,0,0,0">Stop</TextBlock>
@@ -154,7 +154,7 @@
                         <TextBlock Margin="5,0,0,0">Check Out</TextBlock>
                     </StackPanel>
                 </Button>
-                <Button x:Name="btnRevert">
+                <Button x:Name="btnRevert" Command="{Binding Path=RevertCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="Icons/_Revert.png" Width="16" />
                         <TextBlock Margin="5,0,0,0">Revert to Revision...</TextBlock>
