@@ -83,9 +83,15 @@ namespace SMAStudio
             return parameterName;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Run_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
+            Close();
+        }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
             Close();
         }
     }

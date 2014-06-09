@@ -13,7 +13,7 @@
         </Grid.ColumnDefinitions>
         <ToolBarTray x:Name="Toolbar" Grid.Row="0" Grid.ColumnSpan="2">
             <ToolBar>
-                <Button x:Name="btnRestart" Command="{Binding RunCommand}">
+                <Button x:Name="btnRestart" Command="{Binding RunCommand}" CommandParameter="{Binding}">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="../../Icons/_Refresh.png" Width="16" />
                         <TextBlock Margin="5,0,0,0">Restart</TextBlock>

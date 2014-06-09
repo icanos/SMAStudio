@@ -24,6 +24,9 @@ namespace SMAStudio.Commands
             if (parameter is RunbookViewModel)
                 return true;
 
+            if (parameter is ExecutionViewModel)
+                return true;
+
             return false;
         }
 
@@ -38,10 +41,16 @@ namespace SMAStudio.Commands
             if (parameter == null)
                 return;
 
-            if (!(parameter is RunbookViewModel))
+            RunbookViewModel runbook = null;
+            /*if (!(parameter is RunbookViewModel))
                 return;
 
-            var runbook = (RunbookViewModel)parameter;
+            var runbook = (RunbookViewModel)parameter;*/
+            if (parameter is RunbookViewModel)
+                runbook = (RunbookViewModel)parameter;
+            else if (parameter is ExecutionViewModel)
+                runbook = ((ExecutionViewModel)parameter).Runbook;
+
             var window = new PrepareRunWindow(runbook);
             window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
 
@@ -64,7 +73,16 @@ namespace SMAStudio.Commands
                 }
             }
 
-            _api.Current.AttachTo("Runbooks", runbook.Runbook);
+            //if (parameter is RunbookViewModel)
+            try
+            {
+                _api.Current.AttachTo("Runbooks", runbook.Runbook);
+            }
+            catch (InvalidOperationException)
+            {
+
+            }
+
             _api.Current.UpdateObject(runbook.Runbook);
 
             Guid? jobGuid = new Guid?(runbook.Runbook.StartRunbook(_api.Current, parameters));

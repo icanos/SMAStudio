@@ -11,16 +11,19 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using SMAStudio.Services;
 
 namespace SMAStudio.Commands
 {
     public class CheckOutCommand : ICommand
     {
         private ApiService _api;
+        private RunbookService _runbookService;
 
         public CheckOutCommand()
         {
             _api = new ApiService();
+            _runbookService = new RunbookService();
         }
 
         public bool CanExecute(object parameter)
@@ -53,7 +56,7 @@ namespace SMAStudio.Commands
             if (parameter == null)
                 return;
 
-            if (MessageBox.Show("Do you want to check out the runbook?\r\nThis will cause the runbook to be stopped.", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+            if (MessageBox.Show("Do you want to check out the runbook?\r\nThis will still allow the current version of the runbook to run.", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
                 return;
 
             var rb = ((RunbookViewModel)parameter);
@@ -106,6 +109,8 @@ namespace SMAStudio.Commands
 
             rb.CheckedOut = true;
             rb.Runbook = runbook;
+
+            rb.Versions = _runbookService.GetVersions(rb);
         }
     }
 }

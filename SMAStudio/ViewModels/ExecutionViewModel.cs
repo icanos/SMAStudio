@@ -191,6 +191,11 @@ namespace SMAStudio.ViewModels
             return job;
         }
 
+        public RunbookViewModel Runbook
+        {
+            get { return _runbookViewModel; }
+        }
+
         public string WindowTitle
         {
             get
