@@ -23,6 +23,7 @@ Download the source code, open in Visual Studio 2013+ and make sure that you dow
  - SMA Environment up and running
  
 ## Credits
-Icon for the application and other windows within SMA Studio from http://graphicloads.com/
+ - Icon for the application and other windows within SMA Studio from http://graphicloads.com/
+ - PlexDiff http://diffplex.codeplex.com/
 
 ######Copyright 2014 Marcus Westin. SMA Studio is distributed under the Apache 2.0 License
