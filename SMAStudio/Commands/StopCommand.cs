@@ -24,13 +24,20 @@ namespace SMAStudio.Commands
             if (parameter == null)
                 return false;
 
-            if (!(parameter is RunbookViewModel))
+            if (!(parameter is RunbookViewModel) && !(parameter is ExecutionViewModel))
                 return false;
 
-            if (((RunbookViewModel)parameter).JobID == Guid.Empty)
-                return false;
+            bool result = true;
 
-            return true;
+            if (parameter is RunbookViewModel)
+                result = !(((RunbookViewModel)parameter).JobID == Guid.Empty);
+            else if (parameter is ExecutionViewModel)
+                result = !(((ExecutionViewModel)parameter).Runbook.JobID == Guid.Empty);
+
+            //if (((RunbookViewModel)parameter).JobID == Guid.Empty)
+            //    return false;
+
+            return result;
         }
 
         public event EventHandler CanExecuteChanged
@@ -46,7 +53,14 @@ namespace SMAStudio.Commands
 
             if (MessageBox.Show("Are you sure you want to stop the execution?", "Stop execution", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
-                var runbook = (RunbookViewModel)parameter;
+                RunbookViewModel runbook = null;
+
+                if (parameter is RunbookViewModel)
+                    runbook = (RunbookViewModel)parameter;
+                else if (parameter is ExecutionViewModel)
+                    runbook = ((ExecutionViewModel)parameter).Runbook;
+                else
+                    throw new Exception("Invalid object");
 
                 var job = _api.Current.Jobs.Where(j => j.JobID == runbook.JobID).First();
                 job.Stop(_api.Current);

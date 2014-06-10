@@ -11,11 +11,11 @@ using System.Windows.Input;
 
 namespace SMAStudio.Commands
 {
-    public class RunCommand : ICommand
+    public class TestCommand : ICommand
     {
         private ApiService _api;
 
-        public RunCommand()
+        public TestCommand()
         {
             _api = new ApiService();
         }
@@ -25,17 +25,17 @@ namespace SMAStudio.Commands
             if (parameter is RunbookViewModel)
             {
                 if (((RunbookViewModel)parameter).CheckedOut)
-                    return false;
+                    return true;
 
-                return true;
+                return false;
             }
 
             if (parameter is ExecutionViewModel)
             {
                 if (((ExecutionViewModel)parameter).Runbook.CheckedOut)
-                    return false;
+                    return true;
 
-                return true;
+                return false;
             }
 
             return false;
@@ -111,8 +111,8 @@ namespace SMAStudio.Commands
                     return;
                 }
             }
-
-            Guid? jobGuid = new Guid?(runbook.Runbook.StartRunbook(_api.Current, parameters));
+            
+            Guid? jobGuid = new Guid?(runbook.Runbook.TestRunbook(_api.Current, parameters));
             runbook.JobID = (Guid)jobGuid;
             
             var executionWindow = new ExecutionWindow(runbook);

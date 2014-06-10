@@ -32,5 +32,11 @@ namespace SMAStudio
             Width = (System.Windows.SystemParameters.PrimaryScreenWidth / 4) * 3;   // 3/4 of the screen
             WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            var executionViewModel = (ExecutionViewModel)DataContext;
+            executionViewModel.ClosingWindow();
+        }
     }
 }

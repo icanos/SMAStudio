@@ -1,10 +1,13 @@
 ﻿using SMAStudio.Commands;
+using SMAStudio.Models;
 using SMAStudio.Services;
+using SMAStudio.Settings;
 using SMAStudio.SMAWebService;
 using SMAStudio.Util;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -30,8 +33,10 @@ namespace SMAStudio.ViewModels
         private ExecutionProperty paramJobStatus = null;
 
         private ICommand _runCommand;
+        private ICommand _stopCommand;
 
         private Thread _thread = null;
+        private Job _job = null;
 
         public ExecutionViewModel(RunbookViewModel runbookViewModel)
         {
@@ -41,6 +46,7 @@ namespace SMAStudio.ViewModels
             ExecutionProperties = new ObservableCollection<ExecutionProperty>();
 
             _runCommand = new RunCommand();
+            _stopCommand = new StopCommand();
 
             // Start the retrieving of data from the webservice
             Run();
@@ -53,30 +59,30 @@ namespace SMAStudio.ViewModels
             //AsyncService.Execute(ThreadPriority.Normal, delegate()
             _thread = new Thread(new ThreadStart(delegate()
             {
-                var job = GetJobDetails(_runbookViewModel.JobID);
+                _job = GetJobDetails(_runbookViewModel.JobID);
 
                 //var job = _api.Current.Jobs.Where(j => j.JobID == _runbookViewModel.JobID).FirstOrDefault();
 
-                if (job == null)
+                if (_job == null)
                     return;
 
                 // Add the JobID parameter
-                var param1 = new ExecutionProperty("Job ID", job.JobID);
-                //var param2 = new ExecutionProperty("Runbook ID", runbookVersion.RunbookID);
-                //var param3 = new ExecutionProperty("Runbook Name", runbook.RunbookName);
-                paramJobStatus = new ExecutionProperty("Job Status", job.JobStatus);
-                paramStartTime = new ExecutionProperty("Start Time", job.StartTime);
-                paramEndTime = new ExecutionProperty("End Time", job.EndTime);
-                var param5 = new ExecutionProperty("Creation Time", job.CreationTime);
-                var param6 = new ExecutionProperty("Last Modified Time", job.LastModifiedTime);
-                paramErrorCount = new ExecutionProperty("Error Count", job.ErrorCount);
-                paramWarnCount = new ExecutionProperty("Warning Count", job.WarningCount);
+                var param1 = new ExecutionProperty("Job ID", _job.JobID);
+                var param2 = new ExecutionProperty("Runbook ID", _runbookViewModel.Runbook.RunbookID);
+                var param3 = new ExecutionProperty("Runbook Name", _runbookViewModel.Runbook.RunbookName);
+                paramJobStatus = new ExecutionProperty("Job Status", _job.JobStatus);
+                paramStartTime = new ExecutionProperty("Start Time", _job.StartTime);
+                paramEndTime = new ExecutionProperty("End Time", _job.EndTime);
+                var param5 = new ExecutionProperty("Creation Time", _job.CreationTime);
+                var param6 = new ExecutionProperty("Last Modified Time", _job.LastModifiedTime);
+                paramErrorCount = new ExecutionProperty("Error Count", _job.ErrorCount);
+                paramWarnCount = new ExecutionProperty("Warning Count", _job.WarningCount);
 
                 App.Current.Dispatcher.Invoke((Action)delegate()
                 {
                     ExecutionProperties.Add(param1);
-                    //ExecutionProperties.Add(param2);
-                    //ExecutionProperties.Add(param3);
+                    ExecutionProperties.Add(param2);
+                    ExecutionProperties.Add(param3);
                     ExecutionProperties.Add(paramJobStatus);
                     ExecutionProperties.Add(paramStartTime);
                     ExecutionProperties.Add(paramEndTime);
@@ -86,17 +92,26 @@ namespace SMAStudio.ViewModels
                     ExecutionProperties.Add(paramWarnCount);
                 });
 
-                while (!doneStatuses.Contains(job.JobStatus))
+                while (!doneStatuses.Contains(_job.JobStatus))
                 {
-                    UpdateExecution(job);
+                    UpdateExecution(_job);
 
                     Thread.Sleep(2 * 1000);
-                    job = GetJobDetails(_runbookViewModel.JobID);
-                    //job = null;
-                    //job = _api.Current.Jobs.Where(j => j.JobID == _runbookViewModel.JobID).First();
+                    var tmpJob = GetJobDetails(_runbookViewModel.JobID);
+
+                    // If the job we retrieved is null - we break, since the job was most
+                    // likely cancelled by the user or the runbook server going offline.
+                    if (tmpJob == null)
+                    {
+                        _job.JobStatus = "Stopped";
+                        _job.EndTime = DateTime.Now;
+                        break;
+                    }
+                    else
+                        _job = tmpJob;
                 }
 
-                UpdateExecution(job);
+                UpdateExecution(_job);
 
                 Console.WriteLine("Execution is complete.");
                 base.RaisePropertyChanged("ExecutionProperties");
@@ -104,6 +119,20 @@ namespace SMAStudio.ViewModels
             }));
 
             _thread.Start();
+        }
+
+        public void ClosingWindow()
+        {
+            if (_job.JobStatus.Equals("New") ||
+                _job.JobStatus.Equals("Running") ||
+                _job.JobStatus.Equals("Activating") ||
+                _job.JobStatus.Equals("Suspended"))
+            {
+                if (MessageBox.Show("The job is currently running. Do you want to cancel the job before closing the window?", "Cancel job", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                {
+                    _job.Stop(_api.Current);
+                }
+            }
         }
 
         private void UpdateExecution(Job job)
@@ -115,8 +144,13 @@ namespace SMAStudio.ViewModels
 
             App.Current.Dispatcher.Invoke((Action)delegate()
             {
-                var apiJob = _api.Current.Jobs.Where(j => j.JobID == _runbookViewModel.JobID).First();
-                ExecutionContent = ApiHelpers.GetJobOutput(_api.Current, apiJob);
+                ExecutionContent = job.JobException;
+
+                if (!String.IsNullOrEmpty(job.JobException))
+                    ExecutionContent += "\r\n\r\n--------------------------------------------------\r\n\r\n";
+
+                //ExecutionContent += ApiHelpers.GetJobOutput(_api.Current, apiJob);
+                ExecutionContent += GetJobOutput(job);
 
                 paramStartTime.Value = job.StartTime;
                 paramEndTime.Value = job.EndTime;
@@ -131,11 +165,20 @@ namespace SMAStudio.ViewModels
         
         private Job GetJobDetails(Guid jobGuid)
         {
-            string url = "https://wwin14.westin.local:9090/00000000-0000-0000-0000-000000000000/Jobs(guid'" + jobGuid + "')";
+            string url = SettingsManager.Current.Settings.SmaWebServiceUrl + "/Jobs(guid'" + jobGuid + "')";
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.Credentials = CredentialCache.DefaultCredentials;
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            HttpWebResponse response = null;
+
+            try
+            {
+                response = (HttpWebResponse)request.GetResponse();
+            }
+            catch (WebException)
+            {
+                return null;
+            }
 
             TextReader tr = new StreamReader(response.GetResponseStream());
             string content = tr.ReadToEnd();
@@ -191,6 +234,85 @@ namespace SMAStudio.ViewModels
 
             return job;
         }
+        
+        private string GetJobOutput(Job job)
+        {
+            string jobStreamUrl = SettingsManager.Current.Settings.SmaWebServiceUrl + "/JobStreams/GetStreamItems";
+            string queryString = "jobId='" + job.JobID.ToString() + "'&streamType='Any'";
+
+            if (job.StartTime != null)
+            {
+                queryString += "&streamsCreatedSinceDateTime='" + Uri.EscapeDataString(((DateTime)job.StartTime).ToUniversalTime().ToString()) + "'";
+            }
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(jobStreamUrl + "?" + queryString);
+            request.Credentials = CredentialCache.DefaultCredentials;
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+            TextReader tr = new StreamReader(response.GetResponseStream());
+            string content = tr.ReadToEnd();
+
+            tr.Close();
+
+            XElement outputXml = XElement.Parse(content);
+            XNamespace d = "http://schemas.microsoft.com/ado/2007/08/dataservices";
+            XNamespace m = "http://schemas.microsoft.com/ado/2007/08/dataservices/metadata";
+            XNamespace a = "http://www.w3.org/2005/Atom";
+            IEnumerable<XElement> entries = outputXml.Elements(a + "entry");//.Elements(m + "properties");
+
+            List<OutputItem> outputItems = new List<OutputItem>();
+            foreach (var entry in entries)
+            {
+                var propertyContainers = entry.Element(a + "content").Element(m + "properties").Elements();
+                var outputItem = new OutputItem();
+
+                foreach (var prop in propertyContainers)
+                {
+                    switch (prop.Name.LocalName)
+                    {
+                        case "JobId":
+                            outputItem.JobID = Guid.Parse(prop.Value);
+                            break;
+                        case "RunbookVersionId":
+                            outputItem.RunbookVersionID = Guid.Parse(prop.Value);
+                            break;
+                        case "StreamTypeName":
+                            outputItem.StreamTypeName = prop.Value;
+                            break;
+                        case "TenantId":
+                            outputItem.TenantID = Guid.Parse(prop.Value);
+                            break;
+                        case "StreamTime":
+                            outputItem.StreamTime = DateTime.Parse(prop.Value);
+                            break;
+                        case "StreamText":
+                            outputItem.StreamText = prop.Value;
+                            break;
+                        case "NameValues":
+                            /*var subProps = prop.Element(d + "element").Element(d + "NameValueInner").Elements(d + "element");
+
+                            foreach (var subProp in subProps)
+                            {
+                                outputItem.Values.Add(new OutputNameValue
+                                    {
+                                        Name = subProp.Element(d + "Name").Value,
+                                        Value = subProp.Element(d + "Value").Value
+                                    });
+                            }*/
+                            break;
+                    }
+                }
+
+                outputItems.Add(outputItem);
+            }
+
+            string resultContent = "";
+
+            foreach (var item in outputItems)
+                resultContent += item.ToString() + "\r\n\r\n";
+
+            return resultContent;
+        }
 
         public RunbookViewModel Runbook
         {
@@ -220,6 +342,11 @@ namespace SMAStudio.ViewModels
         public ICommand RunCommand
         {
             get { return _runCommand; }
+        }
+
+        public ICommand StopCommand
+        {
+            get { return _stopCommand; }
         }
 
         public class ExecutionProperty : ObservableObject

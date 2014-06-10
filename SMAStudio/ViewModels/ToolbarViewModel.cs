@@ -17,6 +17,7 @@ namespace SMAStudio.ViewModels
         private ICommand _stopCommand;
         private ICommand _refreshCommand;
         private ICommand _revertCommand;
+        private ICommand _testCommand;
 
         public ToolbarViewModel(ComponentsViewModel componentsViewModel)
         {
@@ -27,6 +28,7 @@ namespace SMAStudio.ViewModels
             _stopCommand = new StopCommand();
             _refreshCommand = new RefreshCommand(componentsViewModel);
             _revertCommand = new RevertCommand();
+            _testCommand = new TestCommand();
         }
 
         public ICommand SaveCommand
@@ -62,6 +64,11 @@ namespace SMAStudio.ViewModels
         public ICommand RevertCommand
         {
             get { return _revertCommand; }
+        }
+
+        public ICommand TestCommand
+        {
+            get { return _testCommand; }
         }
     }
 }

@@ -1,7 +1,8 @@
 ﻿<Window x:Class="SMAStudio.ExecutionWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="{Binding Path=WindowTitle}" Height="600" Width="800" Icon="/SMAStudio;component/Icons/clock-icon-32.png">
+        Title="{Binding Path=WindowTitle}" Height="600" Width="800" Icon="/SMAStudio;component/Icons/clock-icon-32.png"
+        Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -17,6 +18,13 @@
                     <StackPanel Orientation="Horizontal">
                         <Image Source="../../Icons/_Refresh.png" Width="16" />
                         <TextBlock Margin="5,0,0,0">Restart</TextBlock>
+                    </StackPanel>
+                </Button>
+                <Separator />
+                <Button x:Name="btnStop" Command="{Binding StopCommand}" CommandParameter="{Binding}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="../../Icons/_Stop.png" Width="16" />
+                        <TextBlock Margin="5,0,0,0">Stop</TextBlock>
                     </StackPanel>
                 </Button>
             </ToolBar>

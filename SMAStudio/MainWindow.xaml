@@ -123,6 +123,12 @@
                     </StackPanel>
                 </Button>
                 <Separator />
+                <Button x:Name="btnTest" Command="{Binding TestCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="Icons/_Test.png" Width="16" />
+                        <TextBlock Margin="5,0,0,0">Test</TextBlock>
+                    </StackPanel>
+                </Button>
                 <Button x:Name="btnStart" Command="{Binding RunCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="Icons/_Run.png" Width="16" />
