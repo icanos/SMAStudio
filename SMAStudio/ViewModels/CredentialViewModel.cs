@@ -103,6 +103,7 @@ namespace SMAStudio.ViewModels
                 CachedChanges = false;
 
                 base.RaisePropertyChanged("Name");
+                base.RaisePropertyChanged("Title");
             }
         }
 
