@@ -36,6 +36,12 @@ namespace SMAStudio
                 return;
             }
 
+            if (!txtSMAUrl.Text.EndsWith("00000000-0000-0000-0000-000000000000") ||
+                !txtSMAUrl.Text.EndsWith("00000000-0000-0000-0000-000000000000/"))
+            {
+                txtSMAUrl.Text += (txtSMAUrl.Text.EndsWith("/") ? "00000000-0000-0000-0000-000000000000" : "/00000000-0000-0000-0000-000000000000");
+            }
+
             SettingsManager.Current.Settings.SmaWebServiceUrl = txtSMAUrl.Text;
 
             DialogResult = true;

@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using SMAStudio.Resources;
 using SMAStudio.Editor;
+using SMAStudio.Settings;
 
 namespace SMAStudio.ViewModels
 {
@@ -210,7 +211,7 @@ namespace SMAStudio.ViewModels
         {
             get
             {
-                return new Uri(ConfigurationManager.AppSettings["SMAApiUrl"] + "/Runbooks(guid'" + Runbook.RunbookID + "')");
+                return new Uri(SettingsManager.Current.Settings.SmaWebServiceUrl + "/Runbooks(guid'" + Runbook.RunbookID + "')");
             }
         }
 

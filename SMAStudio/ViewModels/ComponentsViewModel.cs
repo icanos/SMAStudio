@@ -21,7 +21,6 @@ namespace SMAStudio.ViewModels
 {
     public class ComponentsViewModel : ObservableObject
     {
-        private OrchestratorApi _api;
         private ICommand _loadCommand;
         private ICommand _checkInCommand;
         private ICommand _checkOutCommand;
@@ -42,11 +41,6 @@ namespace SMAStudio.ViewModels
         public ComponentsViewModel(WorkspaceViewModel dataContext)
         {
             _dataContext = dataContext;
-
-            ServicePointManager.ServerCertificateValidationCallback = ValidateServerCertficate;
-
-            _api = new OrchestratorApi(new Uri(ConfigurationManager.AppSettings["SMAApiUrl"]));
-            ((DataServiceContext)_api).Credentials = CredentialCache.DefaultCredentials;
 
             Runbooks = new ObservableCollection<RunbookViewModel>();
             Variables = new ObservableCollection<VariableViewModel>();
@@ -194,15 +188,6 @@ namespace SMAStudio.ViewModels
         {
             get { return _selectedRunbook; }
             set { _selectedRunbook = value; }
-        }
-
-        private bool ValidateServerCertficate(
-                object sender,
-                X509Certificate cert,
-                X509Chain chain,
-                SslPolicyErrors sslPolicyErrors)
-        {
-            return true;
         }
     }
 }

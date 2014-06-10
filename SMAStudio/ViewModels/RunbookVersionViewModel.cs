@@ -1,4 +1,5 @@
-﻿using SMAStudio.SMAWebService;
+﻿using SMAStudio.Settings;
+using SMAStudio.SMAWebService;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -42,7 +43,7 @@ namespace SMAStudio.ViewModels
         {
             get
             {
-                return new Uri(ConfigurationManager.AppSettings["SMAApiUrl"] + "/RunbookVersions(guid'" + RunbookVersion.RunbookVersionID + "')");
+                return new Uri(SettingsManager.Current.Settings.SmaWebServiceUrl + "/RunbookVersions(guid'" + RunbookVersion.RunbookVersionID + "')");
             }
         }
 

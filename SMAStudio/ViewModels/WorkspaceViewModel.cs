@@ -43,14 +43,14 @@ namespace SMAStudio.ViewModels
             _errorListViewModel = errorListViewModel;
             StatusBarText = "SMA Studio 2014";
 
-            Documents.Add(new RunbookViewModel()
+            /*Documents.Add(new RunbookViewModel()
             {
                 CheckedOut = false,
                 Content = "",
                 Runbook = new SMAWebService.Runbook()
             });
 
-            SelectedIndex = 0;
+            SelectedIndex = 0;*/
 
             _saveCommand = new SaveCommand(null);
             _findCommand = new FindCommand();
@@ -119,7 +119,7 @@ namespace SMAStudio.ViewModels
                         data.Add(cmd);
                 }
                 
-                _completionWindow.Show();
+                //_completionWindow.Show();
                 _completionWindow.Closed += delegate
                 {
                     _completionWindow = null;
@@ -209,7 +209,7 @@ namespace SMAStudio.ViewModels
 
         public IDocumentViewModel CurrentDocument
         {
-            get { return SelectedIndex < 0 ? null : Documents[SelectedIndex]; }
+            get { return SelectedIndex < 0 || Documents.Count == 0 ? null : Documents[SelectedIndex]; }
         }
 
         public ICommand SaveCommand

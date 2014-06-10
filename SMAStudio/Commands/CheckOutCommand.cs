@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using SMAStudio.Services;
+using SMAStudio.Settings;
 
 namespace SMAStudio.Commands
 {
@@ -82,7 +83,7 @@ namespace SMAStudio.Commands
 
             // First, we need to download the published code and then republish it as a draft
             // Retrieve the raw content of the runbook
-            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(ConfigurationManager.AppSettings["SMAApiUrl"] + "/Runbooks(guid'" + runbook.RunbookID + "')/PublishedRunbookVersion/$value");
+            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(SettingsManager.Current.Settings.SmaWebServiceUrl + "/Runbooks(guid'" + runbook.RunbookID + "')/PublishedRunbookVersion/$value");
             request.Credentials = CredentialCache.DefaultCredentials;
 
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
