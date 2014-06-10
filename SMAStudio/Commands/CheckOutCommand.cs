@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Input;
 using SMAStudio.Services;
 using SMAStudio.Settings;
+using SMAStudio.Logging;
 
 namespace SMAStudio.Commands
 {
@@ -20,11 +21,13 @@ namespace SMAStudio.Commands
     {
         private ApiService _api;
         private RunbookService _runbookService;
+        private ILoggingService _log;
 
         public CheckOutCommand()
         {
             _api = new ApiService();
             _runbookService = new RunbookService();
+            _log = new log4netLoggingService();
         }
 
         public bool CanExecute(object parameter)
@@ -76,7 +79,7 @@ namespace SMAStudio.Commands
             else
             {
                 // TODO: Support overwriting of already checked out runbook?
-
+                _log.ErrorFormat("The runbook was already checked out.");
                 MessageBox.Show("The runbook's already checked out.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }

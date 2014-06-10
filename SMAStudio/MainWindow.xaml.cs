@@ -2,6 +2,7 @@
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using SMAStudio.Commands;
 using SMAStudio.Editor;
+using SMAStudio.Logging;
 using SMAStudio.Services;
 using SMAStudio.Settings;
 using SMAStudio.Util;
@@ -118,6 +119,9 @@ namespace SMAStudio
 
             _autoSaveManager = new AutoSaveService((WorkspaceViewModel)DataContext);
             _autoSaveManager.Start();
+
+            var log = new log4netLoggingService();
+            log.DebugFormat("Running SMA Studio 2014");
         }
 
         private void OnPreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)

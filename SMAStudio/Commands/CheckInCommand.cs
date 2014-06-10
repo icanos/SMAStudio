@@ -8,16 +8,19 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using SMAStudio.Logging;
 
 namespace SMAStudio.Commands
 {
     public class CheckInCommand : ICommand
     {
         private ApiService _api;
+        private ILoggingService _log;
 
         public CheckInCommand()
         {
             _api = new ApiService();
+            _log = new log4netLoggingService();
         }
 
         public bool CanExecute(object parameter)
@@ -77,7 +80,7 @@ namespace SMAStudio.Commands
             }
             catch (Exception e)
             {
-                // TODO: Log the error
+                _log.Error("Something went wrong when checking in the runbook.", e);
                 MessageBox.Show("Something went wrong when trying to check in the runbook. Refer to the logs for more information.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
