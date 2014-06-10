@@ -99,7 +99,7 @@ namespace SMAStudio.Commands
 
             foreach (var job in jobs)
             {
-                var jobContext = _api.Current.JobContexts.Where(jc => jc.RunbookVersionID.Equals(runbook.Runbook.DraftRunbookVersionID)).FirstOrDefault();
+                var jobContext = _api.Current.JobContexts.Where(jc => jc.RunbookVersionID.Equals(runbook.Runbook.PublishedRunbookVersionID)).FirstOrDefault();
 
                 if (jobContext == null)
                     continue;
