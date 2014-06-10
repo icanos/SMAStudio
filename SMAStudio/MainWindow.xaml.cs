@@ -76,6 +76,7 @@ namespace SMAStudio
                         if (result == MessageBoxResult.Yes)
                         {
                             // Save!
+                            ((WorkspaceViewModel)DataContext).SaveCommand.Execute(document);
                         }
                         else if (result == MessageBoxResult.No)
                         {
@@ -122,6 +123,7 @@ namespace SMAStudio
         private void OnPreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             TreeViewItem treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
+            treeViewItem.Focus();
 
             if (!(treeViewItem.Header is RunbookViewModel))
                 return;
@@ -154,8 +156,6 @@ namespace SMAStudio
                 {
                     btnCompare.Items.Add(new MenuItem() { Header = "Loading..." });
                 }
-
-                treeViewItem.Focus();
             }
         }
 
