@@ -112,6 +112,9 @@
                 <Separator />
                 <MenuItem Header="Insert File as Text..." IsEnabled="False" />
             </MenuItem>
+            <MenuItem Header="Help">
+                <MenuItem Header="About SMA Studio 2014" Command="{Binding Path=AboutCommand}" />
+            </MenuItem>
         </Menu>
 
         <ToolBarTray x:Name="Toolbar" Grid.Row="1" Grid.ColumnSpan="2">

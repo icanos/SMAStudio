@@ -1,0 +1,85 @@
+﻿<Window x:Class="SMAStudio.AboutDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About SMA Studio 2014" Style="{DynamicResource AboutDialogStyle}" WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <Style x:Key="AboutDialogStyle" TargetType="Window">
+            <Setter Property="Height" Value="Auto" />
+            <Setter Property="Width" Value="500" />
+            <Setter Property="ShowInTaskbar" Value="False" />
+            <Setter Property="ResizeMode" Value="NoResize" />
+            <Setter Property="WindowStyle" Value="SingleBorderWindow" />
+            <Setter Property="SizeToContent" Value="Height" />
+        </Style>
+        <Style x:Key="DisplayAreaStyle" TargetType="{x:Type StackPanel}">
+            <Setter Property="Margin" Value="10,10,10,5" />
+        </Style>
+        <Style x:Key="BackgroundStyle" TargetType="{x:Type StackPanel}">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush EndPoint="0,1">
+                        <GradientStop Offset="0" Color="LightBlue" />
+                        <GradientStop Offset="0.55" Color="White" />
+                        <GradientStop Offset="0.85" Color="White" />
+                        <GradientStop Offset="1" Color="LightBlue" />
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="Label">
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style x:Key="ParagraphSeparator" TargetType="{x:Type Label}">
+            <Setter Property="Padding" Value="0,10,0,0" />
+        </Style>
+        <Style x:Key="LinkLabelStyle">
+            <Setter Property="Control.Padding" Value="0" />
+            <Setter Property="Control.VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="ReadOnlyDescStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="MinLines" Value="6" />
+            <Setter Property="MaxLines" Value="6" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="TextWrapping" Value="WrapWithOverflow" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Visible" />
+        </Style>
+        <Style x:Key="OkButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="MinWidth" Value="75" />
+            <Setter Property="Margin" Value="0,5" />
+            <Setter Property="DockPanel.Dock" Value="Right" />
+            <Setter Property="IsDefault" Value="True" />
+            <Setter Property="IsCancel" Value="True" />
+        </Style>
+    </Window.Resources>
+    <StackPanel x:Uid="clientArea" Style="{StaticResource BackgroundStyle}">
+        <TextBlock Height="70" Text="SMA Studio 2014" Background="#ffffff" Foreground="#000000" Padding="10,20,0,0" FontSize="22" />
+        <StackPanel x:Uid="displayArea" Style="{StaticResource DisplayAreaStyle}">
+            <StackPanel x:Uid="versionArea" Orientation="Horizontal">
+                <Label x:Name="versionLabel" x:Uid="VersionLabel" Content="Version - " />
+                <Label x:Name="version" x:Uid="version" Content="{Binding Mode=OneTime, XPath=Version}" />
+            </StackPanel>
+            <Label x:Name="copyright" x:Uid="copyright" Content="Copyright (C) Marcus Westin 2014" />
+            <Label x:Name="company" x:Uid="company" Content="www.sekurbit.se" />
+            <Label x:Name="reserved" x:Uid="reserved" Content="All Rights Reserved." />
+            <Label x:Name="info" x:Uid="info" Style="{StaticResource ParagraphSeparator}"
+                   Content="Product details:" />
+            <TextBox x:Name="description" x:Uid="description" Text="SMA Studio is a free IDE for developing and managing a Microsoft System Center Service Management Automation environment. It comes with a wide range of great features to ease your work."
+                     Style="{StaticResource ReadOnlyDescStyle}" />
+            <Label x:Name="license" x:Uid="info" Style="{StaticResource ParagraphSeparator}"
+                   Content="License:" />
+            <TextBox x:Name="licenseInfo" x:Uid="license" Style="{StaticResource ReadOnlyDescStyle}" Text="{Binding Path=License, Mode=OneTime}">
+                
+            </TextBox>
+            <DockPanel x:Uid="buttonArea">
+                <Button x:Name="okButton" x:Uid="okButton" Style="{StaticResource OkButtonStyle}"
+                        Content="OK" />
+                <Label x:Name="productLink" x:Uid="productLink" Style="{StaticResource LinkLabelStyle}" >
+                    <Hyperlink x:Name="hyperlink" x:Uid="hyperlink" NavigateUri="http://www.sekurbit.se/"  Style="{StaticResource LinkLabelStyle}"
+                               Hyperlink.RequestNavigate="hyperlink_RequestNavigate">
+                        <TextBlock Text="www.sekurbit.se" />
+                    </Hyperlink>
+                </Label>
+            </DockPanel>
+        </StackPanel>
+    </StackPanel>
+</Window>

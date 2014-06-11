@@ -33,6 +33,7 @@ namespace SMAStudio.ViewModels
         private ICommand _newRunbookCommand;
         private ICommand _newVariableCommand;
         private ICommand _exitCommand;
+        private ICommand _aboutCommand;
 
         private string _title = "SMA Studio 2014";
         private string _customTitle = string.Empty;
@@ -60,6 +61,7 @@ namespace SMAStudio.ViewModels
             _newRunbookCommand = new NewRunbookCommand(this);
             _newVariableCommand = new NewVariableCommand(this);
             _exitCommand = new ExitCommand();
+            _aboutCommand = new AboutCommand();
 
             _codeCompletionEngine = new CompletionEngine();
             //_codeCompletionEngine.Start();
@@ -250,6 +252,11 @@ namespace SMAStudio.ViewModels
         public ICommand ExitCommand
         {
             get { return _exitCommand; }
+        }
+
+        public ICommand AboutCommand
+        {
+            get { return _aboutCommand; }
         }
 
         public ComponentsViewModel Components
