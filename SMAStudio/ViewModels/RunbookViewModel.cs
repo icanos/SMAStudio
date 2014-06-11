@@ -161,7 +161,7 @@ namespace SMAStudio.ViewModels
         public string Content
         {
             get { return _content; }
-            set { _content = value; }
+            set { _content = value; base.RaisePropertyChanged("Content"); }
         }
 
         /// <summary>

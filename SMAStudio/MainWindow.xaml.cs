@@ -199,6 +199,9 @@ namespace SMAStudio
 
         private void CompareClicked(object sender, RoutedEventArgs e)
         {
+            if ((RunbookVersionViewModel)((MenuItem)e.OriginalSource).Tag == null)
+                return;
+
             CompareWindow compareWindow = new CompareWindow((RunbookViewModel)SelectedItem, (RunbookVersionViewModel)((MenuItem)e.OriginalSource).Tag);
             compareWindow.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
             compareWindow.Show();

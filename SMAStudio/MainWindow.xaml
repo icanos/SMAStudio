@@ -163,7 +163,7 @@
                         <TextBlock Margin="5,0,0,0">Check Out</TextBlock>
                     </StackPanel>
                 </Button>
-                <Button x:Name="btnRevert" IsEnabled="False" Command="{Binding Path=RevertCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}">
+                <Button x:Name="btnRevert" Command="{Binding Path=RevertCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="Icons/_Revert.png" Width="16" />
                         <TextBlock Margin="5,0,0,0">Revert to Revision...</TextBlock>
