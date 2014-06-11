@@ -31,8 +31,9 @@ namespace SMAStudio.Services
 
                 return _variableCache;
             }
-            catch (DataServiceTransportException)
+            catch (DataServiceTransportException e)
             {
+                Core.Log.Error("Unable to retrieve variables from SMA", e);
                 base.NotifyConnectionError();
 
                 return new List<Variable>();

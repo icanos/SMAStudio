@@ -31,8 +31,9 @@ namespace SMAStudio.Services
 
                 return _credentialCache;
             }
-            catch (DataServiceTransportException)
+            catch (DataServiceTransportException e)
             {
+                Core.Log.Error("Unable to retrieve credentials from SMA", e);
                 NotifyConnectionError();
 
                 return new List<Credential>();
@@ -50,6 +51,9 @@ namespace SMAStudio.Services
             _credentialViewModelCache = new ObservableCollection<CredentialViewModel>();
 
             if (_credentialViewModelCache == null)
+                return new ObservableCollection<CredentialViewModel>();
+
+            if (_credentialCache == null)
                 return new ObservableCollection<CredentialViewModel>();
 
             foreach (var credential in _credentialCache)

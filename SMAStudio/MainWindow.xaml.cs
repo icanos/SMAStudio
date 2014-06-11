@@ -56,12 +56,17 @@ namespace SMAStudio
                 if (DataContext == null)
                     return;
 
+                Core.Log.DebugFormat("Close application event received");
+
                 SettingsManager.Current.Dispose();
+                Core.Log.DebugFormat("Stopped Settings Manager");
 
                 foreach (var document in ((WorkspaceViewModel)DataContext).Documents)
                 {
                     if (document.UnsavedChanges)
                     {
+                        Core.Log.DebugFormat("Detected unsaved changes in a document");
+
                         //hasUnsavedChanges = true;
                         string message = "Save {0} \"{1}\"?";
 
@@ -91,6 +96,8 @@ namespace SMAStudio
                     }
                 }
 
+                Core.Log.DebugFormat("Stopping auto save manager and async service.");
+
                 _autoSaveManager.Dispose();
                 AsyncService.Stop();
             };
@@ -99,16 +106,21 @@ namespace SMAStudio
 
             if (!SettingsManager.Current.Settings.IsConfigured)
             {
+                Core.Log.InfoFormat("No settings.xml has been configured. Running first time wizard.");
+
                 var window = new WelcomeDialog();
                 window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
                 if (!(bool)window.ShowDialog())
                 {
+                    Core.Log.InfoFormat("User cancelled out of Welcome Wizard");
                     Close();
                     return;
                 }
             }
 
             // Data binding
+            Core.Log.DebugFormat("Setting up data bindings...");
+
             errorList.DataContext = new ErrorListViewModel();
             DataContext = new WorkspaceViewModel((ErrorListViewModel)errorList.DataContext);
             explorerList.DataContext = new ComponentsViewModel((WorkspaceViewModel)DataContext);
@@ -117,11 +129,12 @@ namespace SMAStudio
 
             Toolbar.DataContext = new ToolbarViewModel((ComponentsViewModel)explorerList.DataContext);
 
+            Core.Log.DebugFormat("Starting the auto save manager");
+
             _autoSaveManager = new AutoSaveService((WorkspaceViewModel)DataContext);
             _autoSaveManager.Start();
 
-            var log = new log4netLoggingService();
-            log.DebugFormat("Running SMA Studio 2014");
+            Core.Log.DebugFormat("Successfully initialized SMA Studio 2014.");
         }
 
         private void OnPreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)

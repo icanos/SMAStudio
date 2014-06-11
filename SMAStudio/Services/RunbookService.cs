@@ -35,9 +35,11 @@ namespace SMAStudio.Services
 
                 return _runbookCache;
             }
-            catch (DataServiceTransportException)
+            catch (DataServiceTransportException e)
             {
+                Core.Log.Error("Unable to retrieve the runbooks from SMA.", e);
                 NotifyConnectionError();
+                SuccessfulInitialization = false;
 
                 return new List<Runbook>();
             }
@@ -82,9 +84,11 @@ namespace SMAStudio.Services
 
                 return versionsViewModels;
             }
-            catch (DataServiceTransportException)
+            catch (DataServiceTransportException e)
             {
+                Core.Log.Error(String.Format("Unable to retrieve versions for runbook {0}", runbookViewModel.ID), e);
                 base.NotifyConnectionError();
+                SuccessfulInitialization = false;
 
                 return new List<RunbookVersionViewModel>();
             }

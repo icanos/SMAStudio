@@ -9,6 +9,11 @@ namespace SMAStudio.Services
 {
     public class BaseService
     {
+        public BaseService()
+        {
+            SuccessfulInitialization = true;
+        }
+
         internal void NotifyConnectionError()
         {
             if (App.Current == null)
@@ -18,6 +23,12 @@ namespace SMAStudio.Services
             {
                 MessageBox.Show("Unable to connect to the SMA server. Please verify the connectivity and try again.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
             });
+        }
+
+        public bool SuccessfulInitialization
+        {
+            get;
+            set;
         }
     }
 }

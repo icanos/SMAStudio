@@ -37,8 +37,12 @@ namespace SMAStudio.Util
 
                 if (files.Length > 0)
                 {
+                    Core.Log.InfoFormat("Recovered runbooks found.");
+
                     if (MessageBox.Show("Do you want to restore recovered runbooks?\r\nIf no, the recovered runbooks will be deleted from disk.", "Restore runbooks", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                     {
+                        Core.Log.InfoFormat("User wants to restore runbooks.");
+
                         // Load the runbooks
                         foreach (var file in files)
                         {
@@ -98,6 +102,8 @@ namespace SMAStudio.Util
                     }
                     else
                     {
+                        Core.Log.InfoFormat("User did not want to restore runbooks.");
+
                         foreach (var file in files)
                             File.Delete(file);
                     }

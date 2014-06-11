@@ -67,6 +67,8 @@ namespace SMAStudio.ViewModels
 
             AsyncService.Execute(ThreadPriority.Normal, delegate()
             {
+                Core.Log.DebugFormat("Loading runbooks...");
+
                 // Load the runbooks
                 Runbooks = _runbookService.GetRunbookViewModels(forceDownload);
                 base.RaisePropertyChanged("Runbooks");
@@ -81,6 +83,8 @@ namespace SMAStudio.ViewModels
                         if (!runbook.CheckedOut)
                             continue;
 
+                        Core.Log.DebugFormat("Versions being loaded for {0}", runbook.Runbook.RunbookID);
+
                         runbook.Versions = _runbookService.GetVersions(runbook);
                         runbook.LoadedVersions = true;
                     }
@@ -91,17 +95,27 @@ namespace SMAStudio.ViewModels
                 _dataContext.StatusBarText = "Connected";
             });
 
-            AsyncService.Execute(ThreadPriority.Normal, delegate()
+            if (_runbookService.SuccessfulInitialization)
             {
-                Variables = _variableService.GetVariableViewModels(forceDownload);
-                base.RaisePropertyChanged("Variables");
-            });
+                AsyncService.Execute(ThreadPriority.Normal, delegate()
+                {
+                    Core.Log.DebugFormat("Loading variables...");
 
-            AsyncService.Execute(ThreadPriority.Normal, delegate()
+                    Variables = _variableService.GetVariableViewModels(forceDownload);
+                    base.RaisePropertyChanged("Variables");
+                });
+            }
+
+            if (_runbookService.SuccessfulInitialization || _variableService.SuccessfulInitialization)
             {
-                Credentials = _credentialService.GetCredentialViewModels(forceDownload);
-                base.RaisePropertyChanged("Credentials");
-            });
+                AsyncService.Execute(ThreadPriority.Normal, delegate()
+                {
+                    Core.Log.DebugFormat("Loading credentials...");
+
+                    Credentials = _credentialService.GetCredentialViewModels(forceDownload);
+                    base.RaisePropertyChanged("Credentials");
+                });
+            }
         }
 
         public void AddRunbook(RunbookViewModel runbook)
