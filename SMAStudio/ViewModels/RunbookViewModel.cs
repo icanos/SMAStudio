@@ -71,10 +71,15 @@ namespace SMAStudio.ViewModels
 
                 reader.Close();
             }
-            catch (WebException)
+            catch (WebException e)
             {
-                // 404...
-                _content = GetContent(forceDownload, true);
+                Core.Log.Error("WebException received when trying to download content of runbook from SMA", e);
+
+                if (e.Status != WebExceptionStatus.ConnectFailure &&
+                    e.Status != WebExceptionStatus.ConnectionClosed)
+                {
+                    _content = GetContent(forceDownload, true);
+                }
             }
 
             return _content;

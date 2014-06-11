@@ -51,6 +51,8 @@ namespace SMAStudio
 
             InitializeComponent();
 
+            Core.Log.InfoFormat("\r\n\r\nStarted new intance of SMA Studi 2014 v " + Core.Version);
+
             Closing += delegate(object sender, CancelEventArgs e)
             {
                 if (DataContext == null)
