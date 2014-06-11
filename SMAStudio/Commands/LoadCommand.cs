@@ -46,7 +46,6 @@ namespace SMAStudio.Commands
                     runbook.Content = runbook.GetContent();
 
                     _dataContext.OpenDocument(runbook);
-                    _componentsViewModel.SelectedItem = runbook;
                 });
 
                 _dataContext.WindowTitle = ((RunbookViewModel)obj.NewValue).RunbookName;
@@ -58,7 +57,6 @@ namespace SMAStudio.Commands
                     var variable = (IDocumentViewModel)obj.NewValue;
 
                     _dataContext.OpenDocument(variable);
-                    _componentsViewModel.SelectedItem = variable;
                 });
 
                 if (obj.NewValue is VariableViewModel)

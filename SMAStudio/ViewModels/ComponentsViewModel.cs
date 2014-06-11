@@ -29,7 +29,6 @@ namespace SMAStudio.ViewModels
         private ICommand _newCredentialCommand;
         private ICommand _deleteCommand;
 
-        private IDocumentViewModel _selectedRunbook = null;
         private WorkspaceViewModel _dataContext;
 
         private RunbookService _runbookService;
