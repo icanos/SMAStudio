@@ -61,6 +61,11 @@ namespace SMAStudio.ViewModels
             Load();
         }
 
+        /// <summary>
+        /// Called when the application is launched to load runbooks, variables and credentials
+        /// from the SMA web service.
+        /// </summary>
+        /// <param name="forceDownload">Set to true to force the API manager to download new content instead of using potentially cached data.</param>
         public void Load(bool forceDownload = false)
         {
             _dataContext.StatusBarText = "Retrieving data from SMA...";
@@ -118,6 +123,10 @@ namespace SMAStudio.ViewModels
             }
         }
 
+        /// <summary>
+        /// Add a runbook to the list if it doesn't already exist
+        /// </summary>
+        /// <param name="runbook"></param>
         public void AddRunbook(RunbookViewModel runbook)
         {
             if (!Runbooks.Contains(runbook))
@@ -127,6 +136,10 @@ namespace SMAStudio.ViewModels
             }
         }
 
+        /// <summary>
+        /// Remove a runbook from the list if it exist
+        /// </summary>
+        /// <param name="runbook"></param>
         public void RemoveRunbook(RunbookViewModel runbook)
         {
             if (Runbooks.Contains(runbook))
@@ -136,6 +149,10 @@ namespace SMAStudio.ViewModels
             }
         }
 
+        /// <summary>
+        /// Add a variable to the list if it doesn't already exist
+        /// </summary>
+        /// <param name="variable"></param>
         public void AddVariable(VariableViewModel variable)
         {
             if (!Variables.Contains(variable))
@@ -145,6 +162,10 @@ namespace SMAStudio.ViewModels
             }
         }
 
+        /// <summary>
+        /// Remove a variable from the list if it exist
+        /// </summary>
+        /// <param name="variable"></param>
         public void RemoveVariable(VariableViewModel variable)
         {
             if (Variables.Contains(variable))
@@ -154,6 +175,7 @@ namespace SMAStudio.ViewModels
             }
         }
 
+        #region Properties
         public ObservableCollection<RunbookViewModel> Runbooks { get; set; }
 
         public ObservableCollection<VariableViewModel> Variables { get; set; }
@@ -194,14 +216,6 @@ namespace SMAStudio.ViewModels
         {
             get { return _deleteCommand; }
         }
-
-        /// <summary>
-        /// DEPRECATED
-        /// </summary>
-        public IDocumentViewModel SelectedItem
-        {
-            get { return _selectedRunbook; }
-            set { _selectedRunbook = value; }
-        }
+        #endregion
     }
 }

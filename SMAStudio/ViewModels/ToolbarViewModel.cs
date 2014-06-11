@@ -31,6 +31,7 @@ namespace SMAStudio.ViewModels
             _testCommand = new TestCommand();
         }
 
+        #region Properties
         public ICommand SaveCommand
         {
             get { return _saveCommand; }
@@ -70,5 +71,6 @@ namespace SMAStudio.ViewModels
         {
             get { return _testCommand; }
         }
+        #endregion
     }
 }

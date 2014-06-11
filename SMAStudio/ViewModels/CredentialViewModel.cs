@@ -21,6 +21,11 @@ namespace SMAStudio.ViewModels
 
         }
 
+        /// <summary>
+        /// Event called when text changes in the credential object
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void TextChanged(object sender, EventArgs e)
         {
             if (!(sender is TextBox))
@@ -38,6 +43,7 @@ namespace SMAStudio.ViewModels
                 Username = textBox.Text;*/
         }
 
+        #region Properties
         public Credential Credential
         {
             get { return _credential; }
@@ -145,5 +151,6 @@ namespace SMAStudio.ViewModels
                 _credential.Name = value;
             }
         }
+        #endregion
     }
 }

@@ -21,6 +21,12 @@ namespace SMAStudio.ViewModels
 
         }
 
+        /// <summary>
+        /// Event triggered when the text changes in the text editor when this variable
+        /// is active.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void TextChanged(object sender, EventArgs e)
         {
             if (!(sender is TextBox))
@@ -32,7 +38,11 @@ namespace SMAStudio.ViewModels
             Content = ((TextBox)sender).Text;
             UnsavedChanges = true;
         }
-        
+
+        #region Properties
+        /// <summary>
+        /// Gets or sets the variable model object
+        /// </summary>
         public Variable Variable
         {
             get { return _variable; }
@@ -44,12 +54,19 @@ namespace SMAStudio.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets or sets the ID of the variable
+        /// </summary>
         public Guid ID
         {
             get { return Variable.VariableID; }
             set { Variable.VariableID = value; }
         }
 
+        /// <summary>
+        /// Gets the variable name accompanied wth a asterisk (*) if the variable contains
+        /// unsaved data
+        /// </summary>
         public string Title
         {
             get
@@ -67,6 +84,9 @@ namespace SMAStudio.ViewModels
             set { Variable.Name = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the name of the variable
+        /// </summary>
         public string Name
         {
             get
@@ -76,12 +96,18 @@ namespace SMAStudio.ViewModels
             set { Variable.Name = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the value of the variable
+        /// </summary>
         public string Content
         {
             get { return Variable.Value; }
             set { Variable.Value = value; }
         }
 
+        /// <summary>
+        /// Gets or sets wether or not this variable is encrypted
+        /// </summary>
         public bool IsEncrypted
         {
             get { return Variable.IsEncrypted; }
@@ -109,12 +135,18 @@ namespace SMAStudio.ViewModels
             }
         }
 
+        /// <summary>
+        /// Set to true if the runbook contains changes that are cached and not saved
+        /// </summary>
         public bool CachedChanges
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Will always return true since a variable is always checked out
+        /// </summary>
         public bool CheckedOut
         {
             get { return true; }
@@ -130,10 +162,14 @@ namespace SMAStudio.ViewModels
             set { _icon = value; }
         }
 
+        /// <summary>
+        /// Last DateTime a key was pressed in the text editor of this runbook instance
+        /// </summary>
         public DateTime LastTimeKeyDown
         {
             get;
             set;
         }
+        #endregion
     }
 }

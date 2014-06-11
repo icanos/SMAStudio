@@ -52,6 +52,9 @@ namespace SMAStudio.ViewModels
             Run();
         }
 
+        /// <summary>
+        /// Entry point to where the execution logging takes place
+        /// </summary>
         public void Run()
         {
             var doneStatuses = new List<string> { "Completed", "Failed" };
@@ -121,6 +124,9 @@ namespace SMAStudio.ViewModels
             _thread.Start();
         }
 
+        /// <summary>
+        /// Verifies if a job is running and in case it is, warns the user before closing
+        /// </summary>
         public void ClosingWindow()
         {
             if (_job.JobStatus.Equals("New") ||
@@ -135,6 +141,10 @@ namespace SMAStudio.ViewModels
             }
         }
 
+        /// <summary>
+        /// Loop running while the job is executing, downloading new information from the web service.
+        /// </summary>
+        /// <param name="job">The job we're executing</param>
         private void UpdateExecution(Job job)
         {
             if (App.Current == null)
@@ -163,6 +173,15 @@ namespace SMAStudio.ViewModels
             });
         }
         
+        /// <summary>
+        /// Retrieves the job details from SMA web service
+        /// 
+        /// I had to write this method instead of using the Service Reference since data from
+        /// this command was cached and not updated, resulting in a endless loop of waiting for
+        /// the job to complete, even though it did a long time ago.
+        /// </summary>
+        /// <param name="jobGuid">GUID to retrieve information about</param>
+        /// <returns></returns>
         private Job GetJobDetails(Guid jobGuid)
         {
             string url = SettingsManager.Current.Settings.SmaWebServiceUrl + "/Jobs(guid'" + jobGuid + "')";
@@ -235,10 +254,20 @@ namespace SMAStudio.ViewModels
             return job;
         }
         
-        private string GetJobOutput(Job job)
+        /// <summary>
+        /// Retrieves output from a job execution by reading the output stream
+        /// 
+        /// I had to write this method in order to be able to retrieve any stream
+        /// we wanted, instead of just the Output stream. This was discovered by
+        /// running Wireshark while using the PowerShell cmdlets of SMA.
+        /// </summary>
+        /// <param name="job">Which job to retrieve output from</param>
+        /// <param name="streamType">Which stream to retrieve</param>
+        /// <returns>Formatted output from the job</returns>
+        private string GetJobOutput(Job job, string streamType = "Any")
         {
             string jobStreamUrl = SettingsManager.Current.Settings.SmaWebServiceUrl + "/JobStreams/GetStreamItems";
-            string queryString = "jobId='" + job.JobID.ToString() + "'&streamType='Any'";
+            string queryString = "jobId='" + job.JobID.ToString() + "'&streamType='" + streamType + "'";
 
             if (job.StartTime != null)
             {
@@ -314,11 +343,18 @@ namespace SMAStudio.ViewModels
             return resultContent;
         }
 
+        #region Properties
+        /// <summary>
+        /// Gets the RunbookViewModel this execution context is focused around
+        /// </summary>
         public RunbookViewModel Runbook
         {
             get { return _runbookViewModel; }
         }
 
+        /// <summary>
+        /// Gets the window title (used for data binding)
+        /// </summary>
         public string WindowTitle
         {
             get
@@ -327,12 +363,19 @@ namespace SMAStudio.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets or sets the execution properties, the information displayed to the left
+        /// in the window.
+        /// </summary>
         public ObservableCollection<ExecutionProperty> ExecutionProperties
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the output from the runbook execution
+        /// </summary>
         public string ExecutionContent
         {
             get;
@@ -348,6 +391,7 @@ namespace SMAStudio.ViewModels
         {
             get { return _stopCommand; }
         }
+        #endregion
 
         public class ExecutionProperty : ObservableObject
         {

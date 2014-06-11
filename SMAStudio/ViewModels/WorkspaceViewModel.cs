@@ -70,6 +70,10 @@ namespace SMAStudio.ViewModels
             _parserService.Start();
         }
 
+        /// <summary>
+        /// Opens a new document and changes focus to that document
+        /// </summary>
+        /// <param name="document"></param>
         public void OpenDocument(IDocumentViewModel document)
         {
             if (App.Current == null)
@@ -88,6 +92,11 @@ namespace SMAStudio.ViewModels
         }
 
         private string _cachedText = string.Empty;
+        /// <summary>
+        /// Event called after text has been added to the editor text box
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void EditorTextEntered(object sender, TextCompositionEventArgs e)
         {
             if (e.Text == "-" && _codeCompletionEngine.ApprovedVerbs.Contains(_cachedText))
@@ -139,6 +148,11 @@ namespace SMAStudio.ViewModels
             }
         }
 
+        /// <summary>
+        /// Event called when text is being entered into the editor text box
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void EditorTextEntering(object sender, TextCompositionEventArgs e)
         {
             if (e.Text.Length > 0 && _completionWindow != null)
@@ -153,7 +167,11 @@ namespace SMAStudio.ViewModels
             }
         }
 
+        #region Properties
         private ObservableCollection<IDocumentViewModel> _documents = new ObservableCollection<IDocumentViewModel>();
+        /// <summary>
+        /// Gets or sets documents that are open
+        /// </summary>
         public ObservableCollection<IDocumentViewModel> Documents
         {
             get { return _documents; }
@@ -165,12 +183,18 @@ namespace SMAStudio.ViewModels
         }
 
         private int _selectedIndex = 0;
+        /// <summary>
+        /// Gets or sets which document is active in the editor pane
+        /// </summary>
         public int SelectedIndex
         {
             get { return _selectedIndex; }
             set { _selectedIndex = value; base.RaisePropertyChanged("SelectedIndex"); }
         }
 
+        /// <summary>
+        /// Gets or sets the window title
+        /// </summary>
         public string WindowTitle
         {
             get
@@ -193,6 +217,9 @@ namespace SMAStudio.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets or sets the status bar text
+        /// </summary>
         public string StatusBarText
         {
             get { return _statusBarText; }
@@ -209,6 +236,9 @@ namespace SMAStudio.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets the current active document
+        /// </summary>
         public IDocumentViewModel CurrentDocument
         {
             get { return SelectedIndex < 0 || Documents.Count == 0 ? null : Documents[SelectedIndex]; }
@@ -259,6 +289,9 @@ namespace SMAStudio.ViewModels
             get { return _aboutCommand; }
         }
 
+        /// <summary>
+        /// Gets or sets the ComponentsViewModel
+        /// </summary>
         public ComponentsViewModel Components
         {
             get { return _componentsViewModel; }
@@ -268,6 +301,7 @@ namespace SMAStudio.ViewModels
                 _saveCommand = new SaveCommand(_componentsViewModel);
             }
         }
+        #endregion
 
         public void Dispose()
         {

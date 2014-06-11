@@ -13,6 +13,9 @@ namespace SMAStudio.ViewModels
 {
     public class RunbookVersionViewModel
     {
+        private string _content = string.Empty;
+        private DateTime _lastFetched = DateTime.MinValue;
+
         public RunbookVersionViewModel()
         {
             
@@ -22,33 +25,6 @@ namespace SMAStudio.ViewModels
         {
             RunbookVersion = runbookVersion;
         }
-
-        public RunbookVersion RunbookVersion
-        {
-            get;
-            set;
-        }
-
-        public int VersionNumber
-        {
-            get { return RunbookVersion.VersionNumber; }
-        }
-
-        public DateTime Created
-        {
-            get { return RunbookVersion.CreationTime; }
-        }
-
-        public Uri Uri
-        {
-            get
-            {
-                return new Uri(SettingsManager.Current.Settings.SmaWebServiceUrl + "/RunbookVersions(guid'" + RunbookVersion.RunbookVersionID + "')");
-            }
-        }
-
-        private string _content = string.Empty;
-        private DateTime _lastFetched = DateTime.MinValue;
 
         /// <summary>
         /// Retrieve the content of the current runbook version
@@ -72,5 +48,43 @@ namespace SMAStudio.ViewModels
 
             return _content;
         }
+
+        #region Properties
+        /// <summary>
+        /// Gets or sets the RunbookVersion model object
+        /// </summary>
+        public RunbookVersion RunbookVersion
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets the runbook version number
+        /// </summary>
+        public int VersionNumber
+        {
+            get { return RunbookVersion.VersionNumber; }
+        }
+
+        /// <summary>
+        /// Gets the date when the version was created
+        /// </summary>
+        public DateTime Created
+        {
+            get { return RunbookVersion.CreationTime; }
+        }
+
+        /// <summary>
+        /// Gets the URL to where the data of this version is contained
+        /// </summary>
+        public Uri Uri
+        {
+            get
+            {
+                return new Uri(SettingsManager.Current.Settings.SmaWebServiceUrl + "/RunbookVersions(guid'" + RunbookVersion.RunbookVersionID + "')");
+            }
+        }
+        #endregion
     }
 }

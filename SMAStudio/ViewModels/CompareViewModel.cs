@@ -20,9 +20,11 @@ namespace SMAStudio.ViewModels
             _compareCommand = new CompareCommand(compareWindow);
         }
 
+        #region Properties
         public ICommand CompareCommand
         {
             get { return _compareCommand; }
         }
+        #endregion
     }
 }

@@ -33,6 +33,12 @@ namespace SMAStudio.ViewModels
             LoadedVersions = false;
         }
 
+        /// <summary>
+        /// Event triggered when the text changes in the text editor when this runbook
+        /// is active.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void TextChanged(object sender, EventArgs e)
         {
             if (!(sender is MvvmTextEditor))
@@ -49,7 +55,8 @@ namespace SMAStudio.ViewModels
         /// Retrieve the content of the current runbook version
         /// </summary>
         /// <param name="forceDownload">Forces the application to download new content from the web service instead of using the cached information.</param>
-        /// <returns></returns>
+        /// <param name="publishedVersion">Set to true if we want to download the published version of the runbook, otherwise we'll get the draft</param>
+        /// <returns>The content of the runbook</returns>
         public string GetContent(bool forceDownload = false, bool publishedVersion = false)
         {
             if (!String.IsNullOrEmpty(_content) && !forceDownload && (DateTime.Now - _lastFetched) < new TimeSpan(0, 30, 0))
@@ -87,7 +94,7 @@ namespace SMAStudio.ViewModels
 
         #region Properties
         /// <summary>
-        /// Contains the actual runbook from SMA
+        /// Contains a mapping to the Model object of our runbook
         /// </summary>
         public Runbook Runbook
         {
@@ -101,10 +108,13 @@ namespace SMAStudio.ViewModels
         }
 
         /// <summary>
-        /// Different versions of this runbook
+        /// Contains all versions of the runbook that has been checked in
         /// </summary>
         public List<RunbookVersionViewModel> Versions { get; set; }
 
+        /// <summary>
+        /// A mapping to the Runbook ID
+        /// </summary>
         public Guid ID
         {
             get { return Runbook.RunbookID; }
@@ -188,12 +198,18 @@ namespace SMAStudio.ViewModels
             }
         }
 
+        /// <summary>
+        /// Set to true if the runbook contains changes that are cached and not saved
+        /// </summary>
         public bool CachedChanges
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Set to true if versions has been loaded
+        /// </summary>
         public bool LoadedVersions
         {
             get;
@@ -229,12 +245,18 @@ namespace SMAStudio.ViewModels
             set { _icon = value; base.RaisePropertyChanged("Icon"); }
         }
 
+        /// <summary>
+        /// Last DateTime a key was pressed in the text editor of this runbook instance
+        /// </summary>
         public DateTime LastTimeKeyDown
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Set to the ID of the job if the runbook is currently executed otherwise Guid.Empty
+        /// </summary>
         public Guid JobID
         {
             get;
@@ -242,7 +264,10 @@ namespace SMAStudio.ViewModels
         }
         #endregion
 
-
+        /// <summary>
+        /// Returns the Runbook Name
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return RunbookName;
