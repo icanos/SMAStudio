@@ -1,5 +1,4 @@
-﻿using SMAStudio.Services;
-using SMAStudio.ViewModels;
+﻿using SMAStudio.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,18 +8,14 @@ using System.Windows.Input;
 
 namespace SMAStudio.Commands
 {
-    public class NewRunbookCommand : ICommand
+    public class GoDefinitionCommand : ICommand
     {
-        private IRunbookService _runbookService;
-
-        public NewRunbookCommand()
-        {
-            _runbookService = Core.Resolve<IRunbookService>();
-        }
-
         public bool CanExecute(object parameter)
         {
-            return true;
+            if (parameter is DocumentReference)
+                return true;
+
+            return false;
         }
 
         public event EventHandler CanExecuteChanged
@@ -31,7 +26,7 @@ namespace SMAStudio.Commands
 
         public void Execute(object parameter)
         {
-            _runbookService.Create();
+            var document = (DocumentReference)parameter;
         }
     }
 }

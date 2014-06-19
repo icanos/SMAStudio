@@ -1,4 +1,5 @@
-﻿using SMAStudio.ViewModels;
+﻿using SMAStudio.Services;
+using SMAStudio.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,11 +11,11 @@ namespace SMAStudio.Commands
 {
     public class NewCredentialCommand : ICommand
     {
-        private WorkspaceViewModel _workspaceViewModel;
+        private ICredentialService _credentialService;
 
-        public NewCredentialCommand(WorkspaceViewModel workspaceViewModel)
+        public NewCredentialCommand()
         {
-            _workspaceViewModel = workspaceViewModel;
+            _credentialService = Core.Resolve<ICredentialService>();
         }
 
         public bool CanExecute(object parameter)
@@ -30,14 +31,7 @@ namespace SMAStudio.Commands
 
         public void Execute(object parameter)
         {
-            var newCredential = new CredentialViewModel
-            {
-                Credential = new SMAWebService.Credential(),
-                CheckedOut = true,
-                UnsavedChanges = true
-            };
-
-            _workspaceViewModel.OpenDocument(newCredential);
+            _credentialService.Create();
         }
     }
 }

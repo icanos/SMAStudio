@@ -1,6 +1,7 @@
 ﻿using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
+using Microsoft.Practices.Unity;
 using SMAStudio.Commands;
 using SMAStudio.Editor.CodeCompletion;
 using SMAStudio.Editor.Parsing;
@@ -16,57 +17,31 @@ using System.Windows.Threading;
 
 namespace SMAStudio.ViewModels
 {
-    public class WorkspaceViewModel : ObservableObject, IDisposable
+    public class WorkspaceViewModel : ObservableObject, IWorkspaceViewModel, IDisposable
     {
         private CompletionEngine _codeCompletionEngine;
         private CompletionWindow _completionWindow;
 
-        private ParserService _parserService;
-        private ErrorListViewModel _errorListViewModel;
-        private ComponentsViewModel _componentsViewModel;
-
-        private ICommand _saveCommand;
-        private ICommand _findCommand;
-        private ICommand _closeCommand;
-        private ICommand _closeAllCommand;
-        private ICommand _newCredentialCommand;
-        private ICommand _newRunbookCommand;
-        private ICommand _newVariableCommand;
-        private ICommand _exitCommand;
-        private ICommand _aboutCommand;
+        private IParserService _parserService;
+        private IErrorListViewModel _errorListViewModel;
 
         private string _title = "SMA Studio 2014";
         private string _customTitle = string.Empty;
         private string _statusBarText = string.Empty;
 
-        public WorkspaceViewModel(ErrorListViewModel errorListViewModel)
+        public WorkspaceViewModel(IErrorListViewModel errorListViewModel, IParserService parserService)
         {
             _errorListViewModel = errorListViewModel;
+            _parserService = parserService;
+
             StatusBarText = "SMA Studio 2014";
-
-            /*Documents.Add(new RunbookViewModel()
-            {
-                CheckedOut = false,
-                Content = "",
-                Runbook = new SMAWebService.Runbook()
-            });
-
-            SelectedIndex = 0;*/
-
-            _saveCommand = new SaveCommand(null);
-            _findCommand = new FindCommand();
-            _closeCommand = new CloseCommand(this);
-            _closeAllCommand = new CloseAllCommand(this);
-            _newCredentialCommand = new NewCredentialCommand(this);
-            _newRunbookCommand = new NewRunbookCommand(this);
-            _newVariableCommand = new NewVariableCommand(this);
-            _exitCommand = new ExitCommand();
-            _aboutCommand = new AboutCommand();
 
             _codeCompletionEngine = new CompletionEngine();
             //_codeCompletionEngine.Start();
+        }
 
-            _parserService = new ParserService(this, _errorListViewModel);
+        public void Initialize()
+        {
             _parserService.Start();
         }
 
@@ -146,6 +121,8 @@ namespace SMAStudio.ViewModels
                 else
                     _cachedText += e.Text;
             }
+
+            _parserService.ParseCommandTokens(Documents[SelectedIndex]);
         }
 
         /// <summary>
@@ -246,67 +223,54 @@ namespace SMAStudio.ViewModels
 
         public ICommand SaveCommand
         {
-            get { return _saveCommand; }
+            get { return Core.Resolve<ICommand>("Save"); }
         }
 
         public ICommand FindCommand
         {
-            get { return _findCommand; }
+            get { return Core.Resolve<ICommand>("Find"); }
         }
 
         public ICommand CloseCommand
         {
-            get { return _closeCommand; }
+            get { return Core.Resolve<ICommand>("Close"); }
         }
 
         public ICommand CloseAllCommand
         {
-            get { return _closeAllCommand; }
+            get { return Core.Resolve<ICommand>("CloseAll"); }
         }
 
         public ICommand NewCredentialCommand
         {
-            get { return _newCredentialCommand; }
+            get { return Core.Resolve<ICommand>("NewCredential"); }
         }
 
         public ICommand NewRunbookCommand
         {
-            get { return _newRunbookCommand; }
+            get { return Core.Resolve<ICommand>("NewRunbook"); }
         }
 
         public ICommand NewVariableCommand
         {
-            get { return _newVariableCommand; }
+            get { return Core.Resolve<ICommand>("NewVariable"); }
         }
 
         public ICommand ExitCommand
         {
-            get { return _exitCommand; }
+            get { return Core.Resolve<ICommand>("Exit"); }
         }
 
         public ICommand AboutCommand
         {
-            get { return _aboutCommand; }
-        }
-
-        /// <summary>
-        /// Gets or sets the ComponentsViewModel
-        /// </summary>
-        public ComponentsViewModel Components
-        {
-            get { return _componentsViewModel; }
-            set
-            {
-                _componentsViewModel = value;
-                _saveCommand = new SaveCommand(_componentsViewModel);
-            }
+            get { return Core.Resolve<ICommand>("About"); }
         }
         #endregion
 
         public void Dispose()
         {
             if (_parserService != null)
-                _parserService.Dispose();
+                ((IDisposable)_parserService).Dispose();
         }
     }
 }

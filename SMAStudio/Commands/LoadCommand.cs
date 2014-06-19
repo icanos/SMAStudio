@@ -14,13 +14,13 @@ namespace SMAStudio.Commands
 {
     public class LoadCommand : ICommand
     {
-        private WorkspaceViewModel _dataContext;
-        private ComponentsViewModel _componentsViewModel;
+        private IWorkspaceViewModel _dataContext;
+        private IComponentsViewModel _componentsViewModel;
 
-        public LoadCommand(WorkspaceViewModel dataContext, ComponentsViewModel componentsViewModel)
+        public LoadCommand()
         {
-            _dataContext = dataContext;
-            _componentsViewModel = componentsViewModel;
+            _dataContext = Core.Resolve<IWorkspaceViewModel>();
+            _componentsViewModel = Core.Resolve<IComponentsViewModel>();
         }
 
         public bool CanExecute(object parameter)

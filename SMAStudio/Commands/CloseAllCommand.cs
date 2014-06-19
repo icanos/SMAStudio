@@ -11,11 +11,11 @@ namespace SMAStudio.Commands
 {
     public class CloseAllCommand : ICommand
     {
-        private WorkspaceViewModel _workspaceViewModel;
+        private IWorkspaceViewModel _workspaceViewModel;
 
-        public CloseAllCommand(WorkspaceViewModel workspaceViewModel)
+        public CloseAllCommand()
         {
-            _workspaceViewModel = workspaceViewModel;
+            _workspaceViewModel = Core.Resolve<IWorkspaceViewModel>();
         }
 
         public bool CanExecute(object parameter)

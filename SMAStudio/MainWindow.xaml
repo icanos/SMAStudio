@@ -6,6 +6,7 @@
         xmlns:SmaStudioUtil="clr-namespace:SMAStudio.Util"
         xmlns:SmaStudioEditor="clr-namespace:SMAStudio.Editor"
         xmlns:SmaStudioVm="clr-namespace:SMAStudio.ViewModels"
+        xmlns:SmaStudioModels="clr-namespace:SMAStudio.Models"
         Title="{Binding Path=WindowTitle}" Height="600" Width="919" Icon="Icons/setting-icon-32.png">
     <Window.InputBindings>
         <KeyBinding Modifiers="Control" Key="S" Command="{Binding Path=SaveCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}" />
@@ -67,6 +68,13 @@
             <Setter Property="BorderBrush" Value="#666666" />
             <Setter Property="BorderThickness" Value="1" />
         </Style>
+        
+        <ContextMenu x:Key="DocumentReferenceContextMenu">
+            <MenuItem Header="Go To Definition" Command="{Binding GoDefinitionCommand}" />
+            <MenuItem Header="View Code" Command="{Binding ViewCodeCommand}" />
+        </ContextMenu>
+        
+        <SmaStudioUtil:ContextMenuConverter x:Key="ContextMenuConverter" />
 
     </Window.Resources>
     <Grid>
@@ -260,6 +268,13 @@
                             </Setter.Value>
                         </Setter>
                     </Style>
+                    
+                    <DataTemplate x:Key="ReferenceItem" DataType="{x:Type SmaStudioModels:DocumentReference}">
+                        <StackPanel Orientation="Horizontal" ContextMenu="{Binding Converter={StaticResource ContextMenuConverter}}">
+                            <Image Source="Icons/link.png" Width="16" Height="16" SnapsToDevicePixels="True" Margin="0,0,5,0"/>
+                            <TextBlock Foreground="#eeeeee" Text="{Binding}" />
+                        </StackPanel>
+                    </DataTemplate>
                 </TreeView.Resources>
                 <TreeViewItem Header="Runbooks" ItemsSource="{Binding Runbooks}" Foreground="#eeeeee">
                     <TreeViewItem.HeaderTemplate>
@@ -271,12 +286,12 @@
                         </DataTemplate>
                     </TreeViewItem.HeaderTemplate>
                     <TreeViewItem.ItemTemplate>
-                        <DataTemplate>
+                        <HierarchicalDataTemplate ItemTemplate="{StaticResource ReferenceItem}" ItemsSource="{Binding Path=References}">
                             <StackPanel Orientation="Horizontal">
                                 <Image Source="{Binding Path=Icon}" Width="16" Height="16" SnapsToDevicePixels="True" Margin="0,0,5,0"/>
                                 <TextBlock Text="{Binding Path=Title}" Foreground="#eeeeee" />
                             </StackPanel>
-                        </DataTemplate>
+                        </HierarchicalDataTemplate>
                     </TreeViewItem.ItemTemplate>
                 </TreeViewItem>
                 <TreeViewItem Header="Credentials" ItemsSource="{Binding Credentials}" Foreground="#eeeeee">

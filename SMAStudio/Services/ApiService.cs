@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace SMAStudio.Util
 {
-    sealed class ApiService
+    public class ApiService : IApiService
     {
         private OrchestratorApi _api;
 

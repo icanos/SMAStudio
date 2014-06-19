@@ -46,7 +46,7 @@ namespace SMAStudio
 
             if (scriptBlock.EndBlock == null || scriptBlock.EndBlock.Statements.Count == 0)
             {
-                MessageBox.Show("Your script is broken and cannot be run. Please fix any errors.", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show("Your runbook is broken and it's possible that the runbook won't run. Please fix any errors.", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
 
@@ -54,15 +54,28 @@ namespace SMAStudio
 
             if (functionBlock.Body.ParamBlock != null)
             {
+                if (functionBlock.Body.ParamBlock.Parameters == null)
+                {
+                    Core.Log.InfoFormat("Runbook contains ParamBlock but no Parameters.");
+                    return;
+                }
+
                 foreach (var param in functionBlock.Body.ParamBlock.Parameters)
                 {
-                    var input = new UIInputParameter
+                    try
                     {
-                        Name = ConvertToNiceName(param.Name.Extent.Text),
-                        Command = param.Name.Extent.Text
-                    };
+                        var input = new UIInputParameter
+                        {
+                            Name = ConvertToNiceName(param.Name.Extent.Text),
+                            Command = param.Name.Extent.Text
+                        };
 
-                    Inputs.Add(input);
+                        Inputs.Add(input);
+                    }
+                    catch (Exception ex)
+                    {
+                        Core.Log.Error("Unable to create a UIInputParameter for a runbook parameter.", ex);
+                    }
                 }
 
                 Inputs = Inputs.OrderBy(i => i.Name).ToObservableCollection();
@@ -77,6 +90,12 @@ namespace SMAStudio
 
         private string ConvertToNiceName(string parameterName)
         {
+            if (parameterName == null)
+                return string.Empty;
+
+            if (parameterName.Length == 0)
+                return string.Empty;
+
             parameterName = parameterName.Replace("$", "");
             parameterName = char.ToUpper(parameterName[0]) + parameterName.Substring(1);
 

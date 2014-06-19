@@ -1,29 +1,13 @@
-﻿using ICSharpCode.AvalonEdit.Highlighting;
-using ICSharpCode.AvalonEdit.Highlighting.Xshd;
-using SMAStudio.Commands;
-using SMAStudio.Editor;
-using SMAStudio.Logging;
-using SMAStudio.Services;
+﻿using SMAStudio.Services;
 using SMAStudio.Settings;
 using SMAStudio.Util;
 using SMAStudio.ViewModels;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Xml;
 
 namespace SMAStudio
 {
@@ -43,7 +27,7 @@ namespace SMAStudio
 
         public const string SMA_STUDIO_NAME = " - SMA Studio 2014";
 
-        private AutoSaveService _autoSaveManager;
+        private IAutoSaveService _autoSaveManager;
 
         public MainWindow()
         {
@@ -52,6 +36,68 @@ namespace SMAStudio
             InitializeComponent();
 
             Core.Log.InfoFormat("\r\n\r\nStarted new intance of SMA Studi 2014 v " + Core.Version);
+
+            Core.Start();
+            Delegates();
+            if (!ConfigureSettingsManager())
+            {
+                Close();
+                return;
+            }
+
+            ConfigureDataContexts();
+            ConfigureAutoSaver();
+
+            tabDocuments.SelectedIndex = 0;
+
+            ContextMenuConverter.DocumentReferenceContextMenu = (ContextMenu)Resources["DocumentReferenceContextMenu"];
+
+            Core.Log.DebugFormat("Successfully initialized SMA Studio 2014.");            
+        }
+
+        private void ConfigureDataContexts()
+        {
+            Core.Log.DebugFormat("Configuring data bindings...");
+
+            errorList.DataContext = Core.Resolve<IErrorListViewModel>();
+            DataContext = Core.Resolve<IWorkspaceViewModel>();
+            explorerList.DataContext = Core.Resolve<IComponentsViewModel>();
+            Toolbar.DataContext = Core.Resolve<IToolbarViewModel>();
+        }
+
+        private void ConfigureAutoSaver()
+        {
+            Core.Log.DebugFormat("Starting the auto save manager");
+
+            _autoSaveManager = Core.Resolve<IAutoSaveService>();
+            _autoSaveManager.Start();
+        }
+
+        private bool ConfigureSettingsManager()
+        {
+            if (!SettingsManager.Current.Settings.IsConfigured)
+            {
+                Core.Log.InfoFormat("No settings.xml has been configured. Running first time wizard.");
+
+                var window = new WelcomeDialog();
+                window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+                if (!(bool)window.ShowDialog())
+                {
+                    Core.Log.InfoFormat("User cancelled out of Welcome Wizard");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private void Delegates()
+        {
+            Loaded += delegate(object sender, RoutedEventArgs e)
+            {
+                ((IWorkspaceViewModel)DataContext).Initialize();
+                ((IComponentsViewModel)explorerList.DataContext).Initialize();
+            };
 
             Closing += delegate(object sender, CancelEventArgs e)
             {
@@ -100,43 +146,9 @@ namespace SMAStudio
 
                 Core.Log.DebugFormat("Stopping auto save manager and async service.");
 
-                _autoSaveManager.Dispose();
+                ((IDisposable)_autoSaveManager).Dispose();
                 AsyncService.Stop();
             };
-
-            tabDocuments.SelectedIndex = 0;
-
-            if (!SettingsManager.Current.Settings.IsConfigured)
-            {
-                Core.Log.InfoFormat("No settings.xml has been configured. Running first time wizard.");
-
-                var window = new WelcomeDialog();
-                window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
-                if (!(bool)window.ShowDialog())
-                {
-                    Core.Log.InfoFormat("User cancelled out of Welcome Wizard");
-                    Close();
-                    return;
-                }
-            }
-
-            // Data binding
-            Core.Log.DebugFormat("Setting up data bindings...");
-
-            errorList.DataContext = new ErrorListViewModel();
-            DataContext = new WorkspaceViewModel((ErrorListViewModel)errorList.DataContext);
-            explorerList.DataContext = new ComponentsViewModel((WorkspaceViewModel)DataContext);
-
-            ((WorkspaceViewModel)DataContext).Components = (ComponentsViewModel)explorerList.DataContext;
-
-            Toolbar.DataContext = new ToolbarViewModel((ComponentsViewModel)explorerList.DataContext);
-
-            Core.Log.DebugFormat("Starting the auto save manager");
-
-            _autoSaveManager = new AutoSaveService((WorkspaceViewModel)DataContext);
-            _autoSaveManager.Start();
-
-            Core.Log.DebugFormat("Successfully initialized SMA Studio 2014.");
         }
 
         private void OnPreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)

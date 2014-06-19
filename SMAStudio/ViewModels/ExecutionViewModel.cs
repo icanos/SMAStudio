@@ -21,9 +21,12 @@ using System.Xml.Linq;
 
 namespace SMAStudio.ViewModels
 {
+    /// <summary>
+    /// TODO: Move the job retriever to a separate service
+    /// </summary>
     public class ExecutionViewModel : ObservableObject, IDisposable
     {
-        private ApiService _api;
+        private IApiService _api;
         private RunbookViewModel _runbookViewModel;
 
         private ExecutionProperty paramStartTime = null;
@@ -32,9 +35,6 @@ namespace SMAStudio.ViewModels
         private ExecutionProperty paramWarnCount = null;
         private ExecutionProperty paramJobStatus = null;
 
-        private ICommand _runCommand;
-        private ICommand _stopCommand;
-
         private Thread _thread = null;
         private Job _job = null;
 
@@ -42,11 +42,8 @@ namespace SMAStudio.ViewModels
         {
             _runbookViewModel = runbookViewModel;
 
-            _api = new ApiService();
+            _api = Core.Resolve<IApiService>();
             ExecutionProperties = new ObservableCollection<ExecutionProperty>();
-
-            _runCommand = new RunCommand();
-            _stopCommand = new StopCommand();
 
             // Start the retrieving of data from the webservice
             Run();
@@ -384,12 +381,12 @@ namespace SMAStudio.ViewModels
 
         public ICommand RunCommand
         {
-            get { return _runCommand; }
+            get { return Core.Resolve<ICommand>("Run"); }
         }
 
         public ICommand StopCommand
         {
-            get { return _stopCommand; }
+            get { return Core.Resolve<ICommand>("Stop"); }
         }
         #endregion
 

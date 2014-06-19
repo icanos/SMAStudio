@@ -8,68 +8,52 @@ using System.Windows.Input;
 
 namespace SMAStudio.ViewModels
 {
-    public class ToolbarViewModel
+    public class ToolbarViewModel : IToolbarViewModel
     {
-        private ICommand _saveCommand;
-        private ICommand _checkInCommand;
-        private ICommand _checkOutCommand;
-        private ICommand _runCommand;
-        private ICommand _stopCommand;
-        private ICommand _refreshCommand;
-        private ICommand _revertCommand;
-        private ICommand _testCommand;
-
-        public ToolbarViewModel(ComponentsViewModel componentsViewModel)
+        public ToolbarViewModel()
         {
-            _saveCommand = new SaveCommand(componentsViewModel);
-            _checkInCommand = new CheckInCommand();
-            _checkOutCommand = new CheckOutCommand();
-            _runCommand = new RunCommand();
-            _stopCommand = new StopCommand();
-            _refreshCommand = new RefreshCommand(componentsViewModel);
-            _revertCommand = new RevertCommand();
-            _testCommand = new TestCommand();
+            
         }
 
         #region Properties
         public ICommand SaveCommand
         {
-            get { return _saveCommand; }
+            get { return Core.Resolve<ICommand>("Save"); }
         }
 
         public ICommand CheckInCommand
         {
-            get { return _checkInCommand; }
+            get { return Core.Resolve<ICommand>("CheckIn"); }
         }
 
         public ICommand CheckOutCommand
         {
-            get { return _checkOutCommand; }
+            get { return Core.Resolve<ICommand>("CheckOut"); }
         }
 
         public ICommand RunCommand
         {
-            get { return _runCommand; }
+            get { return Core.Resolve<ICommand>("Run"); }
         }
 
         public ICommand StopCommand
         {
-            get { return _stopCommand; }
+            get { return Core.Resolve<ICommand>("Stop"); }
         }
 
         public ICommand RefreshCommand
         {
-            get { return _refreshCommand; }
+            get { return Core.Resolve<ICommand>("Refresh"); }
         }
 
         public ICommand RevertCommand
         {
-            get { return _revertCommand; }
+            get { return Core.Resolve<ICommand>("Revert"); }
         }
 
         public ICommand TestCommand
         {
-            get { return _testCommand; }
+            get { return Core.Resolve<ICommand>("Test"); }
         }
         #endregion
     }

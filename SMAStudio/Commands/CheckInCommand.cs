@@ -9,18 +9,19 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using SMAStudio.Logging;
+using SMAStudio.Services;
 
 namespace SMAStudio.Commands
 {
     public class CheckInCommand : ICommand
     {
-        private ApiService _api;
-        private ILoggingService _log;
+        private IApiService _api;
+        private IRunbookService _runbookService;
 
         public CheckInCommand()
         {
-            _api = new ApiService();
-            _log = new log4netLoggingService();
+            _api = Core.Resolve<IApiService>();
+            _runbookService = Core.Resolve<IRunbookService>();
         }
 
         public bool CanExecute(object parameter)
@@ -55,35 +56,7 @@ namespace SMAStudio.Commands
             if (parameter == null)
                 return;
 
-            var rb = ((RunbookViewModel)parameter);
-
-            var runbook = _api.Current.Runbooks.Where(r => r.RunbookID == rb.Runbook.RunbookID).FirstOrDefault();
-            if (runbook == null)
-            {
-                MessageBox.Show("The runbook does not exist.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            if (!runbook.DraftRunbookVersionID.HasValue || runbook.DraftRunbookVersionID == Guid.Empty)
-            {
-                MessageBox.Show("The runbook's already checked in.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            try
-            {
-                // Publish the runbook
-                runbook.Publish(_api.Current);
-
-                rb.CheckedOut = false;
-                rb.Runbook = runbook;
-            }
-            catch (Exception e)
-            {
-                _log.Error("Something went wrong when checking in the runbook.", e);
-                MessageBox.Show("Something went wrong when trying to check in the runbook. Refer to the logs for more information.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
+            _runbookService.CheckIn((RunbookViewModel)parameter);
         }
     }
 }

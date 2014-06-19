@@ -19,43 +19,30 @@ using SMAStudio.Services;
 
 namespace SMAStudio.ViewModels
 {
-    public class ComponentsViewModel : ObservableObject
+    public class ComponentsViewModel : ObservableObject, IComponentsViewModel
     {
-        private ICommand _loadCommand;
-        private ICommand _checkInCommand;
-        private ICommand _checkOutCommand;
-        private ICommand _newRunbookCommand;
-        private ICommand _newVariableCommand;
-        private ICommand _newCredentialCommand;
-        private ICommand _deleteCommand;
+        private IWorkspaceViewModel _dataContext;
 
-        private WorkspaceViewModel _dataContext;
-
-        private RunbookService _runbookService;
-        private VariableService _variableService;
-        private CredentialService _credentialService;
+        private IRunbookService _runbookService;
+        private IVariableService _variableService;
+        private ICredentialService _credentialService;
 
         private object _sync = new object();
         
-        public ComponentsViewModel(WorkspaceViewModel dataContext)
+        public ComponentsViewModel(IWorkspaceViewModel dataContext)
         {
             _dataContext = dataContext;
 
             Runbooks = new ObservableCollection<RunbookViewModel>();
             Variables = new ObservableCollection<VariableViewModel>();
             Credentials = new ObservableCollection<CredentialViewModel>();
+        }
 
-            _loadCommand = new LoadCommand(_dataContext, this);
-            _checkInCommand = new CheckInCommand();
-            _checkOutCommand = new CheckOutCommand();
-            _newRunbookCommand = new NewRunbookCommand(dataContext);
-            _newVariableCommand = new NewVariableCommand(dataContext);
-            _newCredentialCommand = new NewCredentialCommand(dataContext);
-            _deleteCommand = new DeleteCommand(this, dataContext);
-
-            _runbookService = new RunbookService();
-            _variableService = new VariableService();
-            _credentialService = new CredentialService();
+        public void Initialize()
+        {
+            _runbookService = Core.Resolve<IRunbookService>();
+            _variableService = Core.Resolve<IVariableService>();
+            _credentialService = Core.Resolve<ICredentialService>();
 
             Load();
         }
@@ -99,7 +86,7 @@ namespace SMAStudio.ViewModels
                 _dataContext.StatusBarText = "Connected";
             });
 
-            if (_runbookService.SuccessfulInitialization)
+            if (((BaseService)_runbookService).SuccessfulInitialization)
             {
                 AsyncService.Execute(ThreadPriority.Normal, delegate()
                 {
@@ -110,7 +97,7 @@ namespace SMAStudio.ViewModels
                 });
             }
 
-            if (_runbookService.SuccessfulInitialization || _variableService.SuccessfulInitialization)
+            if (((BaseService)_runbookService).SuccessfulInitialization || ((BaseService)_variableService).SuccessfulInitialization)
             {
                 AsyncService.Execute(ThreadPriority.Normal, delegate()
                 {
@@ -183,37 +170,37 @@ namespace SMAStudio.ViewModels
 
         public ICommand LoadCommand
         {
-            get { return _loadCommand; }
+            get { return Core.Resolve<ICommand>("Load"); }
         }
 
         public ICommand CheckInCommand
         {
-            get { return _checkInCommand; }
+            get { return Core.Resolve<ICommand>("CheckIn"); }
         }
 
         public ICommand CheckOutCommand
         {
-            get { return _checkOutCommand; }
+            get { return Core.Resolve<ICommand>("CheckOut"); }
         }
 
         public ICommand NewRunbookCommand
         {
-            get { return _newRunbookCommand; }
+            get { return Core.Resolve<ICommand>("NewRunbook"); }
         }
 
         public ICommand NewVariableCommand
         {
-            get { return _newVariableCommand; }
+            get { return Core.Resolve<ICommand>("NewVariable"); }
         }
 
         public ICommand NewCredentialCommand
         {
-            get { return _newCredentialCommand; }
+            get { return Core.Resolve<ICommand>("NewCredential"); }
         }
 
         public ICommand DeleteCommand
         {
-            get { return _deleteCommand; }
+            get { return Core.Resolve<ICommand>("Delete"); }
         }
         #endregion
     }

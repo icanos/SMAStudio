@@ -13,6 +13,9 @@ using System.Windows.Input;
 using SMAStudio.Resources;
 using SMAStudio.Editor;
 using SMAStudio.Settings;
+using SMAStudio.Models;
+using System.Collections.ObjectModel;
+using SMAStudio.Editor.Parsing;
 
 namespace SMAStudio.ViewModels
 {
@@ -30,6 +33,7 @@ namespace SMAStudio.ViewModels
         public RunbookViewModel()
         {
             Versions = new List<RunbookVersionViewModel>();
+            References = new ObservableCollection<DocumentReference>();
             LoadedVersions = false;
         }
 
@@ -161,7 +165,7 @@ namespace SMAStudio.ViewModels
         public string Content
         {
             get { return _content; }
-            set { _content = value; base.RaisePropertyChanged("Content"); }
+            set { _content = value; /*base.RaisePropertyChanged("Content");*/ }
         }
 
         /// <summary>
@@ -258,6 +262,12 @@ namespace SMAStudio.ViewModels
         /// Set to the ID of the job if the runbook is currently executed otherwise Guid.Empty
         /// </summary>
         public Guid JobID
+        {
+            get;
+            set;
+        }
+
+        public ObservableCollection<DocumentReference> References
         {
             get;
             set;

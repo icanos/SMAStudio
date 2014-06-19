@@ -13,18 +13,18 @@ using System.Windows.Controls;
 
 namespace SMAStudio.Util
 {
-    public class AutoSaveService : IDisposable
+    public class AutoSaveService : IAutoSaveService, IDisposable
     {
         private bool _running = true;
         private object _sync = new object();
 
-        private WorkspaceViewModel _workspaceViewModel;
-        private ApiService _api;
+        private IWorkspaceViewModel _workspaceViewModel;
+        private IApiService _api;
 
-        public AutoSaveService(WorkspaceViewModel workspaceViewModel)
+        public AutoSaveService(IWorkspaceViewModel workspaceViewModel, IApiService api)
         {
             _workspaceViewModel = workspaceViewModel;
-            _api = new ApiService();
+            _api = api;
         }
 
         public void Start()

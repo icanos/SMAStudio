@@ -1,4 +1,5 @@
-﻿using SMAStudio.ViewModels;
+﻿using SMAStudio.Services;
+using SMAStudio.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,11 +11,11 @@ namespace SMAStudio.Commands
 {
     public class NewVariableCommand : ICommand
     {
-        private WorkspaceViewModel _workspaceViewModel;
+        private IVariableService _variableService;
 
-        public NewVariableCommand(WorkspaceViewModel workspaceViewModel)
+        public NewVariableCommand()
         {
-            _workspaceViewModel = workspaceViewModel;
+            _variableService = Core.Resolve<IVariableService>();
         }
 
         public bool CanExecute(object parameter)
@@ -30,19 +31,7 @@ namespace SMAStudio.Commands
 
         public void Execute(object parameter)
         {
-            var newVariable = new VariableViewModel
-            {
-                Variable = new SMAWebService.Variable(),
-                CheckedOut = true,
-                UnsavedChanges = true
-            };
-
-            newVariable.Variable.Name = string.Empty;
-            newVariable.Variable.Value = string.Empty;
-
-            newVariable.Variable.VariableID = Guid.Empty;
-
-            _workspaceViewModel.OpenDocument(newVariable);
+            _variableService.Create();
         }
     }
 }

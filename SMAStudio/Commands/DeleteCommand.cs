@@ -1,4 +1,5 @@
-﻿using SMAStudio.Util;
+﻿using SMAStudio.Services;
+using SMAStudio.Util;
 using SMAStudio.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -12,15 +13,17 @@ namespace SMAStudio.Commands
 {
     public class DeleteCommand : ICommand
     {
-        private ApiService _api;
-        private ComponentsViewModel _componentsViewModel;
-        private WorkspaceViewModel _workspaceViewModel;
+        private IApiService _api;
+        private IRunbookService _runbookService;
+        private IVariableService _variableService;
+        private ICredentialService _credentialService;
 
-        public DeleteCommand(ComponentsViewModel componentsViewModel, WorkspaceViewModel workspaceViewModel)
+        public DeleteCommand()
         {
-            _api = new ApiService();
-            _componentsViewModel = componentsViewModel;
-            _workspaceViewModel = workspaceViewModel;
+            _api = Core.Resolve<IApiService>();
+            _runbookService = Core.Resolve<IRunbookService>();
+            _variableService = Core.Resolve<IVariableService>();
+            _credentialService = Core.Resolve<ICredentialService>();
         }
 
         public bool CanExecute(object parameter)
@@ -52,63 +55,17 @@ namespace SMAStudio.Commands
 
         private void DeleteRunbook(RunbookViewModel runbookViewModel)
         {
-            var runbook = _api.Current.Runbooks.Where(r => r.RunbookID == runbookViewModel.Runbook.RunbookID).FirstOrDefault();
-
-            if (runbook == null)
-            {
-                Core.Log.DebugFormat("Trying to remove a runbook that doesn't exist. GUID: {0}", runbookViewModel.Runbook.RunbookID);
-                return;
-            }
-
-            _api.Current.DeleteObject(runbook);
-            _api.Current.SaveChanges();
-
-            // Remove the runbook from the list of runbooks
-            _componentsViewModel.RemoveRunbook(runbookViewModel);
-
-            // If the runbook is open, we close it
-            if (_workspaceViewModel.Documents.Contains(runbookViewModel))
-                _workspaceViewModel.Documents.Remove(runbookViewModel);
+            _runbookService.Delete(runbookViewModel);
         }
 
         private void DeleteVariable(VariableViewModel variableViewModel)
         {
-            var variable = _api.Current.Variables.Where(v => v.VariableID == variableViewModel.ID).FirstOrDefault();
-
-            if (variable == null)
-            {
-                Core.Log.DebugFormat("Trying to remove a variable that doesn't exist. GUID {0}", variableViewModel.ID);
-                return;
-            }
-
-            _api.Current.DeleteObject(variable);
-            _api.Current.SaveChanges();
-
-            // Remove the variable from the list of variables
-            _componentsViewModel.RemoveVariable(variableViewModel);
-
-            // If the variable is open, we close it
-            if (_workspaceViewModel.Documents.Contains(variableViewModel))
-                _workspaceViewModel.Documents.Remove(variableViewModel);
+            _variableService.Delete(variableViewModel);
         }
 
         private void DeleteCredential(CredentialViewModel credentialViewModel)
         {
-            var credential = _api.Current.Credentials.Where(c => c.CredentialID == credentialViewModel.ID).FirstOrDefault();
-
-            if (credential == null)
-            {
-                Core.Log.DebugFormat("Trying to remove a credential that doesn't exist. GUID {0}", credentialViewModel.ID);
-                return;
-            }
-
-            _api.Current.DeleteObject(credential);
-            _api.Current.SaveChanges();
-
-            _componentsViewModel.Credentials.Remove(credentialViewModel);
-
-            if (_workspaceViewModel.Documents.Contains(credentialViewModel))
-                _workspaceViewModel.Documents.Remove(credentialViewModel);
+            _credentialService.Delete(credentialViewModel);
         }
     }
 }

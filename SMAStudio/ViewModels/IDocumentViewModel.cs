@@ -1,5 +1,7 @@
-﻿using System;
+﻿using SMAStudio.Models;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -49,5 +51,10 @@ namespace SMAStudio.ViewModels
         /// <param name="sender"></param>
         /// <param name="e"></param>
         void TextChanged(object sender, EventArgs e);
+
+        /// <summary>
+        /// Gets or sets the references from this document
+        /// </summary>
+        ObservableCollection<DocumentReference> References { get; set; }
     }
 }

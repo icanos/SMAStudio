@@ -55,6 +55,15 @@
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.Data.Services.Client.5.6.0\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Practices.Unity">
+      <HintPath>..\packages\Unity.3.5.1404.0\lib\net45\Microsoft.Practices.Unity.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Configuration">
+      <HintPath>..\packages\Unity.3.5.1404.0\lib\net45\Microsoft.Practices.Unity.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.RegistrationByConvention">
+      <HintPath>..\packages\Unity.3.5.1404.0\lib\net45\Microsoft.Practices.Unity.RegistrationByConvention.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
@@ -89,6 +98,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Commands\GoDefinitionCommand.cs" />
+    <Compile Include="Editor\Parsing\IParserService.cs" />
+    <Compile Include="Models\DocumentReference.cs" />
+    <Compile Include="Services\IApiService.cs" />
+    <Compile Include="Services\IAutoSaveService.cs" />
+    <Compile Include="Services\ICredentialService.cs" />
+    <Compile Include="Services\IRunbookService.cs" />
+    <Compile Include="Services\IVariableService.cs" />
     <Compile Include="UI\Dialogs\AboutDialog.xaml.cs">
       <DependentUpon>AboutDialog.xaml</DependentUpon>
     </Compile>
@@ -141,7 +158,9 @@
     <Compile Include="UI\Windows\ExecutionWindow.xaml.cs">
       <DependentUpon>ExecutionWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\Windows\ICompareWindow.cs" />
     <Compile Include="Util\AppHelper.cs" />
+    <Compile Include="Util\ContextMenuConverter.cs" />
     <Compile Include="Util\ControlHelper.cs" />
     <Compile Include="Util\JsonConverter.cs" />
     <Compile Include="Util\ObservableCollectionExtensions.cs" />
@@ -177,13 +196,18 @@
       <DependentUpon>Reference.datasvcmap</DependentUpon>
     </Compile>
     <Compile Include="UI\Colorizing\DiffColorizing.cs" />
+    <Compile Include="Util\UnitTestDetector.cs" />
     <Compile Include="Util\WorkspaceTemplateSelector.cs" />
     <Compile Include="ViewModels\CompareViewModel.cs" />
     <Compile Include="ViewModels\ComponentsViewModel.cs" />
     <Compile Include="ViewModels\CredentialViewModel.cs" />
     <Compile Include="ViewModels\ErrorListViewModel.cs" />
     <Compile Include="ViewModels\ExecutionViewModel.cs" />
+    <Compile Include="ViewModels\IComponentsViewModel.cs" />
     <Compile Include="ViewModels\IDocumentViewModel.cs" />
+    <Compile Include="ViewModels\IErrorListViewModel.cs" />
+    <Compile Include="ViewModels\IToolbarViewModel.cs" />
+    <Compile Include="ViewModels\IWorkspaceViewModel.cs" />
     <Compile Include="ViewModels\RunbookVersionViewModel.cs" />
     <Compile Include="ViewModels\RunbookViewModel.cs" />
     <Compile Include="ViewModels\ToolbarViewModel.cs" />
@@ -341,6 +365,10 @@
   <ItemGroup>
     <EmbeddedResource Include="license.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\link.png" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

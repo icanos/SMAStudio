@@ -1,8 +1,10 @@
-﻿using SMAStudio.Resources;
+﻿using SMAStudio.Models;
+using SMAStudio.Resources;
 using SMAStudio.SMAWebService;
 using SMAStudio.Util;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -150,6 +152,15 @@ namespace SMAStudio.ViewModels
             {
                 _credential.Name = value;
             }
+        }
+
+        /// <summary>
+        /// Unused for variables
+        /// </summary>
+        public ObservableCollection<DocumentReference> References
+        {
+            get;
+            set;
         }
         #endregion
     }

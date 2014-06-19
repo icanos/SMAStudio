@@ -8,18 +8,24 @@ using System.Data.Services.Client;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace SMAStudio.Services
 {
-    public class CredentialService : BaseService
+    public class CredentialService : BaseService, ICredentialService
     {
-        private ApiService _api;
+        private IApiService _api;
         private IList<Credential> _credentialCache = null;
         private ObservableCollection<CredentialViewModel> _credentialViewModelCache = null;
 
+        private IWorkspaceViewModel _workspaceViewModel;
+        private IComponentsViewModel _componentsViewModel;
+
         public CredentialService()
         {
-            _api = new ApiService();
+            _api = Core.Resolve<IApiService>();
+            _workspaceViewModel = Core.Resolve<IWorkspaceViewModel>();
+            _componentsViewModel = Core.Resolve<IComponentsViewModel>();
         }
 
         public IList<Credential> GetCredentials(bool forceDownload=false)
@@ -67,6 +73,112 @@ namespace SMAStudio.Services
             }
 
             return _credentialViewModelCache;
+        }
+
+        public bool Create()
+        {
+            try
+            {
+                var newCredential = new CredentialViewModel
+                {
+                    Credential = new SMAWebService.Credential(),
+                    CheckedOut = true,
+                    UnsavedChanges = true
+                };
+
+                _workspaceViewModel.OpenDocument(newCredential);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Core.Log.Error("Unable to create a new credential.", ex);
+            }
+
+            return false;
+        }
+
+        public bool Update(CredentialViewModel credential)
+        {
+            Credential cred = null;
+
+            try
+            {
+                if (credential.Credential.CredentialID != Guid.Empty)
+                {
+                    cred = _api.Current.Credentials.Where(c => c.CredentialID == credential.ID).FirstOrDefault();
+
+                    if (cred == null)
+                        return false;
+
+                    cred.Name = credential.Name;
+                    cred.UserName = credential.Username;
+                    cred.RawValue = credential.Password;
+
+                    _api.Current.UpdateObject(cred);
+                    _api.Current.SaveChanges();
+                }
+                else
+                {
+                    cred = new Credential();
+
+                    cred.Name = credential.Name;
+                    cred.UserName = credential.Username;
+                    cred.RawValue = credential.Password;
+
+                    _api.Current.AddToCredentials(cred);
+                    _api.Current.SaveChanges();
+
+                    credential.Credential = cred;
+                }
+
+                credential.UnsavedChanges = false;
+                credential.CachedChanges = false;
+
+                if (!_componentsViewModel.Credentials.Contains(credential))
+                    _componentsViewModel.Credentials.Add(credential);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Core.Log.Error("Unable to save the credential.", ex);
+                MessageBox.Show("An error occurred when saving the credential. Please refer to the logs for more information.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            return false;
+        }
+
+        public bool Delete(CredentialViewModel credentialViewModel)
+        {
+            try
+            {
+                var credential = _api.Current.Credentials.Where(c => c.CredentialID == credentialViewModel.ID).FirstOrDefault();
+
+                if (credential == null)
+                {
+                    Core.Log.DebugFormat("Trying to remove a credential that doesn't exist. GUID {0}", credentialViewModel.ID);
+                    return false;
+                }
+
+                _api.Current.DeleteObject(credential);
+                _api.Current.SaveChanges();
+
+                if (_componentsViewModel != null)
+                    _componentsViewModel.Credentials.Remove(credentialViewModel);
+
+                if (_workspaceViewModel != null && _workspaceViewModel.Documents.Contains(credentialViewModel))
+                    _workspaceViewModel.Documents.Remove(credentialViewModel);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Core.Log.Error("Unable to remove the credential.", ex);
+                MessageBox.Show("An error occurred when trying to remove the credential. Please refer to the logs for more information.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            return false;
         }
     }
 }

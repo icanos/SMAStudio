@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SMAStudio.ViewModels
 {
-    public class ErrorListViewModel : ObservableObject
+    public class ErrorListViewModel : ObservableObject, IErrorListViewModel
     {
         public ErrorListViewModel()
         {

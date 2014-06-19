@@ -1,8 +1,10 @@
-﻿using SMAStudio.Resources;
+﻿using SMAStudio.Models;
+using SMAStudio.Resources;
 using SMAStudio.SMAWebService;
 using SMAStudio.Util;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -166,6 +168,15 @@ namespace SMAStudio.ViewModels
         /// Last DateTime a key was pressed in the text editor of this runbook instance
         /// </summary>
         public DateTime LastTimeKeyDown
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Unused for variables
+        /// </summary>
+        public ObservableCollection<DocumentReference> References
         {
             get;
             set;
