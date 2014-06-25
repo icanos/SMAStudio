@@ -41,6 +41,10 @@ namespace SMAStudio
             _runbookViewModel = runbookViewModel;
             _runbookVersionViewModel = runbookVersionViewModel;
 
+            // Create a new revert command
+            ((CompareViewModel)DataContext).RevertCommand =
+                new RevertSpecificCommand(this, _runbookViewModel, _runbookVersionViewModel);
+
             Loaded += WindowLoaded;
         }
 
@@ -123,7 +127,13 @@ namespace SMAStudio
         public RunbookVersionViewModel Version
         {
             get { return _runbookVersionViewModel; }
-            set { _runbookVersionViewModel = value; BuildDiffView(); }
+            set
+            {
+                _runbookVersionViewModel = value;
+                
+                // Rebuild the differencing view
+                BuildDiffView();
+            }
         }
     }
 }

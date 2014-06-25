@@ -23,7 +23,7 @@
                     </StackPanel>
                 </Button>
                 <Separator />
-                <Button x:Name="btnRevert">
+                <Button x:Name="btnRevert" Command="{Binding RevertCommand}">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="../../Icons/_Revert.png" Width="16" />
                         <TextBlock Margin="5,0,0,0">Revert to this revision</TextBlock>
