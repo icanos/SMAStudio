@@ -64,6 +64,8 @@ namespace SMAStudio.ViewModels
                     SelectedIndex = Documents.Count - 1;
                 }
             });
+
+            _parserService.ParseCommandTokens(Documents[SelectedIndex]);
         }
 
         private string _cachedText = string.Empty;

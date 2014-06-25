@@ -46,6 +46,8 @@ namespace SMAStudio.ViewModels
             {
                 Document = new TextDocument();
             });
+
+            
         }
 
         /// <summary>
@@ -319,6 +321,12 @@ namespace SMAStudio.ViewModels
         }
 
         public ObservableCollection<DocumentReference> References
+        {
+            get;
+            set;
+        }
+
+        public int CaretOffset
         {
             get;
             set;

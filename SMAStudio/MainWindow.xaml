@@ -70,8 +70,8 @@
         </Style>
         
         <ContextMenu x:Key="DocumentReferenceContextMenu">
-            <MenuItem Header="Go To Definition" Command="{Binding GoDefinitionCommand}" />
-            <MenuItem Header="View Code" Command="{Binding ViewCodeCommand}" />
+            <MenuItem Header="Go To Definition" Command="{Binding GoDefinitionCommand}" CommandParameter="{Binding}" />
+            <!--<MenuItem Header="View Code" Command="{Binding ViewCodeCommand}" />-->
         </ContextMenu>
         
         <SmaStudioUtil:ContextMenuConverter x:Key="ContextMenuConverter" />
@@ -388,6 +388,7 @@
                                         Foreground="#F8F8F2"
                                         Background="#272822"
                                         Document="{Binding Path=Document}"
+                                        CaretOffset="{Binding Path=CaretOffset}"
                                         TextChanged="textEditor_TextChanged"
                                         DockPanel.Dock="Top"
                                         />

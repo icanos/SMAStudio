@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace SMAStudio.Models
 {
@@ -22,6 +23,11 @@ namespace SMAStudio.Models
         /// Line number of which the call is happening
         /// </summary>
         public int LineNumber { get; set; }
+
+        public ICommand GoDefinitionCommand
+        {
+            get { return Core.Resolve<ICommand>("GoDefinition"); }
+        }
 
         public override string ToString()
         {
