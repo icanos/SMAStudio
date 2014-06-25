@@ -1,4 +1,5 @@
 ﻿using SMAStudio.ViewModels;
+using SMAStudio.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,16 +68,7 @@ namespace SMAStudio.Editor.Parsing
                     {
                         ClearParseErrors(document);
                     }
-
-                    // Try to find all commands in the script, this is done in order
-                    // to find any references between runbooks
-                    /*var commandTokens = tokens.Where(t => t.TokenFlags.Equals(TokenFlags.CommandName)).ToList();
-
-                    if (commandTokens.Count > 0)
-                    {
-                        HandleCommandTokens(document, tokens, commandTokens);
-                    }*/
-
+                    
                     // Clean up
                     parseErrors = null;
                     tokens = null;
@@ -194,6 +186,12 @@ namespace SMAStudio.Editor.Parsing
 
                     if (tokens.Length <= (i + 2))
                         return "";
+
+                    // We only want to return this reference if the reference is completed.
+                    // We will end up here while typing the 'Start-SmaRunbook' command and
+                    // only want to list this item if the command is completely typed in.
+                    if (tokens[i + 1].Text.OccurrencesOf('"') < 2)
+                        return "";
                     
                     return tokens[i + 1].Text.Replace("\"", "").Trim();
                 }
@@ -202,6 +200,12 @@ namespace SMAStudio.Editor.Parsing
                     tokens[i].Kind == TokenKind.StringLiteral) &&
                     !tokens[i].HasError)
                 {
+                    // We only want to return this reference if the reference is completed.
+                    // We will end up here while typing the 'Start-SmaRunbook' command and
+                    // only want to list this item if the command is completely typed in.
+                    if (tokens[i].Text.OccurrencesOf('"') < 2)
+                        return "";
+
                     return tokens[i].Text.Replace("\"", "").Trim();
                 }
             }

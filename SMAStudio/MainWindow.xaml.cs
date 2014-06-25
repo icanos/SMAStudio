@@ -35,7 +35,7 @@ namespace SMAStudio
 
             InitializeComponent();
 
-            Core.Log.InfoFormat("\r\n\r\nStarted new intance of SMA Studi 2014 v " + Core.Version);
+            Core.Log.InfoFormat("\r\n\r\nStarted new intance of SMA Studio 2014 v " + Core.Version);
 
             Core.Start();
             Delegates();

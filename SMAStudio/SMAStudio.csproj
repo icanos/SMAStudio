@@ -165,6 +165,7 @@
     <Compile Include="Util\JsonConverter.cs" />
     <Compile Include="Util\ObservableCollectionExtensions.cs" />
     <Compile Include="Util\PasswordBoxExtensions.cs" />
+    <Compile Include="Util\StringExtensions.cs" />
     <Compile Include="Util\StringHelper.cs" />
     <Compile Include="Util\ActionExtensions.cs" />
     <Compile Include="UI\Dialogs\FindReplaceDialog.xaml.cs">
@@ -196,6 +197,7 @@
       <DependentUpon>Reference.datasvcmap</DependentUpon>
     </Compile>
     <Compile Include="UI\Colorizing\DiffColorizing.cs" />
+    <Compile Include="Util\TypeConverter.cs" />
     <Compile Include="Util\UnitTestDetector.cs" />
     <Compile Include="Util\WorkspaceTemplateSelector.cs" />
     <Compile Include="ViewModels\CompareViewModel.cs" />

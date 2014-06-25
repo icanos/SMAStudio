@@ -16,6 +16,7 @@ using SMAStudio.Settings;
 using SMAStudio.Models;
 using System.Collections.ObjectModel;
 using SMAStudio.Editor.Parsing;
+using ICSharpCode.AvalonEdit.Document;
 
 namespace SMAStudio.ViewModels
 {
@@ -24,7 +25,7 @@ namespace SMAStudio.ViewModels
         private bool _checkedOut = true;
         private bool _unsavedChanges = false;
 
-        private string _content = string.Empty;
+        private string _content = string.Empty;  // used for comparsion between the local copy and the remote (to detect changes)
         private string _icon = Icons.Runbook;
         private DateTime _lastFetched = DateTime.MinValue;
 
@@ -35,6 +36,13 @@ namespace SMAStudio.ViewModels
             Versions = new List<RunbookVersionViewModel>();
             References = new ObservableCollection<DocumentReference>();
             LoadedVersions = false;
+
+            // The UI thread needs to own the document in order to be able
+            // to edit it.
+            App.Current.Dispatcher.Invoke(delegate()
+            {
+                Document = new TextDocument();
+            });
         }
 
         /// <summary>
@@ -48,11 +56,12 @@ namespace SMAStudio.ViewModels
             if (!(sender is MvvmTextEditor))
                 return;
 
-            if (Content.Equals(((MvvmTextEditor)sender).Text))
+            var editor = ((MvvmTextEditor)sender);
+            if (editor.Document.Text.Equals(_content))
                 return;
 
-            Content = ((MvvmTextEditor)sender).Text;
-            UnsavedChanges = true;
+            //Content = ((MvvmTextEditor)sender).Text;
+            //UnsavedChanges = true;
         }
 
         /// <summary>
@@ -63,12 +72,14 @@ namespace SMAStudio.ViewModels
         /// <returns>The content of the runbook</returns>
         public string GetContent(bool forceDownload = false, bool publishedVersion = false)
         {
-            if (!String.IsNullOrEmpty(_content) && !forceDownload && (DateTime.Now - _lastFetched) < new TimeSpan(0, 30, 0))
-                return _content;
+            if (!String.IsNullOrEmpty(Content) && !forceDownload && (DateTime.Now - _lastFetched) < new TimeSpan(0, 30, 0))
+                return Content;
 
             string runbookVersion = "DraftRunbookVersion";
             if (publishedVersion)
                 runbookVersion = "PublishedRunbookVersion";
+
+            Core.Log.DebugFormat("Downloading content for runbook '{0}', version: {1}", ID, runbookVersion);
 
             try
             {
@@ -78,7 +89,8 @@ namespace SMAStudio.ViewModels
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 TextReader reader = new StreamReader(response.GetResponseStream());
 
-                _content = reader.ReadToEnd();
+                Content = reader.ReadToEnd();
+                _content = Content;
 
                 reader.Close();
             }
@@ -89,11 +101,12 @@ namespace SMAStudio.ViewModels
                 if (e.Status != WebExceptionStatus.ConnectFailure &&
                     e.Status != WebExceptionStatus.ConnectionClosed)
                 {
-                    _content = GetContent(forceDownload, true);
+                    Content = GetContent(forceDownload, true);
+                    _content = Content;
                 }
             }
 
-            return _content;
+            return Content;
         }
 
         #region Properties
@@ -159,13 +172,48 @@ namespace SMAStudio.ViewModels
             }
         }
 
+        public TextDocument Document
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// Gets or sets the content of the Runbook (the actual Powershell script)
         /// </summary>
         public string Content
         {
-            get { return _content; }
-            set { _content = value; /*base.RaisePropertyChanged("Content");*/ }
+            get
+            {
+                string content = "";
+
+                // App is closing
+                if (App.Current == null)
+                    return string.Empty;
+
+                App.Current.Dispatcher.Invoke(delegate()
+                {
+                    content = Document.Text;
+                });
+
+                return content;
+            }
+            set
+            {
+                // App is closing
+                if (App.Current == null)
+                    return;
+
+                App.Current.Dispatcher.Invoke(delegate()
+                {
+                    Document.Text = value;
+                });
+
+                base.RaisePropertyChanged("Document");
+
+                if (!_content.Equals(value))
+                    base.RaisePropertyChanged("UnsavedChanges");
+            }
         }
 
         /// <summary>

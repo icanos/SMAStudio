@@ -29,6 +29,6 @@ namespace SMAStudio.Services
 
         bool CheckIn(RunbookViewModel runbook);
 
-        bool CheckOut(RunbookViewModel runbook);
+        bool CheckOut(RunbookViewModel runbook, bool silentCheckOut = false);
     }
 }

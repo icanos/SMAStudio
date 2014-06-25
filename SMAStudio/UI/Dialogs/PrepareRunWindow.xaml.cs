@@ -67,7 +67,9 @@ namespace SMAStudio
                         var input = new UIInputParameter
                         {
                             Name = ConvertToNiceName(param.Name.Extent.Text),
-                            Command = param.Name.Extent.Text
+                            Command = param.Name.Extent.Text.Substring(1),                  // Remove the $
+                            IsArray = (param.Attributes[1].TypeName.IsArray ? true : false),
+                            TypeName = param.Attributes[1].TypeName.Name
                         };
 
                         Inputs.Add(input);
@@ -122,5 +124,9 @@ namespace SMAStudio
         public string Command { get; set; }
 
         public string Value { get; set; }
+
+        public bool IsArray { get; set; }
+
+        public string TypeName { get; set; }
     }
 }

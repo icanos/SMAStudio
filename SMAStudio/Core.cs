@@ -34,7 +34,6 @@ namespace SMAStudio
         {
             _container = new UnityContainer();
 
-            //_container.RegisterType<IParserService, ParserService>();
             _container.RegisterInstance<IParserService>(new ParserService());
 
             // View models
@@ -56,7 +55,6 @@ namespace SMAStudio
             _container.RegisterType<ICommand, CheckOutCommand>("CheckOut");
             _container.RegisterType<ICommand, CloseAllCommand>("CloseAll");
             _container.RegisterType<ICommand, CloseCommand>("Close");
-            //_container.RegisterType<ICommand, CompareCommand>("Compare");
             _container.RegisterType<ICommand, DeleteCommand>("Delete");
             _container.RegisterType<ICommand, ExitCommand>("Exit");
             _container.RegisterType<ICommand, FindCommand>("Find");
@@ -85,7 +83,7 @@ namespace SMAStudio
 
         public static string Version
         {
-            get { return "0.1.4"; }
+            get { return "0.1.5"; }
         }
     }
 }

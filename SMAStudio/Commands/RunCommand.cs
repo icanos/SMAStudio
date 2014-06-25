@@ -76,15 +76,26 @@ namespace SMAStudio.Commands
 
                 foreach (var param in window.Inputs)
                 {
-                    parameters.Add(new NameValuePair
+                    var nameValuePair = new NameValuePair
                         {
                             Name = param.Command,
-                            Value = JsonConverter.ToJson(param.Value)
-                        });
+                        };
+
+                    // Parse the value to the correct data type and convert to json
+                    var value = TypeConverter.Convert(param);
+
+                    if (value == null)
+                    {
+                        MessageBox.Show(String.Format("Invalid data type for parameter '{0}'. Expected data type was: {1}", param.Name, param.TypeName), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    nameValuePair.Value = (string)value;
+
+                    parameters.Add(nameValuePair);
                 }
             }
 
-            //if (parameter is RunbookViewModel)
             try
             {
                 _api.Current.AttachTo("Runbooks", runbook.Runbook);

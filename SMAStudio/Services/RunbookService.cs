@@ -247,22 +247,15 @@ namespace SMAStudio.Services
 
         public bool CheckIn(RunbookViewModel runbookViewModel)
         {
-            /*var runbook = _api.Current.Runbooks.Where(r => r.RunbookID == runbookViewModel.Runbook.RunbookID).FirstOrDefault();
-
-            if (runbook == null)
-            {
-                MessageBox.Show("The runbook does not exist.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }*/
             var runbook = runbookViewModel.Runbook;
 
             try
             {
                 _api.Current.AttachTo("Runbooks", runbook);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException)
             {
-                Core.Log.Error("Unable to attach the runbook to the model. Possible loss of data!", ex);
+                // Thrown when the context is already tracking the entity
             }
 
             if (!runbook.DraftRunbookVersionID.HasValue || runbook.DraftRunbookVersionID == Guid.Empty)
@@ -274,9 +267,11 @@ namespace SMAStudio.Services
             try
             {
                 // Publish the runbook
-                runbook.Publish(_api.Current);
+                runbookViewModel.Runbook.PublishedRunbookVersionID = runbook.Publish(_api.Current);
+                runbookViewModel.Runbook.DraftRunbookVersionID = Guid.Empty;
 
                 runbookViewModel.CheckedOut = false;
+
                 runbookViewModel.Runbook = runbook;
             }
             catch (Exception e)
@@ -289,33 +284,27 @@ namespace SMAStudio.Services
             return true;
         }
 
-        public bool CheckOut(RunbookViewModel runbookViewModel)
+        public bool CheckOut(RunbookViewModel runbookViewModel, bool silentCheckOut = false)
         {
             var messageBoxResult = MessageBoxResult.Yes;
 
-            if (!UnitTestDetector.IsInUnitTest)
+            if (!silentCheckOut)
                 messageBoxResult = MessageBox.Show("Do you want to check out the runbook?\r\nThis will still allow the current version of the runbook to run.", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (messageBoxResult != MessageBoxResult.Yes)
                 return false;
 
-            /*var runbook = _api.Current.Runbooks.Where(r => r.RunbookID == rb.Runbook.RunbookID).FirstOrDefault();
-            if (runbook == null)
-            {
-                MessageBox.Show("The runbook does not exist.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }*/
             var runbook = runbookViewModel.Runbook;
 
             try
             {
                 _api.Current.AttachTo("Runbooks", runbook);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException)
             {
-                Core.Log.Error("Unable to attach the runbook to the model. Possible loss of data!", ex);
+                // Thrown when we're already attached to the API
             }
-
+            
             if (!runbook.DraftRunbookVersionID.HasValue || runbook.DraftRunbookVersionID == Guid.Empty)
             {
                 runbook.DraftRunbookVersionID = new Guid?(runbook.Edit(_api.Current));
@@ -358,9 +347,10 @@ namespace SMAStudio.Services
                 _api.Current.SaveChanges();
 
                 runbookViewModel.CheckedOut = true;
-                runbookViewModel.Runbook = runbook;
-
+                runbookViewModel.Runbook = _api.Current.Runbooks.Where(r => r.RunbookID == runbook.RunbookID).First();
+                
                 runbookViewModel.Versions = GetVersions(runbookViewModel);
+                runbookViewModel.LoadedVersions = true;
 
                 return true;
             }

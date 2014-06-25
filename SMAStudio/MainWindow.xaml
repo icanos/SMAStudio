@@ -101,7 +101,7 @@
                 <MenuItem Header="Close All But the Active" Command="{Binding CloseAllCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}" />
                 <Separator />
                 <MenuItem Header="Save" Command="{Binding SaveCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}" />
-                <MenuItem Header="Save As" />
+                <!--<MenuItem Header="Save As" />-->
                 <Separator />
                 <MenuItem Header="Exit" Command="{Binding ExitCommand}" />
             </MenuItem>
@@ -116,9 +116,9 @@
                 <MenuItem Command="SelectAll"/>
                 <Separator />
                 <MenuItem Header="Find and Replace" Command="{Binding Path=FindCommand}" />
-                <MenuItem Header="Go To..." IsEnabled="False"/>
+                <!--<MenuItem Header="Go To..." IsEnabled="False"/>
                 <Separator />
-                <MenuItem Header="Insert File as Text..." IsEnabled="False" />
+                <MenuItem Header="Insert File as Text..." IsEnabled="False" />-->
             </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem Header="About SMA Studio 2014" Command="{Binding Path=AboutCommand}" />
@@ -387,7 +387,7 @@
                                         Padding="5,5,5,5"
                                         Foreground="#F8F8F2"
                                         Background="#272822"
-                                        Text="{Binding Path=Content}"
+                                        Document="{Binding Path=Document}"
                                         TextChanged="textEditor_TextChanged"
                                         DockPanel.Dock="Top"
                                         />

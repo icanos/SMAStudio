@@ -273,7 +273,17 @@ namespace SMAStudio.ViewModels
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(jobStreamUrl + "?" + queryString);
             request.Credentials = CredentialCache.DefaultCredentials;
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            HttpWebResponse response = null;
+
+            try
+            {
+                response = (HttpWebResponse)request.GetResponse();
+            }
+            catch (WebException e)
+            {
+                Core.Log.Error("Error when trying to load job data.", e);
+                return string.Empty;
+            }
 
             TextReader tr = new StreamReader(response.GetResponseStream());
             string content = tr.ReadToEnd();
@@ -356,7 +366,7 @@ namespace SMAStudio.ViewModels
         {
             get
             {
-                return _runbookViewModel.RunbookName + ": Execution";
+                return "Execution: " + _runbookViewModel.RunbookName;
             }
         }
 

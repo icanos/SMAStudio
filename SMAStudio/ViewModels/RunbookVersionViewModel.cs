@@ -36,6 +36,8 @@ namespace SMAStudio.ViewModels
             if (!String.IsNullOrEmpty(_content) && !forceDownload &&  (DateTime.Now - _lastFetched) < new TimeSpan(0, 30, 0))
                 return _content;
 
+            Core.Log.DebugFormat("Downloading runbook version content from SMA");
+
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(Uri.AbsoluteUri + "/$value");
             request.Credentials = CredentialCache.DefaultCredentials;
 

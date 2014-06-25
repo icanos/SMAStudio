@@ -13,6 +13,12 @@
                 <TextBox Grid.Column="1" Text="{Binding Path=Value}" Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ColumnDefinition}}, Path=Width}" />
             </Grid>
         </DataTemplate>
+        <Style TargetType="ListBox">
+            <Setter Property="KeyboardNavigation.TabNavigation" Value="Continue" />
+        </Style>
+        <Style TargetType="ListBoxItem">
+            <Setter Property="IsTabStop" Value="False" />
+        </Style>
     </Window.Resources>
     <StackPanel Orientation="Vertical">
         <ListBox x:Name="lstInput" Height="270" Margin="5,5,5,5" ItemsSource="{Binding Path=Inputs}" ItemTemplate="{DynamicResource InputListBoxItem}">

@@ -58,7 +58,16 @@ namespace SMAStudio.Commands
             if (parameter == null)
                 return;
 
-            _runbookService.CheckOut((RunbookViewModel)parameter);
+            _runbookService.CheckOut((RunbookViewModel)parameter, SilentCheckOut);
+        }
+
+        /// <summary>
+        /// Set to true if the checkout should be silent
+        /// </summary>
+        public bool SilentCheckOut
+        {
+            private get;
+            set;
         }
     }
 }
