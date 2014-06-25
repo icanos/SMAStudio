@@ -64,12 +64,15 @@ namespace SMAStudio
                 {
                     try
                     {
+                        AttributeBaseAst attrib = null;
+                        attrib = param.Attributes[param.Attributes.Count - 1]; // always the last one
+
                         var input = new UIInputParameter
                         {
                             Name = ConvertToNiceName(param.Name.Extent.Text),
                             Command = param.Name.Extent.Text.Substring(1),                  // Remove the $
-                            IsArray = (param.Attributes[1].TypeName.IsArray ? true : false),
-                            TypeName = param.Attributes[1].TypeName.Name
+                            IsArray = (attrib.TypeName.IsArray ? true : false),
+                            TypeName = attrib.TypeName.Name
                         };
 
                         Inputs.Add(input);
@@ -77,6 +80,7 @@ namespace SMAStudio
                     catch (Exception ex)
                     {
                         Core.Log.Error("Unable to create a UIInputParameter for a runbook parameter.", ex);
+                        MessageBox.Show("An error occurred when enumerating the runbook parameters. Please refer to the logs for more information", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
 

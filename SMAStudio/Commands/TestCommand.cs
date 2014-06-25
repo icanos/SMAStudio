@@ -53,14 +53,23 @@ namespace SMAStudio.Commands
                 return;
 
             RunbookViewModel runbook = null;
-            /*if (!(parameter is RunbookViewModel))
-                return;
 
-            var runbook = (RunbookViewModel)parameter;*/
             if (parameter is RunbookViewModel)
                 runbook = (RunbookViewModel)parameter;
             else if (parameter is ExecutionViewModel)
                 runbook = ((ExecutionViewModel)parameter).Runbook;
+
+            // We need to save the runbook before testing it, this is
+            // to assure that we test the latest code.
+            var saveCommand = Core.Resolve<ICommand>("Save");
+            if (saveCommand != null)
+            {
+                saveCommand.Execute(runbook);
+            }
+            else
+            {
+                Core.Log.ErrorFormat("No SaveCommand was found. This can't happen?");
+            }
 
             var window = new PrepareRunWindow(runbook);
             window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
@@ -76,15 +85,26 @@ namespace SMAStudio.Commands
 
                 foreach (var param in window.Inputs)
                 {
-                    parameters.Add(new NameValuePair
-                        {
-                            Name = param.Command,
-                            Value = JsonConverter.ToJson(param.Value)
-                        });
+                    var nameValuePair = new NameValuePair
+                    {
+                        Name = param.Command,
+                    };
+
+                    // Parse the value to the correct data type and convert to json
+                    var value = TypeConverter.Convert(param);
+
+                    if (value == null)
+                    {
+                        MessageBox.Show(String.Format("Invalid data type for parameter '{0}'. Expected data type was: {1}", param.Name, param.TypeName), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    nameValuePair.Value = (string)value;
+
+                    parameters.Add(nameValuePair);
                 }
             }
 
-            //if (parameter is RunbookViewModel)
             try
             {
                 _api.Current.AttachTo("Runbooks", runbook.Runbook);

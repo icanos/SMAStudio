@@ -39,6 +39,9 @@ namespace SMAStudio.ViewModels
 
             // The UI thread needs to own the document in order to be able
             // to edit it.
+            if (App.Current == null)
+                return;
+
             App.Current.Dispatcher.Invoke(delegate()
             {
                 Document = new TextDocument();
@@ -61,7 +64,7 @@ namespace SMAStudio.ViewModels
                 return;
 
             //Content = ((MvvmTextEditor)sender).Text;
-            //UnsavedChanges = true;
+            UnsavedChanges = true;
         }
 
         /// <summary>

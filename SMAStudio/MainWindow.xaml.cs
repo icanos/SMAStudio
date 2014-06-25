@@ -37,13 +37,14 @@ namespace SMAStudio
 
             Core.Log.InfoFormat("\r\n\r\nStarted new intance of SMA Studio 2014 v " + Core.Version);
 
-            Core.Start();
             Delegates();
             if (!ConfigureSettingsManager())
             {
                 Close();
                 return;
             }
+
+            Core.Start();
 
             ConfigureDataContexts();
             ConfigureAutoSaver();

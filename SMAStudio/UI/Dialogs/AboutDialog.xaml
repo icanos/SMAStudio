@@ -4,7 +4,7 @@
         Title="About SMA Studio 2014" Style="{DynamicResource AboutDialogStyle}" WindowStartupLocation="CenterOwner">
     <Window.Resources>
         <Style x:Key="AboutDialogStyle" TargetType="Window">
-            <Setter Property="Height" Value="Auto" />
+            <Setter Property="Height" Value="350" />
             <Setter Property="Width" Value="500" />
             <Setter Property="ShowInTaskbar" Value="False" />
             <Setter Property="ResizeMode" Value="NoResize" />
@@ -58,7 +58,7 @@
                 <Label x:Name="versionLabel" x:Uid="VersionLabel" Content="Version - " />
                 <Label x:Name="version" x:Uid="version" Content="{Binding Mode=OneTime, XPath=Version}" />
             </StackPanel>
-            <Label x:Name="copyright" x:Uid="copyright" Content="Copyright (C) Marcus Westin 2014" />
+            <Label x:Name="copyright" x:Uid="copyright" Content="Copyright (C) 2014 - Marcus Westin" />
             <Label x:Name="company" x:Uid="company" Content="www.sekurbit.se" />
             <Label x:Name="reserved" x:Uid="reserved" Content="All Rights Reserved." />
             <Label x:Name="info" x:Uid="info" Style="{StaticResource ParagraphSeparator}"
