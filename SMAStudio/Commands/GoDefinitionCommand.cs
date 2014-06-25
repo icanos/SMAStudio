@@ -57,6 +57,10 @@ namespace SMAStudio.Commands
             }
             else
             {
+                // Load the runbook content
+                document.Content = document.GetContent();
+
+                // Open the document
                 _workspaceViewModel.OpenDocument(document);
             }
         }
