@@ -7,9 +7,14 @@ using SMAStudio.Util;
 using SMAStudio.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace SMAStudio
@@ -69,6 +74,8 @@ namespace SMAStudio
             _container.RegisterType<ICommand, SaveCommand>("Save");
             _container.RegisterType<ICommand, StopCommand>("Stop");
             _container.RegisterType<ICommand, TestCommand>("Test");
+
+            VerifyVersion();
         }
 
         public static T Resolve<T>()
@@ -81,9 +88,48 @@ namespace SMAStudio
             return _container.Resolve<T>(name);
         }
 
+        private static void VerifyVersion()
+        {
+            AsyncService.Execute(ThreadPriority.Normal, delegate()
+            {
+                //
+                try
+                {
+                    HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create("http://www.sekurbit.se/version.txt");
+
+                    HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                    TextReader reader = new StreamReader(response.GetResponseStream());
+
+                    string version = reader.ReadToEnd();
+
+                    reader.Close();
+
+                    if (!version.Equals(Core.Version))
+                    {
+                        if (App.Current == null)
+                            return;
+
+                        App.Current.Dispatcher.Invoke(delegate()
+                        {
+                            var result = MessageBox.Show("A new version of SMA Studio 2014 is available.\r\nDo you want to download it now?", "New version", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                            if (result == MessageBoxResult.Yes)
+                            {
+                                // Open a browser
+                                Process.Start("http://www.sekurbit.se/");
+                            }
+                        });
+                    }
+                }
+                catch (WebException)
+                {
+                    Core.Log.ErrorFormat("Unable to check version. Continuing as normal.");
+                }
+            });
+        }
+
         public static string Version
         {
-            get { return "0.1.5"; }
+            get { return "0.2.0"; }
         }
     }
 }
