@@ -1,6 +1,7 @@
 ﻿using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
+using ICSharpCode.AvalonEdit.Snippets;
 using Microsoft.Practices.Unity;
 using SMAStudio.Commands;
 using SMAStudio.Editor.CodeCompletion;
@@ -76,6 +77,29 @@ namespace SMAStudio.ViewModels
         /// <param name="e"></param>
         public void EditorTextEntered(object sender, TextCompositionEventArgs e)
         {
+            var textArea = ((TextArea)sender);
+
+            /*var loopCounter = new SnippetReplaceableTextElement { Text = "i" };
+            Snippet snippet = new Snippet
+            {
+                Elements = {
+                        new SnippetTextElement { Text = "for(int " },
+                        new SnippetBoundElement { TargetElement = loopCounter },
+                        new SnippetTextElement { Text = " = " },
+                        new SnippetReplaceableTextElement { Text = "0" },
+                        new SnippetTextElement { Text = "; " },
+                        loopCounter,
+                        new SnippetTextElement { Text = " < " },
+                        new SnippetReplaceableTextElement { Text = "end" },
+                        new SnippetTextElement { Text = "; " },
+                        new SnippetBoundElement { TargetElement = loopCounter },
+                        new SnippetTextElement { Text = "++) { \t" },
+                        new SnippetCaretElement(),
+                        new SnippetTextElement { Text = " }" }
+                    }
+            };
+            snippet.Insert(textArea);*/
+
             if (e.Text == "-" && _codeCompletionEngine.ApprovedVerbs.Contains(_cachedText))
             {
                 if (_cachedText.StartsWith("$"))
@@ -84,7 +108,7 @@ namespace SMAStudio.ViewModels
                     return;
                 }
 
-                var textArea = ((TextArea)sender);
+                //var textArea = ((TextArea)sender);
 
                 _completionWindow = new CompletionWindow(textArea);
                 _completionWindow.Width = 300;

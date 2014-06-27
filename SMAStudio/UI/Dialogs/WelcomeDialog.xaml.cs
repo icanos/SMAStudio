@@ -1,4 +1,5 @@
 ﻿using SMAStudio.Settings;
+using SMAStudio.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,6 +44,13 @@ namespace SMAStudio
             }
 
             SettingsManager.Current.Settings.SmaWebServiceUrl = txtSMAUrl.Text;
+
+            var apiService = new ApiService();
+            if (!apiService.TestConnectivity())
+            {
+                MessageBox.Show("Invalid Service Management Automation URL and/or credentials. Please verify connectivity and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
             DialogResult = true;
             Close();

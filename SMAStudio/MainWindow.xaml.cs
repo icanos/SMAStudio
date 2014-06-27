@@ -60,6 +60,15 @@ namespace SMAStudio
 
             Core.Start();
 
+            // Verify that we have connectivity against SMA before continuing
+            var apiService = new ApiService();
+            if (!apiService.TestConnectivity())
+            {
+                MessageBox.Show("Invalid Service Management Automation URL and/or credentials. Please verify connectivity and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Close();
+                return;
+            }
+
             ConfigureDataContexts();
             ConfigureAutoSaver();
 
