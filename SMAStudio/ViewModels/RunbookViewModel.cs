@@ -17,6 +17,8 @@ using SMAStudio.Models;
 using System.Collections.ObjectModel;
 using SMAStudio.Editor.Parsing;
 using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Editing;
+using ICSharpCode.AvalonEdit.Snippets;
 
 namespace SMAStudio.ViewModels
 {
@@ -30,6 +32,7 @@ namespace SMAStudio.ViewModels
         private DateTime _lastFetched = DateTime.MinValue;
 
         private Runbook _runbook = null;
+        private TextDocument _document = null;
 
         public RunbookViewModel()
         {
@@ -114,6 +117,11 @@ namespace SMAStudio.ViewModels
             return Content;
         }
 
+        public void DocumentLoaded()
+        {
+            
+        }
+
         #region Properties
         /// <summary>
         /// Contains a mapping to the Model object of our runbook
@@ -178,6 +186,18 @@ namespace SMAStudio.ViewModels
         }
 
         public TextDocument Document
+        {
+            get { return _document; }
+            set
+            {
+                _document = value;
+            }
+        }
+
+        /// <summary>
+        /// Data bound to the TextArea of AvalonEdit
+        /// </summary>
+        public TextArea MvvmTextArea
         {
             get;
             set;

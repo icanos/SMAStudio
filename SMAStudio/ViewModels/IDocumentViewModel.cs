@@ -56,5 +56,10 @@ namespace SMAStudio.ViewModels
         /// Gets or sets the references from this document
         /// </summary>
         ObservableCollection<DocumentReference> References { get; set; }
+
+        /// <summary>
+        /// Called when the MvvmTextEditor has been initialized
+        /// </summary>
+        void DocumentLoaded();
     }
 }

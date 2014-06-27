@@ -18,6 +18,10 @@ using System.Windows.Threading;
 
 namespace SMAStudio.ViewModels
 {
+    /// <summary>
+    /// WorkspaceViewModel is current dependent of MvvmTextEditor since there are bindings between these
+    /// in order for Code Completion to work. This is not compliant with MVVM.
+    /// </summary>
     public class WorkspaceViewModel : ObservableObject, IWorkspaceViewModel, IDisposable
     {
         private CompletionEngine _codeCompletionEngine;
@@ -78,27 +82,6 @@ namespace SMAStudio.ViewModels
         public void EditorTextEntered(object sender, TextCompositionEventArgs e)
         {
             var textArea = ((TextArea)sender);
-
-            /*var loopCounter = new SnippetReplaceableTextElement { Text = "i" };
-            Snippet snippet = new Snippet
-            {
-                Elements = {
-                        new SnippetTextElement { Text = "for(int " },
-                        new SnippetBoundElement { TargetElement = loopCounter },
-                        new SnippetTextElement { Text = " = " },
-                        new SnippetReplaceableTextElement { Text = "0" },
-                        new SnippetTextElement { Text = "; " },
-                        loopCounter,
-                        new SnippetTextElement { Text = " < " },
-                        new SnippetReplaceableTextElement { Text = "end" },
-                        new SnippetTextElement { Text = "; " },
-                        new SnippetBoundElement { TargetElement = loopCounter },
-                        new SnippetTextElement { Text = "++) { \t" },
-                        new SnippetCaretElement(),
-                        new SnippetTextElement { Text = " }" }
-                    }
-            };
-            snippet.Insert(textArea);*/
 
             if (e.Text == "-" && _codeCompletionEngine.ApprovedVerbs.Contains(_cachedText))
             {

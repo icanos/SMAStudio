@@ -12,6 +12,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.*/
 
+using SMAStudio.Editor;
 using SMAStudio.Services;
 using SMAStudio.Settings;
 using SMAStudio.Util;
@@ -255,7 +256,7 @@ namespace SMAStudio
             documentViewModel.LastTimeKeyDown = DateTime.Now;
         }
 
-        /// <summary>
+        /*/// <summary>
         /// Called when the MvvmTextEditor content changes, in order for code completion to work correctly
         /// </summary>
         /// <param name="sender"></param>
@@ -275,7 +276,7 @@ namespace SMAStudio
         {
             var workspace = (WorkspaceViewModel)DataContext;
             workspace.EditorTextEntering(sender, e);
-        }
+        }*/
 
         private void FindReplaceClicked(object sender, RoutedEventArgs e)
         {

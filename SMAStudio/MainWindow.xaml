@@ -378,21 +378,22 @@
                                         <TextBlock Text="Tags" Margin="0,0,5,0" DockPanel.Dock="Left" />
                                         <TextBox x:Name="txtTags" DockPanel.Dock="Left" Text="{Binding Path=Tags}" />
                                     </DockPanel>
-                                    <SmaStudioEditor:MvvmTextEditor
-                                        x:Name="textEditor"
-                                        IsReadOnly="{Binding Path=CheckedIn}"
-                                        FontFamily="Consolas"
-                                        SyntaxHighlighting="SMA"
-                                        FontSize="10pt"
-                                        Padding="5,5,5,5"
-                                        Foreground="#F8F8F2"
-                                        Background="#272822"
-                                        Document="{Binding Path=Document}"
-                                        CaretOffset="{Binding Path=CaretOffset}"
-                                        TextChanged="textEditor_TextChanged"
-                                        DockPanel.Dock="Top"
-                                        />
-                                </DockPanel>
+                                        <SmaStudioEditor:MvvmTextEditor
+                                            x:Name="textEditor"
+                                            IsReadOnly="{Binding Path=CheckedIn}"
+                                            FontFamily="Consolas"
+                                            SyntaxHighlighting="SMA"
+                                            FontSize="10pt"
+                                            Padding="5,5,5,5"
+                                            Foreground="#F8F8F2"
+                                            Background="#272822"
+                                            Document="{Binding Path=Document}"
+                                            CaretOffset="{Binding Path=CaretOffset}"
+                                            TextChanged="textEditor_TextChanged"
+                                            DockPanel.Dock="Top"
+                                            >
+                                        </SmaStudioEditor:MvvmTextEditor>
+                                    </DockPanel>
                             </DataTemplate>
                         </SmaStudioUtil:WorkspaceTemplateSelector.RunbookTemplate>
                         <SmaStudioUtil:WorkspaceTemplateSelector.VariableTemplate>

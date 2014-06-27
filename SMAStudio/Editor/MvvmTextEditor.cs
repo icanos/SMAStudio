@@ -1,6 +1,8 @@
 ﻿using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
+using SMAStudio.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,7 +17,7 @@ using System.Xml;
 
 namespace SMAStudio.Editor
 {
-    public class MvvmTextEditor : TextEditor, INotifyPropertyChanged
+    public class MvvmTextEditor : TextEditor, IDisposable, INotifyPropertyChanged
     {
         public MvvmTextEditor()
         {
@@ -24,8 +26,14 @@ namespace SMAStudio.Editor
             ShowLineNumbers = true;
 
             // TODO: This doesn't follow the MVVM pattern and has to be changed
-            TextArea.TextEntered += MainWindow.Instance.TextEntered;
-            TextArea.TextEntering += MainWindow.Instance.TextEntering;
+            var workspace = Core.Resolve<IWorkspaceViewModel>();
+            TextArea.TextEntered += workspace.EditorTextEntered;
+            TextArea.TextEntering += workspace.EditorTextEntering;
+
+            if (workspace.CurrentDocument is RunbookViewModel)
+            {
+                ((RunbookViewModel)workspace.CurrentDocument).MvvmTextArea = TextArea;
+            }
             // END TODO
 
             var dir = System.IO.Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
@@ -37,6 +45,8 @@ namespace SMAStudio.Editor
                     SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
                 }
             }
+
+            workspace.CurrentDocument.DocumentLoaded();
         }
 
         public static DependencyProperty TextProperty =
@@ -83,6 +93,15 @@ namespace SMAStudio.Editor
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(info));
             }
+        }
+
+        public void Dispose()
+        {
+            // TODO: This doesn't follow the MVVM pattern and has to be changed
+            var workspace = Core.Resolve<IWorkspaceViewModel>();
+            TextArea.TextEntered -= workspace.EditorTextEntered;
+            TextArea.TextEntering -= workspace.EditorTextEntering;
+            // END TODO
         }
     }
 }

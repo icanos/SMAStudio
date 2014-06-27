@@ -41,6 +41,11 @@ namespace SMAStudio.ViewModels
             UnsavedChanges = true;
         }
 
+        public void DocumentLoaded()
+        {
+            
+        }
+
         #region Properties
         /// <summary>
         /// Gets or sets the variable model object

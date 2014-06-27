@@ -98,6 +98,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Editor\Snippets\ReplaceableSnippetElement.cs" />
     <Compile Include="Models\DocumentTemplate.cs" />
     <Compile Include="UI\Dialogs\AddNewItemDialog.xaml.cs">
       <DependentUpon>AddNewItemDialog.xaml</DependentUpon>

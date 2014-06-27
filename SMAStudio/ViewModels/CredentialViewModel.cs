@@ -45,6 +45,11 @@ namespace SMAStudio.ViewModels
                 Username = textBox.Text;*/
         }
 
+        public void DocumentLoaded()
+        {
+            
+        }
+
         #region Properties
         public Credential Credential
         {

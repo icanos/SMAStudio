@@ -46,13 +46,13 @@ namespace SMAStudio
                 return;
             }
 
-            Name = RunbookName.Text;
+            CreatedName = RunbookName.Text;
 
             DialogResult = true;
             Close();
         }
 
-        public string Name
+        public string CreatedName
         {
             get;
             set;

@@ -43,7 +43,7 @@ namespace SMAStudio.Commands
 
                 reader.Close();
 
-                _runbookService.Create(addNewItemDialog.Name, runbookContent);
+                _runbookService.Create(addNewItemDialog.CreatedName, runbookContent);
             }
         }
     }
