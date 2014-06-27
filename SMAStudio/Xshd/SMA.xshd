@@ -131,6 +131,10 @@
       [\w]+-[\w]+
     </Rule>
 
+    <Rule color="Command">
+      [\w]+-[\w]+-[\w]+
+    </Rule>
+
     <!-- Digits -->
     <Rule color="NumberLiteral">
       \b0[xX][0-9a-fA-F]+  # hex number
