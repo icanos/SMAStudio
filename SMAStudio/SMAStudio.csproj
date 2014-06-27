@@ -98,6 +98,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\DocumentTemplate.cs" />
+    <Compile Include="UI\Dialogs\AddNewItemDialog.xaml.cs">
+      <DependentUpon>AddNewItemDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Commands\GoDefinitionCommand.cs" />
     <Compile Include="Commands\RevertSpecificCommand.cs" />
     <Compile Include="Editor\Parsing\IParserService.cs" />
@@ -201,6 +205,7 @@
     <Compile Include="Util\TypeConverter.cs" />
     <Compile Include="Util\UnitTestDetector.cs" />
     <Compile Include="Util\WorkspaceTemplateSelector.cs" />
+    <Compile Include="ViewModels\AddNewItemViewModel.cs" />
     <Compile Include="ViewModels\CompareViewModel.cs" />
     <Compile Include="ViewModels\ComponentsViewModel.cs" />
     <Compile Include="ViewModels\CredentialViewModel.cs" />
@@ -219,6 +224,10 @@
     <Compile Include="UI\Dialogs\WelcomeDialog.xaml.cs">
       <DependentUpon>WelcomeDialog.xaml</DependentUpon>
     </Compile>
+    <Page Include="UI\Dialogs\AddNewItemDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UI\Dialogs\AboutDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

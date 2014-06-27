@@ -2,6 +2,7 @@
 using SMAStudio.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,7 +32,19 @@ namespace SMAStudio.Commands
 
         public void Execute(object parameter)
         {
-            _runbookService.Create();
+            var addNewItemDialog = new AddNewItemDialog();
+            addNewItemDialog.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+
+            if ((bool)addNewItemDialog.ShowDialog())
+            {
+                TextReader reader = new StreamReader(addNewItemDialog.SelectedTemplate.Path);
+                reader.ReadLine(); // Skip the first line since that contains the DESCRIPTION
+                string runbookContent = reader.ReadToEnd();
+
+                reader.Close();
+
+                _runbookService.Create(addNewItemDialog.Name, runbookContent);
+            }
         }
     }
 }

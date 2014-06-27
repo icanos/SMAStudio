@@ -23,6 +23,8 @@ namespace SMAStudio.Services
 
         bool Create();
 
+        bool Create(string runbookName, string runbookContent = "");
+
         bool Update(RunbookViewModel runbook);
 
         bool Delete(RunbookViewModel runbook);

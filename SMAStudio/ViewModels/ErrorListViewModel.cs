@@ -52,6 +52,9 @@ namespace SMAStudio.ViewModels
         /// <param name="runbookName"></param>
         public void RemoveErrorByRunbook(string runbookName)
         {
+            if (App.Current == null)
+                return;
+
             var errors = Items.Where(i => i.Runbook.Equals(runbookName, StringComparison.InvariantCultureIgnoreCase)).ToList();
 
             App.Current.Dispatcher.Invoke((Action)delegate()

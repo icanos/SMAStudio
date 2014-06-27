@@ -124,14 +124,25 @@ namespace SMAStudio.Services
 
         public bool Create()
         {
+            return Create(string.Empty);
+        }
+
+        public bool Create(string runbookName, string runbookContent = "")
+        {
             try
             {
                 var newRunbook = new RunbookViewModel
                 {
                     Runbook = new SMAWebService.Runbook(),
                     CheckedOut = true,
-                    UnsavedChanges = true
+                    UnsavedChanges = true,
                 };
+
+                // Set the name of the runbook
+                newRunbook.Runbook.RunbookName = runbookName;
+
+                // Set the runbook content as well
+                newRunbook.Content = runbookContent;
 
                 _workspaceViewModel.OpenDocument(newRunbook);
 

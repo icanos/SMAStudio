@@ -25,6 +25,7 @@ namespace SMAStudio.Editor.Parsing
 
         private Thread _thread = null;
 
+        private IComponentsViewModel _componentsViewModel;
         private IWorkspaceViewModel _workspaceViewModel;
         private IErrorListViewModel _errorListViewModel;
 
@@ -35,10 +36,15 @@ namespace SMAStudio.Editor.Parsing
 
         }
 
+        /// <summary>
+        /// Starts the parser service running in a separate thread, scanning
+        /// through it looking for runbook references or parse errors
+        /// </summary>
         public void Start()
         {
             _workspaceViewModel = Core.Resolve<IWorkspaceViewModel>();
             _errorListViewModel = Core.Resolve<IErrorListViewModel>();
+            _componentsViewModel = Core.Resolve<IComponentsViewModel>();
 
             _thread = new Thread(new ThreadStart(delegate()
             {
@@ -82,15 +88,20 @@ namespace SMAStudio.Editor.Parsing
             _thread.Start();
         }
 
+        /// <summary>
+        /// Parses a document and tokenizes it
+        /// </summary>
+        /// <param name="document">Document to work with</param>
         public void ParseCommandTokens(IDocumentViewModel document)
         {
             Token[] tokens;
             ParseError[] parseErrors;
 
-            if (_workspaceViewModel == null || _errorListViewModel == null)
+            if (_workspaceViewModel == null || _errorListViewModel == null || _componentsViewModel == null)
             {
                 _workspaceViewModel = Core.Resolve<IWorkspaceViewModel>();
                 _errorListViewModel = Core.Resolve<IErrorListViewModel>();
+                _componentsViewModel = Core.Resolve<IComponentsViewModel>();
             }
 
             Parser.ParseInput(document.Content, out tokens, out parseErrors);
@@ -105,6 +116,13 @@ namespace SMAStudio.Editor.Parsing
             }
         }
 
+        /// <summary>
+        /// Retrieves the document content of the currently active page.
+        /// Takes into account whether or not we're still typing in the textbox
+        /// and if that's the case, we wait until we're done before processing
+        /// </summary>
+        /// <param name="scriptContent">Content of the document</param>
+        /// <returns>Document</returns>
         private IDocumentViewModel GetDocument(out string scriptContent)
         {
             IDocumentViewModel document = null;
@@ -137,6 +155,12 @@ namespace SMAStudio.Editor.Parsing
             return document;
         }
 
+        /// <summary>
+        /// Loops through all tokens and look for a call to another runbook
+        /// </summary>
+        /// <param name="document">Document to work on</param>
+        /// <param name="rawTokens">List of tokens</param>
+        /// <param name="tokens">Tokens of type CommandName</param>
         private void HandleCommandTokens(IDocumentViewModel document, Token[] rawTokens, List<Token> tokens)
         {
             if (App.Current == null)
@@ -149,8 +173,11 @@ namespace SMAStudio.Editor.Parsing
 
             foreach (var token in tokens)
             {
-                if (!token.Text.Equals(START_SMARUNBOOK, StringComparison.InvariantCultureIgnoreCase))
+                if (!token.Text.Equals(START_SMARUNBOOK, StringComparison.InvariantCultureIgnoreCase) &&
+                    token.TokenFlags != TokenFlags.CommandName)
+                {
                     continue;
+                }
 
                 var tokenIndex = rawTokens.ToList().IndexOf(token);
                 var parameterName = ParseRunbookName(tokenIndex, rawTokens);
@@ -175,12 +202,34 @@ namespace SMAStudio.Editor.Parsing
             }
         }
 
+        /// <summary>
+        /// Parses the runbook name and returns it (if found)
+        /// </summary>
+        /// <param name="tokenIndex">Index in the tokenized array to start searching from</param>
+        /// <param name="tokens">List of tokens</param>
+        /// <returns>Name of the runbook</returns>
         private string ParseRunbookName(int tokenIndex, Token[] tokens)
         {
             for (int i = tokenIndex; i < tokens.Length; i++)
             {
-                if (tokens[i].Kind == TokenKind.Parameter && tokens[i].Text.Equals("-name", StringComparison.InvariantCultureIgnoreCase) && !tokens[i].HasError)
+                if ((tokens[i].Kind == TokenKind.Parameter
+                        && tokens[i].Text.Equals("-name", StringComparison.InvariantCultureIgnoreCase)
+                        && !tokens[i].HasError)
+                    || (tokens[i].Kind == TokenKind.Generic
+                        && tokens[i].TokenFlags == TokenFlags.CommandName)
+                        && !tokens[i].Text.Equals(START_SMARUNBOOK, StringComparison.InvariantCultureIgnoreCase))
                 {
+                    // A runbook can be referenced by simple calling the runbook by name and passing
+                    // the parameters along. This is like calling whatever cmdlet in PS. Therefore, if
+                    // it's a command, we need to verify if it is a runbook or not
+                    if (tokens[i].TokenFlags == TokenFlags.CommandName)
+                    {
+                        if (VerifyCommandIsRunbook(tokens[i].Text))
+                            return tokens[i].Text;
+                        else
+                            return "";
+                    }
+
                     if (tokens.Length <= (i + 1))
                         return "";
 
@@ -213,6 +262,11 @@ namespace SMAStudio.Editor.Parsing
             return "";
         }
 
+        /// <summary>
+        /// Creates a parse error in our error list
+        /// </summary>
+        /// <param name="document"></param>
+        /// <param name="parseErrors"></param>
         private void HandleParseErrors(IDocumentViewModel document, ParseError[] parseErrors)
         {
             document.Icon = Icons.ParseError;
@@ -236,6 +290,25 @@ namespace SMAStudio.Editor.Parsing
             // TODO: Colorize the error in the editor
         }
 
+        /// <summary>
+        /// Verifies that a command call is a runbook and not another command
+        /// </summary>
+        /// <param name="commandName">Name to check</param>
+        /// <returns>True if found, false if not</returns>
+        private bool VerifyCommandIsRunbook(string commandName)
+        {
+            var runbook = _componentsViewModel.Runbooks.Where(r => r.RunbookName.Equals(commandName, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+
+            if (runbook == null)
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Removes all entries by a specific runbook
+        /// </summary>
+        /// <param name="document"></param>
         private void ClearParseErrors(IDocumentViewModel document)
         {
             document.Icon = Icons.Runbook;
