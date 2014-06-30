@@ -1,4 +1,5 @@
-﻿using SMAStudio.SMAWebService;
+﻿using SMAStudio.Services;
+using SMAStudio.SMAWebService;
 using SMAStudio.Util;
 using SMAStudio.ViewModels;
 using System;
@@ -106,14 +107,12 @@ namespace SMAStudio.Commands
 
             }
 
-            var jobs = _api.Current.Jobs.Where(j => !j.JobStatus.Equals("Completed") && !j.JobStatus.Equals("Failed") && !j.JobStatus.Equals("Stopped")).ToList();
+            var runbookService = Core.Resolve<IRunbookService>();
+            Guid jobId = Guid.Empty;
 
-            foreach (var job in jobs)
+            if ((jobId = runbookService.GetSuspendedJobs(runbook.Runbook)) != Guid.Empty)
             {
-                var jobContext = _api.Current.JobContexts.Where(jc => jc.RunbookVersionID.Equals(runbook.Runbook.PublishedRunbookVersionID)).FirstOrDefault();
-
-                if (jobContext == null)
-                    continue;
+                var job = _api.Current.Jobs.Where(j => j.JobID.Equals(jobId)).First();
 
                 if (MessageBox.Show("Another job is already running for this runbook. Do you want to terminate it?", "Terminate runbook", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
