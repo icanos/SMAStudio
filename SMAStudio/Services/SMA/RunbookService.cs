@@ -53,6 +53,25 @@ namespace SMAStudio.Services
             }
         }
 
+        public IList<string> GetTags()
+        {
+            var tags = new List<string>();
+
+            foreach (var runbook in _runbookCache)
+            {
+                var splitTags = runbook.Tags.Split(',');
+                foreach (var tag in splitTags)
+                {
+                    var fixedTag = tag.Trim();
+
+                    if (!tags.Contains(fixedTag))
+                        tags.Add(fixedTag);
+                }
+            }
+
+            return tags;
+        }
+
         public ObservableCollection<RunbookViewModel> GetRunbookViewModels(bool forceDownload = false)
         {
             if (_runbookCache == null || forceDownload)
@@ -372,6 +391,22 @@ namespace SMAStudio.Services
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Returns the Guid of the job for the selected runbook that is set in Suspended mode.
+        /// </summary>
+        /// <param name="runbook"></param>
+        /// <returns></returns>
+        public Guid GetSuspendedJobs(RunbookViewModel runbook)
+        {
+            var jobContexts = _api.Current.JobContexts.Where(jc => jc.RunbookVersionID.Equals(runbook.ID)).Select(jc => jc.JobContextID).ToList();
+            var job = _api.Current.Jobs.Where(j => j.JobStatus.Equals("Suspended") && jobContexts.Contains(j.JobContextID)).FirstOrDefault();
+
+            if (job == null)
+                return Guid.Empty;
+
+            return job.JobID;
         }
 
         private void SaveNewRunbook(RunbookViewModel runbookViewModel)

@@ -85,6 +85,7 @@ namespace SMAStudio
             _container.RegisterType<ICommand, RefreshCommand>("Refresh");
             _container.RegisterType<ICommand, RevertCommand>("Revert");
             _container.RegisterType<ICommand, RunCommand>("Run");
+            _container.RegisterType<ICommand, ResumeCommand>("Resume");
             _container.RegisterType<ICommand, SaveCommand>("Save");
             _container.RegisterType<ICommand, StopCommand>("Stop");
             _container.RegisterType<ICommand, TestCommand>("Test");

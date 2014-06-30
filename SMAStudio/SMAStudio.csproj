@@ -36,6 +36,12 @@
   <PropertyGroup>
     <ApplicationIcon>settings-icon.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>SMAStudio.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="ICSharpCode.AvalonEdit">
       <HintPath>..\packages\AvalonEdit.4.4.2.9744\lib\Net40\ICSharpCode.AvalonEdit.dll</HintPath>
@@ -98,7 +104,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Editor\Snippets\ReplaceableSnippetElement.cs" />
+    <Compile Include="Commands\ResumeCommand.cs" />
     <Compile Include="Models\DocumentTemplate.cs" />
     <Compile Include="UI\Dialogs\AddNewItemDialog.xaml.cs">
       <DependentUpon>AddNewItemDialog.xaml</DependentUpon>
@@ -303,6 +309,7 @@
     </None>
     <AppDesigner Include="Properties\" />
     <None Include="Service References\SMAWebService\service.edmx" />
+    <None Include="SMAStudio.pfx" />
     <None Include="Xshd\SMA.xshd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
