@@ -51,6 +51,10 @@ namespace SMAStudio.Commands
                 DeleteVariable((VariableViewModel)parameter);
             else if (parameter is CredentialViewModel)
                 DeleteCredential((CredentialViewModel)parameter);
+
+            // Reload the left side menu as well
+            var componentsViewModel = Core.Resolve<IComponentsViewModel>();
+            componentsViewModel.Load(true /* force download */);
         }
 
         private void DeleteRunbook(RunbookViewModel runbookViewModel)
