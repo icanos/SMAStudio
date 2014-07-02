@@ -16,13 +16,22 @@ namespace SMAStudio.ViewModels
         {
             _tag = tag;
             Runbooks = new ObservableCollection<RunbookViewModel>();
+
+            if (!tag.Equals("(untagged)"))
+            IsExpanded = true;
         }
 
+        /// <summary>
+        /// Name of the tag
+        /// </summary>
         public string Name
         {
             get { return _tag; }
         }
 
+        /// <summary>
+        /// Used for databinding the UI, same as Name
+        /// </summary>
         public string Title
         {
             get { return Name; }
@@ -39,6 +48,15 @@ namespace SMAStudio.ViewModels
         public string Icon
         {
             get { return Icons.Tag; }
+        }
+
+        /// <summary>
+        /// Determines if the object is expanded or not
+        /// </summary>
+        public bool IsExpanded
+        {
+            get;
+            set;
         }
     }
 }

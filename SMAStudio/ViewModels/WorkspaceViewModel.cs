@@ -24,7 +24,6 @@ namespace SMAStudio.ViewModels
     /// </summary>
     public class WorkspaceViewModel : ObservableObject, IWorkspaceViewModel, IDisposable
     {
-        private CompletionEngine _codeCompletionEngine;
         private CompletionWindow _completionWindow;
 
         private IParserService _parserService;
@@ -41,7 +40,6 @@ namespace SMAStudio.ViewModels
 
             StatusBarText = "SMA Studio 2014";
 
-            _codeCompletionEngine = new CompletionEngine();
             //_codeCompletionEngine.Start();
         }
 
@@ -63,10 +61,22 @@ namespace SMAStudio.ViewModels
             {
                 if (!Documents.Contains(document))
                 {
+                    // If this is a newly created document and we click on it in the list
+                    // of documents, we will end up with two of the same. To prevent that,
+                    // we close the first one and use the last
+                    var foundDocument = Documents.Where(d => d.ID.Equals(document.ID)).FirstOrDefault();
+                    if (foundDocument != null)
+                        Documents.Remove(foundDocument);
+
                     Documents.Add(document);
                     base.RaisePropertyChanged("Documents");
 
                     SelectedIndex = Documents.Count - 1;
+                }
+                else
+                {
+                    // Bring the selected document to the front
+                    SelectedIndex = Documents.IndexOf(document);
                 }
             });
 
@@ -81,7 +91,7 @@ namespace SMAStudio.ViewModels
         /// <param name="e"></param>
         public void EditorTextEntered(object sender, TextCompositionEventArgs e)
         {
-            var textArea = ((TextArea)sender);
+            /*var textArea = ((TextArea)sender);
 
             if (e.Text == "-" && _codeCompletionEngine.ApprovedVerbs.Contains(_cachedText))
             {
@@ -129,7 +139,7 @@ namespace SMAStudio.ViewModels
                     _cachedText = string.Empty;
                 else
                     _cachedText += e.Text;
-            }
+            }*/
 
             _parserService.ParseCommandTokens(Documents[SelectedIndex]);
         }

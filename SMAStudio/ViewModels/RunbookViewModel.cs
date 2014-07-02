@@ -61,10 +61,10 @@ namespace SMAStudio.ViewModels
         /// <param name="e"></param>
         public void TextChanged(object sender, EventArgs e)
         {
-            if (!(sender is MvvmTextEditor))
+            if (!(sender is CodeTextEditor))
                 return;
 
-            var editor = ((MvvmTextEditor)sender);
+            var editor = ((CodeTextEditor)sender);
             if (editor.Document.Text.Equals(_content))
                 return;
 
@@ -347,6 +347,12 @@ namespace SMAStudio.ViewModels
         }
 
         public int CaretOffset
+        {
+            get;
+            set;
+        }
+
+        public bool IsExpanded
         {
             get;
             set;

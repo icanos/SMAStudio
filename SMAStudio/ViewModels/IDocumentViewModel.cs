@@ -46,6 +46,11 @@ namespace SMAStudio.ViewModels
         DateTime LastTimeKeyDown { get; set; }
 
         /// <summary>
+        /// Determines if a object is expanded or not (visually)
+        /// </summary>
+        bool IsExpanded { get; set; }
+
+        /// <summary>
         /// Event triggered when the text is updated in the document view
         /// </summary>
         /// <param name="sender"></param>

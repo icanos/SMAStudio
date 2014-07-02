@@ -39,10 +39,6 @@ namespace SMAStudio.ViewModels
                 UnsavedChanges = true;
             else if (textBox.Name.Equals("txtUsername") && !textBox.Text.Equals(Username))
                 UnsavedChanges = true;
-            /*if (textBox.Name.Equals("txtName"))
-                Name = textBox.Text;
-            else if (textBox.Name.Equals("txtUsername"))
-                Username = textBox.Text;*/
         }
 
         public void DocumentLoaded()
@@ -160,9 +156,15 @@ namespace SMAStudio.ViewModels
         }
 
         /// <summary>
-        /// Unused for variables
+        /// Unused for credentials
         /// </summary>
         public ObservableCollection<DocumentReference> References
+        {
+            get;
+            set;
+        }
+
+        public bool IsExpanded
         {
             get;
             set;

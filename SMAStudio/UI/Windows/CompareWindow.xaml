@@ -36,7 +36,7 @@
                 <TextBlock Text="Version:" Margin="5,5,5,5" />
                 <TextBlock x:Name="txtDiffLeftTitle" Text="Unknown" FontWeight="Bold" Margin="5,5,0,5" />
             </StackPanel>
-            <SmaStudioEditor:MvvmTextEditor
+            <SmaStudioEditor:CodeTextEditor
                 DockPanel.Dock="Top"
                 x:Name="txtDiffLeft"
                 ShowLineNumbers="True"
@@ -54,7 +54,7 @@
                 <TextBlock Text="Version:" Margin="5,5,5,5" />
                 <TextBlock x:Name="txtDiffRightTitle" FontWeight="Bold" Margin="5,5,0,5" />
             </StackPanel>
-            <SmaStudioEditor:MvvmTextEditor
+            <SmaStudioEditor:CodeTextEditor
                 DockPanel.Dock="Top"
                 x:Name="txtDiffRight"
                 ShowLineNumbers="True"

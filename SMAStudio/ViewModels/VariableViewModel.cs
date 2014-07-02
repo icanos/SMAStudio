@@ -34,11 +34,25 @@ namespace SMAStudio.ViewModels
             if (!(sender is TextBox))
                 return;
 
-            if (Content.Equals(((TextBox)sender).Text))
-                return;
+            TextBox textBox = (TextBox)sender;
+            bool isNameBox = textBox.Tag.Equals("Name") ? true : false;
 
-            Content = ((TextBox)sender).Text;
-            UnsavedChanges = true;
+            if (isNameBox)
+            {
+                if (!textBox.Text.Equals(Name))
+                {
+                    Name = textBox.Text;
+                    UnsavedChanges = true;
+                }
+            }
+            else
+            {
+                if (!textBox.Text.Equals(Content))
+                {
+                    Content = textBox.Text;
+                    UnsavedChanges = true;
+                }
+            }
         }
 
         public void DocumentLoaded()
@@ -139,6 +153,7 @@ namespace SMAStudio.ViewModels
                 CachedChanges = false;
 
                 base.RaisePropertyChanged("Name");
+                base.RaisePropertyChanged("Title");
             }
         }
 
@@ -182,6 +197,12 @@ namespace SMAStudio.ViewModels
         /// Unused for variables
         /// </summary>
         public ObservableCollection<DocumentReference> References
+        {
+            get;
+            set;
+        }
+
+        public bool IsExpanded
         {
             get;
             set;

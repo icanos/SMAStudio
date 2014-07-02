@@ -30,7 +30,7 @@ namespace SMAStudio.Commands
 
         public void Execute(object parameter)
         {
-            var textEditor = FindVisualChildByName<MvvmTextEditor>(MainWindow.Instance.Tabs, "textEditor");
+            var textEditor = FindVisualChildByName<CodeTextEditor>(MainWindow.Instance.Tabs, "textEditor");
 
             FindReplaceDialog findDialog = new FindReplaceDialog(textEditor);
             findDialog.Topmost = true;
