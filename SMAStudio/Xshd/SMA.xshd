@@ -77,6 +77,7 @@
       <Word>function</Word>
       <Word>workflow</Word>
       <Word>inlinescript</Word>
+      <Word>parameter</Word>
     </Keywords>
 
     <Keywords color="ExceptionKeywords">
@@ -128,13 +129,30 @@
     </Rule>
 
     <Rule color="Command">
-      [\w]+-[\w]+
-    </Rule>
-
-    <Rule color="Command">
       [\w]+-[\w]+-[\w]+
     </Rule>
 
+    <Rule color="Command">
+      [\w]+-[\w]+
+    </Rule>
+
+    <!-- Data type definitions -->
+    <Keywords color="Command">
+      <Word>string</Word>
+      <Word>int</Word>
+      <Word>boolean</Word>
+      <Word>DateTime</Word>
+      <Word>string[]</Word>
+      <Word>object</Word>
+    </Keywords>
+    
+    <!-- Namespaces (.NET) -->
+    <Rule color="Keywords">
+      \b
+      [A-Za-z.]+  # namespace string
+      (?=\s*\]\:\:) # followed by ]::
+    </Rule>
+    
     <!-- Digits -->
     <Rule color="NumberLiteral">
       \b0[xX][0-9a-fA-F]+  # hex number
