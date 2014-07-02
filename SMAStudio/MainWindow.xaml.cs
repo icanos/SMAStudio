@@ -140,7 +140,6 @@ namespace SMAStudio
                     {
                         Core.Log.DebugFormat("Detected unsaved changes in a document");
 
-                        //hasUnsavedChanges = true;
                         string message = "Save {0} \"{1}\"?";
 
                         if (document is RunbookViewModel)

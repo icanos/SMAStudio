@@ -228,6 +228,7 @@
                         <Setter Property="HorizontalContentAlignment" Value="Left" />
                         <Setter Property="Padding" Value="1,2,0,2"/>
                         <Setter Property="FocusVisualStyle" Value="{StaticResource TreeViewItemFocusVisual}"/>
+                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="{x:Type TreeViewItem}">
@@ -243,7 +244,7 @@
                                         </Grid.RowDefinitions>
                                         <ToggleButton x:Name="Expander" Style="{StaticResource ExpandCollapseToggleStyle}" ClickMode="Press" IsChecked="{Binding Path=IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"/>
                                         <Border x:Name="Bd" SnapsToDevicePixels="true" Grid.Column="1" Grid.ColumnSpan="2" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
-                                            <ContentPresenter x:Name="PART_Header" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" ContentSource="Header"/>
+                                            <ContentPresenter x:Name="PART_Header" ContentSource="Header"/>
                                         </Border>
                                         <ItemsPresenter x:Name="ItemsHost" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1"/>
                                     </Grid>
@@ -390,7 +391,7 @@
                                         <TextBlock Text="Tags" Margin="0,0,5,0" DockPanel.Dock="Left" />
                                         <TextBox x:Name="txtTags" DockPanel.Dock="Left" Text="{Binding Path=Tags}" />
                                     </DockPanel>
-                                        <SmaStudioEditor:MvvmTextEditor
+                                        <SmaStudioEditor:CodeTextEditor
                                             x:Name="textEditor"
                                             IsReadOnly="{Binding Path=CheckedIn}"
                                             FontFamily="Consolas"
@@ -404,7 +405,7 @@
                                             TextChanged="textEditor_TextChanged"
                                             DockPanel.Dock="Top"
                                             >
-                                        </SmaStudioEditor:MvvmTextEditor>
+                                        </SmaStudioEditor:CodeTextEditor>
                                     </DockPanel>
                             </DataTemplate>
                         </SmaStudioUtil:WorkspaceTemplateSelector.RunbookTemplate>
@@ -413,10 +414,10 @@
                                 <GroupBox Header="Variable Configuration">
                                     <DockPanel LastChildFill="False">
                                         <Label Content="Name" DockPanel.Dock="Top" />
-                                        <TextBox DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Name}" TextChanged="textEditor_TextChanged" />
+                                        <TextBox DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Name}" Tag="Name" TextChanged="textEditor_TextChanged" />
 
                                         <Label Content="Value" DockPanel.Dock="Top" Margin="0,5,0,0" />
-                                        <TextBox DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Content}" TextChanged="textEditor_TextChanged" />
+                                        <TextBox DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Content}" Tag="Value" TextChanged="textEditor_TextChanged" />
 
                                         <Label Content="Is Encrypted" DockPanel.Dock="Top" Margin="0,5,0,0" />
                                         <CheckBox DockPanel.Dock="Top" Margin="5,0,5,0" IsChecked="{Binding Path=IsEncrypted}" />
@@ -429,10 +430,10 @@
                                     <GroupBox Header="Credential Configuration">
                                         <DockPanel LastChildFill="False">
                                             <Label Content="Name" DockPanel.Dock="Top" />
-                                            <TextBox x:Name="txtName" DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Name}" TextChanged="textEditor_TextChanged" />
+                                            <TextBox x:Name="txtName" DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Name}" Tag="Name" TextChanged="textEditor_TextChanged" />
 
                                             <Label Content="Username" DockPanel.Dock="Top" Margin="0,5,0,0" />
-                                            <TextBox x:Name="txtUsername" DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Username}" TextChanged="textEditor_TextChanged" />
+                                            <TextBox x:Name="txtUsername" DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Username}" Tag="Username" TextChanged="textEditor_TextChanged" />
                                             
                                             <Label Content="Password" DockPanel.Dock="Top" Margin="0,5,0,0" />
                                             <PasswordBox x:Name="txtPassword" DockPanel.Dock="Top" Margin="5,0,5,0" SmaStudioUtil:PasswordBoxExtensions.BindPassword="true" SmaStudioUtil:PasswordBoxExtensions.BoundPassword="{Binding Path=Password, Mode=OneWayToSource}" />

@@ -104,7 +104,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Commands\BaseRunCommand.cs" />
     <Compile Include="Commands\ResumeCommand.cs" />
+    <Compile Include="Editor\CodeCompletion\CodeCompletionResult.cs" />
+    <Compile Include="Editor\CodeCompletion\PowershellCompletion.cs" />
     <Compile Include="Models\DocumentTemplate.cs" />
     <Compile Include="UI\Dialogs\AddNewItemDialog.xaml.cs">
       <DependentUpon>AddNewItemDialog.xaml</DependentUpon>
@@ -135,8 +138,6 @@
     <Compile Include="Commands\StopCommand.cs" />
     <Compile Include="Commands\TestCommand.cs" />
     <Compile Include="Core.cs" />
-    <Compile Include="Editor\CodeCompletion\CompletionEngine.cs" />
-    <Compile Include="Editor\CodeCompletion\CompletionSnippet.cs" />
     <Compile Include="Commands\CheckInCommand.cs" />
     <Compile Include="Commands\CheckOutCommand.cs" />
     <Compile Include="Commands\CompareCommand.cs" />
@@ -184,7 +185,7 @@
       <DependentUpon>FindReplaceDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Util\Converters.cs" />
-    <Compile Include="Editor\MvvmTextEditor.cs" />
+    <Compile Include="Editor\CodeTextEditor.cs" />
     <Compile Include="Util\ListExtension.cs" />
     <Compile Include="Util\CustomCommandInvoker.cs" />
     <Compile Include="Util\ObservableObject.cs" />
@@ -311,9 +312,9 @@
     <AppDesigner Include="Properties\" />
     <None Include="Service References\SMAWebService\service.edmx" />
     <None Include="SMAStudio.pfx" />
-    <None Include="Xshd\SMA.xshd">
+    <EmbeddedResource Include="Xshd\SMA.xshd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -391,6 +392,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icons\Resume.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Powershell\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
