@@ -1,4 +1,5 @@
-﻿using SMAStudio.SMAWebService;
+﻿using SMAStudio.Services;
+using SMAStudio.SMAWebService;
 using SMAStudio.Util;
 using SMAStudio.ViewModels;
 using System;
@@ -11,7 +12,7 @@ using System.Windows.Input;
 
 namespace SMAStudio.Commands
 {
-    public class TestCommand : ICommand
+    public class TestCommand : BaseRunCommand, ICommand
     {
         private ApiService _api;
 
@@ -71,74 +72,21 @@ namespace SMAStudio.Commands
                 Core.Log.ErrorFormat("No SaveCommand was found. This can't happen?");
             }
 
-            var window = new PrepareRunWindow(runbook);
-            window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
-
-            if (!(bool)window.ShowDialog())
+            // Check if the runbook is already running
+            if (!CheckForRunningRunbooks(runbook))
+            {
+                Core.Log.DebugFormat("User cancelled execution because of running job.");
                 return;
-
-            List<NameValuePair> parameters = null;
-
-            if (window.Inputs.Count > 0)
-            {
-                parameters = new List<NameValuePair>();
-
-                foreach (var param in window.Inputs)
-                {
-                    var nameValuePair = new NameValuePair
-                    {
-                        Name = param.Command,
-                    };
-
-                    // Parse the value to the correct data type and convert to json
-                    var value = TypeConverter.Convert(param);
-
-                    if (value == null)
-                    {
-                        MessageBox.Show(String.Format("Invalid data type for parameter '{0}'. Expected data type was: {1}", param.Name, param.TypeName), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
-
-                    nameValuePair.Value = (string)value;
-
-                    parameters.Add(nameValuePair);
-                }
             }
 
-            try
-            {
-                _api.Current.AttachTo("Runbooks", runbook.Runbook);
-                _api.Current.UpdateObject(runbook.Runbook);
-            }
-            catch (InvalidOperationException)
-            {
+            // Retrieve any parameters and their input values from the user
+            var parameters = GetUserParameters(runbook);
 
-            }
-
-            var jobs = _api.Current.Jobs.Where(j => !j.JobStatus.Equals("Completed") && !j.JobStatus.Equals("Failed") && !j.JobStatus.Equals("Stopped")).ToList();
-
-            foreach (var job in jobs)
-            {
-                var jobContext = _api.Current.JobContexts.Where(jc => jc.RunbookVersionID.Equals(runbook.Runbook.DraftRunbookVersionID)).FirstOrDefault();
-
-                if (jobContext == null)
-                    continue;
-
-                if (MessageBox.Show("Another job is already running for this runbook. Do you want to terminate it?", "Terminate runbook", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-                {
-                    job.Stop(_api.Current);
-                    MessageBox.Show("Stop job request has been sent. Please wait a few seconds before starting it again.", "Stop job");
-                    return;
-                }
-            }
-            
             Guid? jobGuid = new Guid?(runbook.Runbook.TestRunbook(_api.Current, parameters));
             runbook.JobID = (Guid)jobGuid;
-            
-            var executionWindow = new ExecutionWindow(runbook);
-            executionWindow.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
 
-            executionWindow.Show();
+            // Display execution progress
+            DisplayExecutionProgress(runbook, parameters);
         }
     }
 }

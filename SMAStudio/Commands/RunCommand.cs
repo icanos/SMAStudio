@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace SMAStudio.Commands
 {
-    public class RunCommand : ICommand
+    public class RunCommand : BaseRunCommand, ICommand
     {
         private ApiService _api;
 
@@ -54,48 +54,11 @@ namespace SMAStudio.Commands
                 return;
 
             RunbookViewModel runbook = null;
-            /*if (!(parameter is RunbookViewModel))
-                return;
 
-            var runbook = (RunbookViewModel)parameter;*/
             if (parameter is RunbookViewModel)
                 runbook = (RunbookViewModel)parameter;
             else if (parameter is ExecutionViewModel)
                 runbook = ((ExecutionViewModel)parameter).Runbook;
-
-            var window = new PrepareRunWindow(runbook);
-            window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
-
-            if (!(bool)window.ShowDialog())
-                return;
-
-            List<NameValuePair> parameters = null;
-
-            if (window.Inputs.Count > 0)
-            {
-                parameters = new List<NameValuePair>();
-
-                foreach (var param in window.Inputs)
-                {
-                    var nameValuePair = new NameValuePair
-                        {
-                            Name = param.Command,
-                        };
-
-                    // Parse the value to the correct data type and convert to json
-                    var value = TypeConverter.Convert(param);
-
-                    if (value == null)
-                    {
-                        MessageBox.Show(String.Format("Invalid data type for parameter '{0}'. Expected data type was: {1}", param.Name, param.TypeName), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
-
-                    nameValuePair.Value = (string)value;
-
-                    parameters.Add(nameValuePair);
-                }
-            }
 
             try
             {
@@ -107,28 +70,21 @@ namespace SMAStudio.Commands
 
             }
 
-            var runbookService = Core.Resolve<IRunbookService>();
-            Guid jobId = Guid.Empty;
-
-            if ((jobId = runbookService.GetSuspendedJobs(runbook.Runbook)) != Guid.Empty)
+            // Check if the runbook is already running
+            if (!CheckForRunningRunbooks(runbook))
             {
-                var job = _api.Current.Jobs.Where(j => j.JobID.Equals(jobId)).First();
-
-                if (MessageBox.Show("Another job is already running for this runbook. Do you want to terminate it?", "Terminate runbook", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-                {
-                    job.Stop(_api.Current);
-                    MessageBox.Show("Stop job request has been sent. Please wait a few seconds before starting it again.", "Stop job");
-                    return;
-                }
+                Core.Log.DebugFormat("User cancelled execution because of running job.");
+                return;
             }
+
+            // Retrieve any parameters and their input values from the user
+            var parameters = GetUserParameters(runbook);
 
             Guid? jobGuid = new Guid?(runbook.Runbook.StartRunbook(_api.Current, parameters));
             runbook.JobID = (Guid)jobGuid;
-            
-            var executionWindow = new ExecutionWindow(runbook);
-            executionWindow.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
 
-            executionWindow.Show();
+            // Display execution progress
+            DisplayExecutionProgress(runbook, parameters);
         }
     }
 }
