@@ -25,6 +25,12 @@ namespace SMAStudio.Services
         IList<string> GetTags();
 
         /// <summary>
+        /// Retrieves a collection of TagViewModels used for the UI
+        /// </summary>
+        /// <returns></returns>
+        ObservableCollection<TagViewModel> GetTagViewModels();
+
+        /// <summary>
         /// Creates View Models of each runbook downloaded from the SMA webservice. Will download the runbooks
         /// if it hasn't been done yet.
         /// </summary>
@@ -101,6 +107,6 @@ namespace SMAStudio.Services
         /// </summary>
         /// <param name="runbook">Runbook to get suspended jobs from</param>
         /// <returns>ID of the job</returns>
-        Guid GetSuspendedJobs(RunbookViewModel runbook);
+        Guid GetSuspendedJobs(Runbook runbook);
     }
 }

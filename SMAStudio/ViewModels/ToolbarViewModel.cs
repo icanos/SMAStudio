@@ -36,6 +36,11 @@ namespace SMAStudio.ViewModels
             get { return Core.Resolve<ICommand>("Run"); }
         }
 
+        public ICommand ResumeCommand
+        {
+            get { return Core.Resolve<ICommand>("Resume"); }
+        }
+
         public ICommand StopCommand
         {
             get { return Core.Resolve<ICommand>("Stop"); }

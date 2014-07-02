@@ -168,7 +168,8 @@ namespace SMAStudio.Editor.Parsing
 
             App.Current.Dispatcher.Invoke(delegate()
             {
-                document.References.Clear();
+                if (document is RunbookViewModel)
+                    document.References.Clear();
             });
 
             foreach (var token in tokens)

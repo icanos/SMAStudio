@@ -12,5 +12,6 @@ namespace SMAStudio.Resources
         public const string ParseError = "Icons/error.png";
         public const string Variable = "Icons/_Resources.png";
         public const string Credential = "Icons/_Keyword.png";
+        public const string Tag = "Icons/_Folder.png";
     }
 }

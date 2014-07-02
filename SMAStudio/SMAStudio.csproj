@@ -115,9 +115,9 @@
     <Compile Include="Models\DocumentReference.cs" />
     <Compile Include="Services\IApiService.cs" />
     <Compile Include="Services\IAutoSaveService.cs" />
-    <Compile Include="Services\ICredentialService.cs" />
-    <Compile Include="Services\IRunbookService.cs" />
-    <Compile Include="Services\IVariableService.cs" />
+    <Compile Include="Services\SMA\ICredentialService.cs" />
+    <Compile Include="Services\SMA\IRunbookService.cs" />
+    <Compile Include="Services\SMA\IVariableService.cs" />
     <Compile Include="UI\Dialogs\AboutDialog.xaml.cs">
       <DependentUpon>AboutDialog.xaml</DependentUpon>
     </Compile>
@@ -164,9 +164,9 @@
     <Compile Include="Services\AutoSaveService.cs" />
     <Compile Include="Services\AsyncService.cs" />
     <Compile Include="Services\BaseService.cs" />
-    <Compile Include="Services\CredentialService.cs" />
-    <Compile Include="Services\RunbookService.cs" />
-    <Compile Include="Services\VariableService.cs" />
+    <Compile Include="Services\SMA\CredentialService.cs" />
+    <Compile Include="Services\SMA\RunbookService.cs" />
+    <Compile Include="Services\SMA\VariableService.cs" />
     <Compile Include="UI\Windows\ExecutionWindow.xaml.cs">
       <DependentUpon>ExecutionWindow.xaml</DependentUpon>
     </Compile>
@@ -225,6 +225,7 @@
     <Compile Include="ViewModels\IWorkspaceViewModel.cs" />
     <Compile Include="ViewModels\RunbookVersionViewModel.cs" />
     <Compile Include="ViewModels\RunbookViewModel.cs" />
+    <Compile Include="ViewModels\TagViewModel.cs" />
     <Compile Include="ViewModels\ToolbarViewModel.cs" />
     <Compile Include="ViewModels\VariableViewModel.cs" />
     <Compile Include="ViewModels\WorkspaceViewModel.cs" />
@@ -388,7 +389,9 @@
   <ItemGroup>
     <Resource Include="Icons\link.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Icons\Resume.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -146,6 +146,12 @@
                         <TextBlock Margin="5,0,0,0">Run</TextBlock>
                     </StackPanel>
                 </Button>
+                <Button x:Name="btnResume" Command="{Binding ResumeCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="Icons/Resume.png" Width="16" />
+                        <TextBlock Margin="5,0,0,0">Resume</TextBlock>
+                    </StackPanel>
+                </Button>
                 <Button x:Name="btnStop" Command="{Binding StopCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="Icons/_Stop.png" Width="16" />
@@ -275,8 +281,22 @@
                             <TextBlock Foreground="#eeeeee" Text="{Binding}" />
                         </StackPanel>
                     </DataTemplate>
+
+                    <HierarchicalDataTemplate x:Key="RunbookItem" DataType="{x:Type SmaStudioVm:RunbookViewModel}" ItemTemplate="{StaticResource ReferenceItem}" ItemsSource="{Binding Path=References}">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{Binding Path=Icon}" Width="16" Height="16" SnapsToDevicePixels="True" Margin="0,0,5,0"/>
+                            <TextBlock Foreground="#eeeeee" Text="{Binding Path=Title}" />
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
+
+                    <HierarchicalDataTemplate DataType="{x:Type SmaStudioVm:TagViewModel}" ItemTemplate="{StaticResource RunbookItem}" ItemsSource="{Binding Path=Runbooks}">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{Binding Path=Icon}" Width="16" Height="16" SnapsToDevicePixels="True" Margin="0,0,5,0"/>
+                            <TextBlock Text="{Binding Path=Title}" Foreground="#eeeeee" />
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
                 </TreeView.Resources>
-                <TreeViewItem Header="Runbooks" ItemsSource="{Binding Runbooks}" Foreground="#eeeeee">
+                <TreeViewItem Header="Runbooks" ItemsSource="{Binding Tags}" Foreground="#eeeeee">
                     <TreeViewItem.HeaderTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -285,14 +305,6 @@
                             </StackPanel>
                         </DataTemplate>
                     </TreeViewItem.HeaderTemplate>
-                    <TreeViewItem.ItemTemplate>
-                        <HierarchicalDataTemplate ItemTemplate="{StaticResource ReferenceItem}" ItemsSource="{Binding Path=References}">
-                            <StackPanel Orientation="Horizontal">
-                                <Image Source="{Binding Path=Icon}" Width="16" Height="16" SnapsToDevicePixels="True" Margin="0,0,5,0"/>
-                                <TextBlock Text="{Binding Path=Title}" Foreground="#eeeeee" />
-                            </StackPanel>
-                        </HierarchicalDataTemplate>
-                    </TreeViewItem.ItemTemplate>
                 </TreeViewItem>
                 <TreeViewItem Header="Credentials" ItemsSource="{Binding Credentials}" Foreground="#eeeeee">
                     <TreeViewItem.HeaderTemplate>

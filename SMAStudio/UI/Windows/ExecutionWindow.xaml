@@ -21,6 +21,12 @@
                     </StackPanel>
                 </Button>
                 <Separator />
+                <Button x:Name="btnResume" Command="{Binding ResumeCommand}" CommandParameter="{Binding}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="../../Icons/Resume.png" Width="16" />
+                        <TextBlock Margin="5,0,0,0">Resume</TextBlock>
+                    </StackPanel>
+                </Button>
                 <Button x:Name="btnStop" Command="{Binding StopCommand}" CommandParameter="{Binding}">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="../../Icons/_Stop.png" Width="16" />

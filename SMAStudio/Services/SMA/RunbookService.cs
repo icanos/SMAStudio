@@ -22,10 +22,15 @@ namespace SMAStudio.Services
     {
         private IApiService _api;
         private IList<Runbook> _runbookCache = null;
+        private IList<string> _tagCache = null;
         private ObservableCollection<RunbookViewModel> _runbookViewModelCache = null;
+        private ObservableCollection<TagViewModel> _tagViewModelCache = null;
 
         private IWorkspaceViewModel _workspaceViewModel;
         private IComponentsViewModel _componentsViewModel;
+
+        private DateTime _lastCheckedSuspendedJobs = DateTime.MinValue;
+        private Guid _lastSuspendedJobID = Guid.Empty;
 
         public RunbookService()
         {
@@ -55,21 +60,69 @@ namespace SMAStudio.Services
 
         public IList<string> GetTags()
         {
-            var tags = new List<string>();
+            if (_tagCache == null)
+                _tagCache = new List<string>();
+            else
+                _tagCache.Clear();
 
             foreach (var runbook in _runbookCache)
             {
+                if (runbook.Tags == null)
+                    continue;
+
                 var splitTags = runbook.Tags.Split(',');
                 foreach (var tag in splitTags)
                 {
                     var fixedTag = tag.Trim();
 
-                    if (!tags.Contains(fixedTag))
-                        tags.Add(fixedTag);
+                    if (!_tagCache.Contains(fixedTag))
+                        _tagCache.Add(fixedTag);
                 }
             }
 
-            return tags;
+            _tagCache = _tagCache.OrderBy(t => t).ToList();
+
+            return _tagCache;
+        }
+
+        public ObservableCollection<TagViewModel> GetTagViewModels()
+        {
+            //var list = new ObservableCollection<TagViewModel>();
+            if (_tagViewModelCache == null)
+                _tagViewModelCache = new ObservableCollection<TagViewModel>();
+
+            GetTags();
+
+            AsyncService.ExecuteOnUIThread(delegate()
+            {
+                _tagViewModelCache.Clear();
+            });
+
+            TagViewModel tagViewModel = null;
+
+            foreach (var tag in _tagCache)
+            {
+                tagViewModel = new TagViewModel(tag);
+                tagViewModel.Runbooks = 
+                    _runbookViewModelCache.Where(r => r.Tags != null && r.Tags.Contains(tag))
+                        .ToObservableCollection();
+
+                AsyncService.ExecuteOnUIThread(delegate()
+                {
+                    _tagViewModelCache.Add(tagViewModel);
+                });
+            }
+
+            // Last but not least, we take all non tagged runbooks and put them in an (untagged) folder
+            tagViewModel = new TagViewModel("(untagged)");
+            tagViewModel.Runbooks = _runbookViewModelCache.Where(r => r.Tags == null).ToObservableCollection();
+
+            AsyncService.ExecuteOnUIThread(delegate()
+            {
+                _tagViewModelCache.Add(tagViewModel);
+            });
+
+            return _tagViewModelCache;
         }
 
         public ObservableCollection<RunbookViewModel> GetRunbookViewModels(bool forceDownload = false)
@@ -177,15 +230,18 @@ namespace SMAStudio.Services
 
         public bool Update(RunbookViewModel rb)
         {
-            if (String.IsNullOrEmpty(rb.RunbookName))
+            if (String.IsNullOrEmpty(rb.RunbookName) || rb.ID == Guid.Empty)
             {
-                var window = new NewRunbookDialog();
-                window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                window.Topmost = true;
-                if (!(bool)window.ShowDialog())
+                if (String.IsNullOrEmpty(rb.RunbookName))
                 {
-                    // The user canceled the save
-                    return false;
+                    var window = new NewRunbookDialog();
+                    window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                    window.Topmost = true;
+                    if (!(bool)window.ShowDialog())
+                    {
+                        // The user canceled the save
+                        return false;
+                    }
                 }
 
                 SaveNewRunbook(rb);
@@ -398,15 +454,31 @@ namespace SMAStudio.Services
         /// </summary>
         /// <param name="runbook"></param>
         /// <returns></returns>
-        public Guid GetSuspendedJobs(RunbookViewModel runbook)
+        public Guid GetSuspendedJobs(Runbook runbook)
         {
-            var jobContexts = _api.Current.JobContexts.Where(jc => jc.RunbookVersionID.Equals(runbook.ID)).Select(jc => jc.JobContextID).ToList();
-            var job = _api.Current.Jobs.Where(j => j.JobStatus.Equals("Suspended") && jobContexts.Contains(j.JobContextID)).FirstOrDefault();
+            // Use the cached value and only check towards the webservice every two minutes.
+            // If we are within the two minute interval, use the last known value.
+            if ((DateTime.Now - _lastCheckedSuspendedJobs).TotalMinutes < 2)
+                return _lastSuspendedJobID;
 
-            if (job == null)
-                return Guid.Empty;
+            _lastCheckedSuspendedJobs = DateTime.Now;
 
-            return job.JobID;
+            var jobContexts = _api.Current.JobContexts.Where(jc => jc.RunbookVersionID.Equals(runbook.DraftRunbookVersionID) || jc.RunbookVersionID.Equals(runbook.PublishedRunbookVersionID)).ToList();
+
+            var jobs = _api.Current.Jobs.Where(j => j.JobStatus.Equals("Suspended")).ToList();
+            foreach (var context in jobContexts)
+            {
+                var job = jobs.Where(j => j.JobContextID.Equals(context.JobContextID)).FirstOrDefault();
+                
+                if (job != null)
+                {
+                    _lastSuspendedJobID = job.JobID;
+                    return job.JobID;
+                }
+            }
+
+            _lastSuspendedJobID = Guid.Empty;
+            return Guid.Empty;
         }
 
         private void SaveNewRunbook(RunbookViewModel runbookViewModel)

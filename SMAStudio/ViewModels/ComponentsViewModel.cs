@@ -60,9 +60,12 @@ namespace SMAStudio.ViewModels
             {
                 Core.Log.DebugFormat("Loading runbooks...");
 
-                // Load the runbooks
+                // Load the runbooks and runbook tags
                 Runbooks = _runbookService.GetRunbookViewModels(forceDownload);
+                Tags = _runbookService.GetTagViewModels();
+
                 base.RaisePropertyChanged("Runbooks");
+                base.RaisePropertyChanged("Tags");
 
                 // After the runbooks has been loaded, we can scan through each
                 // runbook and load the different versions of it.
@@ -167,6 +170,8 @@ namespace SMAStudio.ViewModels
         public ObservableCollection<VariableViewModel> Variables { get; set; }
 
         public ObservableCollection<CredentialViewModel> Credentials { get; set; }
+
+        public ObservableCollection<TagViewModel> Tags { get; set; }
 
         public ICommand LoadCommand
         {

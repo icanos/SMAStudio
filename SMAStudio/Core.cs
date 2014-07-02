@@ -144,7 +144,7 @@ namespace SMAStudio
 
         public static string Version
         {
-            get { return "0.2.0"; }
+            get { return "0.2.1"; }
         }
     }
 }

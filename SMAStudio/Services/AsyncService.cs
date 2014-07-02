@@ -31,6 +31,18 @@ namespace SMAStudio.Services
             thread.Start();
         }
 
+        /// <summary>
+        /// Executes a chunk of code on the UI thread
+        /// </summary>
+        /// <param name="action"></param>
+        public static void ExecuteOnUIThread(Action action)
+        {
+            if (App.Current == null)
+                return;
+
+            App.Current.Dispatcher.Invoke(action);
+        }
+
         public static void Clean()
         {
             var deadThreads = new List<Thread>();

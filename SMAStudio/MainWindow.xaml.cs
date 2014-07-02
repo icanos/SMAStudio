@@ -179,13 +179,15 @@ namespace SMAStudio
         private void OnPreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             TreeViewItem treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
-            treeViewItem.Focus();
 
-            if (!(treeViewItem.Header is RunbookViewModel))
-                return;
+            if (treeViewItem != null)
+                treeViewItem.Focus();            
 
             if (treeViewItem != null)
             {
+                if (!(treeViewItem.Header is RunbookViewModel))
+                    return;
+
                 SelectedItem = treeViewItem.Header;
 
                 var runbook = (RunbookViewModel)SelectedItem;
@@ -255,28 +257,6 @@ namespace SMAStudio
 
             documentViewModel.LastTimeKeyDown = DateTime.Now;
         }
-
-        /*/// <summary>
-        /// Called when the MvvmTextEditor content changes, in order for code completion to work correctly
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        public void TextEntered(object sender, TextCompositionEventArgs e)
-        {
-            var workspace = (WorkspaceViewModel)DataContext;
-            workspace.EditorTextEntered(sender, e);
-        }
-
-        /// <summary>
-        /// Called when the MvvmTextEditor content changes, in order for code completion to work correctly
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        public void TextEntering(object sender, TextCompositionEventArgs e)
-        {
-            var workspace = (WorkspaceViewModel)DataContext;
-            workspace.EditorTextEntering(sender, e);
-        }*/
 
         private void FindReplaceClicked(object sender, RoutedEventArgs e)
         {
