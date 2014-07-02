@@ -88,6 +88,9 @@ namespace SMAStudio.Services
 
                 _workspaceViewModel.OpenDocument(newCredential);
 
+                // Reload the data from SMA
+                _componentsViewModel.Load(true /* force download */);
+
                 return true;
             }
             catch (Exception ex)

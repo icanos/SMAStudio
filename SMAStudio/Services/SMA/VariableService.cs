@@ -90,6 +90,9 @@ namespace SMAStudio.Services
 
                 _workspaceViewModel.OpenDocument(newVariable);
 
+                // Reload the data from SMA
+                _componentsViewModel.Load(true /* force download */);
+
                 return true;
             }
             catch (Exception ex)

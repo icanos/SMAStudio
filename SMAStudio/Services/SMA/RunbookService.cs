@@ -514,6 +514,8 @@ namespace SMAStudio.Services
             catch (Exception e)
             {
                 Core.Log.Error("Unable to verify the saved runbook.", e);
+                MessageBox.Show("Sorry, we were unable to save your runbook. Please refer to the log for more information.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
 
             if (ed != null && ed.EditLink != null)
@@ -560,6 +562,9 @@ namespace SMAStudio.Services
 
             if (!_componentsViewModel.Runbooks.Contains(runbookViewModel))
                 _componentsViewModel.AddRunbook(runbookViewModel);
+
+            // Reload all runbooks since we have saved a new one
+            _componentsViewModel.Load(true /* force download */);
         }
     }
 }
