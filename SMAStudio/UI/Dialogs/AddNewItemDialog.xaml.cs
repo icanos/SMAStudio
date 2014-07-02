@@ -62,5 +62,14 @@ namespace SMAStudio
         {
             get { return (DocumentTemplate)TemplateList.SelectedItem; }
         }
+
+        private void RunbookName_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                // Submit as if we clicked 'Add'
+                Submit_Click(sender, new RoutedEventArgs());
+            }
+        }
     }
 }
