@@ -144,10 +144,17 @@ namespace SMAStudio.Util
                     if (document is VariableViewModel)
                         prefix = "var";
 
-                    TextWriter tw = new StreamWriter(Path.Combine(AppHelper.StartupPath, "cache", prefix + "_" + document.ID.ToString()), false);
-                    tw.Write(document.Content);
-                    tw.Flush();
-                    tw.Close();
+                    try
+                    {
+                        TextWriter tw = new StreamWriter(Path.Combine(AppHelper.StartupPath, "cache", prefix + "_" + document.ID.ToString()), false);
+                        tw.Write(document.Content);
+                        tw.Flush();
+                        tw.Close();
+                    }
+                    catch (IOException e)
+                    {
+                        Core.Log.Error("Unable to access cache file for " + document.ID, e);
+                    }
 
                     document.CachedChanges = true;
                 }

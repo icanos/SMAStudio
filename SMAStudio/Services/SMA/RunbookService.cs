@@ -463,18 +463,25 @@ namespace SMAStudio.Services
 
             _lastCheckedSuspendedJobs = DateTime.Now;
 
-            var jobContexts = _api.Current.JobContexts.Where(jc => jc.RunbookVersionID.Equals(runbook.DraftRunbookVersionID) || jc.RunbookVersionID.Equals(runbook.PublishedRunbookVersionID)).ToList();
-
-            var jobs = _api.Current.Jobs.Where(j => j.JobStatus.Equals("Suspended")).ToList();
-            foreach (var context in jobContexts)
+            try
             {
-                var job = jobs.Where(j => j.JobContextID.Equals(context.JobContextID)).FirstOrDefault();
-                
-                if (job != null)
+                var jobContexts = _api.Current.JobContexts.Where(jc => jc.RunbookVersionID.Equals(runbook.DraftRunbookVersionID) || jc.RunbookVersionID.Equals(runbook.PublishedRunbookVersionID)).ToList();
+
+                var jobs = _api.Current.Jobs.Where(j => j.JobStatus.Equals("Suspended")).ToList();
+                foreach (var context in jobContexts)
                 {
-                    _lastSuspendedJobID = job.JobID;
-                    return job.JobID;
+                    var job = jobs.Where(j => j.JobContextID.Equals(context.JobContextID)).FirstOrDefault();
+
+                    if (job != null)
+                    {
+                        _lastSuspendedJobID = job.JobID;
+                        return job.JobID;
+                    }
                 }
+            }
+            catch (DataServiceTransportException e)
+            {
+                Core.Log.Error("Unable to connect to the SMA webservice. Network connectivity lost?", e);
             }
 
             _lastSuspendedJobID = Guid.Empty;

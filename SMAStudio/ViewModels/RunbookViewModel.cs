@@ -99,6 +99,7 @@ namespace SMAStudio.ViewModels
 
                 Content = reader.ReadToEnd();
                 _content = Content;
+                _lastFetched = DateTime.Now;
 
                 reader.Close();
             }
@@ -111,6 +112,7 @@ namespace SMAStudio.ViewModels
                 {
                     Content = GetContent(forceDownload, true);
                     _content = Content;
+                    _lastFetched = DateTime.Now;
                 }
             }
 

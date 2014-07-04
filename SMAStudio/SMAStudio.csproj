@@ -104,11 +104,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Editor\CodeCompletion\DataItems\CmdletCompletionData.cs" />
     <Compile Include="Commands\BaseRunCommand.cs" />
     <Compile Include="Commands\ResumeCommand.cs" />
     <Compile Include="Editor\CodeCompletion\CodeCompletionResult.cs" />
+    <Compile Include="Editor\CodeCompletion\DataItems\CompletionData.cs" />
+    <Compile Include="Editor\CodeCompletion\DataItems\ParameterCompletionData.cs" />
+    <Compile Include="Editor\CodeCompletion\DataItems\RunbookCompletionData.cs" />
+    <Compile Include="Editor\CodeCompletion\DataItems\VariableCompletionData.cs" />
     <Compile Include="Editor\CodeCompletion\PowershellCompletion.cs" />
+    <Compile Include="Editor\CodeCompletion\PowershellCompletionEngine.cs" />
     <Compile Include="Models\DocumentTemplate.cs" />
+    <Compile Include="Models\IProjectContent.cs" />
+    <Compile Include="Models\PowershellProjectContent.cs" />
     <Compile Include="UI\Dialogs\AddNewItemDialog.xaml.cs">
       <DependentUpon>AddNewItemDialog.xaml</DependentUpon>
     </Compile>
@@ -393,9 +401,7 @@
   <ItemGroup>
     <Resource Include="Icons\Resume.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Powershell\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

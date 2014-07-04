@@ -76,7 +76,7 @@ namespace SMAStudio.Editor
         {
             if (e.Text.Length > 0 && _completionWindow != null)
             {
-                if (!char.IsLetterOrDigit(e.Text[0]))
+                if (!char.IsLetterOrDigit(e.Text[0]) && e.Text[0] != '-')
                 {
                     // Whenever a non-letter is typed while the completion window is open,
                     // insert the currently selected element.
@@ -110,7 +110,7 @@ namespace SMAStudio.Editor
                 {
                     int offset = 0;
                     var doc = GetCompletionDocument(out offset);
-                    //results = Completion.GetCompletions(doc, offset, controlSpace);
+                    results = Completion.GetCompletions(doc, offset, controlSpace, null);
                 }
                 catch (Exception e)
                 {
@@ -120,10 +120,11 @@ namespace SMAStudio.Editor
                 if (results == null)
                     return;
 
-                /*if (_completionWindow == null && results != null && results.CompletionData.Any())
+                if (_completionWindow == null && results != null && results.CompletionData.Any())
                 {
                     _completionWindow = new CompletionWindow(TextArea);
-                    _completionWindow.CloseWhenCaretAtBeginning = controlSpace;
+                    _completionWindow.CloseWhenCaretAtBeginning = true;
+                    _completionWindow.MinWidth = 260;
                     _completionWindow.StartOffset -= results.TriggerWordLength;
 
                     IList<ICompletionData> data = _completionWindow.CompletionList.CompletionData;
@@ -139,7 +140,7 @@ namespace SMAStudio.Editor
 
                     _completionWindow.Show();
                     _completionWindow.Closed += (o, args) => _completionWindow = null;
-                }*/
+                }
             }
         }
 
