@@ -37,7 +37,15 @@ namespace SMAStudio.Util
 
             //_api = new OrchestratorApi(new Uri(ConfigurationManager.AppSettings["SMAApiUrl"]));
             _api = new OrchestratorApi(new Uri(SettingsManager.Current.Settings.SmaWebServiceUrl));
-            ((DataServiceContext)_api).Credentials = CredentialCache.DefaultCredentials;
+
+            if (SettingsManager.Current.Settings.Impersonate)
+            {
+                ((DataServiceContext)_api).Credentials = CredentialCache.DefaultCredentials;
+            }
+            else
+            {
+                ((DataServiceContext)_api).Credentials = new NetworkCredential(SettingsManager.Current.Settings.UserName, SettingsManager.Current.Settings.GetPassword(), SettingsManager.Current.Settings.Domain);
+            }
         }
 
         /// <summary>

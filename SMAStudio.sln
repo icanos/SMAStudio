@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30324.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SMAStudio", "SMAStudio\SMAStudio.csproj", "{DF860935-27F5-42C9-9332-AF5C89EA03F6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodedUITest.SMAStudio", "CodedUITest.SMAStudio\CodedUITest.SMAStudio.csproj", "{5ABC257D-12AE-405D-9A38-EC2F7A65D4FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +15,6 @@ Global
 		{DF860935-27F5-42C9-9332-AF5C89EA03F6}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{DF860935-27F5-42C9-9332-AF5C89EA03F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF860935-27F5-42C9-9332-AF5C89EA03F6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5ABC257D-12AE-405D-9A38-EC2F7A65D4FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5ABC257D-12AE-405D-9A38-EC2F7A65D4FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5ABC257D-12AE-405D-9A38-EC2F7A65D4FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5ABC257D-12AE-405D-9A38-EC2F7A65D4FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -66,6 +66,7 @@ namespace SMAStudio
             if (!apiService.TestConnectivity())
             {
                 MessageBox.Show("Invalid Service Management Automation URL and/or credentials. Please verify connectivity and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                ConfigureSettingsManager(true);
                 Close();
                 return;
             }
@@ -98,18 +99,32 @@ namespace SMAStudio
             _autoSaveManager.Start();
         }
 
-        private bool ConfigureSettingsManager()
+        private bool ConfigureSettingsManager(bool Force = false)
         {
-            if (!SettingsManager.Current.Settings.IsConfigured)
+            if (Force)
             {
-                Core.Log.InfoFormat("No settings.xml has been configured. Running first time wizard.");
-
+                Core.Log.InfoFormat("Reconfigure settings.xml. Run wizard.");
                 var window = new WelcomeDialog();
                 window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
                 if (!(bool)window.ShowDialog())
                 {
                     Core.Log.InfoFormat("User cancelled out of Welcome Wizard");
                     return false;
+                }
+            }
+            else
+            {
+                if (!SettingsManager.Current.Settings.IsConfigured)
+                {
+                    Core.Log.InfoFormat("No settings.xml has been configured. Running first time wizard.");
+
+                    var window = new WelcomeDialog();
+                    window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+                    if (!(bool)window.ShowDialog())
+                    {
+                        Core.Log.InfoFormat("User cancelled out of Welcome Wizard");
+                        return false;
+                    }
                 }
             }
 

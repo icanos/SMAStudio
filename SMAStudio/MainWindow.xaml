@@ -102,7 +102,7 @@
                 <Separator />
                 <MenuItem Header="Save" Command="{Binding SaveCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}" />
                 <!--<MenuItem Header="Save As" />-->
-                <Separator />
+                <Separator />                
                 <MenuItem Header="Exit" Command="{Binding ExitCommand}" />
             </MenuItem>
             <MenuItem Header="Edit">
