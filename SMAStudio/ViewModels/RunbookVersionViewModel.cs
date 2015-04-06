@@ -39,7 +39,14 @@ namespace SMAStudio.ViewModels
             Core.Log.DebugFormat("Downloading runbook version content from SMA");
 
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(Uri.AbsoluteUri + "/$value");
-            request.Credentials = CredentialCache.DefaultCredentials;
+            if (SettingsManager.Current.Settings.Impersonate)
+            {
+                request.Credentials = CredentialCache.DefaultCredentials;
+            }
+            else
+            {
+                request.Credentials = new NetworkCredential(SettingsManager.Current.Settings.UserName, SettingsManager.Current.Settings.GetPassword(), SettingsManager.Current.Settings.Domain);
+            }
 
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
             TextReader reader = new StreamReader(response.GetResponseStream());

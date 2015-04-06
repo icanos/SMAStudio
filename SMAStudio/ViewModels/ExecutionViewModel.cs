@@ -184,7 +184,14 @@ namespace SMAStudio.ViewModels
             string url = SettingsManager.Current.Settings.SmaWebServiceUrl + "/Jobs(guid'" + jobGuid + "')";
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.Credentials = CredentialCache.DefaultCredentials;
+            if (SettingsManager.Current.Settings.Impersonate)
+            {
+                request.Credentials = CredentialCache.DefaultCredentials;
+            }
+            else
+            {
+                request.Credentials = new NetworkCredential(SettingsManager.Current.Settings.UserName, SettingsManager.Current.Settings.GetPassword(), SettingsManager.Current.Settings.Domain);
+            }
             HttpWebResponse response = null;
 
             try
@@ -272,7 +279,14 @@ namespace SMAStudio.ViewModels
             }
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(jobStreamUrl + "?" + queryString);
-            request.Credentials = CredentialCache.DefaultCredentials;
+            if (SettingsManager.Current.Settings.Impersonate)
+            {
+                request.Credentials = CredentialCache.DefaultCredentials;
+            }
+            else
+            {
+                request.Credentials = new NetworkCredential(SettingsManager.Current.Settings.UserName, SettingsManager.Current.Settings.GetPassword(), SettingsManager.Current.Settings.Domain);
+            }
             HttpWebResponse response = null;
 
             try

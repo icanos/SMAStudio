@@ -406,7 +406,15 @@ namespace SMAStudio.Services
             // First, we need to download the published code and then republish it as a draft
             // Retrieve the raw content of the runbook
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(SettingsManager.Current.Settings.SmaWebServiceUrl + "/Runbooks(guid'" + runbook.RunbookID + "')/PublishedRunbookVersion/$value");
-            request.Credentials = CredentialCache.DefaultCredentials;
+
+            if (SettingsManager.Current.Settings.Impersonate)
+            {
+                request.Credentials = CredentialCache.DefaultCredentials;
+            }
+            else
+            {
+                request.Credentials = new NetworkCredential(SettingsManager.Current.Settings.UserName, SettingsManager.Current.Settings.GetPassword(), SettingsManager.Current.Settings.Domain);
+            }           
 
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
             TextReader reader = new StreamReader(response.GetResponseStream());
