@@ -43,8 +43,16 @@ namespace SMAStudio
                 txtSMAUrl.Text += (txtSMAUrl.Text.EndsWith("/") ? "00000000-0000-0000-0000-000000000000" : "/00000000-0000-0000-0000-000000000000");
             }
 
-            SettingsManager.Current.Settings.SmaWebServiceUrl = txtSMAUrl.Text;
-
+            SettingsManager.Current.Settings.SmaWebServiceUrl = txtSMAUrl.Text;            
+            SettingsManager.Current.Settings.Impersonate = rbtCustomCredentials.IsChecked == true ? false : true;
+            
+            if(!SettingsManager.Current.Settings.Impersonate)
+            {
+                SettingsManager.Current.Settings.UserName = txtUserName.Text;
+                SettingsManager.Current.Settings.Domain = txtDomain.Text;
+                SettingsManager.Current.Settings.Password = DataProtection.Protect(txtPassword.Password);
+            }
+            
             var apiService = new ApiService();
             if (!apiService.TestConnectivity())
             {
@@ -54,6 +62,18 @@ namespace SMAStudio
 
             DialogResult = true;
             Close();
+        }
+
+        private void rbtCustomCredentials_Click(object sender, RoutedEventArgs e)
+        {
+            if (rbtCustomCredentials.IsChecked == true)
+            {
+                grdCustomCred.Visibility = System.Windows.Visibility.Visible;
+            }
+            else
+            {
+                grdCustomCred.Visibility = System.Windows.Visibility.Collapsed;
+            }
         }
     }
 }

@@ -92,7 +92,14 @@ namespace SMAStudio.ViewModels
             try
             {
                 HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(Uri.AbsoluteUri + "/" + runbookVersion + "/$value");
-                request.Credentials = CredentialCache.DefaultCredentials;
+                if (SettingsManager.Current.Settings.Impersonate)
+                {
+                    request.Credentials = CredentialCache.DefaultCredentials;
+                }
+                else
+                {
+                    request.Credentials = new NetworkCredential(SettingsManager.Current.Settings.UserName, SettingsManager.Current.Settings.GetPassword(), SettingsManager.Current.Settings.Domain);
+                }
 
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 TextReader reader = new StreamReader(response.GetResponseStream());
