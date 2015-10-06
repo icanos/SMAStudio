@@ -80,7 +80,8 @@ namespace SMAStudio.ViewModels
                 }
             });
 
-            _parserService.ParseCommandTokens(Documents[SelectedIndex]);
+            if (Documents[SelectedIndex].Content != null)
+                _parserService.ParseCommandTokens(Documents[SelectedIndex]);
         }
 
         private string _cachedText = string.Empty;
@@ -273,6 +274,11 @@ namespace SMAStudio.ViewModels
         public ICommand NewVariableCommand
         {
             get { return Core.Resolve<ICommand>("NewVariable"); }
+        }
+
+        public ICommand NewScheduleCommand
+        {
+            get { return Core.Resolve<ICommand>("NewSchedule"); }
         }
 
         public ICommand ExitCommand

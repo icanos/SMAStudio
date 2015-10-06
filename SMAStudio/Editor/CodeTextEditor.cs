@@ -5,6 +5,9 @@ using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using SMAStudio.Editor.CodeCompletion;
+using SMAStudio.Editor.CodeCompletion.DataItems;
+using SMAStudio.Language;
+using SMAStudio.Resources;
 using SMAStudio.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -56,9 +59,7 @@ namespace SMAStudio.Editor
             }
             #endregion
 
-            #region Load Code Completion
-            Completion = new PowershellCompletion();
-            #endregion
+            Context = new PowershellContext();
 
             var ctrlSpace = new RoutedCommand();
             ctrlSpace.InputGestures.Add(new KeyGesture(Key.Space, ModifierKeys.Control));
@@ -69,7 +70,7 @@ namespace SMAStudio.Editor
             _workspaceViewModel.CurrentDocument.DocumentLoaded();
         }
 
-        public PowershellCompletion Completion { get; set; }
+        public PowershellContext Context { get; set; }
 
         #region Code Completion Event Handlers
         private void OnTextEntering(object sender, TextCompositionEventArgs e)
@@ -79,10 +80,12 @@ namespace SMAStudio.Editor
                 if (!char.IsLetterOrDigit(e.Text[0]) && e.Text[0] != '-')
                 {
                     // Whenever a non-letter is typed while the completion window is open,
-                    // insert the currently selected element.
-                    _completionWindow.CompletionList.RequestInsertion(e);
+                    // insert the currently element.
+                    //_completionWindow.CompletionList.RequestInsertion(e);
                 }
             }
+            else if (e.Text.Length > 0)
+                Context.SetContent(Text);
         }
 
         private void OnTextEntered(object sender, TextCompositionEventArgs e)
@@ -97,7 +100,84 @@ namespace SMAStudio.Editor
 
         private void ShowCompletion(string text, bool controlSpace)
         {
-            if (Completion == null)
+            if (_completionWindow != null)
+                return;
+
+            if (!controlSpace && text.Trim().Length == 0)
+                return;
+
+            List<string> data = null;
+            var completionType = 0;
+
+            // Cmdlets and variables
+            if (text != null && text.StartsWith("$"))
+            {
+                // Variables
+                data = Context.GetVariables(CaretOffset, text);
+                completionType = 1;
+            }
+            else if (text != null && text.StartsWith("-"))
+            {
+                // Parameters
+                completionType = 2;
+            }
+            else
+            {
+                // Cmdlets and stuff
+                data = text != null ? Context.GetCmdlets(CaretOffset, text) : Context.GetCmdlets(CaretOffset);
+                completionType = 3;
+
+                if (text != null)
+                {
+                    var componentsViewModel = Core.Resolve<IComponentsViewModel>();
+                    data.AddRange(componentsViewModel.Runbooks.Where(r => r.RunbookName.StartsWith(text, StringComparison.InvariantCultureIgnoreCase)).Select(r => r.RunbookName).ToList());
+
+                    data.Sort();
+                }
+            }
+
+            if (data == null || (data != null && data.Count == 0))
+                return;
+
+            _completionWindow = new CompletionWindow(TextArea);
+            _completionWindow.CloseWhenCaretAtBeginning = true;
+            _completionWindow.MinWidth = 260;
+
+            if (text != null)
+                _completionWindow.StartOffset -= text.Length;
+
+            foreach (var item in data)
+            {
+                var completionData = new CompletionData(item);
+
+                switch (completionType)
+                {
+                    case 1:
+                        completionData.Image = Icons.GetImage(Icons.Variable);
+                        break;
+                    case 2:
+                        completionData.Image = Icons.GetImage(Icons.Tag);
+                        break;
+                    case 3:
+                        completionData.Image = Icons.GetImage(Icons.Runbook);
+                        break;
+                }
+
+                _completionWindow.CompletionList.CompletionData.Add(completionData);
+            }
+
+            if (text != null)
+                _completionWindow.CompletionList.SelectItem(text);
+
+            /*if (results.TriggerWordLength > 0)
+            {
+                _completionWindow.CompletionList.SelectItem(results.TriggerWord);
+            }*/
+
+            _completionWindow.Show();
+            _completionWindow.Closed += (o, args) => _completionWindow = null;
+
+            /*if (Completion == null)
             {
                 Core.Log.DebugFormat("Code completion is null, cannot run code completion.");
                 return;
@@ -141,7 +221,7 @@ namespace SMAStudio.Editor
                     _completionWindow.Show();
                     _completionWindow.Closed += (o, args) => _completionWindow = null;
                 }
-            }
+            }*/
         }
 
         /// <summary>

@@ -50,7 +50,7 @@ namespace SMAStudio.Commands
 
                 _dataContext.WindowTitle = ((RunbookViewModel)obj.NewValue).RunbookName;
             }
-            else if (obj.NewValue is VariableViewModel || obj.NewValue is CredentialViewModel)
+            else if (obj.NewValue is VariableViewModel || obj.NewValue is CredentialViewModel || obj.NewValue is ScheduleViewModel)
             {
                 AsyncService.Execute(ThreadPriority.Normal, delegate()
                 {
@@ -61,8 +61,10 @@ namespace SMAStudio.Commands
 
                 if (obj.NewValue is VariableViewModel)
                     _dataContext.WindowTitle = ((VariableViewModel)obj.NewValue).Name;
-                else
+                else if (obj.NewValue is CredentialViewModel)
                     _dataContext.WindowTitle = ((CredentialViewModel)obj.NewValue).Name;
+                else
+                    _dataContext.WindowTitle = ((ScheduleViewModel)obj.NewValue).Name;
             }
         }
     }

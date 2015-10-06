@@ -47,7 +47,7 @@ namespace SMAStudio.ViewModels
             }
             else
             {
-                if (!textBox.Text.Equals(Content))
+                if (!textBox.Text.Equals(ContentParsed))
                 {
                     Content = textBox.Text;
                     UnsavedChanges = true;
@@ -123,7 +123,16 @@ namespace SMAStudio.ViewModels
         public string Content
         {
             get { return Variable.Value; }
-            set { Variable.Value = value; }
+            set { Variable.Value = value; base.RaisePropertyChanged("ContentParsed"); }
+        }
+
+        /// <summary>
+        /// Same as Content but "parses" the content and removes the quotation marks
+        /// </summary>
+        public string ContentParsed
+        {
+            get { return Variable.Value.Replace("\"", ""); }
+            set { Variable.Value = "\"" + value + "\""; }
         }
 
         /// <summary>

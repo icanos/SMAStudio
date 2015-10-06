@@ -2,6 +2,7 @@
 using SMAStudio.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Data.Services.Client;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,7 +64,16 @@ namespace SMAStudio.Commands
                     throw new Exception("Invalid object");
 
                 var job = _api.Current.Jobs.Where(j => j.JobID == runbook.JobID).First();
-                job.Stop(_api.Current);
+
+                try
+                {
+                    job.Stop(_api.Current);
+                }
+                catch (DataServiceQueryException ex)
+                {
+                    Core.Log.Error(ex.Message, ex);
+                    MessageBox.Show("Unable to stop the job since it already have a pending action.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
 
                 runbook.JobID = Guid.Empty;
             }

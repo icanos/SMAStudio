@@ -3,6 +3,7 @@
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:SmaStudioUtil="clr-namespace:SMAStudio.Util"
         xmlns:SmaStudioEditor="clr-namespace:SMAStudio.Editor"
         xmlns:SmaStudioVm="clr-namespace:SMAStudio.ViewModels"
@@ -219,6 +220,7 @@
                         <Separator />
                         <MenuItem Header="New Credential" Command="{Binding NewCredentialCommand}" />
                         <MenuItem Header="New Runbook" Command="{Binding NewRunbookCommand}" />
+                        <MenuItem Header="New Schedule" Command="{Binding NewScheduleCommand}" />
                         <MenuItem Header="New Variable" Command="{Binding NewVariableCommand}" />
                     </ContextMenu>
                 </TreeView.ContextMenu>
@@ -325,6 +327,24 @@
                         </DataTemplate>
                     </TreeViewItem.ItemTemplate>
                 </TreeViewItem>
+                <TreeViewItem Header="Schedules" ItemsSource="{Binding Schedules}" Foreground="#eeeeee">
+                    <TreeViewItem.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="Icons/_Folder.png" Width="16" Height="16" SnapsToDevicePixels="True" Margin="0,0,5,0"/>
+                                <TextBlock Text="Schedules" Foreground="#eeeeee" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </TreeViewItem.HeaderTemplate>
+                    <TreeViewItem.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{Binding Path=Icon}" Width="16" Height="16" SnapsToDevicePixels="True" Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding Path=Title}" Foreground="#eeeeee" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </TreeViewItem.ItemTemplate>
+                </TreeViewItem>
                 <TreeViewItem Header="Variables" ItemsSource="{Binding Variables}" Foreground="#eeeeee">
                     <TreeViewItem.HeaderTemplate>
                         <DataTemplate>
@@ -417,7 +437,7 @@
                                         <TextBox DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Name}" Tag="Name" TextChanged="textEditor_TextChanged" />
 
                                         <Label Content="Value" DockPanel.Dock="Top" Margin="0,5,0,0" />
-                                        <TextBox DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Content}" Tag="Value" TextChanged="textEditor_TextChanged" />
+                                        <TextBox DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=ContentParsed}" Tag="Value" TextChanged="textEditor_TextChanged" />
 
                                         <Label Content="Is Encrypted" DockPanel.Dock="Top" Margin="0,5,0,0" />
                                         <CheckBox DockPanel.Dock="Top" Margin="5,0,5,0" IsChecked="{Binding Path=IsEncrypted}" />
@@ -425,22 +445,45 @@
                                 </GroupBox>
                              </DataTemplate>
                         </SmaStudioUtil:WorkspaceTemplateSelector.VariableTemplate>
-                            <SmaStudioUtil:WorkspaceTemplateSelector.CredentialTemplate>
-                                <DataTemplate>
-                                    <GroupBox Header="Credential Configuration">
-                                        <DockPanel LastChildFill="False">
-                                            <Label Content="Name" DockPanel.Dock="Top" />
-                                            <TextBox x:Name="txtName" DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Name}" Tag="Name" TextChanged="textEditor_TextChanged" />
+                        <SmaStudioUtil:WorkspaceTemplateSelector.CredentialTemplate>
+                            <DataTemplate>
+                                <GroupBox Header="Credential Configuration">
+                                    <DockPanel LastChildFill="False">
+                                        <Label Content="Name" DockPanel.Dock="Top" />
+                                        <TextBox x:Name="txtName" DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Name}" Tag="Name" TextChanged="textEditor_TextChanged" />
 
-                                            <Label Content="Username" DockPanel.Dock="Top" Margin="0,5,0,0" />
-                                            <TextBox x:Name="txtUsername" DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Username}" Tag="Username" TextChanged="textEditor_TextChanged" />
+                                        <Label Content="Username" DockPanel.Dock="Top" Margin="0,5,0,0" />
+                                        <TextBox x:Name="txtUsername" DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Username}" Tag="Username" TextChanged="textEditor_TextChanged" />
                                             
-                                            <Label Content="Password" DockPanel.Dock="Top" Margin="0,5,0,0" />
-                                            <PasswordBox x:Name="txtPassword" DockPanel.Dock="Top" Margin="5,0,5,0" SmaStudioUtil:PasswordBoxExtensions.BindPassword="true" SmaStudioUtil:PasswordBoxExtensions.BoundPassword="{Binding Path=Password, Mode=OneWayToSource}" />
-                                        </DockPanel>
-                                    </GroupBox>
-                                </DataTemplate>
-                            </SmaStudioUtil:WorkspaceTemplateSelector.CredentialTemplate>
+                                        <Label Content="Password" DockPanel.Dock="Top" Margin="0,5,0,0" />
+                                        <PasswordBox x:Name="txtPassword" DockPanel.Dock="Top" Margin="5,0,5,0" SmaStudioUtil:PasswordBoxExtensions.BindPassword="true" SmaStudioUtil:PasswordBoxExtensions.BoundPassword="{Binding Path=Password, Mode=OneWayToSource}" />
+                                    </DockPanel>
+                                </GroupBox>
+                            </DataTemplate>
+                        </SmaStudioUtil:WorkspaceTemplateSelector.CredentialTemplate>
+                        <SmaStudioUtil:WorkspaceTemplateSelector.ScheduleTemplate>
+                            <DataTemplate>
+                                <GroupBox Header="Credential Configuration">
+                                    <DockPanel LastChildFill="False">
+                                        <Label Content="Name" DockPanel.Dock="Top" />
+                                        <TextBox x:Name="txtName" DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Name}" Tag="Name" IsReadOnly="{Binding Path=IsReadOnly}" TextChanged="textEditor_TextChanged" />
+
+                                        <Label Content="Start Date" DockPanel.Dock="Top" Margin="0,5,0,0" />
+                                            <xctk:DateTimePicker x:Name="txtStartTime" DockPanel.Dock="Top" Margin="5,0,5,0" Value="{Binding Path=StartTime, Mode=TwoWay}" IsReadOnly="{Binding Path=IsReadOnly}" Tag="StartTime" Format="UniversalSortableDateTime" />
+
+                                        <Label Content="Expiry Date" DockPanel.Dock="Top" Margin="0,5,0,0" />
+                                            <xctk:DateTimePicker x:Name="txtExpiryTime" DockPanel.Dock="Top" Margin="5,0,5,0" Value="{Binding Path=ExpiryTime, Mode=TwoWay}" IsReadOnly="{Binding Path=IsReadOnly}" Tag="ExpiryTime" Format="UniversalSortableDateTime" />
+
+                                        <Label Content="Recurring Schedule" DockPanel.Dock="Top" Margin="0,5,0,0" />
+                                            <CheckBox x:Name="chkDailySchedule" DockPanel.Dock="Top" Margin="5,0,5,0" IsChecked="{Binding Path=IsDaily}" IsEnabled="{Binding Path=IsReadOnly}" Tag="IsDaily" />
+
+                                        <Label Content="Interval (if recurring) in days" DockPanel.Dock="Top" Margin="0,5,0,0" />
+                                            <xctk:IntegerUpDown x:Name="txtInterval" DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Interval}" Maximum="128" Minimum="0" Tag="Interval" IsReadOnly="{Binding Path=IsReadOnly}" />
+                                        <!--<TextBox x:Name="txtInterval" DockPanel.Dock="Top" Margin="5,0,5,0"-->
+                                    </DockPanel>
+                                </GroupBox>
+                            </DataTemplate>
+                        </SmaStudioUtil:WorkspaceTemplateSelector.ScheduleTemplate>
                     </SmaStudioUtil:WorkspaceTemplateSelector>
                 </TabControl.ContentTemplateSelector>
             </TabControl>

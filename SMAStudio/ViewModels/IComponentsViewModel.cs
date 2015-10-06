@@ -11,7 +11,7 @@ namespace SMAStudio.ViewModels
     {
         void Initialize();
 
-        void Load(bool forceDownload = false);
+        void Load(bool forceDownload = false, bool cleanFirst = false);
 
         void AddRunbook(RunbookViewModel runbook);
 
@@ -21,10 +21,16 @@ namespace SMAStudio.ViewModels
 
         void RemoveVariable(VariableViewModel variable);
 
+        void AddSchedule(ScheduleViewModel schedule);
+
+        void RemoveSchedule(ScheduleViewModel schedule);
+
         ObservableCollection<RunbookViewModel> Runbooks { get; set; }
 
         ObservableCollection<VariableViewModel> Variables { get; set; }
 
         ObservableCollection<CredentialViewModel> Credentials { get; set; }
+
+        ObservableCollection<ScheduleViewModel> Schedules { get; set; }
     }
 }

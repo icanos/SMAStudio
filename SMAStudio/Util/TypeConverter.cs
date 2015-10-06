@@ -20,7 +20,7 @@ namespace SMAStudio.Util
             if (String.IsNullOrEmpty(param.Value))
                 return string.Empty;
 
-            switch (param.TypeName)
+            switch (param.TypeName.ToLower())
             {
                 case "int":
                     int value = 0;
@@ -56,6 +56,7 @@ namespace SMAStudio.Util
             }
 
             // Unsupported type
+            Core.Log.DebugFormat("Unrecognized type found = " + param.TypeName);
             return null;
         }
     }

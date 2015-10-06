@@ -4,6 +4,7 @@ using SMAStudio.Util;
 using SMAStudio.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Data.Services.Client;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -80,11 +81,19 @@ namespace SMAStudio.Commands
             // Retrieve any parameters and their input values from the user
             var parameters = GetUserParameters(runbook);
 
-            Guid? jobGuid = new Guid?(runbook.Runbook.StartRunbook(_api.Current, parameters));
-            runbook.JobID = (Guid)jobGuid;
+            try
+            {
+                Guid? jobGuid = new Guid?(runbook.Runbook.StartRunbook(_api.Current, parameters));
+                runbook.JobID = (Guid)jobGuid;
 
-            // Display execution progress
-            DisplayExecutionProgress(runbook, parameters);
+                // Display execution progress
+                DisplayExecutionProgress(runbook, parameters);
+            }
+            catch (DataServiceQueryException ex)
+            {
+                Core.Log.Error("Job is already running.", ex);
+                MessageBox.Show("A job is already running for the runbook. Please stop that and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

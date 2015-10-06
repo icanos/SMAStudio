@@ -163,6 +163,8 @@ namespace SMAStudio
                             message = String.Format(message, "variable", ((VariableViewModel)document).Name);
                         else if (document is CredentialViewModel)
                             message = String.Format(message, "credential", ((CredentialViewModel)document).Name);
+                        else if (document is ScheduleViewModel)
+                            message = String.Format(message, "schedule", ((ScheduleViewModel)document).Name);
 
                         var result = MessageBox.Show(message, "Save", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 

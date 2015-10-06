@@ -32,6 +32,9 @@ namespace SMAStudio.Services
         private DateTime _lastCheckedSuspendedJobs = DateTime.MinValue;
         private Guid _lastSuspendedJobID = Guid.Empty;
 
+        private DateTime _lastCheckedRunningJobs = DateTime.MinValue;
+        private Guid _lastRunningJobID = Guid.Empty;
+
         public RunbookService()
         {
             _api = Core.Resolve<IApiService>();
@@ -93,7 +96,57 @@ namespace SMAStudio.Services
 
             GetTags();
 
+            bool needToCache = false;
+            foreach (var tag in _tagCache)
+            {
+                var tagViewModel = _tagViewModelCache.FirstOrDefault(t => t.Name.Equals(tag));
+
+                if (tagViewModel == null)
+                {
+                    needToCache = true;
+                    tagViewModel = new TagViewModel(tag);
+                }
+                else
+                    needToCache = false;
+
+                AsyncService.ExecuteOnUIThread(delegate()
+                {
+                    tagViewModel.Runbooks.Clear();
+                    var tmp = _runbookViewModelCache.Where(r => r.Tags != null && r.Tags.Contains(tag)).ToObservableCollection();
+
+                    foreach (var runbook in tmp)
+                        tagViewModel.Runbooks.Add(runbook);
+                    //tagViewModel.Runbooks = _runbookViewModelCache.Where(r => r.Tags != null && r.Tags.Contains(tag)).ToObservableCollection();
+
+                    if (needToCache)
+                        _tagViewModelCache.Add(tagViewModel);
+                });
+            }
+
+            // Take care of untagged runbooks too
+            var untaggedViewModel = _tagViewModelCache.FirstOrDefault(t => t.Name.Equals("(untagged)"));
+            needToCache = false;
+
+            if (untaggedViewModel == null)
+            {
+                untaggedViewModel = new TagViewModel("(untagged)");
+                needToCache = true;
+            }
+
             AsyncService.ExecuteOnUIThread(delegate()
+            {
+                untaggedViewModel.Runbooks.Clear();
+                var tmp = _runbookViewModelCache.Where(r => r.Tags == null).ToObservableCollection();
+
+                foreach (var runbook in tmp)
+                    untaggedViewModel.Runbooks.Add(runbook);
+
+                if (needToCache)
+                {
+                    _tagViewModelCache.Add(untaggedViewModel);
+                }
+            });
+            /*AsyncService.ExecuteOnUIThread(delegate()
             {
                 _tagViewModelCache.Clear();
             });
@@ -120,7 +173,7 @@ namespace SMAStudio.Services
             AsyncService.ExecuteOnUIThread(delegate()
             {
                 _tagViewModelCache.Add(tagViewModel);
-            });
+            });*/
 
             return _tagViewModelCache;
         }
@@ -493,6 +546,45 @@ namespace SMAStudio.Services
             }
 
             _lastSuspendedJobID = Guid.Empty;
+            return Guid.Empty;
+        }
+
+        /// <summary>
+        /// Returns the Guid of the job for the selected runbook that is set in a running mode.
+        /// </summary>
+        /// <param name="runbook"></param>
+        /// <returns></returns>
+        public Guid GetActiveJobs(Runbook runbook)
+        {
+            // Use the cached value and only check towards the webservice every two minutes.
+            // If we are within the two minute interval, use the last known value.
+            if ((DateTime.Now - _lastCheckedRunningJobs).TotalMinutes < 2)
+                return _lastRunningJobID;
+
+            _lastCheckedRunningJobs = DateTime.Now;
+
+            try
+            {
+                var jobContexts = _api.Current.JobContexts.Where(jc => jc.RunbookVersionID.Equals(runbook.DraftRunbookVersionID) || jc.RunbookVersionID.Equals(runbook.PublishedRunbookVersionID)).ToList();
+
+                var jobs = _api.Current.Jobs.Where(j => j.JobStatus.Equals("Suspended") || j.JobStatus.Equals("Running") || j.JobStatus.Equals("New")).ToList();
+                foreach (var context in jobContexts)
+                {
+                    var job = jobs.Where(j => j.JobContextID.Equals(context.JobContextID)).FirstOrDefault();
+
+                    if (job != null)
+                    {
+                        _lastRunningJobID = job.JobID;
+                        return job.JobID;
+                    }
+                }
+            }
+            catch (DataServiceTransportException e)
+            {
+                Core.Log.Error("Unable to connect to the SMA webservice. Network connectivity lost?", e);
+            }
+
+            _lastRunningJobID = Guid.Empty;
             return Guid.Empty;
         }
 

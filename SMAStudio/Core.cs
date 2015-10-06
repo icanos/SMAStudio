@@ -17,6 +17,7 @@ using SMAStudio.Commands;
 using SMAStudio.Editor.Parsing;
 using SMAStudio.Logging;
 using SMAStudio.Services;
+using SMAStudio.Services.SMA;
 using SMAStudio.Util;
 using SMAStudio.ViewModels;
 using System;
@@ -66,6 +67,7 @@ namespace SMAStudio
             _container.RegisterInstance<IRunbookService>(new RunbookService());
             _container.RegisterInstance<IVariableService>(new VariableService());
             _container.RegisterInstance<ICredentialService>(new CredentialService());
+            _container.RegisterInstance<IScheduleService>(new ScheduleService());
             _container.RegisterInstance<IAutoSaveService>(new AutoSaveService(_container.Resolve<IWorkspaceViewModel>(), _container.Resolve<IApiService>()));
 
             // Commands
@@ -82,6 +84,7 @@ namespace SMAStudio
             _container.RegisterType<ICommand, NewCredentialCommand>("NewCredential");
             _container.RegisterType<ICommand, NewRunbookCommand>("NewRunbook");
             _container.RegisterType<ICommand, NewVariableCommand>("NewVariable");
+            _container.RegisterType<ICommand, NewScheduleCommand>("NewSchedule");
             _container.RegisterType<ICommand, RefreshCommand>("Refresh");
             _container.RegisterType<ICommand, RevertCommand>("Revert");
             _container.RegisterType<ICommand, RunCommand>("Run");
@@ -137,14 +140,14 @@ namespace SMAStudio
                 }
                 catch (WebException)
                 {
-                    Core.Log.ErrorFormat("Unable to check version. Continuing as normal.");
+                    Core.Log.WarningFormat("Unable to check version. Continuing as normal.");
                 }
             });
         }
 
         public static string Version
         {
-            get { return "0.2.1"; }
+            get { return "0.3.0"; }
         }
     }
 }

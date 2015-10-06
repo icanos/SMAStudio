@@ -97,7 +97,7 @@ namespace SMAStudio.Services
             }
             catch (Exception ex)
             {
-                Core.Log.Error("Unable to create a new runbook.", ex);
+                Core.Log.Error("Unable to create a new variable.", ex);
             }
 
             return false;

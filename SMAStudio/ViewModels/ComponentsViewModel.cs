@@ -16,6 +16,7 @@ using System.Windows.Input;
 using System.Threading;
 using System.Windows;
 using SMAStudio.Services;
+using SMAStudio.Services.SMA;
 
 namespace SMAStudio.ViewModels
 {
@@ -26,6 +27,7 @@ namespace SMAStudio.ViewModels
         private IRunbookService _runbookService;
         private IVariableService _variableService;
         private ICredentialService _credentialService;
+        private IScheduleService _scheduleService;
 
         private object _sync = new object();
         
@@ -36,6 +38,7 @@ namespace SMAStudio.ViewModels
             Runbooks = new ObservableCollection<RunbookViewModel>();
             Variables = new ObservableCollection<VariableViewModel>();
             Credentials = new ObservableCollection<CredentialViewModel>();
+            Schedules = new ObservableCollection<ScheduleViewModel>();
         }
 
         public void Initialize()
@@ -43,6 +46,7 @@ namespace SMAStudio.ViewModels
             _runbookService = Core.Resolve<IRunbookService>();
             _variableService = Core.Resolve<IVariableService>();
             _credentialService = Core.Resolve<ICredentialService>();
+            _scheduleService = Core.Resolve<IScheduleService>();
 
             Load();
         }
@@ -52,16 +56,34 @@ namespace SMAStudio.ViewModels
         /// from the SMA web service.
         /// </summary>
         /// <param name="forceDownload">Set to true to force the API manager to download new content instead of using potentially cached data.</param>
-        public void Load(bool forceDownload = false)
+        /// <param name="cleanFirst">Cleans all first, to make sure that the data presented is fresh</param>
+        public void Load(bool forceDownload = false, bool cleanFirst = false)
         {
             _dataContext.StatusBarText = "Retrieving data from SMA...";
+
+            if (cleanFirst)
+            {
+                Runbooks.Clear();
+                Tags.Clear();
+                Variables.Clear();
+                Credentials.Clear();
+            }
 
             AsyncService.Execute(ThreadPriority.Normal, delegate()
             {
                 Core.Log.DebugFormat("Loading runbooks...");
 
                 // Load the runbooks and runbook tags
-                Runbooks = _runbookService.GetRunbookViewModels(forceDownload);
+                var tempRunbooks = _runbookService.GetRunbookViewModels(forceDownload);
+
+                foreach (var runbook in tempRunbooks)
+                {
+                    if (!Runbooks.Contains(runbook))
+                        Runbooks.Add(runbook);
+                }
+
+                Runbooks = Runbooks.OrderBy(r => r.RunbookName).ToObservableCollection();
+
                 Tags = _runbookService.GetTagViewModels();
 
                 base.RaisePropertyChanged("Runbooks");
@@ -100,6 +122,17 @@ namespace SMAStudio.ViewModels
                 });
             }
 
+            if (((BaseService)_runbookService).SuccessfulInitialization)
+            {
+                AsyncService.Execute(ThreadPriority.Normal, delegate()
+                {
+                    Core.Log.DebugFormat("Loading schedules...");
+
+                    Schedules = _scheduleService.GetScheduleViewModels(forceDownload);
+                    base.RaisePropertyChanged("Schedules");
+                });
+            }
+
             if (((BaseService)_runbookService).SuccessfulInitialization || ((BaseService)_variableService).SuccessfulInitialization)
             {
                 AsyncService.Execute(ThreadPriority.Normal, delegate()
@@ -122,6 +155,7 @@ namespace SMAStudio.ViewModels
             {
                 Runbooks.Add(runbook);
                 base.RaisePropertyChanged("Runbooks");
+                base.RaisePropertyChanged("Tags");
             }
         }
 
@@ -135,6 +169,7 @@ namespace SMAStudio.ViewModels
             {
                 Runbooks.Remove(runbook);
                 base.RaisePropertyChanged("Runbooks");
+                base.RaisePropertyChanged("Tags");
             }
         }
 
@@ -164,12 +199,40 @@ namespace SMAStudio.ViewModels
             }
         }
 
+        /// <summary>
+        /// Add a schedule to the list if it doesn't already exist
+        /// </summary>
+        /// <param name="schedule"></param>
+        public void AddSchedule(ScheduleViewModel schedule)
+        {
+            if (!Schedules.Contains(schedule))
+            {
+                Schedules.Add(schedule);
+                base.RaisePropertyChanged("Schedules");
+            }
+        }
+
+        /// <summary>
+        /// Remove a schedule from the list if it exist
+        /// </summary>
+        /// <param name="schedule"></param>
+        public void RemoveSchedule(ScheduleViewModel schedule)
+        {
+            if (Schedules.Contains(schedule))
+            {
+                Schedules.Remove(schedule);
+                base.RaisePropertyChanged("Schedules");
+            }
+        }
+
         #region Properties
         public ObservableCollection<RunbookViewModel> Runbooks { get; set; }
 
         public ObservableCollection<VariableViewModel> Variables { get; set; }
 
         public ObservableCollection<CredentialViewModel> Credentials { get; set; }
+
+        public ObservableCollection<ScheduleViewModel> Schedules { get; set; }
 
         public ObservableCollection<TagViewModel> Tags { get; set; }
 
@@ -201,6 +264,11 @@ namespace SMAStudio.ViewModels
         public ICommand NewCredentialCommand
         {
             get { return Core.Resolve<ICommand>("NewCredential"); }
+        }
+
+        public ICommand NewScheduleCommand
+        {
+            get { return Core.Resolve<ICommand>("NewSchedule"); }
         }
 
         public ICommand DeleteCommand

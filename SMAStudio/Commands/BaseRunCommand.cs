@@ -4,6 +4,7 @@ using SMAStudio.Util;
 using SMAStudio.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Data.Services.Client;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -67,14 +68,23 @@ namespace SMAStudio.Commands
 
             Guid jobId = Guid.Empty;
 
-            if ((jobId = runbookService.GetSuspendedJobs(runbook.Runbook)) != Guid.Empty)
+            if ((jobId = runbookService.GetActiveJobs(runbook.Runbook)) != Guid.Empty)
             {
                 var job = api.Current.Jobs.Where(j => j.JobID.Equals(jobId)).First();
 
                 if (MessageBox.Show("Another job is already running for this runbook. Do you want to terminate it?", "Terminate runbook", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
-                    job.Stop(api.Current);
-                    MessageBox.Show("Stop job request has been sent. Please wait a few seconds before starting it again.", "Stop job");
+                    try
+                    {
+                        job.Stop(api.Current);
+                        MessageBox.Show("Stop job request has been sent. Please wait a few seconds before starting it again.", "Stop job");
+                    }
+                    catch (DataServiceQueryException ex)
+                    {
+                        Core.Log.Error("Unable to terminate the job, the job has a pending action.", ex);
+                        MessageBox.Show("The job cannot be terminated since it has a pending action, please wait for it to complete.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+
                     return false;
                 }
             }

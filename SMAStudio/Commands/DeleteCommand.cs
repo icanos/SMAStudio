@@ -1,4 +1,5 @@
 ﻿using SMAStudio.Services;
+using SMAStudio.Services.SMA;
 using SMAStudio.Util;
 using SMAStudio.ViewModels;
 using System;
@@ -17,6 +18,7 @@ namespace SMAStudio.Commands
         private IRunbookService _runbookService;
         private IVariableService _variableService;
         private ICredentialService _credentialService;
+        private IScheduleService _scheduleService;
 
         public DeleteCommand()
         {
@@ -24,6 +26,7 @@ namespace SMAStudio.Commands
             _runbookService = Core.Resolve<IRunbookService>();
             _variableService = Core.Resolve<IVariableService>();
             _credentialService = Core.Resolve<ICredentialService>();
+            _scheduleService = Core.Resolve<IScheduleService>();
         }
 
         public bool CanExecute(object parameter)
@@ -51,6 +54,8 @@ namespace SMAStudio.Commands
                 DeleteVariable((VariableViewModel)parameter);
             else if (parameter is CredentialViewModel)
                 DeleteCredential((CredentialViewModel)parameter);
+            else if (parameter is ScheduleViewModel)
+                DeleteSchedule((ScheduleViewModel)parameter);
 
             // Reload the left side menu as well
             var componentsViewModel = Core.Resolve<IComponentsViewModel>();
@@ -70,6 +75,11 @@ namespace SMAStudio.Commands
         private void DeleteCredential(CredentialViewModel credentialViewModel)
         {
             _credentialService.Delete(credentialViewModel);
+        }
+
+        private void DeleteSchedule(ScheduleViewModel scheduleViewModel)
+        {
+            _scheduleService.Delete(scheduleViewModel);
         }
     }
 }

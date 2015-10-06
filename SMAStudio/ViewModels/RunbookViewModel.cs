@@ -19,6 +19,7 @@ using SMAStudio.Editor.Parsing;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Snippets;
+using System.Windows.Controls;
 
 namespace SMAStudio.ViewModels
 {
@@ -114,12 +115,19 @@ namespace SMAStudio.ViewModels
             {
                 Core.Log.Error("WebException received when trying to download content of runbook from SMA", e);
 
-                if (e.Status != WebExceptionStatus.ConnectFailure &&
-                    e.Status != WebExceptionStatus.ConnectionClosed)
+                try
                 {
-                    Content = GetContent(forceDownload, true);
-                    _content = Content;
-                    _lastFetched = DateTime.Now;
+                    if (e.Status != WebExceptionStatus.ConnectFailure &&
+                        e.Status != WebExceptionStatus.ConnectionClosed)
+                    {
+                        Content = GetContent(forceDownload, true);
+                        _content = Content;
+                        _lastFetched = DateTime.Now;
+                    }
+                }
+                catch (WebException ex)
+                {
+                    Core.Log.Error("Unable to retrieve any content for the runbook. Ignoring this.", ex);
                 }
             }
 

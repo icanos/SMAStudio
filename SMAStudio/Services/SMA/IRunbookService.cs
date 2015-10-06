@@ -108,5 +108,12 @@ namespace SMAStudio.Services
         /// <param name="runbook">Runbook to get suspended jobs from</param>
         /// <returns>ID of the job</returns>
         Guid GetSuspendedJobs(Runbook runbook);
+
+        /// <summary>
+        /// Get the GUID of any active jobs for the runbook
+        /// </summary>
+        /// <param name="runbook">Runbook to get active jobs from</param>
+        /// <returns>ID of the job</returns>
+        Guid GetActiveJobs(Runbook runbook);
     }
 }

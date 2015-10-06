@@ -3,6 +3,7 @@ using SMAStudio.Util;
 using SMAStudio.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Data.Services.Client;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -55,30 +56,40 @@ namespace SMAStudio.Util
 
                             var restoredDocumentGuid = new Guid(fi.Name.Replace("rb_", "").Replace("var_", ""));
 
+                            if (restoredDocumentGuid.Equals(Guid.Empty))
+                                continue;
+
                             if (isRunbook)
                             {
                                 AsyncService.Execute(ThreadPriority.BelowNormal, delegate()
                                 {
-                                    var runbook = _api.Current.Runbooks.Where(r => r.RunbookID.Equals(restoredDocumentGuid)).FirstOrDefault();
-
-                                    // If we don't find the runbook, this indicates that its either
-                                    // removed or we've connected to another environment
-                                    if (runbook != null)
+                                    try
                                     {
-                                        var runbookViewModel = new RunbookViewModel();
-                                        runbookViewModel.Runbook = runbook;
-                                        runbookViewModel.Content = content;
-                                        runbookViewModel.UnsavedChanges = true;
-                                        runbookViewModel.CachedChanges = true; // we do not want to cache this version again, since no changes have been done
+                                        var runbook = _api.Current.Runbooks.Where(r => r.RunbookID.Equals(restoredDocumentGuid)).FirstOrDefault();
 
-                                        var versions = _api.Current.RunbookVersions.Where(rv => rv.RunbookID.Equals(restoredDocumentGuid)).ToList();
-
-                                        foreach (var version in versions)
+                                        // If we don't find the runbook, this indicates that its either
+                                        // removed or we've connected to another environment
+                                        if (runbook != null)
                                         {
-                                            runbookViewModel.Versions.Add(new RunbookVersionViewModel(version));
-                                        }
+                                            var runbookViewModel = new RunbookViewModel();
+                                            runbookViewModel.Runbook = runbook;
+                                            runbookViewModel.Content = content;
+                                            runbookViewModel.UnsavedChanges = true;
+                                            runbookViewModel.CachedChanges = true; // we do not want to cache this version again, since no changes have been done
 
-                                        _workspaceViewModel.OpenDocument(runbookViewModel);
+                                            var versions = _api.Current.RunbookVersions.Where(rv => rv.RunbookID.Equals(restoredDocumentGuid)).ToList();
+
+                                            foreach (var version in versions)
+                                            {
+                                                runbookViewModel.Versions.Add(new RunbookVersionViewModel(version));
+                                            }
+
+                                            _workspaceViewModel.OpenDocument(runbookViewModel);
+                                        }
+                                    }
+                                    catch (DataServiceQueryException ex)
+                                    {
+                                        Core.Log.Error("Unable to restore runbook.", ex);
                                     }
                                 });
                             }
