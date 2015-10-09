@@ -316,7 +316,14 @@ namespace SMAStudio.ViewModels
         public string Tags
         {
             get { return Runbook != null ? Runbook.Tags : ""; }
-            set { Runbook.Tags = value; UnsavedChanges = true; }
+            set
+            {
+                if (!Runbook.Tags.Equals(value))
+                {
+                    Runbook.Tags = value;
+                    UnsavedChanges = true;
+                }
+            }
         }
 
         /// <summary>
