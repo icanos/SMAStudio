@@ -13,6 +13,7 @@ namespace SMAStudio.Language
         private PowershellParser _parser;
         private List<PowershellSegment> _segments = null;
 
+        private List<string> _language = new List<string> { "if", "else", "elseif", "for", "foreach", "do", "while", "until", "switch", "break", "continue", "return" };
         private List<string> _keywords = new List<string> { "Begin", "Break", "Catch", "Continue", "Data", "Do", "DynamicParam", "Else", "ElseIf", "End", "Exit", "Filter", "Finally", "For", "ForEach", "From", "Function", "If", "In", "InlineScript", "Hidden", "Parallel", "Param", "Process", "Return", "Sequence", "Switch", "Throw", "Trap", "Try", "Until", "While", "Workflow" };
         private List<string> _standardCmdlets = new List<string>();
         private List<string> _cmdlets = new List<string>();
@@ -228,8 +229,7 @@ namespace SMAStudio.Language
 
             foundCmdlets.AddRange(_standardCmdlets.Where(c => c.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).ToList());
             foundCmdlets.AddRange(_cmdlets.Where(c => c.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).ToList());
-
-            foundCmdlets.Sort();
+            foundCmdlets.AddRange(_language.Where(l => l.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).ToList());
 
             return foundCmdlets;
         }
