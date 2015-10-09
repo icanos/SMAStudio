@@ -56,7 +56,12 @@ namespace SMAStudio.Commands
             if (parameter == null)
                 return;
 
-            _runbookService.CheckIn((RunbookViewModel)parameter);
+            var runbookViewModel = (RunbookViewModel)parameter;
+
+            // Save the runbook and check in
+            _runbookService.CheckIn(runbookViewModel);
+
+            runbookViewModel.UnsavedChanges = false;
         }
     }
 }

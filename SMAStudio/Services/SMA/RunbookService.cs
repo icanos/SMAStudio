@@ -146,34 +146,6 @@ namespace SMAStudio.Services
                     _tagViewModelCache.Add(untaggedViewModel);
                 }
             });
-            /*AsyncService.ExecuteOnUIThread(delegate()
-            {
-                _tagViewModelCache.Clear();
-            });
-
-            TagViewModel tagViewModel = null;
-
-            foreach (var tag in _tagCache)
-            {
-                tagViewModel = new TagViewModel(tag);
-                tagViewModel.Runbooks = 
-                    _runbookViewModelCache.Where(r => r.Tags != null && r.Tags.Contains(tag))
-                        .ToObservableCollection();
-
-                AsyncService.ExecuteOnUIThread(delegate()
-                {
-                    _tagViewModelCache.Add(tagViewModel);
-                });
-            }
-
-            // Last but not least, we take all non tagged runbooks and put them in an (untagged) folder
-            tagViewModel = new TagViewModel("(untagged)");
-            tagViewModel.Runbooks = _runbookViewModelCache.Where(r => r.Tags == null).ToObservableCollection();
-
-            AsyncService.ExecuteOnUIThread(delegate()
-            {
-                _tagViewModelCache.Add(tagViewModel);
-            });*/
 
             return _tagViewModelCache;
         }
@@ -400,6 +372,10 @@ namespace SMAStudio.Services
             if (!runbook.DraftRunbookVersionID.HasValue || runbook.DraftRunbookVersionID == Guid.Empty)
             {
                 MessageBox.Show("The runbook's already checked in.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // If we have gotten out of sync, mark this runbook as already checked in
+                runbookViewModel.CheckedOut = false;
+
                 return false;
             }
 
