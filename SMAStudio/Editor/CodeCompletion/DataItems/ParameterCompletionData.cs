@@ -8,43 +8,34 @@ using System.Threading.Tasks;
 
 namespace SMAStudio.Editor.CodeCompletion.DataItems
 {
-    class ParameterCompletionData : CompletionData
+    public class ParameterCompletionData : CompletionData
     {
-        private readonly ParameterAst _parameter;
-        private readonly PropertyInfo _propInfo;
+        private string _typeName = string.Empty;
+        private string _parameterName = string.Empty;
+        private bool _switchParameter = false;
 
-        public ParameterCompletionData(PropertyInfo propInfo, bool includeDash)
+        public ParameterCompletionData()
         {
-            _propInfo = propInfo;
-            string parameterName = propInfo.Name;
-            string dataType = propInfo.PropertyType.ToString();
-            dataType = dataType.Substring(dataType.LastIndexOf('.') + 1);
-
-            if (includeDash)
-                DisplayText = "-";
-
-            DisplayText += parameterName;
-
-            if (!dataType.Equals("switchparameter", StringComparison.InvariantCultureIgnoreCase))
-                DisplayText += " <" + dataType + ">";
-
-            CompletionText = (includeDash ? "-" : "") + parameterName;
+            DisplayText = "";
         }
 
-        public ParameterCompletionData(ParameterAst parameter, bool includeDash)
+        public ParameterCompletionData(string typeName, string parameterName, bool switchParameter)
         {
-            _parameter = parameter;
-            string parameterName = parameter.Name.Extent.Text.Replace("$", "");
+            _typeName = typeName;
+            _parameterName = parameterName;
+            _switchParameter = switchParameter;
 
-            if (includeDash)
-                DisplayText = "-";
+            if (!_switchParameter && !String.IsNullOrEmpty(_typeName))
+                DisplayText = _parameterName + ": " + _typeName;
+            else if (_switchParameter && !String.IsNullOrEmpty(_typeName))
+                DisplayText = "[switch] " + _parameterName;
+            else
+                DisplayText = _parameterName;
 
-            DisplayText += parameterName;
-
-            // Add data type
-            DisplayText += " <" + parameter.StaticType.Name + ">";
-
-            CompletionText = (includeDash ? "-" : "") + parameterName;
+            if (!_parameterName.StartsWith("-"))
+                CompletionText = "-" + _parameterName;
+            else
+                CompletionText = _parameterName;
         }
 
         private string _description;

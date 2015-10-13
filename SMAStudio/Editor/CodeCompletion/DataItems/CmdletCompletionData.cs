@@ -11,27 +11,25 @@ using System.Xml;
 
 namespace SMAStudio.Editor.CodeCompletion.DataItems
 {
-    class CmdletCompletionData : CompletionData
+    public class CmdletCompletionData : CompletionData
     {
-        private readonly CmdletConfigurationEntry _entity;
-
-        public CmdletConfigurationEntry Entity
+        public CmdletCompletionData()
         {
-            get { return _entity; }
+            Parameters = new List<ParameterCompletionData>();
         }
 
-        public CmdletCompletionData(CmdletConfigurationEntry entity)
+        public CmdletCompletionData(string cmdletName)
         {
-            if (entity == null)
-                throw new ArgumentNullException("entity");
+            DisplayText = cmdletName;
+            CompletionText = cmdletName;
 
-            _entity = entity;
+            Parameters = new List<ParameterCompletionData>();
+        }
 
-            DisplayText = entity.Name;
-            CompletionText = entity.Name;
-
-            // TODO: Add Image!
-            //Image = 
+        public List<ParameterCompletionData> Parameters
+        {
+            get;
+            set;
         }
 
         private string _description;
@@ -42,7 +40,7 @@ namespace SMAStudio.Editor.CodeCompletion.DataItems
                 if (_description == null)
                 {
                     _description = DisplayText;
-                    _description += Environment.NewLine + XmlDocumentationToText(_entity);
+                    //_description += Environment.NewLine + XmlDocumentationToText(_entity);
                 }
 
                 return _description;
@@ -51,26 +49,6 @@ namespace SMAStudio.Editor.CodeCompletion.DataItems
             {
                 _description = value;
             }
-        }
-
-        public static string XmlDocumentationToText(CmdletConfigurationEntry entity)
-        {
-            var b = new StringBuilder();
-
-            /*try
-            {
-                using (XmlTextReader reader = new XmlTextReader(Path.Combine(entity.ImplementingType.Assembly.Location, entity.HelpFileName)))
-                //using (XmlTextReader reader = new XmlTextReader(entity.HelpFileName))
-                {
-                    reader.Read();
-                }
-            }
-            catch (Exception)
-            {
-
-            }*/
-
-            return b.ToString();
         }
     }
 }

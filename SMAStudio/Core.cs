@@ -129,12 +129,12 @@ namespace SMAStudio
 
                         App.Current.Dispatcher.Invoke(delegate()
                         {
-                            var result = MessageBox.Show("A new version of SMA Studio 2014 is available.\r\nDo you want to download it now?", "New version", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                            /*var result = MessageBox.Show("A new version of SMA Studio 2014 is available.\r\nDo you want to download it now?", "New version", MessageBoxButton.YesNo, MessageBoxImage.Information);
                             if (result == MessageBoxResult.Yes)
                             {
                                 // Open a browser
                                 Process.Start("http://www.sekurbit.se/");
-                            }
+                            }*/
                         });
                     }
                 }
@@ -147,7 +147,7 @@ namespace SMAStudio
 
         public static string Version
         {
-            get { return "0.3.0"; }
+            get { return "0.3.4"; }
         }
     }
 }

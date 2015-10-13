@@ -1,10 +1,15 @@
-﻿using System;
+﻿using SMAStudio.Editor.CodeCompletion.DataItems;
+using SMAStudio.Services;
+using SMAStudio.Util;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace SMAStudio.Language
 {
@@ -13,11 +18,13 @@ namespace SMAStudio.Language
         private PowershellParser _parser;
         private List<PowershellSegment> _segments = null;
 
-        private List<string> _language = new List<string> { "if", "else", "elseif", "for", "foreach", "do", "while", "until", "switch", "break", "continue", "return" };
         private List<string> _keywords = new List<string> { "Begin", "Break", "Catch", "Continue", "Data", "Do", "DynamicParam", "Else", "ElseIf", "End", "Exit", "Filter", "Finally", "For", "ForEach", "From", "Function", "If", "In", "InlineScript", "Hidden", "Parallel", "Param", "Process", "Return", "Sequence", "Switch", "Throw", "Trap", "Try", "Until", "While", "Workflow" };
-        private List<string> _standardCmdlets = new List<string>();
-        private List<string> _cmdlets = new List<string>();
+        private List<string> _reservedParameters = new List<string> { "-Debug", "-db", "-ErrorAction", "-ea", "-ErrorVariable", "-ev", "-InformationAction", "-InformationVariable", "-OutVariable", "-ov", "-OutBuffer", "-ob", "-PiplineVariable", "-pv", "-Verbose", "-vb", "-WarningAction", "-wa", "-WarningVariable", "-wv", "-WhatIf", "-wi", "-Confirm", "-cf" };
+        private List<CmdletCompletionData> _standardCmdlets = new List<CmdletCompletionData>();
+        private List<CmdletCompletionData> _cmdlets = new List<CmdletCompletionData>();
         private List<string> _cachedModules = new List<string>();
+
+        private object _syncLock = new object();
 
         public PowershellContext()
         {
@@ -32,8 +39,16 @@ namespace SMAStudio.Language
 
         public void SetContent(string content)
         {
-            _parser.Clear();
-            _segments = _parser.Parse(content);
+            //AsyncService.Execute(System.Threading.ThreadPriority.Normal, delegate()
+            //{
+            lock (_syncLock)
+            {
+                _parser.Clear();
+                _segments = _parser.Parse(content);
+            }
+            //});
+            //_parser.Clear();
+            //_segments = _parser.Parse(content);
         }
 
         /// <summary>
@@ -81,6 +96,16 @@ namespace SMAStudio.Language
             return context;
         }
 
+        public ExpressionType GetContextName(int contextualPosition)
+        {
+            lock (_syncLock)
+            {
+                var context = _segments.Where(s => s.Start <= contextualPosition).ToList();
+
+                return context[context.Count - 1].Type;
+            }
+        }
+
         /// <summary>
         /// Return a list of functions defined in the script we're parsing.
         /// </summary>
@@ -103,7 +128,7 @@ namespace SMAStudio.Language
         /// variables found, regardless of scope.
         /// </summary>
         /// <returns></returns>
-        public List<string> GetVariables()
+        public List<VariableCompletionData> GetVariables()
         {
             return GetVariables(0);
         }
@@ -114,20 +139,27 @@ namespace SMAStudio.Language
         /// </summary>
         /// <param name="contextualPosition"></param>
         /// <returns></returns>
-        public List<string> GetVariables(int contextualPosition, string pattern = "")
+        public List<VariableCompletionData> GetVariables(int contextualPosition, string pattern = "")
         {
-            List<PowershellSegment> segments = null;// 
+            List<PowershellSegment> segments = null;//
+
+            if (pattern == null)
+                pattern = string.Empty;
 
             if (contextualPosition == 0)
                 segments = _segments.Where(s => s.Type == ExpressionType.Variable && s.Value.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).ToList();
             else
                 segments = GetContext(contextualPosition).Where(s => s.Type == ExpressionType.Variable && s.Value.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).ToList();
 
-            var variables = new List<string>();
+            var variables = new List<VariableCompletionData>();
 
             foreach (var segment in segments)
-                if (!variables.Contains(segment.Value))
-                    variables.Add(segment.Value);
+            {
+                var variableObj = new VariableCompletionData(segment.Value);
+
+                if (!variables.Contains(variableObj))
+                    variables.Add(variableObj);
+            }
 
             return variables;
         }
@@ -137,9 +169,132 @@ namespace SMAStudio.Language
         /// </summary>
         /// <param name="contextualPosition"></param>
         /// <returns></returns>
-        public List<string> GetParameters(int contextualPosition)
+        public List<ParameterCompletionData> GetParameters(int contextualPosition, string pattern = "")
         {
-            throw new NotImplementedException();
+            /*List<string> parameters = new List<string>();
+
+            var context = GetContext(contextualPosition);
+
+            // An if statement consists of if ([segment1] [segment2] [segment3])
+            bool isOperator = false;
+
+            if (context.Count > 1)
+            {
+                var segment1 = context[2];
+                if (segment1.Type == ExpressionType.LanguageConstruct && segment1.Value.Equals("if", StringComparison.InvariantCultureIgnoreCase))
+                    isOperator = true;
+            }
+
+            if (isOperator)
+                parameters.AddRange(_parser.Operators);
+
+            if (!isOperator)
+                parameters.AddRange(_reservedParameters);
+
+            parameters.Sort();
+
+            return parameters;*/
+            // TODO: Rewrite the above code
+
+            // Try to find out the cmdlet we're requesting parameters for
+            var context = GetContext(contextualPosition);
+            var parsedCmdlet = default(PowershellSegment);
+
+            // An if statement consists of if ([segment1] [segment2] [segment3])
+            bool isOperator = false;
+
+            if (context.Count > 1)
+            {
+                var segment1 = context[2];
+                if (segment1.Type == ExpressionType.LanguageConstruct && segment1.Value.Equals("if", StringComparison.InvariantCultureIgnoreCase))
+                    isOperator = true;
+            }
+
+            if (!isOperator)
+            {
+                foreach (var item in context)
+                {
+                    if (item.Type == ExpressionType.Keyword)
+                    {
+                        parsedCmdlet = item;
+                        break;
+                    }
+                }
+
+                if (parsedCmdlet == null)
+                    return new List<ParameterCompletionData>();
+            }
+            else
+            {
+                // Operator
+                var list = new List<ParameterCompletionData>();
+                list.AddRange(_parser.Operators.Select(o => new ParameterCompletionData("", o, false)).ToList());
+
+                return list;
+            }
+
+            return GetParameters(parsedCmdlet.Value);
+        }
+
+        /// <summary>
+        /// Returns a list of parameters for a cmdlet
+        /// </summary>
+        /// <param name="cmdlet"></param>
+        /// <returns></returns>
+        public List<ParameterCompletionData> GetParameters(string cmdletStr)
+        {
+            CmdletCompletionData cmdlet = null;
+            lock (_standardCmdlets)
+            {
+                cmdlet = _standardCmdlets.Where(c => c != null && c.Text.ToLower().Equals(cmdletStr.ToLower())).FirstOrDefault();
+            }
+
+            lock (_cmdlets)
+            {
+                if (cmdlet == null)
+                    cmdlet = _cmdlets.Where(c => c != null && c.Text.ToLower().Equals(cmdletStr.ToLower())).FirstOrDefault();
+            }
+
+            if (cmdlet == null)
+                return new List<ParameterCompletionData>();
+
+            if (cmdlet.Parameters.Count == 0)
+            {
+                using (var context = PowerShell.Create())
+                {
+                    context.AddScript("Get-Command " + cmdlet.ToString() + " | select -expandproperty parameters");
+                    var paramsFromPs = context.Invoke();
+
+                    if (paramsFromPs.Count > 0)
+                    {
+                        var result = (Dictionary<string, ParameterMetadata>)paramsFromPs[0].BaseObject;
+
+                        //foreach (var key in result.Keys)
+                        lock (cmdlet)
+                        {
+                            Parallel.ForEach(result.Keys, (key) =>
+                            {
+                                var paramObj = new ParameterCompletionData(result[key].ParameterType.Name, result[key].Name, result[key].ParameterType.Name.Equals("SwitchParameter"));
+
+                                if (paramObj != null)
+                                    cmdlet.Parameters.Add(paramObj);
+                            });
+                        }
+                    }
+                }
+
+                CacheCmdlets(_standardCmdlets);
+            }
+
+            return cmdlet.Parameters.Where(p => p != null).OrderBy(p => p.DisplayText).ToList();
+        }
+
+        public List<CmdletCompletionData> GetLanguageConstructs(string pattern = "")
+        {
+            if (pattern == null)
+                pattern = string.Empty;
+
+            return _parser.Language.Where(l => l.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).Select(l => new CmdletCompletionData(l)).ToList();
         }
 
         /// <summary>
@@ -186,9 +341,12 @@ namespace SMAStudio.Language
             return modules;
         }
 
-        public List<string> GetCmdlets(int contextualPosition, string pattern = "")
+        public List<CmdletCompletionData> GetCmdlets(int contextualPosition, string pattern = "")
         {
-            var foundCmdlets = new List<string>();
+            var foundCmdlets = new List<CmdletCompletionData>();
+
+            if (pattern == null)
+                pattern = string.Empty;
 
             // Get all modules that we need to look into as well
             var modules = GetImportedModules(contextualPosition);
@@ -196,18 +354,42 @@ namespace SMAStudio.Language
             // Standard powershell modules (System32 and Program Files)
             if (_standardCmdlets.Count == 0)
             {
-                using (var context = PowerShell.Create())
+                if (File.Exists(Path.Combine(AppHelper.StartupPath, "data", "cmdlets.xml")))
                 {
-                    context.AddScript("Get-Command");
+                    var reader = (TextReader)new StreamReader(Path.Combine(AppHelper.StartupPath, "data", "cmdlets.xml"));
 
-                    //var cmdlets = await Task.Factory.FromAsync(context.BeginInvoke(), pResult => context.EndInvoke(pResult));
-                    var cmdlets = context.Invoke();
+                    var serializer = new XmlSerializer(typeof(List<CmdletCompletionData>));
+                    _standardCmdlets = (List<CmdletCompletionData>)serializer.Deserialize(reader);
 
-                    foreach (var cmdlet in cmdlets)
-                        _standardCmdlets.Add(cmdlet.ToString());
-
-                    Console.WriteLine("Cmdlets = " + cmdlets.Count);
+                    reader.Close();
+                    serializer = null;
                 }
+
+                if (_standardCmdlets.Count == 0)
+                {
+                    using (var context = PowerShell.Create())
+                    {
+                        context.AddScript("Get-Command");
+                        var cmdlets = context.Invoke();
+
+                        //foreach (var cmdlet in cmdlets)
+                        lock (_standardCmdlets)
+                        {
+                            Parallel.ForEach(cmdlets, (cmdlet) =>
+                            {
+                                var cmdletObj = new CmdletCompletionData(cmdlet.ToString());
+
+                                if (cmdletObj != null)
+                                    _standardCmdlets.Add(cmdletObj);
+                                /**/
+                            });
+                        }
+
+                        Console.WriteLine("Cmdlets = " + cmdlets.Count);
+                    }
+                }
+
+                CacheCmdlets(_standardCmdlets);
             }
 
             // Get module cmdlets
@@ -217,21 +399,54 @@ namespace SMAStudio.Language
                 {
                     context.AddScript("Import-Module " + String.Join(",", modules) + "; Get-Command -Module " + String.Join(",", modules));
 
-                    //var cmdlets = await Task.Factory.FromAsync(context.BeginInvoke(), pResult => context.EndInvoke(pResult));
                     var cmdlets = context.Invoke();
 
-                    foreach (var cmdlet in cmdlets)
-                        _cmdlets.Add(cmdlet.ToString());
+                    lock (_cmdlets)
+                    {
+                        foreach (var cmdlet in cmdlets)
+                        {
+                            var cmdletObj = new CmdletCompletionData(cmdlet.ToString());
+                            _cmdlets.Add(cmdletObj);
+                        }
+                    }
 
                     Console.WriteLine("Cmdlets = " + cmdlets.Count);
                 }
             }
 
-            foundCmdlets.AddRange(_standardCmdlets.Where(c => c.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).ToList());
-            foundCmdlets.AddRange(_cmdlets.Where(c => c.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).ToList());
-            foundCmdlets.AddRange(_language.Where(l => l.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).ToList());
+            lock (_syncLock)
+            {
+                foundCmdlets.AddRange(_standardCmdlets.Where(c => c != null && c.Text.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).ToList());
+                foundCmdlets.AddRange(_cmdlets.Where(c => c != null && c.Text.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).ToList());
+                foundCmdlets.AddRange(_parser.Language.Where(l => l.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).Select(l => new CmdletCompletionData(l)).ToList());
+            }
 
             return foundCmdlets;
+        }
+
+        /// <summary>
+        /// Cache any loaded cmdlets to save us from enumerating painfully slow Powershell commands
+        /// </summary>
+        /// <param name="cmdlets"></param>
+        private void CacheCmdlets(List<CmdletCompletionData> cmdlets)
+        {
+            // cache this info to disk since this most likely won't change that much over time
+            if (!Directory.Exists(Path.Combine(AppHelper.StartupPath, "data")))
+            {
+                Directory.CreateDirectory(Path.Combine(AppHelper.StartupPath, "data"));
+            }
+
+            lock (_syncLock)
+            {
+                File.Delete(Path.Combine(AppHelper.StartupPath, "data", "cmdlets.xml"));
+
+                var serializer = new XmlSerializer(typeof(List<CmdletCompletionData>));
+                var textWriter = new StreamWriter(Path.Combine(AppHelper.StartupPath, "data", "cmdlets.xml"));
+                serializer.Serialize(textWriter, cmdlets);
+
+                textWriter.Flush();
+                textWriter.Close();
+            }
         }
     }
 }

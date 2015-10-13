@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace SMAStudio.Editor.CodeCompletion
 {
-    public class PowershellCompletionEngine
+    /*public class PowershellCompletionEngine
     {
         private TextDocument _document;
         private IProjectContent _projectContent;
@@ -171,19 +171,11 @@ namespace SMAStudio.Editor.CodeCompletion
                     break;
 
                 default:
-                    /*var previousToken = GetPreviousToken(tokens, token);
-
-                    if (previousToken != null && previousToken.Kind == TokenKind.Parameter)
-                    {
-                        // The previous parameter (next to this one) is a Parameter for a cmdlet/runbook.
-                        // We need to do context aware parameter completion here
-                        return HandleParameterCompletion(tokens, token, controlSpace);
-                    }*/
 
                     char prevCh = _offset > 2 ? _document.GetCharAt(_offset - 2) : ';';
-                    char nextCh = _offset < _document.TextLength ? _document.GetCharAt(_offset) : ' ';
-					const string allowedChars = ";,.[](){}+-*/%^?:&|~!<>=";
-
+                    char nextCh = _offset < _document.TextLength ? _document.GetCharAt(_offset) : ' ';*/
+					//const string allowedChars = ";,.[](){}+-*/%^?:&|~!<>=";
+    /*
 					if ((!Char.IsWhiteSpace(nextCh) && allowedChars.IndexOf(nextCh) < 0) || !(Char.IsWhiteSpace(prevCh) || allowedChars.IndexOf(prevCh) >= 0)) {
 						if (!controlSpace)
 							return null;
@@ -276,7 +268,7 @@ namespace SMAStudio.Editor.CodeCompletion
 
                 foreach (var param in parameters)
                 {
-                    result.Add(new ParameterCompletionData(param, (node.TokenFlags == TokenFlags.CommandName)));
+                    //result.Add(new ParameterCompletionData(param, (node.TokenFlags == TokenFlags.CommandName)));
                 }
             }
             else
@@ -289,7 +281,7 @@ namespace SMAStudio.Editor.CodeCompletion
                     if (!property.CanWrite || property.Name.Equals("CommandRuntime"))
                         continue;
 
-                    result.Add(new ParameterCompletionData(property, (node.TokenFlags == TokenFlags.CommandName)));
+                    //result.Add(new ParameterCompletionData(property, (node.TokenFlags == TokenFlags.CommandName)));
                 }
             }
 
@@ -473,25 +465,6 @@ namespace SMAStudio.Editor.CodeCompletion
         }
 
         /// <summary>
-        /// Finds the token that has TokenFlag set to CommandName starting at startOffset and walking backwards
-        /// </summary>
-        /// <param name="tokens">Token list</param>
-        /// <param name="startOffset">Offset to start at</param>
-        /// <returns>Token or null</returns>
-        /*private Token FindCommandToken(Token[] tokens, int startOffset)
-        {
-            while (startOffset > 0)
-            {
-                if (tokens[startOffset].TokenFlags == TokenFlags.CommandName)
-                    return tokens[startOffset];
-
-                startOffset--;
-            }
-
-            return null;
-        }*/
-
-        /// <summary>
         /// Tries to find a ParamBlockAst in the parsed scriptBlock. This is used to extract
         /// the parameters for the script from (context aware completion)
         /// </summary>
@@ -537,5 +510,5 @@ namespace SMAStudio.Editor.CodeCompletion
             return null;
         }
         #endregion
-    }
+    }*/
 }

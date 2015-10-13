@@ -46,6 +46,7 @@ namespace SMAStudio
             get { return Core.Version; }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         public string License
         {
             get

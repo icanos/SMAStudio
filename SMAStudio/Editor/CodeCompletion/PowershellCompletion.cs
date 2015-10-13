@@ -19,7 +19,7 @@ namespace SMAStudio.Editor.CodeCompletion
     /// <summary>
     /// TODO: Implement aliases for parameters and cmdlets
     /// </summary>
-    public class PowershellCompletion
+    /*public class PowershellCompletion
     {
         //private List<CompletionData> _completionData;
         private IProjectContent _projectContent;
@@ -43,17 +43,6 @@ namespace SMAStudio.Editor.CodeCompletion
                 });
 
             // Add common parameters
-            /*_completionData.Add(new ParameterCompletionData("Debug"));
-            _completionData.Add(new ParameterCompletionData("ErrorAction"));
-            _completionData.Add(new ParameterCompletionData("ErrorVariable"));
-            _completionData.Add(new ParameterCompletionData("OutVariable"));
-            _completionData.Add(new ParameterCompletionData("OutBuffer"));
-            _completionData.Add(new ParameterCompletionData("Verbose"));
-            _completionData.Add(new ParameterCompletionData("WarningAction"));
-            _completionData.Add(new ParameterCompletionData("WarningVariable"));
-            _completionData.Add(new ParameterCompletionData("Confirm"));
-            _completionData.Add(new ParameterCompletionData("WhatIf"));
-            _completionData.Add(new ParameterCompletionData("UseTransaction"));*/
 
             Core.Log.DebugFormat("Init code completion, loading base cmdlets: {0}", total.Elapsed);
         }
@@ -123,5 +112,5 @@ namespace SMAStudio.Editor.CodeCompletion
 
             return result;
         }
-    }
+    }*/
 }

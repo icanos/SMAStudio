@@ -8,16 +8,19 @@ using SMAStudio.Editor.CodeCompletion;
 using SMAStudio.Editor.CodeCompletion.DataItems;
 using SMAStudio.Language;
 using SMAStudio.Resources;
+using SMAStudio.Services;
 using SMAStudio.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Management.Automation.Language;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml;
@@ -81,24 +84,53 @@ namespace SMAStudio.Editor
                 {
                     // Whenever a non-letter is typed while the completion window is open,
                     // insert the currently element.
-                    //_completionWindow.CompletionList.RequestInsertion(e);
+                    _completionWindow.CompletionList.RequestInsertion(e);
                 }
             }
-            else if (e.Text.Length > 0)
-                Context.SetContent(Text);
+            //else if (e.Text.Length > 0)
+                
         }
 
         private void OnTextEntered(object sender, TextCompositionEventArgs e)
         {
-            ShowCompletion(e.Text, false);
+            var cachedCaretOffset = CaretOffset;
+            var cachedText = Text;
+
+            AsyncService.Execute(System.Threading.ThreadPriority.BelowNormal, delegate()
+            {
+                Context.SetContent(cachedText);
+
+                var contextName = Context.GetContextName(cachedCaretOffset);
+
+                if (contextName == ExpressionType.Parameter ||
+                    contextName == ExpressionType.Keyword ||
+                    contextName == ExpressionType.Variable)
+                {
+                    // We need to find the "whole" word before showing auto completion
+                    string word = "";
+
+                    for (int i = cachedCaretOffset - 1; i >= 0; i--)
+                    {
+                        var ch = cachedText[i];
+
+                        if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
+                            break;
+
+                        word = cachedText[i] + word;
+                    }
+
+                    ShowCompletion(cachedCaretOffset, contextName, word, false);
+                }
+            });
         }
 
         private void OnCtrlSpaceCommand(object sender, ExecutedRoutedEventArgs e)
         {
-            ShowCompletion(null, true);
+            var contextName = Context.GetContextName(CaretOffset);
+            ShowCompletion(CaretOffset, contextName, null, true);
         }
 
-        private void ShowCompletion(string text, bool controlSpace)
+        private void ShowCompletion(int cachedCaretOffset, ExpressionType contextName, string text, bool controlSpace)
         {
             if (_completionWindow != null)
                 return;
@@ -106,122 +138,70 @@ namespace SMAStudio.Editor
             if (!controlSpace && text.Trim().Length == 0)
                 return;
 
-            List<string> data = null;
-            var completionType = 0;
+            List<CompletionData> data = new List<CompletionData>();
 
-            // Cmdlets and variables
-            if (text != null && text.StartsWith("$"))
+            // Determine what kind of context we're in so that
+            // we can display the correct intellisense
+            switch (contextName)
             {
-                // Variables
-                data = Context.GetVariables(CaretOffset, text);
-                completionType = 1;
-            }
-            else if (text != null && text.StartsWith("-"))
-            {
-                // Parameters
-                completionType = 2;
-            }
-            else
-            {
-                // Cmdlets and stuff
-                data = text != null ? Context.GetCmdlets(CaretOffset, text) : Context.GetCmdlets(CaretOffset);
-                completionType = 3;
-
-                if (text != null)
-                {
-                    var componentsViewModel = Core.Resolve<IComponentsViewModel>();
-                    data.AddRange(componentsViewModel.Runbooks.Where(r => r.RunbookName.StartsWith(text, StringComparison.InvariantCultureIgnoreCase)).Select(r => r.RunbookName).ToList());
-
-                    data.Sort();
-                }
+                case ExpressionType.Variable:
+                    data.AddRange(Context.GetVariables(cachedCaretOffset, text));
+                    break;
+                case ExpressionType.Parameter:
+                    data.AddRange(Context.GetParameters(cachedCaretOffset, text));
+                    break;
+                case ExpressionType.Keyword:
+                    data.AddRange(Context.GetCmdlets(cachedCaretOffset, text));
+                    break;
+                case ExpressionType.LanguageConstruct:
+                    data.AddRange(Context.GetLanguageConstructs(text));
+                    break;
             }
 
             if (data == null || (data != null && data.Count == 0))
                 return;
 
-            _completionWindow = new CompletionWindow(TextArea);
-            _completionWindow.CloseWhenCaretAtBeginning = true;
-            _completionWindow.MinWidth = 260;
-
-            if (text != null)
-                _completionWindow.StartOffset -= text.Length;
-
-            foreach (var item in data)
+            AsyncService.ExecuteOnUIThread(delegate()
             {
-                var completionData = new CompletionData(item);
+                _completionWindow = new CompletionWindow(TextArea);
+                _completionWindow.CloseAutomatically = true;
+                _completionWindow.CloseWhenCaretAtBeginning = true;
+                _completionWindow.MinWidth = 260;
 
-                switch (completionType)
+                if (text != null)
+                    _completionWindow.StartOffset -= text.Length;
+
+                if (controlSpace)
+                    _completionWindow.StartOffset = cachedCaretOffset + 1;
+
+                foreach (var item in data)
+                    _completionWindow.CompletionList.CompletionData.Add(item);
+                /*foreach (var item in data)
                 {
-                    case 1:
-                        completionData.Image = Icons.GetImage(Icons.Variable);
-                        break;
-                    case 2:
-                        completionData.Image = Icons.GetImage(Icons.Tag);
-                        break;
-                    case 3:
-                        completionData.Image = Icons.GetImage(Icons.Runbook);
-                        break;
-                }
+                    var completionData = new CompletionData(item);
 
-                _completionWindow.CompletionList.CompletionData.Add(completionData);
-            }
-
-            if (text != null)
-                _completionWindow.CompletionList.SelectItem(text);
-
-            /*if (results.TriggerWordLength > 0)
-            {
-                _completionWindow.CompletionList.SelectItem(results.TriggerWord);
-            }*/
-
-            _completionWindow.Show();
-            _completionWindow.Closed += (o, args) => _completionWindow = null;
-
-            /*if (Completion == null)
-            {
-                Core.Log.DebugFormat("Code completion is null, cannot run code completion.");
-                return;
-            }
-
-            if (_completionWindow == null)
-            {
-                CodeCompletionResult results = null;
-                try
-                {
-                    int offset = 0;
-                    var doc = GetCompletionDocument(out offset);
-                    results = Completion.GetCompletions(doc, offset, controlSpace, null);
-                }
-                catch (Exception e)
-                {
-                    Core.Log.Error("Error while getting code completion: ", e);
-                }
-
-                if (results == null)
-                    return;
-
-                if (_completionWindow == null && results != null && results.CompletionData.Any())
-                {
-                    _completionWindow = new CompletionWindow(TextArea);
-                    _completionWindow.CloseWhenCaretAtBeginning = true;
-                    _completionWindow.MinWidth = 260;
-                    _completionWindow.StartOffset -= results.TriggerWordLength;
-
-                    IList<ICompletionData> data = _completionWindow.CompletionList.CompletionData;
-                    foreach (var completion in results.CompletionData.OrderBy(item => item.Text))
+                    switch (contextName)
                     {
-                        data.Add(completion);
+                        case ExpressionType.Variable:
+                            completionData.Image = Icons.GetImage(Icons.Variable);
+                            break;
+                        case ExpressionType.Parameter:
+                            completionData.Image = Icons.GetImage(Icons.Tag);
+                            break;
+                        case ExpressionType.Keyword:
+                            completionData.Image = Icons.GetImage(Icons.Runbook);
+                            break;
                     }
 
-                    if (results.TriggerWordLength > 0)
-                    {
-                        _completionWindow.CompletionList.SelectItem(results.TriggerWord);
-                    }
+                    _completionWindow.CompletionList.CompletionData.Add(completionData);
+                }*/
 
-                    _completionWindow.Show();
-                    _completionWindow.Closed += (o, args) => _completionWindow = null;
-                }
-            }*/
+                if (text != null)
+                    _completionWindow.CompletionList.SelectItem(text);
+
+                _completionWindow.Show();
+                _completionWindow.Closed += (o, args) => _completionWindow = null;
+            });
         }
 
         /// <summary>
@@ -285,7 +265,7 @@ namespace SMAStudio.Editor
 
         public void Dispose()
         {
-            
+            GC.SuppressFinalize(this);
         }
     }
 }

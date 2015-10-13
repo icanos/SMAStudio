@@ -12,6 +12,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Xml;
 
 namespace SMAStudio.Services
 {
@@ -389,10 +390,23 @@ namespace SMAStudio.Services
 
                 runbookViewModel.Runbook = runbook;
             }
+            catch (DataServiceClientException ex)
+            {
+                var xmlDoc = new XmlDocument();
+                xmlDoc.LoadXml(ex.Message);
+
+                var errorMessage = xmlDoc.SelectSingleNode("//error/message").InnerText;
+
+                Core.Log.Error("Error in runbook.", ex);
+                MessageBox.Show(errorMessage, "Parse Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                return false;
+            }
             catch (Exception e)
             {
                 Core.Log.Error("Something went wrong when checking in the runbook.", e);
                 MessageBox.Show("An error occurred when checking in the runbook. Refer to the logs for more information.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
                 return false;
             }
 

@@ -40,7 +40,7 @@ namespace SMAStudio
             }
         }
 
-        public const string SMA_STUDIO_NAME = " - SMA Studio 2014";
+        public const string SMA_STUDIO_NAME = " - SMA Studio 2015";
 
         private IAutoSaveService _autoSaveManager;
 
@@ -50,7 +50,7 @@ namespace SMAStudio
 
             InitializeComponent();
 
-            Core.Log.InfoFormat("\r\n\r\nStarted new intance of SMA Studio 2014 v " + Core.Version);
+            Core.Log.InfoFormat("\r\n\r\nStarted new intance of SMA Studio 2015 v " + Core.Version);
 
             Delegates();
             if (!ConfigureSettingsManager())
@@ -78,7 +78,7 @@ namespace SMAStudio
 
             ContextMenuConverter.DocumentReferenceContextMenu = (ContextMenu)Resources["DocumentReferenceContextMenu"];
 
-            Core.Log.DebugFormat("Successfully initialized SMA Studio 2014.");            
+            Core.Log.DebugFormat("Successfully initialized SMA Studio 2015.");            
         }
 
         private void ConfigureDataContexts()

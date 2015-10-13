@@ -80,7 +80,7 @@ namespace SMAStudio.Editor.Parsing
                     tokens = null;
 
                     // Sleep for 2 seconds
-                    Thread.Sleep(2 * 1000);
+                    Thread.Sleep(1 * 1000);
                 }
             }));
 
@@ -133,19 +133,19 @@ namespace SMAStudio.Editor.Parsing
                 document = _workspaceViewModel.CurrentDocument;
                 if (document == null)
                 {
-                    Thread.Sleep(2 * 1000);
+                    Thread.Sleep(1 * 1000);
                     return null;
                 }
 
                 if (!(document is RunbookViewModel))
                 {
-                    Thread.Sleep(2 * 1000);
+                    Thread.Sleep(1 * 1000);
                     return null;
                 }
 
                 if ((DateTime.Now - document.LastTimeKeyDown) < TimeSpan.FromSeconds(1))
                 {
-                    Thread.Sleep(2 * 1000);
+                    Thread.Sleep(1 * 1000);
                     return null;
                 }
 
@@ -315,6 +315,7 @@ namespace SMAStudio.Editor.Parsing
             document.Icon = Icons.Runbook;
 
             _errorListViewModel.RemoveErrorByRunbook(((RunbookViewModel)document).RunbookName);
+            _workspaceViewModel.StatusBarText = string.Empty;
         }
 
         public void Dispose()

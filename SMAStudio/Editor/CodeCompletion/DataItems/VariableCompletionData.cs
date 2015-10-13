@@ -7,18 +7,12 @@ using System.Threading.Tasks;
 
 namespace SMAStudio.Editor.CodeCompletion.DataItems
 {
-    class VariableCompletionData : CompletionData
+    public class VariableCompletionData : CompletionData
     {
-        private readonly Token _token;
-        private readonly Token _dataTypeToken;
-
-        public VariableCompletionData(Token token, Token dataTypeToken = null)
+        public VariableCompletionData(string variableName)
         {
-            _token = token;
-            _dataTypeToken = dataTypeToken;
-
-            DisplayText = _token.Text;
-            CompletionText = _token.Text;   // remove the $
+            DisplayText = variableName;
+            CompletionText = variableName;
         }
 
         private string _description;
@@ -26,10 +20,10 @@ namespace SMAStudio.Editor.CodeCompletion.DataItems
         {
             get
             {
-                if (_description == null)
+                /*if (_description == null)
                 {
                     _description = (_dataTypeToken != null ? _dataTypeToken.Text + " " : "") + DisplayText;
-                }
+                }*/
 
                 return _description;
             }

@@ -12,11 +12,22 @@ namespace SMAStudio.Language
         private ExpressionType _expr = ExpressionType.None;
 
         private List<PowershellSegment> _segments = new List<PowershellSegment>();
+        private List<string> _language = new List<string> { "if", "else", "elseif", "for", "foreach", "do", "while", "until", "switch", "break", "continue", "return" };
         private List<string> _operators = new List<string> { "-eq", "-gt", "-lt", "-le", "-ge", "-and", "-or", "-ne", "-like", "-notlike", "-match", "-notmatch", "-replace", "-contains", "-notcontains", "-shl", "-shr", "-in", "-notin" };
 
         public PowershellParser()
         {
             //_content = content;
+        }
+
+        public List<string> Operators
+        {
+            get { return _operators; }
+        }
+
+        public List<string> Language
+        {
+            get { return _language; }
         }
 
         public void Clear()
@@ -40,6 +51,38 @@ namespace SMAStudio.Language
                 var ch = tmpContent[i];
                 var nextCh = tmpContent.Length > i + 1 ? tmpContent[i + 1] : '\0';
 
+                if (_expr == ExpressionType.String || _expr == ExpressionType.QuotedString || _expr == ExpressionType.Comment || _expr == ExpressionType.MultilineComment)
+                {
+                    if (ch == '\n' && _expr != ExpressionType.MultilineComment)
+                    {
+                        chunk = CreateSegment(chunk, startPos, i);
+
+                        if (_expr != ExpressionType.MultilineComment)
+                            _expr = ExpressionType.None;
+
+                        continue;
+                    }
+                    else if (ch == '>' && _expr == ExpressionType.MultilineComment)
+                    {
+                        if (tmpContent[i - 1] == '#')
+                        {
+                            // End the multi line comment
+                            chunk = CreateSegment(chunk, startPos, i);
+                            _expr = ExpressionType.None;
+                            continue;
+                        }
+                    }
+                    else if (ch == '"' && _expr == ExpressionType.QuotedString)
+                    {
+                        chunk = CreateSegment(chunk, startPos, i);
+                        _expr = ExpressionType.None;
+                        continue;
+                    }
+
+                    chunk.Append(ch);
+                    continue;
+                }
+
                 switch (ch)
                 {
                     case ',':
@@ -52,26 +95,21 @@ namespace SMAStudio.Language
                         if (chunk.Length == 0)
                             continue;
 
-                        if (ch == ' ' && _expr == ExpressionType.QuotedString)
-                        {
-                            chunk.Append(ch);
-                            continue;
-                        }
-
                         if (_operators.Contains("-" + chunk.ToString()))
                             _expr = ExpressionType.Operator;
                         else if (chunk.ToString().Equals("Function", StringComparison.InvariantCultureIgnoreCase))
                             _expr = ExpressionType.Function;
-                        /*else if (chunk.ToString().Equals("Import-Module", StringComparison.InvariantCultureIgnoreCase) ||
-                            chunk.ToString().Equals("ipmo", StringComparison.InvariantCultureIgnoreCase))
-                            _expr = ExpressionType.ImportModule;*/
-
+                        else if (_language.Contains(chunk.ToString()))
+                            _expr = ExpressionType.LanguageConstruct;
+                        
                         chunk = CreateSegment(chunk, startPos, i);
 
                         if (_expr == ExpressionType.Parameter && nextCh != '-')
-                            _expr = ExpressionType.String;
+                            _expr = ExpressionType.None;
                         else if (_expr == ExpressionType.Keyword && (nextCh == '"' || char.IsLetter(nextCh)))
                             _expr = ExpressionType.String;
+                        else if (_expr == ExpressionType.MultilineComment)
+                            _expr = ExpressionType.MultilineComment;
                         else
                             _expr = ExpressionType.None;
                         break;
@@ -79,10 +117,9 @@ namespace SMAStudio.Language
                         // Parameter
                         if (_expr == ExpressionType.Keyword && chunk.Length > 0)
                         {
-                            chunk.Append(ch);
+                            
                         }
                         else if (chunk.Length == 0 && _expr != ExpressionType.QuotedString && _expr != ExpressionType.String)
-                        //else if (_expr == ExpressionType.Keyword)
                         {
                             _expr = ExpressionType.Parameter;
                         }
@@ -91,6 +128,7 @@ namespace SMAStudio.Language
                             _expr = ExpressionType.Operator;
                         }
 
+                        chunk.Append(ch);
                         break;
                     case '\r':
                         break;
@@ -111,12 +149,6 @@ namespace SMAStudio.Language
                         break;
                     case '(':
                         // Expression start, eg. (Get-Content -Path "C:\\Test\\Test.txt")
-                        if (_expr == ExpressionType.QuotedString)
-                        {
-                            chunk.Append(ch);
-                            continue;
-                        }
-
                         // we first need to take care of all data in the chunk before creating expression start
                         if (chunk.Length > 0)
                             chunk = CreateSegment(chunk, startPos, i);
@@ -130,12 +162,6 @@ namespace SMAStudio.Language
                         break;
                     case ')':
                         // Expression end, eg. (Get-Content -Path "C:\\Test\\Test.txt")
-                        if (_expr == ExpressionType.QuotedString)
-                        {
-                            chunk.Append(ch);
-                            continue;
-                        }
-
                         // we first need to take care of all data in the chunk before creating expression end
                         if (chunk.Length > 0)
                             chunk = CreateSegment(chunk, startPos, i);
@@ -146,15 +172,11 @@ namespace SMAStudio.Language
                             chunk.Append(ch);
                             chunk = CreateSegment(chunk, startPos, i);
                         }
+
+                        _expr = ExpressionType.None;
                         break;
                     case '{':
                         // Block start, eg. if (junk) {
-                        if (_expr == ExpressionType.QuotedString)
-                        {
-                            chunk.Append(ch);
-                            continue;
-                        }
-
                         // we first need to take care of all data in the chunk before creating block start
                         if (chunk.Length > 0)
                             chunk = CreateSegment(chunk, startPos, i);
@@ -168,12 +190,6 @@ namespace SMAStudio.Language
                         break;
                     case '}':
                         // Block end, eg. if (junk) {
-                        if (_expr == ExpressionType.QuotedString)
-                        {
-                            chunk.Append(ch);
-                            continue;
-                        }
-
                         // we first need to take care of all data in the chunk before creating block end
                         if (chunk.Length > 0)
                             chunk = CreateSegment(chunk, startPos, i);
@@ -186,12 +202,6 @@ namespace SMAStudio.Language
                         }
                         break;
                     case '[':
-                        if (_expr == ExpressionType.QuotedString)
-                        {
-                            chunk.Append(ch);
-                            continue;
-                        }
-
                         if (chunk.Length > 0)
                             chunk = CreateSegment(chunk, startPos, i);
 
@@ -205,12 +215,6 @@ namespace SMAStudio.Language
                         _expr = ExpressionType.Type;
                         break;
                     case ']':
-                        if (_expr == ExpressionType.QuotedString)
-                        {
-                            chunk.Append(ch);
-                            continue;
-                        }
-
                         if (chunk.Length > 0)
                             chunk = CreateSegment(chunk, startPos, i);
 
@@ -234,8 +238,26 @@ namespace SMAStudio.Language
                         _expr = ExpressionType.None;
                         break;
                     case ':':
-                        // .NET function call
+                        // .NET function call or ($Using:...)
                         _expr = ExpressionType.FunctionCall;
+                        chunk.Append(ch);
+                        break;
+                    case '<':
+                        _expr = ExpressionType.MultilineCommentStart;
+                        break;
+                    case '>':
+                        if (_expr == ExpressionType.MultilineComment)
+                        {
+                            chunk = CreateSegment(chunk, startPos, i);
+                            _expr = ExpressionType.None;
+                        }
+                        break;
+                    case '#':
+                        // Comment
+                        if (_expr == ExpressionType.MultilineCommentStart)
+                            _expr = ExpressionType.MultilineComment;
+                        else
+                            _expr = ExpressionType.Comment;
                         break;
                     default:
                         if ((_expr == ExpressionType.None ||
@@ -251,6 +273,11 @@ namespace SMAStudio.Language
                         chunk.Append(ch);
                         break;
                 }
+            }
+
+            if (chunk.Length != 0)
+            {
+                chunk = CreateSegment(chunk, startPos, contentLength);
             }
 
             return _segments;

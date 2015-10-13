@@ -313,6 +313,7 @@ namespace SMAStudio.ViewModels
         /// <summary>
         /// Returns the string of Tags defined on the runbook
         /// </summary>
+        private string _tags = string.Empty;
         public string Tags
         {
             get { return Runbook != null ? Runbook.Tags : ""; }

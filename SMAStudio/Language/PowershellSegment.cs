@@ -27,7 +27,12 @@ namespace SMAStudio.Language
         ImportModule,
         Type,
         TypeStart,
-        TypeEnd
+        TypeEnd,
+        Comment,
+        MultilineComment,
+        MultilineCommentStart,
+        MultilineCommentEnd,
+        LanguageConstruct
     }
 
     public class PowershellSegment

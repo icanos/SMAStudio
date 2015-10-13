@@ -14,6 +14,7 @@ using System.Windows.Controls;
 
 namespace SMAStudio.Util
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
     public class AutoSaveService : IAutoSaveService, IDisposable
     {
         private bool _running = true;

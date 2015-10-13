@@ -32,7 +32,30 @@ namespace SMAStudio.Editor.CodeCompletion.DataItems
 
         public virtual void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionRequestEventArgs)
         {
-            textArea.Document.Replace(completionSegment, CompletionText);
+            var text = textArea.Document.Text;
+            var caretOffset = textArea.Caret.Offset;
+            int startOffset = 0;
+
+            string word = "";
+
+            for (int i = caretOffset - 1; i >= 0; i--)
+            {
+                var ch = text[i];
+
+                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '(')
+                {
+                    startOffset = i + 1;
+                    break;
+                }
+
+                word = text[i] + word;
+            }
+
+            var segment = new TextSegment();
+            segment.StartOffset = startOffset;
+            segment.EndOffset = caretOffset;
+
+            textArea.Document.Replace(segment, CompletionText);
         }
 
         public object Content
