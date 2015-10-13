@@ -166,8 +166,6 @@
     <Compile Include="Editor\CodeCompletion\DataItems\ParameterCompletionData.cs" />
     <Compile Include="Editor\CodeCompletion\DataItems\RunbookCompletionData.cs" />
     <Compile Include="Editor\CodeCompletion\DataItems\VariableCompletionData.cs" />
-    <Compile Include="Editor\CodeCompletion\PowershellCompletion.cs" />
-    <Compile Include="Editor\CodeCompletion\PowershellCompletionEngine.cs" />
     <Compile Include="Language\PowershellContext.cs" />
     <Compile Include="Language\PowershellParser.cs" />
     <Compile Include="Language\PowershellSegment.cs" />

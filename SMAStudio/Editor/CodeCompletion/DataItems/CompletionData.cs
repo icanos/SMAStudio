@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using System.Xml.Serialization;
 
 namespace SMAStudio.Editor.CodeCompletion.DataItems
 {
@@ -23,7 +24,9 @@ namespace SMAStudio.Editor.CodeCompletion.DataItems
             Priority = 1;
         }
 
+        [XmlIgnore]
         public string TriggerWord { get; set; }
+        [XmlIgnore]
         public int TriggerWordLength { get; set; }
 
         public string DisplayText { get; set; }
@@ -58,6 +61,7 @@ namespace SMAStudio.Editor.CodeCompletion.DataItems
             textArea.Document.Replace(segment, CompletionText);
         }
 
+        [XmlIgnore]
         public object Content
         {
             get { return DisplayText; }
@@ -68,18 +72,21 @@ namespace SMAStudio.Editor.CodeCompletion.DataItems
             get { return Description; }
         }
 
+        [XmlIgnore]
         public virtual ImageSource Image
         {
             get;
             set;
         }
 
+        [XmlIgnore]
         public double Priority
         {
             get;
             set;
         }
 
+        [XmlIgnore]
         public string Text
         {
             get { return CompletionText; }

@@ -1,4 +1,5 @@
 ﻿using SMAStudio.Editor.CodeCompletion.DataItems;
+using SMAStudio.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Xml;
+using System.Xml.Serialization;
 
 namespace SMAStudio.Editor.CodeCompletion.DataItems
 {
@@ -35,6 +37,19 @@ namespace SMAStudio.Editor.CodeCompletion.DataItems
         {
             get;
             set;
+        }
+
+        [XmlIgnore]
+        public override ImageSource Image
+        {
+            get
+            {
+                return Icons.GetImage(Icons.Cmdlet);
+            }
+            set
+            {
+
+            }
         }
 
         private string _description;

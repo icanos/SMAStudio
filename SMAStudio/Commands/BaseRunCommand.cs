@@ -12,15 +12,34 @@ using System.Windows;
 
 namespace SMAStudio.Commands
 {
+    public enum PrepareStatus
+    {
+        Cancelled,
+        Run
+    }
+
+    public class RunParameter
+    {
+        public PrepareStatus Status { get; set; }
+
+        public List<NameValuePair> Parameters { get; set; }
+    }
+
     public abstract class BaseRunCommand
     {
-        internal List<NameValuePair> GetUserParameters(RunbookViewModel runbook)
+        internal RunParameter GetUserParameters(RunbookViewModel runbook)
         {
             var window = new PrepareRunWindow(runbook);
             window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
 
             if (!(bool)window.ShowDialog())
-                return null;
+            {
+                return new RunParameter
+                {
+                    Parameters = null,
+                    Status = PrepareStatus.Cancelled
+                };
+            }
 
             List<NameValuePair> parameters = null;
 
@@ -50,7 +69,11 @@ namespace SMAStudio.Commands
                 }
             }
 
-            return parameters;
+            return new RunParameter
+            {
+                Parameters = parameters,
+                Status = PrepareStatus.Run
+            };
         }
 
         internal void DisplayExecutionProgress(RunbookViewModel runbook, List<NameValuePair> parameters)

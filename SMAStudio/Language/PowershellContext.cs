@@ -245,6 +245,8 @@ namespace SMAStudio.Language
         public List<ParameterCompletionData> GetParameters(string cmdletStr)
         {
             CmdletCompletionData cmdlet = null;
+            var components = Core.Resolve<IComponentsViewModel>();
+
             lock (_standardCmdlets)
             {
                 cmdlet = _standardCmdlets.Where(c => c != null && c.Text.ToLower().Equals(cmdletStr.ToLower())).FirstOrDefault();
@@ -254,6 +256,28 @@ namespace SMAStudio.Language
             {
                 if (cmdlet == null)
                     cmdlet = _cmdlets.Where(c => c != null && c.Text.ToLower().Equals(cmdletStr.ToLower())).FirstOrDefault();
+            }
+
+            if (cmdlet == null)
+            {
+                var runbook = components.Runbooks.Where(r => r.RunbookName.ToLower().Equals(cmdletStr.ToLower())).FirstOrDefault();
+
+                if (runbook == null)
+                    return new List<ParameterCompletionData>();
+
+                var paramList = runbook.GetParameters(true);
+
+                if (paramList == null)
+                    return new List<ParameterCompletionData>();
+
+                var parameters = paramList
+                    .Select(p => 
+                        new ParameterCompletionData(
+                            p.TypeName, 
+                            p.Name, 
+                            false)).ToList();
+
+                return parameters;
             }
 
             if (cmdlet == null)
@@ -342,9 +366,9 @@ namespace SMAStudio.Language
             return modules;
         }
 
-        public List<CmdletCompletionData> GetCmdlets(int contextualPosition, string pattern = "")
+        public List<CompletionData> GetCmdlets(int contextualPosition, string pattern = "")
         {
-            var foundCmdlets = new List<CmdletCompletionData>();
+            var foundCmdlets = new List<CompletionData>();
 
             if (pattern == null)
                 pattern = string.Empty;
@@ -357,13 +381,22 @@ namespace SMAStudio.Language
             {
                 if (File.Exists(Path.Combine(AppHelper.CachePath, "data", "cmdlets.xml")))
                 {
-                    var reader = (TextReader)new StreamReader(Path.Combine(AppHelper.CachePath, "data", "cmdlets.xml"));
+                    TextReader reader = null;
 
-                    var serializer = new XmlSerializer(typeof(List<CmdletCompletionData>));
-                    _standardCmdlets = (List<CmdletCompletionData>)serializer.Deserialize(reader);
+                    try
+                    {
+                        reader = (TextReader)new StreamReader(Path.Combine(AppHelper.CachePath, "data", "cmdlets.xml"));
 
-                    reader.Close();
-                    serializer = null;
+                        var serializer = new XmlSerializer(typeof(List<CmdletCompletionData>));
+                        _standardCmdlets = (List<CmdletCompletionData>)serializer.Deserialize(reader);
+
+                        serializer = null;
+                    }
+                    catch (Exception ex)
+                    {
+                        Core.Log.Error("Unable to read cmdlet cache", ex);
+                        reader.Close();
+                    }
                 }
 
                 if (_standardCmdlets.Count == 0)
@@ -387,8 +420,6 @@ namespace SMAStudio.Language
                                 }
                             });
                         }
-
-                        Console.WriteLine("Cmdlets = " + cmdlets.Count);
                     }
                 }
 
@@ -436,7 +467,7 @@ namespace SMAStudio.Language
                 foundCmdlets.AddRange(_standardCmdlets.Where(c => c != null && c.Text.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).ToList());
                 foundCmdlets.AddRange(_cmdlets.Where(c => c != null && c.Text.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).ToList());
                 foundCmdlets.AddRange(_parser.Language.Where(l => l.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).Select(l => new CmdletCompletionData(l)).ToList());
-                foundCmdlets.AddRange(components.Runbooks.Where(r => r.RunbookName.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).Select(r => new CmdletCompletionData(r.RunbookName)).ToList());
+                foundCmdlets.AddRange(components.Runbooks.Where(r => r.RunbookName.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).Select(r => new RunbookCompletionData(r.Runbook)).ToList());
             }
 
             return foundCmdlets;
@@ -456,12 +487,19 @@ namespace SMAStudio.Language
 
             lock (_syncLock)
             {
-                var serializer = new XmlSerializer(typeof(List<CmdletCompletionData>));
-                var textWriter = new StreamWriter(Path.Combine(AppHelper.CachePath, "data", "cmdlets.xml"));
-                serializer.Serialize(textWriter, cmdlets);
+                try
+                {
+                    var serializer = new XmlSerializer(typeof(List<CmdletCompletionData>));
+                    var textWriter = new StreamWriter(Path.Combine(AppHelper.CachePath, "data", "cmdlets.xml"));
+                    serializer.Serialize(textWriter, cmdlets);
 
-                textWriter.Flush();
-                textWriter.Close();
+                    textWriter.Flush();
+                    textWriter.Close();
+                }
+                catch (Exception)
+                {
+                    // Do nothing!
+                }
             }
         }
     }

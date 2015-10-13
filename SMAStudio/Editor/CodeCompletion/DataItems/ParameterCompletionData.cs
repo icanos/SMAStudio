@@ -1,10 +1,13 @@
-﻿using System;
+﻿using SMAStudio.Resources;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation.Language;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
+using System.Xml.Serialization;
 
 namespace SMAStudio.Editor.CodeCompletion.DataItems
 {
@@ -25,10 +28,10 @@ namespace SMAStudio.Editor.CodeCompletion.DataItems
             _parameterName = parameterName;
             _switchParameter = switchParameter;
 
-            if (!_switchParameter && !String.IsNullOrEmpty(_typeName))
+            if (!String.IsNullOrEmpty(_typeName))
                 DisplayText = _parameterName + ": " + _typeName;
-            else if (_switchParameter && !String.IsNullOrEmpty(_typeName))
-                DisplayText = "[switch] " + _parameterName;
+            //else if (_switchParameter && !String.IsNullOrEmpty(_typeName))
+            //    DisplayText = "[switch] " + _parameterName;
             else
                 DisplayText = _parameterName;
 
@@ -36,6 +39,22 @@ namespace SMAStudio.Editor.CodeCompletion.DataItems
                 CompletionText = "-" + _parameterName;
             else
                 CompletionText = _parameterName;
+        }
+
+        [XmlIgnore]
+        public override ImageSource Image
+        {
+            get
+            {
+                if (DisplayText.Contains("SwitchParameter"))
+                    return Icons.GetImage(Icons.ParseError);
+                
+                return Icons.GetImage(Icons.Property);
+            }
+            set
+            {
+
+            }
         }
 
         private string _description;

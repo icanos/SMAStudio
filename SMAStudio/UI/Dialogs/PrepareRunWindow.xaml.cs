@@ -39,7 +39,7 @@ namespace SMAStudio
 
         private void PrepareRunWindowLoaded(object sender, RoutedEventArgs e)
         {
-            Token[] tokens;
+            /*Token[] tokens;
             ParseError[] parseErrors;
 
             var scriptBlock = Parser.ParseInput(_runbookViewModel.Content, out tokens, out parseErrors);
@@ -85,7 +85,10 @@ namespace SMAStudio
                 }
 
                 Inputs = Inputs.OrderBy(i => i.Name).ToObservableCollection();
-            }
+            }*/
+
+            var parameters = _runbookViewModel.GetParameters();
+            Inputs = parameters.OrderBy(i => i.Name).ToObservableCollection();
         }
 
         public ObservableCollection<UIInputParameter> Inputs
@@ -94,7 +97,7 @@ namespace SMAStudio
             set;
         }
 
-        private string ConvertToNiceName(string parameterName)
+        /*private string ConvertToNiceName(string parameterName)
         {
             if (parameterName == null)
                 return string.Empty;
@@ -107,7 +110,7 @@ namespace SMAStudio
 
             return parameterName;
         }
-
+        */
         private void Run_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;

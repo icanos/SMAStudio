@@ -81,13 +81,19 @@ namespace SMAStudio.Commands
             // Retrieve any parameters and their input values from the user
             var parameters = GetUserParameters(runbook);
 
+            if (parameters.Status == PrepareStatus.Cancelled)
+            {
+                Core.Log.DebugFormat("User cancelled test run.");
+                return;
+            }
+
             try
             {
-                Guid? jobGuid = new Guid?(runbook.Runbook.StartRunbook(_api.Current, parameters));
+                Guid? jobGuid = new Guid?(runbook.Runbook.StartRunbook(_api.Current, parameters.Parameters));
                 runbook.JobID = (Guid)jobGuid;
 
                 // Display execution progress
-                DisplayExecutionProgress(runbook, parameters);
+                DisplayExecutionProgress(runbook, parameters.Parameters);
             }
             catch (DataServiceQueryException ex)
             {

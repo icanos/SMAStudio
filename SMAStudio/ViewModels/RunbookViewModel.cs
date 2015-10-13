@@ -20,6 +20,8 @@ using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Snippets;
 using System.Windows.Controls;
+using System.Management.Automation.Language;
+using System.Windows;
 
 namespace SMAStudio.ViewModels
 {
@@ -137,6 +139,83 @@ namespace SMAStudio.ViewModels
         public void DocumentLoaded()
         {
             
+        }
+
+        /// <summary>
+        /// Returns a list of parameters this runbook has defined
+        /// </summary>
+        /// <param name="silent">If set to true, it doesn't show any message boxes etc</param>
+        /// <returns></returns>
+        public List<UIInputParameter> GetParameters(bool silent = false)
+        {
+            var parameters = new List<UIInputParameter>();
+            Token[] tokens;
+            ParseError[] parseErrors;
+
+            var scriptBlock = Parser.ParseInput(Content, out tokens, out parseErrors);
+
+            if ((scriptBlock.EndBlock == null || scriptBlock.EndBlock.Statements.Count == 0))
+            {
+                if (!silent)
+                    MessageBox.Show("Your runbook is broken and it's possible that the runbook won't run. Please fix any errors.", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                
+                return null;
+            }
+
+            var functionBlock = (FunctionDefinitionAst)scriptBlock.EndBlock.Statements[0];
+
+            if (functionBlock.Body.ParamBlock != null)
+            {
+                if (functionBlock.Body.ParamBlock.Parameters == null)
+                {
+                    Core.Log.InfoFormat("Runbook contains ParamBlock but no Parameters.");
+                    return null;
+                }
+
+                foreach (var param in functionBlock.Body.ParamBlock.Parameters)
+                {
+                    try
+                    {
+                        AttributeBaseAst attrib = null;
+                        attrib = param.Attributes[param.Attributes.Count - 1]; // always the last one
+
+                        var input = new UIInputParameter
+                        {
+                            Name = ConvertToNiceName(param.Name.Extent.Text),
+                            Command = param.Name.Extent.Text.Substring(1),                  // Remove the $
+                            IsArray = (attrib.TypeName.IsArray ? true : false),
+                            TypeName = attrib.TypeName.Name
+                        };
+
+                        parameters.Add(input);
+                    }
+                    catch (Exception ex)
+                    {
+                        Core.Log.Error("Unable to create a UIInputParameter for a runbook parameter.", ex);
+
+                        if (!silent)
+                            MessageBox.Show("An error occurred when enumerating the runbook parameters. Please refer to the logs for more information", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+
+                //parameters = parameters.OrderBy(i => i.Name).ToObservableCollection();
+            }
+
+            return parameters;
+        }
+
+        private string ConvertToNiceName(string parameterName)
+        {
+            if (parameterName == null)
+                return string.Empty;
+
+            if (parameterName.Length == 0)
+                return string.Empty;
+
+            parameterName = parameterName.Replace("$", "");
+            parameterName = char.ToUpper(parameterName[0]) + parameterName.Substring(1);
+
+            return parameterName;
         }
 
         #region Properties

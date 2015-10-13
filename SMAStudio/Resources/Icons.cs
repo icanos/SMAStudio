@@ -16,6 +16,8 @@ namespace SMAStudio.Resources
         public const string Credential = "Icons/_Keyword.png";
         public const string Tag = "Icons/_Folder.png";
         public const string Schedule = "Icons/calendar.png";
+        public const string Property = "Icons/_Property.png";
+        public const string Cmdlet = "Icons/_Keyword.png";
 
         private static Dictionary<string, ImageSource> _imageCache = new Dictionary<string, ImageSource>();
 

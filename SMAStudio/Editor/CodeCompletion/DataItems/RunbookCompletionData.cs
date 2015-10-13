@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using System.Xml.Serialization;
 
 namespace SMAStudio.Editor.CodeCompletion.DataItems
 {
@@ -24,6 +25,7 @@ namespace SMAStudio.Editor.CodeCompletion.DataItems
             CompletionText = runbook.RunbookName;
         }
 
+        [XmlIgnore]
         public override ImageSource Image
         {
             get
