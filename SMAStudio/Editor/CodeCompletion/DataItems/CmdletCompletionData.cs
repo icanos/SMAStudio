@@ -26,6 +26,11 @@ namespace SMAStudio.Editor.CodeCompletion.DataItems
             Parameters = new List<ParameterCompletionData>();
         }
 
+        public override string ToString()
+        {
+            return DisplayText;
+        }
+
         public List<ParameterCompletionData> Parameters
         {
             get;

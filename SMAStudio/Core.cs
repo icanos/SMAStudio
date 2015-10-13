@@ -94,6 +94,16 @@ namespace SMAStudio
             _container.RegisterType<ICommand, TestCommand>("Test");
 
             VerifyVersion();
+
+            Application.Current.DispatcherUnhandledException += UnhandledExceptionHandler;
+        }
+
+        private static void UnhandledExceptionHandler(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            Log.Error("Unhandled exception.", e.Exception);
+            MessageBox.Show("Oh no, SMA Studio just crashed, please restart and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+            e.Handled = false;
         }
 
         public static T Resolve<T>()

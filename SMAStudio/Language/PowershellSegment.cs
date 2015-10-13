@@ -54,7 +54,8 @@ namespace SMAStudio.Language
 
         public override string ToString()
         {
-            return "(" + Start + ":" + Stop + ") " + Type.ToString() + ": " + Value;
+            //return "(" + Start + ":" + Stop + ") " + Type.ToString() + ": " + Value;
+            return Value;
         }
     }
 }

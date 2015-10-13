@@ -380,8 +380,10 @@ namespace SMAStudio.Language
                                 var cmdletObj = new CmdletCompletionData(cmdlet.ToString());
 
                                 if (cmdletObj != null)
-                                    _standardCmdlets.Add(cmdletObj);
-                                /**/
+                                {
+                                    if (_standardCmdlets.FirstOrDefault(c => c.DisplayText.Equals(cmdlet.ToString())) == null)
+                                        _standardCmdlets.Add(cmdletObj);
+                                }
                             });
                         }
 
@@ -392,8 +394,18 @@ namespace SMAStudio.Language
                 CacheCmdlets(_standardCmdlets);
             }
 
+            bool hasNewModules = false;
+            foreach (var mod in modules)
+            {
+                if (!_cachedModules.Contains(mod))
+                {
+                    hasNewModules = true;
+                    break;
+                }
+            }
+
             // Get module cmdlets
-            if (!_cachedModules.Equals(modules))
+            if (hasNewModules)
             {
                 using (var context = PowerShell.Create())
                 {
@@ -406,11 +418,11 @@ namespace SMAStudio.Language
                         foreach (var cmdlet in cmdlets)
                         {
                             var cmdletObj = new CmdletCompletionData(cmdlet.ToString());
-                            _cmdlets.Add(cmdletObj);
+
+                            if (_cmdlets.FirstOrDefault(c => c.DisplayText.Equals(cmdlet.ToString())) == null)
+                                _cmdlets.Add(cmdletObj);
                         }
                     }
-
-                    Console.WriteLine("Cmdlets = " + cmdlets.Count);
                 }
             }
 
