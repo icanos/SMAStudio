@@ -1,6 +1,7 @@
 ﻿using SMAStudio.Editor.CodeCompletion.DataItems;
 using SMAStudio.Services;
 using SMAStudio.Util;
+using SMAStudio.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -372,17 +373,17 @@ namespace SMAStudio.Language
                         context.AddScript("Get-Command");
                         var cmdlets = context.Invoke();
 
-                        //foreach (var cmdlet in cmdlets)
                         lock (_standardCmdlets)
                         {
+                            _standardCmdlets.Clear();
+
                             Parallel.ForEach(cmdlets, (cmdlet) =>
                             {
                                 var cmdletObj = new CmdletCompletionData(cmdlet.ToString());
 
                                 if (cmdletObj != null)
                                 {
-                                    if (_standardCmdlets.FirstOrDefault(c => c.DisplayText.Equals(cmdlet.ToString())) == null)
-                                        _standardCmdlets.Add(cmdletObj);
+                                    _standardCmdlets.Add(cmdletObj);
                                 }
                             });
                         }
@@ -415,22 +416,27 @@ namespace SMAStudio.Language
 
                     lock (_cmdlets)
                     {
+                        _cmdlets.Clear();
+
                         foreach (var cmdlet in cmdlets)
                         {
                             var cmdletObj = new CmdletCompletionData(cmdlet.ToString());
 
-                            if (_cmdlets.FirstOrDefault(c => c.DisplayText.Equals(cmdlet.ToString())) == null)
-                                _cmdlets.Add(cmdletObj);
+                            _cmdlets.Add(cmdletObj);
                         }
                     }
                 }
             }
+
+            // We want to auto complete names of the runbooks too
+            var components = Core.Resolve<IComponentsViewModel>();
 
             lock (_syncLock)
             {
                 foundCmdlets.AddRange(_standardCmdlets.Where(c => c != null && c.Text.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).ToList());
                 foundCmdlets.AddRange(_cmdlets.Where(c => c != null && c.Text.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).ToList());
                 foundCmdlets.AddRange(_parser.Language.Where(l => l.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).Select(l => new CmdletCompletionData(l)).ToList());
+                foundCmdlets.AddRange(components.Runbooks.Where(r => r.RunbookName.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase)).Select(r => new CmdletCompletionData(r.RunbookName)).ToList());
             }
 
             return foundCmdlets;
