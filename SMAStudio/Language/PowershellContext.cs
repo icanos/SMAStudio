@@ -354,9 +354,9 @@ namespace SMAStudio.Language
             // Standard powershell modules (System32 and Program Files)
             if (_standardCmdlets.Count == 0)
             {
-                if (File.Exists(Path.Combine(AppHelper.StartupPath, "data", "cmdlets.xml")))
+                if (File.Exists(Path.Combine(AppHelper.CachePath, "data", "cmdlets.xml")))
                 {
-                    var reader = (TextReader)new StreamReader(Path.Combine(AppHelper.StartupPath, "data", "cmdlets.xml"));
+                    var reader = (TextReader)new StreamReader(Path.Combine(AppHelper.CachePath, "data", "cmdlets.xml"));
 
                     var serializer = new XmlSerializer(typeof(List<CmdletCompletionData>));
                     _standardCmdlets = (List<CmdletCompletionData>)serializer.Deserialize(reader);
@@ -443,17 +443,15 @@ namespace SMAStudio.Language
         private void CacheCmdlets(List<CmdletCompletionData> cmdlets)
         {
             // cache this info to disk since this most likely won't change that much over time
-            if (!Directory.Exists(Path.Combine(AppHelper.StartupPath, "data")))
+            if (!Directory.Exists(Path.Combine(AppHelper.CachePath, "data")))
             {
-                Directory.CreateDirectory(Path.Combine(AppHelper.StartupPath, "data"));
+                Directory.CreateDirectory(Path.Combine(AppHelper.CachePath, "data"));
             }
 
             lock (_syncLock)
             {
-                File.Delete(Path.Combine(AppHelper.StartupPath, "data", "cmdlets.xml"));
-
                 var serializer = new XmlSerializer(typeof(List<CmdletCompletionData>));
-                var textWriter = new StreamWriter(Path.Combine(AppHelper.StartupPath, "data", "cmdlets.xml"));
+                var textWriter = new StreamWriter(Path.Combine(AppHelper.CachePath, "data", "cmdlets.xml"));
                 serializer.Serialize(textWriter, cmdlets);
 
                 textWriter.Flush();

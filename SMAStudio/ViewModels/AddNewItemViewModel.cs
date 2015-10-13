@@ -21,11 +21,11 @@ namespace SMAStudio.ViewModels
 
         private void LoadTemplates()
         {
-            if (!Directory.Exists(Path.Combine(AppHelper.StartupPath, "templates")))
+            if (!Directory.Exists(Path.Combine(AppHelper.CachePath, "templates")))
             {
-                Directory.CreateDirectory(Path.Combine(AppHelper.StartupPath, "templates"));
+                Directory.CreateDirectory(Path.Combine(AppHelper.CachePath, "templates"));
 
-                var textWriter = File.CreateText(Path.Combine(AppHelper.StartupPath, "templates", "Standard Template.ps1"));
+                var textWriter = File.CreateText(Path.Combine(AppHelper.CachePath, "templates", "Standard Template.ps1"));
                 textWriter.WriteLine("#DESCRIPTION: Empty runbook template");
                 textWriter.WriteLine("");
                 textWriter.WriteLine("workflow <RunbookName> {");
@@ -36,7 +36,7 @@ namespace SMAStudio.ViewModels
                 textWriter.Close();
             }
 
-            var files = Directory.GetFiles(Path.Combine(AppHelper.StartupPath, "templates"), "*.ps1");
+            var files = Directory.GetFiles(Path.Combine(AppHelper.CachePath, "templates"), "*.ps1");
 
             foreach (var file in files)
             {

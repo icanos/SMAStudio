@@ -31,7 +31,7 @@ namespace SMAStudio.Util
 
         public void Start()
         {
-            string cacheFolder = Path.Combine(AppHelper.StartupPath, "cache");
+            string cacheFolder = Path.Combine(AppHelper.CachePath, "cache");
 
             if (Directory.Exists(cacheFolder))
             {
@@ -129,8 +129,8 @@ namespace SMAStudio.Util
 
         private void InternalStart()
         {
-            if (!Directory.Exists(Path.Combine(AppHelper.StartupPath, "cache")))
-                Directory.CreateDirectory(Path.Combine(AppHelper.StartupPath, "cache"));
+            if (!Directory.Exists(Path.Combine(AppHelper.CachePath, "cache")))
+                Directory.CreateDirectory(Path.Combine(AppHelper.CachePath, "cache"));
 
             while (_running)
             {
@@ -158,7 +158,7 @@ namespace SMAStudio.Util
 
                     try
                     {
-                        TextWriter tw = new StreamWriter(Path.Combine(AppHelper.StartupPath, "cache", prefix + "_" + document.ID.ToString()), false);
+                        TextWriter tw = new StreamWriter(Path.Combine(AppHelper.CachePath, "cache", prefix + "_" + document.ID.ToString()), false);
                         tw.Write(document.Content);
                         tw.Flush();
                         tw.Close();
@@ -181,7 +181,7 @@ namespace SMAStudio.Util
 
             // If we close the application in a controlled way, we delete the
             // cached files since these are onyl used in recovery scenarios.
-            var files = Directory.GetFiles(Path.Combine(AppHelper.StartupPath, "cache"));
+            var files = Directory.GetFiles(Path.Combine(AppHelper.CachePath, "cache"));
 
             foreach (var file in files)
                 File.Delete(file);
