@@ -64,14 +64,20 @@ namespace SMAStudio.ViewModels
         /// <param name="e"></param>
         public void TextChanged(object sender, EventArgs e)
         {
+            if (sender == null)
+                return;
+
             if (!(sender is CodeTextEditor))
                 return;
 
             var editor = ((CodeTextEditor)sender);
+
+            if (editor.Document == null)
+                return;
+
             if (editor.Document.Text.Equals(_content))
                 return;
 
-            //Content = ((MvvmTextEditor)sender).Text;
             UnsavedChanges = true;
         }
 
