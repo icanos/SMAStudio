@@ -29,7 +29,7 @@ namespace SMAStudio.ViewModels
         private IParserService _parserService;
         private IErrorListViewModel _errorListViewModel;
 
-        private string _title = "SMA Studio 2014";
+        private string _title = "SMA Studio 2015";
         private string _customTitle = string.Empty;
         private string _statusBarText = string.Empty;
 

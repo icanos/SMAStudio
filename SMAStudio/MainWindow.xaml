@@ -10,6 +10,7 @@
         xmlns:SmaStudioModels="clr-namespace:SMAStudio.Models"
         Title="{Binding Path=WindowTitle}" Height="600" Width="919" Icon="Icons/setting-icon-32.png">
     <Window.InputBindings>
+        <KeyBinding Modifiers="Control" Key="N" Command="{Binding Path=NewRunbookCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}" />
         <KeyBinding Modifiers="Control" Key="S" Command="{Binding Path=SaveCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}" />
         <KeyBinding Modifiers="Control" Key="F" Command="{Binding Path=FindCommand}" />
         <KeyBinding Modifiers="Control" Key="Q" Command="{Binding Path=CloseCommand}" CommandParameter="{Binding ElementName=tabDocuments, Path=SelectedItem}" />

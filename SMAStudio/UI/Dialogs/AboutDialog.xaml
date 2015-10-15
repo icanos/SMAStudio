@@ -52,13 +52,13 @@
         </Style>
     </Window.Resources>
     <StackPanel x:Uid="clientArea" Style="{StaticResource BackgroundStyle}">
-        <TextBlock Height="70" Text="SMA Studio 2014" Background="#ffffff" Foreground="#000000" Padding="10,20,0,0" FontSize="22" />
+        <TextBlock Height="70" Text="SMA Studio 2015" Background="#ffffff" Foreground="#000000" Padding="10,20,0,0" FontSize="22" />
         <StackPanel x:Uid="displayArea" Style="{StaticResource DisplayAreaStyle}">
             <StackPanel x:Uid="versionArea" Orientation="Horizontal">
                 <Label x:Name="versionLabel" x:Uid="VersionLabel" Content="Version - " />
                 <Label x:Name="version" x:Uid="version" Content="{Binding Mode=OneTime, XPath=Version}" />
             </StackPanel>
-            <Label x:Name="copyright" x:Uid="copyright" Content="Copyright (C) 2014 - Marcus Westin" />
+            <Label x:Name="copyright" x:Uid="copyright" Content="Copyright (C) 2014-2015 - Marcus Westin" />
             <Label x:Name="company" x:Uid="company" Content="www.sekurbit.se" />
             <Label x:Name="reserved" x:Uid="reserved" Content="All Rights Reserved." />
             <Label x:Name="info" x:Uid="info" Style="{StaticResource ParagraphSeparator}"

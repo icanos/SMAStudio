@@ -298,7 +298,6 @@ namespace SMAStudio.Language
                     {
                         var result = (Dictionary<string, ParameterMetadata>)paramsFromPs[0].BaseObject;
 
-                        //foreach (var key in result.Keys)
                         lock (cmdlet)
                         {
                             Parallel.ForEach(result.Keys, (key) =>
