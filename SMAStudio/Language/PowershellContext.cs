@@ -467,23 +467,30 @@ namespace SMAStudio.Language
             // Get module cmdlets
             if (hasNewModules)
             {
-                using (var context = PowerShell.Create())
+                try
                 {
-                    context.AddScript("Import-Module " + String.Join(",", modules) + "; Get-Command -Module " + String.Join(",", modules));
-
-                    var cmdlets = context.Invoke();
-
-                    lock (_cmdlets)
+                    using (var context = PowerShell.Create())
                     {
-                        _cmdlets.Clear();
+                        context.AddScript("Import-Module " + String.Join(",", modules) + "; Get-Command -Module " + String.Join(",", modules));
 
-                        foreach (var cmdlet in cmdlets)
+                        var cmdlets = context.Invoke();
+
+                        lock (_cmdlets)
                         {
-                            var cmdletObj = new CmdletCompletionData(cmdlet.ToString());
+                            _cmdlets.Clear();
 
-                            _cmdlets.Add(cmdletObj);
+                            foreach (var cmdlet in cmdlets)
+                            {
+                                var cmdletObj = new CmdletCompletionData(cmdlet.ToString());
+
+                                _cmdlets.Add(cmdletObj);
+                            }
                         }
                     }
+                }
+                catch (ParseException)
+                {
+
                 }
             }
 

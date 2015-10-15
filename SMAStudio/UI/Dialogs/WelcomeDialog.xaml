@@ -1,15 +1,15 @@
 ﻿<Window x:Class="SMAStudio.WelcomeDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Welcome to SMA Studio 2014" Height="500" Width="600">
+        Title="Welcome to SMA Studio 2015" Height="500" Width="600">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <StackPanel Orientation="Vertical" Grid.Column="0" Background="#eeeeee">
-            <TextBlock Text="SMA Studio 2014" Margin="10,200,10,0" FontSize="22" />
-            <TextBlock Text="Welcome to SMA Studio 2014. Please complete the configuration in order to start using SMA Studio." Margin="10,0,00,10" TextWrapping="Wrap" Height="49" />
+            <TextBlock Text="SMA Studio 2015" Margin="10,200,10,0" FontSize="22" />
+            <TextBlock Text="Welcome to SMA Studio 2015. Please complete the configuration in order to start using SMA Studio." Margin="10,0,00,10" TextWrapping="Wrap" Height="49" />
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Column="1">
             <TextBlock Text="SMA Web Service URL" Margin="10,200,10,2" />
