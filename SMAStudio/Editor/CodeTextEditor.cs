@@ -151,7 +151,14 @@ namespace SMAStudio.Editor
                     data.AddRange(Context.GetParameters(cachedCaretOffset, text));
                     break;
                 case ExpressionType.Keyword:
-                    data.AddRange(Context.GetCmdlets(cachedCaretOffset, text));
+                    try
+                    {
+                        data.AddRange(Context.GetCmdlets(cachedCaretOffset, text));
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        // Ignore
+                    }
                     break;
                 case ExpressionType.LanguageConstruct:
                     data.AddRange(Context.GetLanguageConstructs(text));
