@@ -404,6 +404,9 @@ namespace SMAStudio.ViewModels
             get { return Runbook != null ? Runbook.Tags : ""; }
             set
             {
+                if (!_tags.Equals(value))
+                    UnsavedChanges = true;
+
                 _tags = value;
 
                 if (Runbook.Tags == null || !Runbook.Tags.Equals(_tags))
