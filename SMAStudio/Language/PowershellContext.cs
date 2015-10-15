@@ -500,10 +500,12 @@ namespace SMAStudio.Language
             lock (_syncLock)
             {
                 foundCmdlets.AddRange(_standardCmdlets
+                    //.Distinct()
                     .Where(c => c != null && c.Text.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase))
                     .ToList());
                 
                 foundCmdlets.AddRange(_cmdlets
+                    //.Distinct()
                     .Where(c => c != null && c.Text.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase))
                     .ToList());
                 
@@ -513,6 +515,7 @@ namespace SMAStudio.Language
                     .ToList());
 
                 foundCmdlets.AddRange(components.Runbooks
+                    //.Distinct()
                     .Where(r => r.RunbookName.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase))
                     .Select(r => new RunbookCompletionData(r.Runbook))
                     .ToList());

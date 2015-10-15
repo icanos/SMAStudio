@@ -181,6 +181,8 @@ namespace SMAStudio.Editor
                 if (controlSpace)
                     _completionWindow.StartOffset = cachedCaretOffset + 1;
 
+                _completionWindow.CompletionList.CompletionData.Clear();
+
                 foreach (var item in data)
                     _completionWindow.CompletionList.CompletionData.Add(item);
                 /*foreach (var item in data)
