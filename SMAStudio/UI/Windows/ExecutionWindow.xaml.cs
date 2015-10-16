@@ -1,17 +1,5 @@
 ﻿using SMAStudio.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace SMAStudio
 {
@@ -29,8 +17,8 @@ namespace SMAStudio
             InitializeComponent();
 
             DataContext = new ExecutionViewModel(runbookViewModel);
-            Width = (System.Windows.SystemParameters.PrimaryScreenWidth / 4) * 3;   // 3/4 of the screen
-            WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+            Width = (SystemParameters.PrimaryScreenWidth / 4) * 3;   // 3/4 of the screen
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

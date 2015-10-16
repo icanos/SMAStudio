@@ -1,7 +1,7 @@
 ﻿<Window x:Class="SMAStudio.AboutDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="About SMA Studio 2014" Style="{DynamicResource AboutDialogStyle}" WindowStartupLocation="CenterOwner">
+        Title="About SMA Studio 2015" Style="{DynamicResource AboutDialogStyle}" WindowStartupLocation="CenterOwner">
     <Window.Resources>
         <Style x:Key="AboutDialogStyle" TargetType="Window">
             <Setter Property="Height" Value="350" />

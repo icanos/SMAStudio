@@ -151,22 +151,30 @@ namespace SMAStudio.ViewModels
 
             App.Current.Dispatcher.Invoke((Action)delegate()
             {
-                ExecutionContent = job.JobException;
+                try {
+                    ExecutionContent = job.JobException;
 
-                if (!String.IsNullOrEmpty(job.JobException))
-                    ExecutionContent += "\r\n\r\n--------------------------------------------------\r\n\r\n";
+                    if (!String.IsNullOrEmpty(job.JobException))
+                        ExecutionContent += "\r\n\r\n--------------------------------------------------\r\n\r\n";
 
-                //ExecutionContent += ApiHelpers.GetJobOutput(_api.Current, apiJob);
-                ExecutionContent += GetJobOutput(job);
+                    //ExecutionContent += ApiHelpers.GetJobOutput(_api.Current, apiJob);
+                    ExecutionContent += GetJobOutput(job);
 
-                paramStartTime.Value = job.StartTime;
-                paramEndTime.Value = job.EndTime;
-                paramErrorCount.Value = job.ErrorCount;
-                paramWarnCount.Value = job.WarningCount;
-                paramJobStatus.Value = job.JobStatus;
+                    paramStartTime.Value = job.StartTime;
+                    paramEndTime.Value = job.EndTime;
+                    paramErrorCount.Value = job.ErrorCount;
+                    paramWarnCount.Value = job.WarningCount;
+                    paramJobStatus.Value = job.JobStatus;
 
-                base.RaisePropertyChanged("ExecutionContent");
-                base.RaisePropertyChanged("ExecutionProperties");
+                    base.RaisePropertyChanged("ExecutionContent");
+                    base.RaisePropertyChanged("ExecutionProperties");
+                }
+                catch (XmlException ex)
+                {
+                    Core.Log.Error("Parse error in XML", ex);
+                    ExecutionContent = "There was a parse error in the XML, please refer to smastudio.log for more information. The log is located in " + Path.Combine(AppHelper.CachePath, "smastudio.log");
+                    _thread.Abort();
+                }
             });
         }
         
@@ -303,6 +311,10 @@ namespace SMAStudio.ViewModels
             string content = tr.ReadToEnd();
 
             tr.Close();
+            
+            // Sanitize the retrieved information (remove NUL chars)
+            content = content.Replace(Convert.ToChar(0x0).ToString(), "");
+            content = content.Replace("&#x0;", "");
 
             XElement outputXml = XElement.Parse(content);
             XNamespace d = "http://schemas.microsoft.com/ado/2007/08/dataservices";

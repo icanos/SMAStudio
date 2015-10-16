@@ -88,7 +88,10 @@ namespace SMAStudio
             }*/
 
             var parameters = _runbookViewModel.GetParameters();
-            Inputs = parameters.OrderBy(i => i.Name).ToObservableCollection();
+
+            foreach (var param in parameters)
+                Inputs.Add(param);
+            //Inputs.Addparameters.OrderBy(i => i.Name).ToObservableCollection();
         }
 
         public ObservableCollection<UIInputParameter> Inputs

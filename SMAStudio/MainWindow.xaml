@@ -123,7 +123,7 @@
                 <MenuItem Header="Insert File as Text..." IsEnabled="False" />-->
             </MenuItem>
             <MenuItem Header="Help">
-                <MenuItem Header="About SMA Studio 2014" Command="{Binding Path=AboutCommand}" />
+                <MenuItem Header="About SMA Studio 2015" Command="{Binding Path=AboutCommand}" />
             </MenuItem>
         </Menu>
 
