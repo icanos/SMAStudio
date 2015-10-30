@@ -138,5 +138,10 @@ namespace SMAStudio
         public bool IsArray { get; set; }
 
         public string TypeName { get; set; }
+
+        public string DescribingName
+        {
+            get { return TypeName + ": " + Name; }
+        }
     }
 }
