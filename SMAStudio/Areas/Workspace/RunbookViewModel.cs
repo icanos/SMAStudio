@@ -175,15 +175,38 @@ namespace SMAStudio.ViewModels
                 {
                     try
                     {
+                        bool isMandatory = false;
                         AttributeBaseAst attrib = null;
                         attrib = param.Attributes[param.Attributes.Count - 1]; // always the last one
+
+                        if (param.Attributes.Count > 1)
+                        {
+                            // Probably contains a Parameter(Mandatory = ...) or something, check it out
+                            if (param.Attributes[0] is AttributeAst)
+                            {
+                                var parameterAttrib = (AttributeAst)param.Attributes[0];
+                                if (parameterAttrib.Extent.Text.Contains("[Parameter") ||
+                                    parameterAttrib.Extent.Text.Contains("[parameter"))
+                                {
+                                    foreach (var namedParameter in parameterAttrib.NamedArguments)
+                                    {
+                                        if (namedParameter.ArgumentName.Equals("Mandatory", StringComparison.InvariantCultureIgnoreCase))
+                                        {
+                                            isMandatory = namedParameter.Argument.Extent.Text.Equals("$true") ? true : false;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
 
                         var input = new UIInputParameter
                         {
                             Name = ConvertToNiceName(param.Name.Extent.Text),
                             Command = param.Name.Extent.Text.Substring(1),                  // Remove the $
                             IsArray = (attrib.TypeName.IsArray ? true : false),
-                            TypeName = attrib.TypeName.Name
+                            TypeName = attrib.TypeName.Name,
+                            Required = isMandatory
                         };
 
                         parameters.Add(input);

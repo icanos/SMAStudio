@@ -39,54 +39,6 @@ namespace SMAStudio
 
         private void PrepareRunWindowLoaded(object sender, RoutedEventArgs e)
         {
-            /*Token[] tokens;
-            ParseError[] parseErrors;
-
-            var scriptBlock = Parser.ParseInput(_runbookViewModel.Content, out tokens, out parseErrors);
-
-            if (scriptBlock.EndBlock == null || scriptBlock.EndBlock.Statements.Count == 0)
-            {
-                MessageBox.Show("Your runbook is broken and it's possible that the runbook won't run. Please fix any errors.", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                return;
-            }
-
-            var functionBlock = (FunctionDefinitionAst)scriptBlock.EndBlock.Statements[0];
-
-            if (functionBlock.Body.ParamBlock != null)
-            {
-                if (functionBlock.Body.ParamBlock.Parameters == null)
-                {
-                    Core.Log.InfoFormat("Runbook contains ParamBlock but no Parameters.");
-                    return;
-                }
-
-                foreach (var param in functionBlock.Body.ParamBlock.Parameters)
-                {
-                    try
-                    {
-                        AttributeBaseAst attrib = null;
-                        attrib = param.Attributes[param.Attributes.Count - 1]; // always the last one
-
-                        var input = new UIInputParameter
-                        {
-                            Name = ConvertToNiceName(param.Name.Extent.Text),
-                            Command = param.Name.Extent.Text.Substring(1),                  // Remove the $
-                            IsArray = (attrib.TypeName.IsArray ? true : false),
-                            TypeName = attrib.TypeName.Name
-                        };
-
-                        Inputs.Add(input);
-                    }
-                    catch (Exception ex)
-                    {
-                        Core.Log.Error("Unable to create a UIInputParameter for a runbook parameter.", ex);
-                        MessageBox.Show("An error occurred when enumerating the runbook parameters. Please refer to the logs for more information", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-
-                Inputs = Inputs.OrderBy(i => i.Name).ToObservableCollection();
-            }*/
-
             var parameters = _runbookViewModel.GetParameters();
 
             foreach (var param in parameters)
@@ -116,6 +68,21 @@ namespace SMAStudio
         */
         private void Run_Click(object sender, RoutedEventArgs e)
         {
+            bool hasErrors = false;
+
+            foreach (var input in Inputs)
+            {
+                if (input.Required && String.IsNullOrEmpty(input.Value))
+                {
+                    hasErrors = true;
+                    MessageBox.Show("Missing required parameter: " + input.Name, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    break;
+                }
+            }
+
+            if (hasErrors)
+                return;
+
             DialogResult = true;
             Close();
         }
@@ -139,9 +106,11 @@ namespace SMAStudio
 
         public string TypeName { get; set; }
 
+        public bool Required { get; set; }
+
         public string DescribingName
         {
-            get { return TypeName + ": " + Name; }
+            get { return TypeName + ": " + Name + (Required ? " (required)" : ""); }
         }
     }
 }
