@@ -13,6 +13,7 @@
    limitations under the License.*/
 
 using Microsoft.Practices.Unity;
+using SMAStudio.Analysis;
 using SMAStudio.Commands;
 using SMAStudio.Editor.Parsing;
 using SMAStudio.Logging;
@@ -54,12 +55,13 @@ namespace SMAStudio
         {
             _container = new UnityContainer();
 
-            _container.RegisterInstance<IParserService>(new ParserService());
+            _container.RegisterInstance<IActiveRunbookParserService>(new ActiveRunbookParserService());
+            _container.RegisterInstance<IParameterParserService>(new ParameterParserService());
 
             // View models
             _container.RegisterInstance<IErrorListViewModel>(new ErrorListViewModel());
-            _container.RegisterInstance<IWorkspaceViewModel>(new WorkspaceViewModel(_container.Resolve<IErrorListViewModel>(), _container.Resolve<IParserService>()));
-            _container.RegisterInstance<IComponentsViewModel>(new ComponentsViewModel(_container.Resolve<IWorkspaceViewModel>()));
+            _container.RegisterInstance<IWorkspaceViewModel>(new WorkspaceViewModel(_container.Resolve<IErrorListViewModel>(), _container.Resolve<IActiveRunbookParserService>()));
+            _container.RegisterInstance<IEnvironmentExplorerViewModel>(new EnvironmentExplorerViewModel(_container.Resolve<IWorkspaceViewModel>()));
             _container.RegisterInstance<IToolbarViewModel>(new ToolbarViewModel());
 
             // Services

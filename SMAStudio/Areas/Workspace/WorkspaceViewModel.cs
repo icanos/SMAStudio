@@ -1,51 +1,36 @@
-﻿using ICSharpCode.AvalonEdit;
-using ICSharpCode.AvalonEdit.CodeCompletion;
-using ICSharpCode.AvalonEdit.Editing;
-using ICSharpCode.AvalonEdit.Snippets;
-using Microsoft.Practices.Unity;
-using SMAStudio.Commands;
-using SMAStudio.Editor.CodeCompletion;
+﻿using SMAStudio.Analysis;
 using SMAStudio.Editor.Parsing;
 using SMAStudio.Util;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
-using System.Windows.Threading;
 
 namespace SMAStudio.ViewModels
 {
-    /// <summary>
-    /// WorkspaceViewModel is current dependent of MvvmTextEditor since there are bindings between these
-    /// in order for Code Completion to work. This is not compliant with MVVM.
-    /// </summary>
     public class WorkspaceViewModel : ObservableObject, IWorkspaceViewModel, IDisposable
     {
-        private CompletionWindow _completionWindow;
-
-        private IParserService _parserService;
+        private IActiveRunbookParserService _parserService;
+        private IParameterParserService _parameterParserService;
         private IErrorListViewModel _errorListViewModel;
 
         private string _title = "SMA Studio 2015";
         private string _customTitle = string.Empty;
         private string _statusBarText = string.Empty;
 
-        public WorkspaceViewModel(IErrorListViewModel errorListViewModel, IParserService parserService)
+        public WorkspaceViewModel(IErrorListViewModel errorListViewModel, IActiveRunbookParserService parserService)
         {
             _errorListViewModel = errorListViewModel;
             _parserService = parserService;
+            _parameterParserService = Core.Resolve<IParameterParserService>();
 
             StatusBarText = "SMA Studio 2014";
-
-            //_codeCompletionEngine.Start();
         }
 
         public void Initialize()
         {
             _parserService.Start();
+            _parameterParserService.Start();
         }
 
         /// <summary>
@@ -83,87 +68,7 @@ namespace SMAStudio.ViewModels
             if (Documents[SelectedIndex].Content != null)
                 _parserService.ParseCommandTokens(Documents[SelectedIndex]);
         }
-
-        private string _cachedText = string.Empty;
-        /// <summary>
-        /// Event called after text has been added to the editor text box
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        public void EditorTextEntered(object sender, TextCompositionEventArgs e)
-        {
-            /*var textArea = ((TextArea)sender);
-
-            if (e.Text == "-" && _codeCompletionEngine.ApprovedVerbs.Contains(_cachedText))
-            {
-                if (_cachedText.StartsWith("$"))
-                {
-                    _cachedText = string.Empty;
-                    return;
-                }
-
-                //var textArea = ((TextArea)sender);
-
-                _completionWindow = new CompletionWindow(textArea);
-                _completionWindow.Width = 300;
-
-                IList<ICompletionData> data = _completionWindow.CompletionList.CompletionData;
-                string wordBefore = StringHelper.FindWordBeforeDash(_cachedText) + "-";
-
-                if (wordBefore.Equals("-"))
-                {
-                    // This means that we are adding a parameter
-                    _cachedText = string.Empty;
-                    return;
-                }
-
-                foreach (var cmd in _codeCompletionEngine.Commands)
-                {
-                    ((CompletionSnippet)cmd).ReplaceText = wordBefore;
-
-                    if (cmd.Text.StartsWith(wordBefore, StringComparison.InvariantCultureIgnoreCase))
-                        data.Add(cmd);
-                }
-                
-                //_completionWindow.Show();
-                _completionWindow.Closed += delegate
-                {
-                    _completionWindow = null;
-                    _cachedText = string.Empty;
-                };
-            }
-            else
-            {
-                if (e.Text == " ")
-                    _cachedText = string.Empty;
-                else if (e.Text == "\n")
-                    _cachedText = string.Empty;
-                else
-                    _cachedText += e.Text;
-            }*/
-
-            _parserService.ParseCommandTokens(Documents[SelectedIndex]);
-        }
-
-        /// <summary>
-        /// Event called when text is being entered into the editor text box
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        public void EditorTextEntering(object sender, TextCompositionEventArgs e)
-        {
-            if (e.Text.Length > 0 && _completionWindow != null)
-            {
-                if (e.Text == " " || e.Text == "\t")
-                {
-                    _completionWindow.CompletionList.RequestInsertion(e);
-
-                    if (e.Text == "\t")
-                        e.Handled = true;
-                }
-            }
-        }
-
+        
         #region Properties
         private ObservableCollection<IDocumentViewModel> _documents = new ObservableCollection<IDocumentViewModel>();
         /// <summary>
@@ -294,8 +199,11 @@ namespace SMAStudio.ViewModels
 
         public void Dispose()
         {
-            if (_parserService != null)
+            if (_parserService != null) 
                 ((IDisposable)_parserService).Dispose();
+
+            if (_parameterParserService != null)
+                ((IDisposable)_parameterParserService).Dispose();
         }
     }
 }

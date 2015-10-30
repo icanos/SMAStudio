@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SMAStudio.Editor.Parsing
 {
-    public interface IParserService
+    public interface IActiveRunbookParserService
     {
         void Start();
 

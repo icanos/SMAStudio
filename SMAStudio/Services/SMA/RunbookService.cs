@@ -28,7 +28,7 @@ namespace SMAStudio.Services
         private ObservableCollection<TagViewModel> _tagViewModelCache = null;
 
         private IWorkspaceViewModel _workspaceViewModel;
-        private IComponentsViewModel _componentsViewModel;
+        private IEnvironmentExplorerViewModel _componentsViewModel;
 
         private DateTime _lastCheckedSuspendedJobs = DateTime.MinValue;
         private Guid _lastSuspendedJobID = Guid.Empty;
@@ -40,7 +40,7 @@ namespace SMAStudio.Services
         {
             _api = Core.Resolve<IApiService>();
             _workspaceViewModel = Core.Resolve<IWorkspaceViewModel>();
-            _componentsViewModel = Core.Resolve<IComponentsViewModel>();
+            _componentsViewModel = Core.Resolve<IEnvironmentExplorerViewModel>();
         }
 
         public IList<Runbook> GetRunbooks(bool forceDownload = false)

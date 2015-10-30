@@ -19,13 +19,13 @@ namespace SMAStudio.Services
         private ObservableCollection<VariableViewModel> _variableViewModelCache = null;
 
         private IWorkspaceViewModel _workspaceViewModel;
-        private IComponentsViewModel _componentsViewModel;
+        private IEnvironmentExplorerViewModel _componentsViewModel;
 
         public VariableService()
         {
             _api = Core.Resolve<IApiService>();
             _workspaceViewModel = Core.Resolve<IWorkspaceViewModel>();
-            _componentsViewModel = Core.Resolve<IComponentsViewModel>();
+            _componentsViewModel = Core.Resolve<IEnvironmentExplorerViewModel>();
         }
 
         public IList<Variable> GetVariables(bool forceDownload = false)

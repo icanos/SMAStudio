@@ -11,22 +11,31 @@ using System.Xml.Serialization;
 
 namespace SMAStudio.Editor.CodeCompletion.DataItems
 {
+    public enum ParameterTypes
+    {
+        Parameter,
+        LanguageConstruct,
+        Flag
+    }
+
     public class ParameterCompletionData : CompletionData
     {
         private string _typeName = string.Empty;
         private string _parameterName = string.Empty;
         private bool _switchParameter = false;
+        private ParameterTypes _parameterType = ParameterTypes.Parameter;
 
         public ParameterCompletionData()
         {
             DisplayText = "";
         }
 
-        public ParameterCompletionData(string typeName, string parameterName, bool switchParameter)
+        public ParameterCompletionData(string typeName, string parameterName, bool switchParameter, ParameterTypes parameterType)
         {
             _typeName = typeName;
             _parameterName = parameterName;
             _switchParameter = switchParameter;
+            _parameterType = parameterType;
 
             if (!String.IsNullOrEmpty(_typeName))
                 DisplayText = _parameterName + ": " + _typeName;
@@ -41,13 +50,30 @@ namespace SMAStudio.Editor.CodeCompletion.DataItems
                 CompletionText = _parameterName;
         }
 
+        public override bool Equals(object obj)
+        {
+            if (!(obj is ParameterCompletionData))
+                return false;
+
+            return ((ParameterCompletionData)obj).DisplayText.Equals(DisplayText);
+        }
+
+        public override int GetHashCode()
+        {
+            return DisplayText.GetHashCode();
+        }
+
         [XmlIgnore]
         public override ImageSource Image
         {
             get
             {
                 if (DisplayText.Contains("SwitchParameter"))
-                    return Icons.GetImage(Icons.ParseError);
+                    return Icons.GetImage(Icons.Flag);
+                else if (_parameterType == ParameterTypes.LanguageConstruct)
+                    return Icons.GetImage(Icons.LanguageConstruct);
+                else if (_parameterType == ParameterTypes.Flag)
+                    return Icons.GetImage(Icons.Flag);
                 
                 return Icons.GetImage(Icons.Property);
             }

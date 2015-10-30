@@ -13,19 +13,41 @@ using System.Xml.Serialization;
 
 namespace SMAStudio.Editor.CodeCompletion.DataItems
 {
+    public enum CmdletTypes
+    {
+        Builtin,
+        Custom
+    }
+
     public class CmdletCompletionData : CompletionData
     {
+        private CmdletTypes _cmdletType = CmdletTypes.Custom;
+        
         public CmdletCompletionData()
         {
             Parameters = new List<ParameterCompletionData>();
         }
 
-        public CmdletCompletionData(string cmdletName)
+        public CmdletCompletionData(string cmdletName, CmdletTypes cmdletType)
         {
             DisplayText = cmdletName;
             CompletionText = cmdletName;
+            _cmdletType = cmdletType;
 
             Parameters = new List<ParameterCompletionData>();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is CmdletCompletionData))
+                return false;
+
+            return ((CmdletCompletionData)obj).DisplayText.Equals(DisplayText);
+        }
+
+        public override int GetHashCode()
+        {
+            return DisplayText.GetHashCode();
         }
 
         public override string ToString()
@@ -44,6 +66,11 @@ namespace SMAStudio.Editor.CodeCompletion.DataItems
         {
             get
             {
+                if (_cmdletType == CmdletTypes.Custom)
+                    return Icons.GetImage(Icons.Cmdlet);
+                else if (_cmdletType == CmdletTypes.Builtin)
+                    return Icons.GetImage(Icons.LanguageConstruct);
+
                 return Icons.GetImage(Icons.Cmdlet);
             }
             set

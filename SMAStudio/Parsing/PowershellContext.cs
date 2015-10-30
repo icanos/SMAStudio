@@ -1,4 +1,5 @@
-﻿using SMAStudio.Editor.CodeCompletion.DataItems;
+﻿using SMAStudio.Analysis;
+using SMAStudio.Editor.CodeCompletion.DataItems;
 using SMAStudio.Services;
 using SMAStudio.Util;
 using SMAStudio.ViewModels;
@@ -29,9 +30,9 @@ namespace SMAStudio.Language
 
         private List<string> _reservedParameters = new List<string>
         {
-            "-Debug", "-db", "-ErrorAction", "-ea", "-ErrorVariable", "-ev", "-InformationAction", "-InformationVariable", 
-            "-OutVariable", "-ov", "-OutBuffer", "-ob", "-PiplineVariable", "-pv", "-Verbose", "-vb", "-WarningAction", "-wa", 
-            "-WarningVariable", "-wv", "-WhatIf", "-wi", "-Confirm", "-cf"
+            "Debug", "ErrorAction", "ErrorVariable", "InformationAction", "InformationVariable", 
+            "OutVariable", "OutBuffer", "PiplineVariable", "Verbose", "WarningAction", 
+            "WarningVariable", "WhatIf", "Confirm"
         };
 
         private List<CmdletCompletionData> _standardCmdlets = new List<CmdletCompletionData>();
@@ -40,10 +41,14 @@ namespace SMAStudio.Language
 
         private object _syncLock = new object();
 
+        private IParameterParserService _parameterParserService;
+
         public PowershellContext()
         {
             _parser = new PowershellParser();
             _parser.IgnoreBlockMarks = true;
+
+            _parameterParserService = Core.Resolve<IParameterParserService>();
 
             Task.Factory.StartNew(delegate()
             {
@@ -177,7 +182,7 @@ namespace SMAStudio.Language
             {
                 var variableObj = new VariableCompletionData(segment.Value);
 
-                if (!variables.Contains(variableObj))
+                if (!variables.ContainsElement(variableObj))
                     variables.Add(variableObj);
             }
 
@@ -228,7 +233,7 @@ namespace SMAStudio.Language
             {
                 // Operator
                 var list = new List<ParameterCompletionData>();
-                list.AddRange(_parser.Operators.Select(o => new ParameterCompletionData("", o, false)).ToList());
+                list.AddRange(_parser.Operators.Select(o => new ParameterCompletionData("", o, false, ParameterTypes.LanguageConstruct)).ToList());
 
                 return list;
             }
@@ -236,7 +241,7 @@ namespace SMAStudio.Language
             var parameters = GetParameters(parsedCmdlet.Value);
 
             if (!isOperator)
-                parameters.AddRange(_reservedParameters.Select(p => new ParameterCompletionData("", p, false)).ToList());
+                parameters.AddRange(_reservedParameters.Select(p => new ParameterCompletionData("", p, false, ParameterTypes.LanguageConstruct)).ToList());
 
             return parameters;
         }
@@ -249,7 +254,7 @@ namespace SMAStudio.Language
         public List<ParameterCompletionData> GetParameters(string cmdletStr)
         {
             CmdletCompletionData cmdlet = null;
-            var components = Core.Resolve<IComponentsViewModel>();
+            var components = Core.Resolve<IEnvironmentExplorerViewModel>();
 
             lock (_standardCmdlets)
             {
@@ -264,24 +269,14 @@ namespace SMAStudio.Language
 
             if (cmdlet == null)
             {
-                var runbook = components.Runbooks.Where(r => r.RunbookName.ToLower().Equals(cmdletStr.ToLower())).FirstOrDefault();
-
-                if (runbook == null)
-                    return new List<ParameterCompletionData>();
-
-                var paramList = runbook.GetParameters(true);
-
-                if (paramList == null)
-                    return new List<ParameterCompletionData>();
-
-                var parameters = paramList
-                    .Select(p => 
-                        new ParameterCompletionData(
-                            p.TypeName, 
-                            p.Name, 
-                            false)).ToList();
-
-                return parameters;
+                // Rewrote this to use a parameter scanning service to retrieve this information in the background
+                // to speed up the retrieval of information.
+                return _parameterParserService.GetParameters(cmdletStr).Select(p => new ParameterCompletionData(
+                        p.TypeName,
+                        p.Name,
+                        false,
+                        ParameterTypes.Parameter
+                    )).ToList();
             }
 
             if (cmdlet == null)
@@ -305,9 +300,10 @@ namespace SMAStudio.Language
                                 var paramObj = new ParameterCompletionData(
                                     result[key].ParameterType.Name, 
                                     result[key].Name, 
-                                    result[key].ParameterType.Name.Equals("SwitchParameter"));
+                                    result[key].ParameterType.Name.Equals("SwitchParameter"),
+                                    ParameterTypes.Parameter);
 
-                                if (paramObj != null)
+                                if (cmdlet.Parameters.ContainsElement(paramObj))
                                     cmdlet.Parameters.Add(paramObj);
                             });
                         }
@@ -332,7 +328,7 @@ namespace SMAStudio.Language
 
             return _parser.Language
                 .Where(l => l.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase))
-                .Select(l => new CmdletCompletionData(l))
+                .Select(l => new CmdletCompletionData(l, CmdletTypes.Builtin))
                 .ToList();
         }
 
@@ -379,7 +375,10 @@ namespace SMAStudio.Language
                 for (int i = pos + 1; i < _segments.Count; i++)
                 {
                     if (_segments[i].Type == ExpressionType.String || _segments[i].Type == ExpressionType.QuotedString)
-                        modules.Add(_segments[i].Value);
+                    {
+                        if (!modules.Contains(_segments[i].Value))
+                            modules.Add(_segments[i].Value);
+                    }
                     else
                         break;
                 }
@@ -407,6 +406,8 @@ namespace SMAStudio.Language
             // Standard powershell modules (System32 and Program Files)
             if (_standardCmdlets.Count == 0)
             {
+                Core.Resolve<IWorkspaceViewModel>().StatusBarText = "Building code completion cache...";
+
                 if (File.Exists(Path.Combine(AppHelper.CachePath, "data", "cmdlets.xml")))
                 {
                     TextReader reader = null;
@@ -436,22 +437,26 @@ namespace SMAStudio.Language
 
                         lock (_standardCmdlets)
                         {
-                            _standardCmdlets.Clear();
+                            var cache = new List<CmdletCompletionData>();
 
                             Parallel.ForEach(cmdlets, (cmdlet) =>
                             {
-                                var cmdletObj = new CmdletCompletionData(cmdlet.ToString());
+                                var cmdletObj = new CmdletCompletionData(cmdlet.ToString(), CmdletTypes.Custom);
 
                                 if (cmdletObj != null)
                                 {
-                                    _standardCmdlets.Add(cmdletObj);
+                                    cache.Add(cmdletObj);
                                 }
                             });
+
+                            _standardCmdlets = cache;
                         }
                     }
                 }
 
                 CacheCmdlets(_standardCmdlets);
+
+                Core.Resolve<IWorkspaceViewModel>().StatusBarText = "Building code completion cache completed.";
             }
 
             bool hasNewModules = false;
@@ -463,7 +468,7 @@ namespace SMAStudio.Language
                     break;
                 }
             }
-
+            
             // Get module cmdlets
             if (hasNewModules)
             {
@@ -477,14 +482,16 @@ namespace SMAStudio.Language
 
                         lock (_cmdlets)
                         {
-                            _cmdlets.Clear();
+                            var cache = new List<CmdletCompletionData>();
 
                             foreach (var cmdlet in cmdlets)
                             {
-                                var cmdletObj = new CmdletCompletionData(cmdlet.ToString());
-
-                                _cmdlets.Add(cmdletObj);
+                                var cmdletObj = new CmdletCompletionData(cmdlet.ToString(), CmdletTypes.Custom);
+                                
+                                cache.Add(cmdletObj);
                             }
+
+                            _cmdlets = cache;
                         }
                     }
                 }
@@ -495,7 +502,7 @@ namespace SMAStudio.Language
             }
 
             // We want to auto complete names of the runbooks too
-            var components = Core.Resolve<IComponentsViewModel>();
+            var components = Core.Resolve<IEnvironmentExplorerViewModel>();
 
             lock (_syncLock)
             {
@@ -508,16 +515,17 @@ namespace SMAStudio.Language
                     //.Distinct()
                     .Where(c => c != null && c.Text.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase))
                     .ToList());
-                
-                foundCmdlets.AddRange(_parser.Language
-                    .Where(l => l.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase))
-                    .Select(l => new CmdletCompletionData(l))
-                    .ToList());
+
+                foundCmdlets.AddRange(GetLanguageConstructs(pattern));
 
                 foundCmdlets.AddRange(components.Runbooks
                     //.Distinct()
                     .Where(r => r.RunbookName.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase))
                     .Select(r => new RunbookCompletionData(r.Runbook))
+                    .ToList());
+
+                foundCmdlets.AddRange(_keywords.Where(k => k.StartsWith(pattern, StringComparison.InvariantCultureIgnoreCase))
+                    .Select(k => new CmdletCompletionData(k, CmdletTypes.Builtin))
                     .ToList());
             }
 

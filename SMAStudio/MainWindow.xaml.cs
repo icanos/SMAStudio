@@ -87,7 +87,7 @@ namespace SMAStudio
 
             errorList.DataContext = Core.Resolve<IErrorListViewModel>();
             DataContext = Core.Resolve<IWorkspaceViewModel>();
-            explorerList.DataContext = Core.Resolve<IComponentsViewModel>();
+            explorerList.DataContext = Core.Resolve<IEnvironmentExplorerViewModel>();
             Toolbar.DataContext = Core.Resolve<IToolbarViewModel>();
         }
 
@@ -136,7 +136,7 @@ namespace SMAStudio
             Loaded += delegate(object sender, RoutedEventArgs e)
             {
                 ((IWorkspaceViewModel)DataContext).Initialize();
-                ((IComponentsViewModel)explorerList.DataContext).Initialize();
+                ((IEnvironmentExplorerViewModel)explorerList.DataContext).Initialize();
             };
 
             Closing += delegate(object sender, CancelEventArgs e)
@@ -189,6 +189,8 @@ namespace SMAStudio
 
                 ((IDisposable)_autoSaveManager).Dispose();
                 AsyncService.Stop();
+
+                ((IDisposable)DataContext).Dispose();
             };
         }
 

@@ -12,12 +12,14 @@ namespace SMAStudio.Resources
     {
         public const string Runbook = "Icons/blueprint.png";
         public const string ParseError = "Icons/error.png";
-        public const string Variable = "Icons/_Resources.png";
+        public const string Variable = "Icons/_Property.png";
         public const string Credential = "Icons/_Keyword.png";
         public const string Tag = "Icons/_Folder.png";
         public const string Schedule = "Icons/calendar.png";
-        public const string Property = "Icons/_Property.png";
-        public const string Cmdlet = "Icons/_Keyword.png";
+        public const string Property = "Icons/_Resources.png";
+        public const string Cmdlet = "Icons/Cmdlet.png";
+        public const string LanguageConstruct = "Icons/LanguageConstruct.png";
+        public const string Flag = "Icons/Flag.png";
 
         private static Dictionary<string, ImageSource> _imageCache = new Dictionary<string, ImageSource>();
 

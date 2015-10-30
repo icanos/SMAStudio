@@ -168,6 +168,8 @@ namespace SMAStudio.Editor
             if (data == null || (data != null && data.Count == 0))
                 return;
 
+            data = data.OrderBy(c => c.DisplayText).ToList();
+
             AsyncService.ExecuteOnUIThread(delegate()
             {
                 _completionWindow = new CompletionWindow(TextArea);

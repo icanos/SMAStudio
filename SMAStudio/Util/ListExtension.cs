@@ -20,5 +20,21 @@ namespace SMAStudio.Util
             
             return col;
         }
+
+        public static bool ContainsElement<T>(this IEnumerable<T> list, object obj)
+        {
+            bool found = false;
+
+            foreach (var elem in list)
+            {
+                if (elem.Equals(obj))
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            return found;
+        }
     }
 }

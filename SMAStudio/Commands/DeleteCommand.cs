@@ -58,7 +58,7 @@ namespace SMAStudio.Commands
                 DeleteSchedule((ScheduleViewModel)parameter);
 
             // Reload the left side menu as well
-            var componentsViewModel = Core.Resolve<IComponentsViewModel>();
+            var componentsViewModel = Core.Resolve<IEnvironmentExplorerViewModel>();
             componentsViewModel.Load(true /* force download */);
         }
 

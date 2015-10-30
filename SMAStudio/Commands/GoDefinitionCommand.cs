@@ -13,12 +13,12 @@ namespace SMAStudio.Commands
     public class GoDefinitionCommand : ICommand
     {
         private IWorkspaceViewModel _workspaceViewModel;
-        private IComponentsViewModel _componentsViewModel;
+        private IEnvironmentExplorerViewModel _componentsViewModel;
 
         public GoDefinitionCommand()
         {
             _workspaceViewModel = Core.Resolve<IWorkspaceViewModel>();
-            _componentsViewModel = Core.Resolve<IComponentsViewModel>();
+            _componentsViewModel = Core.Resolve<IEnvironmentExplorerViewModel>();
         }
 
         public bool CanExecute(object parameter)

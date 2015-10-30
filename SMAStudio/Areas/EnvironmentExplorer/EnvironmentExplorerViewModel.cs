@@ -20,7 +20,7 @@ using SMAStudio.Services.SMA;
 
 namespace SMAStudio.ViewModels
 {
-    public class ComponentsViewModel : ObservableObject, IComponentsViewModel
+    public class EnvironmentExplorerViewModel : ObservableObject, IEnvironmentExplorerViewModel
     {
         private IWorkspaceViewModel _dataContext;
 
@@ -31,7 +31,7 @@ namespace SMAStudio.ViewModels
 
         private object _sync = new object();
         
-        public ComponentsViewModel(IWorkspaceViewModel dataContext)
+        public EnvironmentExplorerViewModel(IWorkspaceViewModel dataContext)
         {
             _dataContext = dataContext;
 

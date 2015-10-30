@@ -19,13 +19,13 @@ namespace SMAStudio.Services
         private ObservableCollection<CredentialViewModel> _credentialViewModelCache = null;
 
         private IWorkspaceViewModel _workspaceViewModel;
-        private IComponentsViewModel _componentsViewModel;
+        private IEnvironmentExplorerViewModel _componentsViewModel;
 
         public CredentialService()
         {
             _api = Core.Resolve<IApiService>();
             _workspaceViewModel = Core.Resolve<IWorkspaceViewModel>();
-            _componentsViewModel = Core.Resolve<IComponentsViewModel>();
+            _componentsViewModel = Core.Resolve<IEnvironmentExplorerViewModel>();
         }
 
         public IList<Credential> GetCredentials(bool forceDownload=false)

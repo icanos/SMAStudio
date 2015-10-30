@@ -129,7 +129,7 @@
     </Rule>
 
     <Rule color="Command">
-      [\w]+-[\w]+-[\w]+
+      ([\w]-[\w])+
     </Rule>
 
     <Rule color="Command">

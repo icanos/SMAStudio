@@ -10,11 +10,11 @@ namespace SMAStudio.Commands
 {
     public class RefreshCommand : ICommand
     {
-        private IComponentsViewModel _componentsViewModel;
+        private IEnvironmentExplorerViewModel _componentsViewModel;
 
         public RefreshCommand()
         {
-            _componentsViewModel = Core.Resolve<IComponentsViewModel>();
+            _componentsViewModel = Core.Resolve<IEnvironmentExplorerViewModel>();
         }
 
         public bool CanExecute(object parameter)

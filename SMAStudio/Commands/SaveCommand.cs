@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Data.Services.Client;
 using SMAStudio.Services;
 using SMAStudio.Services.SMA;
+using SMAStudio.Analysis;
 
 namespace SMAStudio.Commands
 {
@@ -69,6 +70,9 @@ namespace SMAStudio.Commands
         private void SaveRunbook(RunbookViewModel rb)
         {
             _runbookService.Update(rb);
+
+            var parameterService = Core.Resolve<IParameterParserService>();
+            parameterService.NotifyChanges();
         }
 
         private void SaveVariable(VariableViewModel variable)

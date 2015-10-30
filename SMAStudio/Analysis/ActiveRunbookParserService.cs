@@ -18,20 +18,20 @@ namespace SMAStudio.Editor.Parsing
     /// and runs that through the Powershell Parser in order to find any
     /// parsing errors, and in that case, notify the user of them.
     /// </summary>
-    sealed class ParserService : IParserService, IDisposable
+    sealed class ActiveRunbookParserService : IActiveRunbookParserService, IDisposable
     {
         private bool _running = true;
         private object _sync = new object();
 
         private Thread _thread = null;
 
-        private IComponentsViewModel _componentsViewModel;
+        private IEnvironmentExplorerViewModel _componentsViewModel;
         private IWorkspaceViewModel _workspaceViewModel;
         private IErrorListViewModel _errorListViewModel;
 
         private const string START_SMARUNBOOK = "Start-SmaRunbook";
 
-        public ParserService()
+        public ActiveRunbookParserService()
         {
 
         }
@@ -44,7 +44,7 @@ namespace SMAStudio.Editor.Parsing
         {
             _workspaceViewModel = Core.Resolve<IWorkspaceViewModel>();
             _errorListViewModel = Core.Resolve<IErrorListViewModel>();
-            _componentsViewModel = Core.Resolve<IComponentsViewModel>();
+            _componentsViewModel = Core.Resolve<IEnvironmentExplorerViewModel>();
 
             _thread = new Thread(new ThreadStart(delegate()
             {
@@ -101,7 +101,7 @@ namespace SMAStudio.Editor.Parsing
             {
                 _workspaceViewModel = Core.Resolve<IWorkspaceViewModel>();
                 _errorListViewModel = Core.Resolve<IErrorListViewModel>();
-                _componentsViewModel = Core.Resolve<IComponentsViewModel>();
+                _componentsViewModel = Core.Resolve<IEnvironmentExplorerViewModel>();
             }
 
             Parser.ParseInput(document.Content, out tokens, out parseErrors);

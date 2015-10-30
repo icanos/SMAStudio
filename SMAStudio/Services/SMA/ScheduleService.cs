@@ -19,13 +19,13 @@ namespace SMAStudio.Services.SMA
         private ObservableCollection<ScheduleViewModel> _scheduleViewModelCache = null;
 
         private IWorkspaceViewModel _workspaceViewModel;
-        private IComponentsViewModel _componentsViewModel;
+        private IEnvironmentExplorerViewModel _componentsViewModel;
 
         public ScheduleService()
         {
             _api = Core.Resolve<IApiService>();
             _workspaceViewModel = Core.Resolve<IWorkspaceViewModel>();
-            _componentsViewModel = Core.Resolve<IComponentsViewModel>();
+            _componentsViewModel = Core.Resolve<IEnvironmentExplorerViewModel>();
         }
 
         public IList<Schedule> GetSchedules(bool forceDownload = false)

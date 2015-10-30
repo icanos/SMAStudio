@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SMAStudio.ViewModels
 {
-    public interface IComponentsViewModel
+    public interface IEnvironmentExplorerViewModel
     {
         void Initialize();
 

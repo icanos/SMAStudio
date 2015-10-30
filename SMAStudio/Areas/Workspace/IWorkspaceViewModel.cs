@@ -14,10 +14,6 @@ namespace SMAStudio.ViewModels
 
         void OpenDocument(IDocumentViewModel document);
 
-        void EditorTextEntered(object sender, TextCompositionEventArgs e);
-
-        void EditorTextEntering(object sender, TextCompositionEventArgs e);
-
         ObservableCollection<IDocumentViewModel> Documents { get; set; }
 
         int SelectedIndex { get; set; }

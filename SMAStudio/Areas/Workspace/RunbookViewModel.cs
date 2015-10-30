@@ -1,25 +1,16 @@
-﻿using SMAStudio.Commands;
-using SMAStudio.Util;
+﻿using SMAStudio.Util;
 using SMAStudio.SMAWebService;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 using SMAStudio.Resources;
 using SMAStudio.Editor;
 using SMAStudio.Settings;
 using SMAStudio.Models;
 using System.Collections.ObjectModel;
-using SMAStudio.Editor.Parsing;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
-using ICSharpCode.AvalonEdit.Snippets;
-using System.Windows.Controls;
 using System.Management.Automation.Language;
 using System.Windows;
 
@@ -152,13 +143,15 @@ namespace SMAStudio.ViewModels
         /// </summary>
         /// <param name="silent">If set to true, it doesn't show any message boxes etc</param>
         /// <returns></returns>
-        public List<UIInputParameter> GetParameters(bool silent = false)
+        public List<UIInputParameter> GetParameters(bool silent = false, bool downloadIfNeeded = false)
         {
             var parameters = new List<UIInputParameter>();
             Token[] tokens;
             ParseError[] parseErrors;
 
-            var scriptBlock = Parser.ParseInput(Content, out tokens, out parseErrors);
+            string runbookContent = GetContent(false, CheckedOut ? false : true);
+
+            var scriptBlock = Parser.ParseInput(runbookContent, out tokens, out parseErrors);
 
             if ((scriptBlock.EndBlock == null || scriptBlock.EndBlock.Statements.Count == 0))
             {

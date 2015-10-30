@@ -15,12 +15,12 @@ namespace SMAStudio.Commands
     public class LoadCommand : ICommand
     {
         private IWorkspaceViewModel _dataContext;
-        private IComponentsViewModel _componentsViewModel;
+        private IEnvironmentExplorerViewModel _componentsViewModel;
 
         public LoadCommand()
         {
             _dataContext = Core.Resolve<IWorkspaceViewModel>();
-            _componentsViewModel = Core.Resolve<IComponentsViewModel>();
+            _componentsViewModel = Core.Resolve<IEnvironmentExplorerViewModel>();
         }
 
         public bool CanExecute(object parameter)
