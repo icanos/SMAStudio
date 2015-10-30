@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.Services.Client;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace SMAStudio.Services
@@ -123,7 +121,7 @@ namespace SMAStudio.Services
                     }
 
                     vari.Name = variable.Variable.Name;
-                    vari.Value = variable.Variable.Value;
+                    vari.Value = JsonConverter.ToJson(variable.Content);//variable.Variable.Value;
 
                     _api.Current.UpdateObject(variable.Variable);
                     _api.Current.SaveChanges();
@@ -133,13 +131,13 @@ namespace SMAStudio.Services
                     vari = new Variable();
 
                     vari.Name = variable.Name;
-                    vari.Value = variable.Content;
+                    vari.Value = JsonConverter.ToJson(variable.Content);//variable.Content;
                     vari.IsEncrypted = variable.IsEncrypted;
 
-                    if (vari.IsEncrypted)
+                    /*if (vari.IsEncrypted)
                     {
                         vari.Value = JsonConverter.ToJson(variable.Content);
-                    }
+                    }*/
 
                     _api.Current.AddToVariables(vari);
                     _api.Current.SaveChanges();

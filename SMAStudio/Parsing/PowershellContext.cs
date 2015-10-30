@@ -1,15 +1,12 @@
 ﻿using SMAStudio.Analysis;
 using SMAStudio.Editor.CodeCompletion.DataItems;
-using SMAStudio.Services;
 using SMAStudio.Util;
 using SMAStudio.ViewModels;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 

@@ -275,6 +275,11 @@ namespace SMAStudio.ViewModels
         {
             get { return Core.Resolve<ICommand>("Delete"); }
         }
+
+        public ICommand RefreshCommand
+        {
+            get { return Core.Resolve<ICommand>("Refresh"); }
+        }
         #endregion
     }
 }

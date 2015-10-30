@@ -159,7 +159,7 @@ namespace SMAStudio
 
         public static string Version
         {
-            get { return "0.3.5"; }
+            get { return "0.4.0"; }
         }
     }
 }

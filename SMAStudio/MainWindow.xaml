@@ -209,6 +209,12 @@
                 </i:Interaction.Triggers>
                 <TreeView.ContextMenu>
                     <ContextMenu>
+                        <MenuItem Header="Add">
+                            <MenuItem Header="New Credential..." Command="{Binding NewCredentialCommand}" />
+                            <MenuItem Header="New Runbook..." Command="{Binding NewRunbookCommand}" />
+                            <MenuItem Header="New Schedule..." Command="{Binding NewScheduleCommand}" />
+                            <MenuItem Header="New Variable..." Command="{Binding NewVariableCommand}" />
+                        </MenuItem>
                         <MenuItem x:Name="btnCompare" Header="Compare to..." Click="CompareClicked" />
                         <Separator />
                         <MenuItem Header="Check In" Command="{Binding CheckInCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
@@ -219,10 +225,7 @@
                         <MenuItem Header="Delete" Command="{Binding DeleteCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
                                                                             AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}" />
                         <Separator />
-                        <MenuItem Header="New Credential" Command="{Binding NewCredentialCommand}" />
-                        <MenuItem Header="New Runbook" Command="{Binding NewRunbookCommand}" />
-                        <MenuItem Header="New Schedule" Command="{Binding NewScheduleCommand}" />
-                        <MenuItem Header="New Variable" Command="{Binding NewVariableCommand}" />
+                        <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" />
                     </ContextMenu>
                 </TreeView.ContextMenu>
                 <TreeView.Resources>
@@ -438,7 +441,7 @@
                                         <TextBox DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Name}" Tag="Name" TextChanged="textEditor_TextChanged" />
 
                                         <Label Content="Value" DockPanel.Dock="Top" Margin="0,5,0,0" />
-                                        <TextBox DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=ContentParsed}" Tag="Value" TextChanged="textEditor_TextChanged" />
+                                        <TextBox DockPanel.Dock="Top" Margin="5,0,5,0" Text="{Binding Path=Content}" Tag="Value" TextChanged="textEditor_TextChanged" />
 
                                         <Label Content="Is Encrypted" DockPanel.Dock="Top" Margin="0,5,0,0" />
                                         <CheckBox DockPanel.Dock="Top" Margin="5,0,5,0" IsChecked="{Binding Path=IsEncrypted}" />

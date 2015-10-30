@@ -14,7 +14,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Marcus Westin")]
 [assembly: AssemblyProduct("SMAStudio")]
-[assembly: AssemblyCopyright("Copyright © Marcus Westin 2014")]
+[assembly: AssemblyCopyright("Copyright © Marcus Westin 2014-2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -53,5 +53,5 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.0.3.5")]
-[assembly: AssemblyFileVersion("0.0.3.5")]
+[assembly: AssemblyVersion("0.0.4.0")]
+[assembly: AssemblyFileVersion("0.0.4.0")]

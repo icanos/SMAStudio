@@ -12,7 +12,6 @@
    See the License for the specific language governing permissions and
    limitations under the License.*/
 
-using SMAStudio.Editor;
 using SMAStudio.Services;
 using SMAStudio.Settings;
 using SMAStudio.Util;

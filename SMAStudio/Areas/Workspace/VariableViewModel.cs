@@ -18,6 +18,13 @@ namespace SMAStudio.ViewModels
         private string _icon = Icons.Variable;
         private Variable _variable = null;
 
+        /// <summary>
+        /// Store the value of the variable in a separate variable
+        /// so that we can, when saving, convert it to JSON to make
+        /// sure we're not breaking SMA :)
+        /// </summary>
+        private string _variableValue = "";
+
         public VariableViewModel()
         {
 
@@ -37,6 +44,10 @@ namespace SMAStudio.ViewModels
             TextBox textBox = (TextBox)sender;
             bool isNameBox = textBox.Tag.Equals("Name") ? true : false;
 
+            // We assume that the value hasn't changed if the CaretIndex = 0
+            if (textBox.CaretIndex == 0 && textBox.Text.Length > 0)
+                return;
+
             if (isNameBox)
             {
                 if (!textBox.Text.Equals(Name))
@@ -47,7 +58,7 @@ namespace SMAStudio.ViewModels
             }
             else
             {
-                if (!textBox.Text.Equals(ContentParsed))
+                if (!textBox.Text.Equals(Variable.Value))
                 {
                     Content = textBox.Text;
                     UnsavedChanges = true;
@@ -70,6 +81,8 @@ namespace SMAStudio.ViewModels
             set
             {
                 _variable = value;
+                _variableValue = JsonConverter.FromJson(_variable.Value).ToString();
+
                 base.RaisePropertyChanged("Title");
                 base.RaisePropertyChanged("Name");
             }
@@ -122,17 +135,8 @@ namespace SMAStudio.ViewModels
         /// </summary>
         public string Content
         {
-            get { return Variable.Value; }
-            set { Variable.Value = value; base.RaisePropertyChanged("ContentParsed"); }
-        }
-
-        /// <summary>
-        /// Same as Content but "parses" the content and removes the quotation marks
-        /// </summary>
-        public string ContentParsed
-        {
-            get { return Variable.Value.Replace("\"", ""); }
-            set { Variable.Value = "\"" + value + "\""; }
+            get { return _variableValue; }
+            set { _variableValue = value; }
         }
 
         /// <summary>
@@ -152,6 +156,9 @@ namespace SMAStudio.ViewModels
             get { return _unsavedChanges; }
             set
             {
+                base.RaisePropertyChanged("Name");
+                base.RaisePropertyChanged("Title");
+
                 if (_unsavedChanges.Equals(value))
                     return;
 
@@ -160,9 +167,6 @@ namespace SMAStudio.ViewModels
                 // Set the CachedChanges to false in order for our auto saving engine to store a
                 // local copy in case the application crashes
                 CachedChanges = false;
-
-                base.RaisePropertyChanged("Name");
-                base.RaisePropertyChanged("Title");
             }
         }
 

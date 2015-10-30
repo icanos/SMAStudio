@@ -1,15 +1,7 @@
 ﻿using SMAStudio.Util;
-using SMAStudio.SMAWebService;
 using SMAStudio.ViewModels;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
-using System.Data.Services.Client;
 using SMAStudio.Services;
 using SMAStudio.Services.SMA;
 using SMAStudio.Analysis;
