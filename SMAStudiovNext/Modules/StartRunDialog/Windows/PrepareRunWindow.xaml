@@ -10,7 +10,7 @@
                     <ColumnDefinition Width="Auto" MinWidth="200" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Text="{Binding Path=RawName}" />
-                <TextBox Grid.Column="1" Text="{Binding Path=Value}" Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ColumnDefinition}}, Path=Width}" />
+                <TextBox Grid.Column="1" Text="{Binding Path=Value, UpdateSourceTrigger=PropertyChanged}" Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ColumnDefinition}}, Path=Width}" />
             </Grid>
         </DataTemplate>
         <Style TargetType="ListBox">

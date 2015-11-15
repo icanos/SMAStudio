@@ -22,22 +22,22 @@
         </Grid.RowDefinitions>
 
         <Label Content="Name" Grid.Column="0" Grid.Row="0" Margin="5,0,5,0" HorizontalAlignment="Right" />
-        <TextBox Grid.Column="1" Grid.Row="0" Margin="5,5,5,5" Text="{Binding Path=Name}" Tag="Name" />
+        <TextBox Grid.Column="1" Grid.Row="0" Margin="5,5,5,5" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}" Tag="Name" />
 
         <Label Content="Start Date" Grid.Column="0" Grid.Row="1" Margin="5,0,5,0" HorizontalAlignment="Right" />
-        <xctk:DateTimePicker Grid.Column="1" Grid.Row="1" Margin="5,5,5,5" Value="{Binding Path=StartTime, Mode=TwoWay}" IsReadOnly="{Binding Path=IsReadOnly}" Tag="StartTime" Format="UniversalSortableDateTime" />
+        <xctk:DateTimePicker Grid.Column="1" Grid.Row="1" Margin="5,5,5,5" Value="{Binding Path=StartTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding Path=IsReadOnly}" Tag="StartTime" Format="UniversalSortableDateTime" />
 
         <Label Content="Expiry Date" Grid.Column="0" Grid.Row="2" Margin="5,0,5,0" HorizontalAlignment="Right" />
-        <xctk:DateTimePicker Grid.Column="1" Grid.Row="2" Margin="5,5,5,5" Value="{Binding Path=ExpiryTime, Mode=TwoWay}" IsReadOnly="{Binding Path=IsReadOnly}" Tag="StartTime" Format="UniversalSortableDateTime" />
+        <xctk:DateTimePicker Grid.Column="1" Grid.Row="2" Margin="5,5,5,5" Value="{Binding Path=ExpiryTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding Path=IsReadOnly}" Tag="StartTime" Format="UniversalSortableDateTime" />
 
         <Label Content="Is Recurring Schedule" Grid.Column="0" Grid.Row="3" Margin="5,0,5,0" HorizontalAlignment="Right" />
-        <CheckBox Grid.Column="1" Grid.Row="3" Margin="5,5,5,5" IsChecked="{Binding Path=IsDaily}" IsEnabled="{Binding Path=IsInvertedReadOnly}" />
+        <CheckBox Grid.Column="1" Grid.Row="3" Margin="5,5,5,5" IsChecked="{Binding Path=IsDaily, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding Path=IsInvertedReadOnly}" />
 
         <Label Content="Interval (if recurring) in days" Grid.Column="0" Grid.Row="4" Margin="5,0,5,0" HorizontalAlignment="Right" />
-        <xctk:IntegerUpDown Grid.Column="1" Grid.Row="4" Margin="5,5,5,5" Text="{Binding Path=DayInterval}" Maximum="128" Minimum="0" Tag="Interval" IsReadOnly="{Binding Path=IsReadOnly}" />
+        <xctk:IntegerUpDown Grid.Column="1" Grid.Row="4" Margin="5,5,5,5" Text="{Binding Path=DayInterval, UpdateSourceTrigger=PropertyChanged}" Maximum="128" Minimum="0" Tag="Interval" IsReadOnly="{Binding Path=IsReadOnly}" />
 
         <Label Content="Is Enabled" Grid.Column="0" Grid.Row="5" Margin="5,0,5,0" HorizontalAlignment="Right" />
-        <CheckBox Grid.Column="1" Grid.Row="5" Margin="5,5,5,5" IsChecked="{Binding Path=IsEnabled}" IsEnabled="{Binding Path=IsInvertedReadOnly}" />
+        <CheckBox Grid.Column="1" Grid.Row="5" Margin="5,5,5,5" IsChecked="{Binding Path=IsEnabled,UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding Path=IsInvertedReadOnly}" />
 
     </Grid> 
 </UserControl>

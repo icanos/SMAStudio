@@ -24,7 +24,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <TextBlock Text="Tags:" Grid.Row="0" Grid.Column="0" Margin="5,5,0,5" />
-        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Tags}" Margin="0,5,5,5" />
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Tags, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,5,5" />
         <TabControl Grid.Row="1" Grid.ColumnSpan="2" TabStripPlacement="Bottom">
             <TabItem Header="Draft">
                 <local:RunbookEditor x:Name="CodeEditor" Foreground="#F8F8F2" Background="#272822" Padding="5,5,5,5">

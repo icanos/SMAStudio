@@ -19,12 +19,12 @@
         </Grid.RowDefinitions>
 
         <Label Content="Name" Grid.Column="0" Grid.Row="0" Margin="5,0,5,0" HorizontalAlignment="Right" />
-        <TextBox Grid.Column="1" Grid.Row="0" Margin="5,5,5,5" Text="{Binding Path=Name}" Tag="Name" />
+        <TextBox Grid.Column="1" Grid.Row="0" Margin="5,5,5,5" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}" Tag="Name" />
 
         <Label Content="Value" Grid.Column="0" Grid.Row="1" Margin="5,0,5,0" HorizontalAlignment="Right" />
-        <TextBox Grid.Column="1" Grid.Row="1" Margin="5,5,5,5" Text="{Binding Path=Content}" Tag="Value" />
+        <TextBox Grid.Column="1" Grid.Row="1" Margin="5,5,5,5" Text="{Binding Path=Content, UpdateSourceTrigger=PropertyChanged}" Tag="Value" />
 
         <Label Content="Is Encrypted" Grid.Column="0" Grid.Row="2" Margin="5,0,5,0" HorizontalAlignment="Right" />
-        <CheckBox Grid.Column="1" Grid.Row="2"  Margin="5,5,5,5" IsChecked="{Binding Path=IsEncrypted}" />
+        <CheckBox Grid.Column="1" Grid.Row="2"  Margin="5,5,5,5" IsChecked="{Binding Path=IsEncrypted, UpdateSourceTrigger=PropertyChanged}" />
     </Grid>
 </UserControl>
