@@ -301,9 +301,11 @@
     <Compile Include="Services\SettingsService.cs" />
     <Compile Include="Modules\AddNewItemDialog\Windows\UIAddNewItemDialog.xaml.cs" />
     <Compile Include="Modules\Runbook\Snippets\CodeSnippet.cs" />
+    <Compile Include="Vendor\Azure\Credential.cs" />
     <Compile Include="Vendor\Azure\Job.cs" />
     <Compile Include="Vendor\Azure\Parameter.cs" />
     <Compile Include="Vendor\Azure\Runbook.cs" />
+    <Compile Include="Vendor\Azure\Schedule.cs" />
     <Compile Include="Vendor\Azure\Variable.cs" />
     <Compile Include="Vendor\GitSharp\Core\Edit.cs" />
     <Compile Include="Vendor\GitSharp\Core\EditList.cs" />

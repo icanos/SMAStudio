@@ -75,6 +75,21 @@ namespace SMAStudiovNext.Services
                 var runbook = model as RunbookModelProxy;
                 SendRequest("runbooks/" + runbook.RunbookName, "DELETE");
             }
+            else if (model is VariableModelProxy)
+            {
+                var variable = model as VariableModelProxy;
+                SendRequest("variables/" + variable.Name, "DELETE");
+            }
+            else if (model is CredentialModelProxy)
+            {
+                var credential = model as CredentialModelProxy;
+                SendRequest("credentials/" + credential.Name, "DELETE");
+            }
+            else if (model is ScheduleModelProxy)
+            {
+                var schedule = model as ScheduleModelProxy;
+                SendRequest("schedules/" + schedule.Name, "DELETE");
+            }
 
             return true;
         }
@@ -268,6 +283,14 @@ namespace SMAStudiovNext.Services
                     runbooksRaw = null;
                 }
 
+                Execute.OnUIThread(() =>
+                {
+                    _backendContext.SignalCompleted();
+                });
+            });
+
+            AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
+            {
                 // Load all variables
                 var variablesContent = SendRequest("variables");
 
@@ -283,14 +306,65 @@ namespace SMAStudiovNext.Services
                         variable.IsEncrypted = entry.properties.isEncrypted;
                         variable.Value = (entry.properties.value != null ? entry.properties.value : "");
 
-                        _backendContext.Variables.Add(new ResourceContainer(variable.Name, new VariableModelProxy(variable, Context), IconsDescription.Variable));
+                        //_backendContext.Variables.Add(new ResourceContainer(variable.Name, new VariableModelProxy(variable, Context), IconsDescription.Variable));
+                        _backendContext.AddToVariables(new VariableModelProxy(variable, Context));
                     }
-                }
 
-                Execute.OnUIThread(() =>
+                    variablesRaw = null;
+                }
+            });
+
+            AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
+            {
+                // Load all credentials
+                var credentialsContent = SendRequest("credentials");
+
+                if (credentialsContent.Length > 0)
                 {
-                    _backendContext.SignalCompleted();
-                });
+                    dynamic credentialsRaw = JObject.Parse(credentialsContent);
+
+                    foreach (var entry in credentialsRaw.value)
+                    {
+                        var credential = new Credential();
+                        credential.CredentialID = Guid.NewGuid();
+                        credential.Name = entry.name;
+                        credential.UserName = entry.properties.userName;
+
+                        _backendContext.AddToCredentials(new CredentialModelProxy(credential, Context));
+                    }
+
+                    credentialsRaw = null;
+                }
+            });
+
+            AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
+            {
+                // Load all schedules
+                var schedulesContent = SendRequest("schedules");
+
+                if (schedulesContent.Length > 0)
+                {
+                    dynamic schedulesRaw = JObject.Parse(schedulesContent);
+
+                    foreach (var entry in schedulesRaw.value)
+                    {
+                        var schedule = new Schedule();
+                        schedule.ScheduleID = Guid.NewGuid();
+                        schedule.Name = entry.name;
+                        schedule.StartTime = entry.properties.startTime;
+                        schedule.ExpiryTime = entry.properties.expiryTime;
+                        schedule.IsEnabled = entry.properties.isEnabled;
+
+                        if (entry.properties.frequency.Equals("day"))
+                            schedule.DayInterval = entry.properties.interval;
+                        else if (entry.properties.frequency.Equals("hour"))
+                            schedule.HourInterval = entry.properties.interval;
+
+                        _backendContext.AddToSchedules(new ScheduleModelProxy(schedule, Context));
+                    }
+
+                    schedulesRaw = null;
+                }
             });
         }
 
@@ -316,17 +390,11 @@ namespace SMAStudiovNext.Services
             }
             else if (instance.Model is CredentialModelProxy)
             {
-                /*var proxy = (CredentialModelProxy)instance.Model;
-
-                if (proxy.GetSubType().Equals(typeof(SMA.Credential)))
-                    SaveSmaCredential(context, instance);*/
+                SaveAzureCredential(instance);
             }
             else if (instance.Model is ScheduleModelProxy)
             {
-                /*var proxy = (ScheduleModelProxy)instance.Model;
-
-                if (proxy.GetSubType().Equals(typeof(SMA.Schedule)))
-                    SaveSmaSchedule(context, instance);*/
+                SaveAzureSchedule(instance);
             }
             else
                 throw new NotImplementedException();
@@ -373,6 +441,79 @@ namespace SMAStudiovNext.Services
             else
             {
                 SendRequest("variables/" + variable.Name.Replace(" ", "%20"), "PATCH", JsonConvert.SerializeObject(dict), "application/json");
+            }
+
+            viewModel.UnsavedChanges = false;
+        }
+
+        private void SaveAzureCredential(IViewModel viewModel)
+        {
+            var credential = viewModel.Model as CredentialModelProxy;
+
+            var dict = new Dictionary<string, object>();
+            var properties = new Dictionary<string, object>();
+            properties.Add("userName", credential.UserName);
+            properties.Add("password", credential.RawValue);
+            dict.Add("properties", properties);
+
+            if (credential.CredentialID == Guid.Empty)
+            {
+                // New variable
+                SendRequest("credentials/" + credential.Name.Replace(" ", "%20"), "PUT", JsonConvert.SerializeObject(dict), "application/json");
+            }
+            else
+            {
+                SendRequest("credentials/" + credential.Name.Replace(" ", "%20"), "PATCH", JsonConvert.SerializeObject(dict), "application/json");
+            }
+
+            viewModel.UnsavedChanges = false;
+        }
+
+        private void SaveAzureSchedule(IViewModel viewModel)
+        {
+            var schedule = viewModel.Model as ScheduleModelProxy;
+
+            var dict = new Dictionary<string, object>();
+            var properties = new Dictionary<string, object>();
+
+            if (schedule.ScheduleID != Guid.Empty)
+            {
+                // Only supported when creating a new schedule
+                properties.Add("startTime", schedule.StartTime.ToUniversalTime());
+
+                if (schedule.ExpiryTime.HasValue)
+                    properties.Add("startTime", schedule.ExpiryTime.Value.ToUniversalTime());
+            }
+
+            properties.Add("isEnabled", schedule.IsEnabled);
+
+            if (schedule.ScheduleID != Guid.Empty)
+            {
+                // Only supported when creating a new schedule
+                if ((schedule.Model as Schedule).DayInterval > 0)
+                {
+                    properties.Add("frequency", "day");
+                    properties.Add("interval", (schedule.Model as Schedule).DayInterval);
+                }
+                else if ((schedule.Model as Schedule).HourInterval > 0)
+                {
+                    properties.Add("frequency", "hour");
+                    properties.Add("interval", (schedule.Model as Schedule).HourInterval);
+                }
+                else
+                    properties.Add("frequency", "onetime");
+            }
+
+            dict.Add("properties", properties);
+
+            if (schedule.ScheduleID == Guid.Empty)
+            {
+                // New variable
+                SendRequest("schedules/" + schedule.Name.Replace(" ", "%20"), "PUT", JsonConvert.SerializeObject(dict), "application/json");
+            }
+            else
+            {
+                SendRequest("schedules/" + schedule.Name.Replace(" ", "%20"), "PATCH", JsonConvert.SerializeObject(dict), "application/json");
             }
 
             viewModel.UnsavedChanges = false;
