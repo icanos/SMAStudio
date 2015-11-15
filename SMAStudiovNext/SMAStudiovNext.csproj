@@ -198,6 +198,7 @@
     <Compile Include="Core\ResourceContainer.cs" />
     <Compile Include="Core\SerializableDictionary.cs" />
     <Compile Include="Core\StatusManager.cs" />
+    <Compile Include="Core\StringExtensions.cs" />
     <Compile Include="Models\CredentialModelProxy.cs" />
     <Compile Include="Models\JobModelProxy.cs" />
     <Compile Include="Models\ModelProxyBase.cs" />

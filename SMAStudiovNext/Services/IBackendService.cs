@@ -62,7 +62,7 @@ namespace SMAStudiovNext.Services
         /// </summary>
         /// <param name="jobId">Guid to retrieve information about</param>
         /// <returns>Proxy object or null</returns>
-        JobModelProxy GetJobDetails(Guid jobId);
+        JobModelProxy GetJobDetails(RunbookModelProxy runbooks);
 
         /// <summary>
         /// Retrieves a list of jobs that has been executed for the specified runbook

@@ -96,6 +96,11 @@ namespace SMAStudiovNext.Models
                 property.SetValue(instance, value);
             }
         }
+
+        /// <summary>
+        /// Internal property used to know if we're testing a runbook or executing a published version
+        /// </summary>
+        public bool IsTestRun { get; set; }
         #endregion
     }
 }

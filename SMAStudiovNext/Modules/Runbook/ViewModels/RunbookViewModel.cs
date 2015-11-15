@@ -402,7 +402,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                             start = DateTime.Now;
 
                             //Content = _backendContext.GetContent(Uri.AbsoluteUri + "/DraftRunbookVersion/$value");
-                            Content = _backendContext.GetContent(_backendContext.Service.GetBackendUrl(runbookType, _runbook));
+                            lock (Content)
+                            {
+                                Content = _backendContext.GetContent(_backendContext.Service.GetBackendUrl(runbookType, _runbook));
+                            }
                             _codeContext.Parse(Content);
 
                             stop = DateTime.Now;
@@ -452,7 +455,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         /// <returns>List of parameters found</returns>
         public IList<ICompletionEntry> GetParameters(KeywordCompletionData completionData)
         {
-            GetContent(RunbookType.Draft, false); // we need to make sure that we have the content downloaded
+            //GetContent(RunbookType.Draft, false); // we need to make sure that we have the content downloaded
 
             Token[] tokens;
             ParseError[] parseErrors;
@@ -692,11 +695,16 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                     AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
                     {
                         var guid = Owner.TestRunbook(_runbook, parameters);
-                        _runbook.JobID = (Guid)guid;
+
+                        if (guid != null)
+                            _runbook.JobID = (Guid)guid;
                     });
 
-                    var shell = IoC.Get<IShell>();
-                    shell.OpenDocument(new ExecutionResultViewModel(this));
+                    if (_runbook.JobID != null && _runbook.JobID != Guid.Empty)
+                    {
+                        var shell = IoC.Get<IShell>();
+                        shell.OpenDocument(new ExecutionResultViewModel(this));
+                    }
                 }
                 catch (DataServiceQueryException ex)
                 {
@@ -748,10 +756,13 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                     }
 
                     var guid = Owner.StartRunbook(_runbook, parameters);
-                    _runbook.JobID = (Guid)guid;
+                    if (guid != null)
+                    {
+                        _runbook.JobID = (Guid)guid;
 
-                    var shell = IoC.Get<IShell>();
-                    shell.OpenDocument(new ExecutionResultViewModel(this));
+                        var shell = IoC.Get<IShell>();
+                        shell.OpenDocument(new ExecutionResultViewModel(this));
+                    }
                 }
                 catch (DataServiceQueryException ex)
                 {
@@ -904,6 +915,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                                 UnsavedChanges = true;
 
                             _view.TextEditor.Text = value;
+                            _content = value;
                         }
                     });
                 }

@@ -64,7 +64,7 @@ namespace SMAStudiovNext.Services
 
         public Task<bool> CheckRunningJobs(RunbookModelProxy runbook, bool checkDraft)
         {
-            // Don't know how to implement this yet
+            
             return Task.Run(() => { return false; });
         }
 
@@ -137,7 +137,7 @@ namespace SMAStudiovNext.Services
 
             var response = (HttpWebResponse)request.GetResponse();
 
-            if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created)
+            if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created || response.StatusCode == HttpStatusCode.Accepted)
             {
                 var responseStream = new StreamReader(response.GetResponseStream());
 
@@ -156,12 +156,50 @@ namespace SMAStudiovNext.Services
             return string.Empty;
         }
 
-        public JobModelProxy GetJobDetails(Guid jobId)
+        public JobModelProxy GetJobDetails(RunbookModelProxy runbook)
+        {
+            if (runbook.IsTestRun)
+                return GetDraftJobDetails(runbook);
+
+            return GetPublishedJobDetails(runbook.JobID);
+        }
+
+        private JobModelProxy GetDraftJobDetails(RunbookModelProxy runbook)
+        {
+            var result = SendRequest("runbooks/" + runbook.RunbookName.ToUrlSafeString() + "/draft/testJob");
+
+            if (result.Length < 1)
+                return null;
+
+            dynamic jsonJob = JObject.Parse(result);
+
+            var job = new Job();
+            job.JobID = Guid.NewGuid();
+            job.CreationTime = (DateTime)jsonJob.creationTime;
+            job.LastModifiedTime = (DateTime)jsonJob.lastModifiedTime;
+            job.JobStatus = jsonJob.status;
+            job.StartTime = jsonJob.startTime != null ? (DateTime?)jsonJob.startTime : null;
+            job.EndTime = jsonJob.endTime != null ? (DateTime?)jsonJob.endTime : null;
+
+            var jobModelProxy = new JobModelProxy(job, Context);
+
+            foreach (var param in jsonJob.parameters)
+            {
+                //jobModelProxy.Parameters.Add(param)
+            }
+
+            var output = SendRequest("runbooks/" + runbook.RunbookName.ToUrlSafeString() + "/draft/testJob/streams");
+            jobModelProxy = ParseJobStreams(jobModelProxy, output);
+
+            return jobModelProxy;
+        }
+
+        private JobModelProxy GetPublishedJobDetails(Guid jobId)
         {
             var result = SendRequest("jobs/" + jobId);
 
             if (result.Length == 0) // maybe return null instead?
-                return new JobModelProxy(new Job(), Context);
+                return null;
 
             dynamic jsonJob = JObject.Parse(result);
 
@@ -181,24 +219,8 @@ namespace SMAStudiovNext.Services
             }
 
             var output = SendRequest("jobs/" + jobId + "/streams");
-            dynamic jsonOutput = JObject.Parse(output);
+            jobModelProxy = ParseJobStreams(jobModelProxy, output);
 
-            if (jsonOutput != null && jsonOutput.value != null)
-            {
-                foreach (var outputRow in jsonOutput.value)
-                {
-                    jobModelProxy.Result.Add(new JobOutput()
-                    {
-                        JobID = jobId,
-                        RunbookVersionID = Guid.Empty,
-                        StreamTypeName = outputRow.properties.streamType,
-                        StreamTime = outputRow.properties.time,
-                        StreamText = outputRow.properties.summary,
-                        TenantID = Guid.Empty
-                    });
-                }
-            }
-            
             if (jsonJob.properties.exception != null)
             {
                 jobModelProxy.Result.Add(new JobOutput()
@@ -210,6 +232,32 @@ namespace SMAStudiovNext.Services
                     StreamText = jsonJob.properties.exception,
                     TenantID = Guid.Empty
                 });
+            }
+
+            return jobModelProxy;
+        }
+
+        private JobModelProxy ParseJobStreams(JobModelProxy jobModelProxy, string output)
+        {
+            dynamic jsonOutput = JObject.Parse(output);
+
+            if (jsonOutput != null && jsonOutput.value != null)
+            {
+                foreach (var outputRow in jsonOutput.value)
+                {
+                    if (outputRow.properties.time > jobModelProxy.LastDownloadTime)
+                    {
+                        jobModelProxy.Result.Add(new JobOutput()
+                        {
+                            JobID = jobModelProxy.JobID,
+                            RunbookVersionID = Guid.Empty,
+                            StreamTypeName = outputRow.properties.streamType,
+                            StreamTime = outputRow.properties.time,
+                            StreamText = outputRow.properties.summary,
+                            TenantID = Guid.Empty
+                        });
+                    }
+                }
             }
 
             return jobModelProxy;
@@ -416,7 +464,7 @@ namespace SMAStudiovNext.Services
             else
             {
                 // Update the runbook
-                SendRequest("runbooks/" + runbook.RunbookName + "/draft/content", "PUT", viewModel.Content, "text/powershell");
+                SendRequest("runbooks/" + runbook.RunbookName.ToUrlSafeString() + "/draft/content", "PUT", viewModel.Content, "text/powershell");
 
                 // Reset the unsaved changes flag
                 viewModel.UnsavedChanges = false;
@@ -436,11 +484,11 @@ namespace SMAStudiovNext.Services
             if (variable.VariableID == Guid.Empty)
             {
                 // New variable
-                SendRequest("variables/" + variable.Name.Replace(" ", "%20"), "PUT", JsonConvert.SerializeObject(dict), "application/json");
+                SendRequest("variables/" + variable.Name.ToUrlSafeString(), "PUT", JsonConvert.SerializeObject(dict), "application/json");
             }
             else
             {
-                SendRequest("variables/" + variable.Name.Replace(" ", "%20"), "PATCH", JsonConvert.SerializeObject(dict), "application/json");
+                SendRequest("variables/" + variable.Name.ToUrlSafeString(), "PATCH", JsonConvert.SerializeObject(dict), "application/json");
             }
 
             viewModel.UnsavedChanges = false;
@@ -459,11 +507,11 @@ namespace SMAStudiovNext.Services
             if (credential.CredentialID == Guid.Empty)
             {
                 // New variable
-                SendRequest("credentials/" + credential.Name.Replace(" ", "%20"), "PUT", JsonConvert.SerializeObject(dict), "application/json");
+                SendRequest("credentials/" + credential.Name.ToUrlSafeString(), "PUT", JsonConvert.SerializeObject(dict), "application/json");
             }
             else
             {
-                SendRequest("credentials/" + credential.Name.Replace(" ", "%20"), "PATCH", JsonConvert.SerializeObject(dict), "application/json");
+                SendRequest("credentials/" + credential.Name.ToUrlSafeString(), "PATCH", JsonConvert.SerializeObject(dict), "application/json");
             }
 
             viewModel.UnsavedChanges = false;
@@ -509,11 +557,11 @@ namespace SMAStudiovNext.Services
             if (schedule.ScheduleID == Guid.Empty)
             {
                 // New variable
-                SendRequest("schedules/" + schedule.Name.Replace(" ", "%20"), "PUT", JsonConvert.SerializeObject(dict), "application/json");
+                SendRequest("schedules/" + schedule.Name.ToUrlSafeString(), "PUT", JsonConvert.SerializeObject(dict), "application/json");
             }
             else
             {
-                SendRequest("schedules/" + schedule.Name.Replace(" ", "%20"), "PATCH", JsonConvert.SerializeObject(dict), "application/json");
+                SendRequest("schedules/" + schedule.Name.ToUrlSafeString(), "PATCH", JsonConvert.SerializeObject(dict), "application/json");
             }
 
             viewModel.UnsavedChanges = false;
@@ -538,7 +586,21 @@ namespace SMAStudiovNext.Services
 
             var json = JsonConvert.SerializeObject(job);
 
-            SendRequest("jobs/" + jobGuid, "PUT", json, "application/json");
+            runbookProxy.IsTestRun = false;
+
+            try
+            {
+                SendRequest("jobs/" + jobGuid, "PUT", json, "application/json");
+            }
+            catch (WebException ex)
+            {
+                if (ex.Status == WebExceptionStatus.ProtocolError && (ex.Response as HttpWebResponse).StatusCode == HttpStatusCode.BadRequest)
+                    MessageBox.Show("A job is already running, please wait for that to complete and then try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                else
+                    MessageBox.Show("An unknown error occurred when trying to start the runbook: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                return null;
+            }
 
             return jobGuid;
         }
@@ -567,7 +629,22 @@ namespace SMAStudiovNext.Services
 
             var json = JsonConvert.SerializeObject(job);
 
-            SendRequest("runbooks/" + runbookProxy.RunbookName + "/draft/testJob", "PUT", json, "application/json");
+            runbookProxy.IsTestRun = true;
+
+            // Try to start the runbook job
+            try
+            {
+                SendRequest("runbooks/" + runbookProxy.RunbookName.ToUrlSafeString() + "/draft/testJob", "PUT", json, "application/json");
+            }
+            catch (WebException ex)
+            {
+                if (ex.Status == WebExceptionStatus.ProtocolError && (ex.Response as HttpWebResponse).StatusCode == HttpStatusCode.BadRequest)
+                    MessageBox.Show("A job is already running, please wait for that to complete and then try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                else
+                    MessageBox.Show("An unknown error occurred when trying to test the runbook: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                return null;
+            }
 
             return jobGuid;
         }

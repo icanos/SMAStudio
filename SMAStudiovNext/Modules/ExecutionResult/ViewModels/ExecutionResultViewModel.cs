@@ -108,52 +108,58 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
                     Thread.Sleep(1 * 1000);
                 }
 
-                job = _backendService.GetJobDetails(_jobId);
+                job = _backendService.GetJobDetails(_runbookViewModel.Runbook);
 
-                Execute.OnUIThreadAsync(() =>
+                if (job != null)
                 {
-                    foreach (var entry in job.Result)
-                        Result.Add(entry);
-
-                    JobStatus = job.JobStatus;
-                    NotifyOfPropertyChange(() => DisplayName);
-
-                    _propertyInfo = new ExecutionResultPropertyInfo();
-                    _propertyInfo.JobID = (_jobId == null) ? Guid.Empty : (Guid)_jobId;
-                    _propertyInfo.RunbookID = (_runbookViewModel != null) ? ((RunbookModelProxy)_runbookViewModel.Model).RunbookID : Guid.Empty;
-                    _propertyInfo.RunbookName = (_runbookViewModel != null) ? ((RunbookModelProxy)_runbookViewModel.Model).RunbookName : "Unknown";
-                    _propertyInfo.JobStatus = job.JobStatus;
-                    _propertyInfo.StartTime = job.StartTime;
-                    _propertyInfo.EndTime = job.EndTime;
-                    _propertyInfo.CreationTime = job.CreationTime;
-                    _propertyInfo.LastModifiedTime = job.LastModifiedTime;
-                    _propertyInfo.ErrorCount = job.ErrorCount;
-                    _propertyInfo.WarningCount = job.WarningCount;
-
-                    _inspectorTool.SelectedObject = _propertyInfo;
-                });
-
-                while (!_completedExecutionStatus.Contains(job.JobStatus))
-                {
-                    job = _backendService.GetJobDetails(_jobId);
-
                     Execute.OnUIThreadAsync(() =>
                     {
+                        foreach (var entry in job.Result)
+                            Result.Add(entry);
+
                         JobStatus = job.JobStatus;
                         NotifyOfPropertyChange(() => DisplayName);
 
+                        _propertyInfo = new ExecutionResultPropertyInfo();
+                        _propertyInfo.JobID = (_jobId == null) ? Guid.Empty : (Guid)_jobId;
+                        _propertyInfo.RunbookID = (_runbookViewModel != null) ? ((RunbookModelProxy)_runbookViewModel.Model).RunbookID : Guid.Empty;
+                        _propertyInfo.RunbookName = (_runbookViewModel != null) ? ((RunbookModelProxy)_runbookViewModel.Model).RunbookName : "Unknown";
+                        _propertyInfo.JobStatus = job.JobStatus;
                         _propertyInfo.StartTime = job.StartTime;
                         _propertyInfo.EndTime = job.EndTime;
+                        _propertyInfo.CreationTime = job.CreationTime;
+                        _propertyInfo.LastModifiedTime = job.LastModifiedTime;
                         _propertyInfo.ErrorCount = job.ErrorCount;
                         _propertyInfo.WarningCount = job.WarningCount;
-                        _propertyInfo.JobStatus = job.JobStatus;
 
-                        _inspectorTool.SelectedObject = null;
                         _inspectorTool.SelectedObject = _propertyInfo;
-
-                        foreach (var entry in job.Result)
-                            Result.Add(entry);
                     });
+                }
+
+                while (!_completedExecutionStatus.Contains(job.JobStatus))
+                {
+                    job = _backendService.GetJobDetails(_runbookViewModel.Runbook);
+
+                    if (job != null)
+                    {
+                        Execute.OnUIThreadAsync(() =>
+                        {
+                            JobStatus = job.JobStatus;
+                            NotifyOfPropertyChange(() => DisplayName);
+
+                            _propertyInfo.StartTime = job.StartTime;
+                            _propertyInfo.EndTime = job.EndTime;
+                            _propertyInfo.ErrorCount = job.ErrorCount;
+                            _propertyInfo.WarningCount = job.WarningCount;
+                            _propertyInfo.JobStatus = job.JobStatus;
+
+                            _inspectorTool.SelectedObject = null;
+                            _inspectorTool.SelectedObject = _propertyInfo;
+
+                            foreach (var entry in job.Result)
+                                Result.Add(entry);
+                        });
+                    }
 
                     Thread.Sleep(2 * 1000);
                 }

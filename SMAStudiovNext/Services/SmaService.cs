@@ -430,18 +430,18 @@ namespace SMAStudiovNext.Services
         /// </summary>
         /// <param name="jobId">ID to retrieve information about</param>
         /// <returns>Proxy object or null</returns>
-        public JobModelProxy GetJobDetails(Guid jobId)
+        public JobModelProxy GetJobDetails(RunbookModelProxy runbook)
         {
             var context = GetConnection();
-            var model = context.Jobs.Where(j => j.JobID.Equals(jobId)).Select(j => new JobModelProxy(j, Context)).FirstOrDefault();
+            var model = context.Jobs.Where(j => j.JobID.Equals(runbook.JobID)).Select(j => new JobModelProxy(j, Context)).FirstOrDefault();
 
             if (model.LastDownloadTime != null)
             {
-                var entries = GetJobContent(jobId, "Any");
+                var entries = GetJobContent(runbook.JobID, "Any");
                 model.Result = entries.Where(e => e.StreamTime > model.LastDownloadTime).ToList();
             }
             else
-                model.Result = GetJobContent(jobId, "Any");
+                model.Result = GetJobContent(runbook.JobID, "Any");
 
             var entry = model.Result.OrderByDescending(m => m.StreamTime).FirstOrDefault();
 
@@ -673,6 +673,7 @@ namespace SMAStudiovNext.Services
             var context = GetConnection();
             var runbook = (SMA.Runbook)runbookProxy.Model;
 
+            runbookProxy.IsTestRun = true;
             return runbook.TestRunbook(context, parameters);
         }
 
@@ -810,6 +811,7 @@ namespace SMAStudiovNext.Services
             var context = GetConnection();
             var runbook = (SMA.Runbook)runbookProxy.Model;
 
+            runbookProxy.IsTestRun = false;
             return runbook.StartRunbook(context, parameters);
         }
 
