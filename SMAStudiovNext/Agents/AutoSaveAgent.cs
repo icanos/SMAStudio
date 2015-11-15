@@ -48,14 +48,19 @@ namespace SMAStudiovNext.Agents
 
             if (result == MessageBoxResult.Yes)
             {
-                // TODO: Rewrite the auto save agent to be context aware
-                /*var context = ((SmaService)_smaService).GetConnection();
-
                 foreach (var file in files)
                 {
                     var fileInfo = new FileInfo(file);
                     var contentReader = new StreamReader(file);
                     var objectContent = contentReader.ReadToEnd();
+                    var nameParts = file.Split('_');
+                    var contextId = nameParts[0];
+
+                    var context = (_application as Modules.Startup.Module).GetContexts().FirstOrDefault(c => c.ID.Equals(contextId));
+
+                    // If context is null, the context might have been deleted and therefore we discard this
+                    if (context == null)
+                        continue;
 
                     contentReader.Close();
 
@@ -63,7 +68,7 @@ namespace SMAStudiovNext.Agents
                     {
                         try
                         {
-                            var runbook = context.Runbooks.FirstOrDefault(x => x.RunbookID.ToString().Equals(fileInfo.Name));
+                            var runbook = context.Runbooks.FirstOrDefault(x => (x.Tag as RunbookModelProxy).RunbookID.ToString().Equals(fileInfo.Name));
 
                             if (runbook == null)
                             {
@@ -71,25 +76,25 @@ namespace SMAStudiovNext.Agents
                                 return;
                             }
 
-                            if (!runbook.DraftRunbookVersionID.HasValue && MessageBox.Show(runbook.RunbookName + " is currently not checked out, do you want to check out the runbook?", "Published Runbook", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                            if (!(runbook.Tag as RunbookModelProxy).DraftRunbookVersionID.HasValue && MessageBox.Show((runbook.Tag as RunbookModelProxy).RunbookName + " is currently not checked out, do you want to check out the runbook?", "Published Runbook", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                             {
                                 return;
                             }
 
-                            //var runbookViewModel = new RunbookViewModel(new RunbookModelProxy(runbook));
-                            MessageBox.Show("Reimplement this with support for both Azure and SMA!");
-                            //await runbookViewModel.CheckOut();
+                            var viewModel = (runbook.Tag as RunbookModelProxy).GetViewModel<RunbookViewModel>();
+                            viewModel.Content = objectContent;
 
-                            //runbookViewModel.Content = objectContent;
-
-                            //_shell.OpenDocument(runbookViewModel);
+                            Execute.OnUIThread(() =>
+                            {
+                                _shell.OpenDocument(viewModel);
+                            });
                         }
                         catch (DataServiceQueryException ex)
                         {
-                            _output.AppendLine("Error when retrieving runbook from SMA: " + ex.Message);
+                            _output.AppendLine("Error when retrieving runbook from backend: " + ex.Message);
                         }
                     });
-                }*/
+                }
             }
             else
             {
@@ -128,7 +133,7 @@ namespace SMAStudiovNext.Agents
 
                     try
                     {
-                        var textWriter = new StreamWriter(Path.Combine(AppHelper.CachePath, "cache", runbookViewModel.Runbook.RunbookID.ToString()), false);
+                        var textWriter = new StreamWriter(Path.Combine(AppHelper.CachePath, "cache", runbookViewModel.Runbook.Context.ID + "_" + runbookViewModel.Runbook.RunbookID.ToString()), false);
                         textWriter.Write(runbookViewModel.Content);
                         textWriter.Flush();
                         textWriter.Close();

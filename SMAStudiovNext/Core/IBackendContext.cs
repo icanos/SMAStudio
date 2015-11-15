@@ -61,6 +61,8 @@ namespace SMAStudiovNext.Core
 
         ObservableCollection<ResourceContainer> Tags { get; set; }
 
+        Guid ID { get; }
+
         ContextType ContextType { get; }
         
         IBackendService Service { get; }

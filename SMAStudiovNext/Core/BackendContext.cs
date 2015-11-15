@@ -190,6 +190,8 @@ namespace SMAStudiovNext.Core
         }
 
         public ContextType ContextType { get { return _backendType; } }
+
+        public Guid ID { get { return _backendConnection.Id; } }
         
         /// <summary>
         /// Contains all runbooks found in the backend

@@ -43,6 +43,8 @@ namespace SMAStudiovNext.Core
 
     public class BackendConnection
     {
+        public Guid Id { get; set; }
+
         public bool IsAzure { get; set; }
 
         public string Name { get; set; }
