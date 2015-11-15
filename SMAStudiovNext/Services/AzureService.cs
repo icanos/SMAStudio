@@ -624,8 +624,6 @@ namespace SMAStudiovNext.Services
 
             var job = new Dictionary<string, Dictionary<string, object>>();
             job.Add("properties", new Dictionary<string, object> { { "parameters", jobParameters } });
-            //job["properties"].Add("parameters", jobParameters);
-
             var json = JsonConvert.SerializeObject(job);
 
             runbookProxy.IsTestRun = true;

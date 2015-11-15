@@ -23,7 +23,7 @@ namespace SMAStudiovNext.Core
     /// <summary>
     /// Holds a connection to a backend, eg. a SMA environment or a Azure Automation account.
     /// </summary>
-    public class BackendContext : IBackendContext
+    public class BackendContext : PropertyChangedBase, IBackendContext
     {
         private readonly IBackendService _backendService;
         private readonly BackendConnection _backendConnection;
@@ -141,7 +141,10 @@ namespace SMAStudiovNext.Core
                 var runbookModel = (RunbookModelProxy)runbook.Tag;
                 if (runbookModel.Tags == null)
                 {
-                    unmatchedTagMenuItem.Items.Add(runbook);
+                    Execute.OnUIThread(() =>
+                    {
+                        unmatchedTagMenuItem.Items.Add(runbook);
+                    });
                     continue;
                 }
 
@@ -149,7 +152,7 @@ namespace SMAStudiovNext.Core
                 if (tags.Length == 0)
                     continue;
 
-                foreach (var tag in tags)
+                foreach (var tag in tags.OrderBy(t => t))
                 {
                     var fixedTagName = tag.Trim();
                     var count = Tags.Count(x => x.Title == fixedTagName);
@@ -158,8 +161,11 @@ namespace SMAStudiovNext.Core
                     {
                         var tagObj = default(ResourceContainer);
                         tagObj = Tags.First(x => x.Title == fixedTagName);
-                        
-                        tagObj.Items.Add(runbook);
+
+                        Execute.OnUIThread(() =>
+                        {
+                            tagObj.Items.Add(runbook);
+                        });
                     }
                     else
                     {
@@ -167,15 +173,18 @@ namespace SMAStudiovNext.Core
                         var menuItem = new ResourceContainer(fixedTagName, tagObj, IconsDescription.Folder);
                         menuItem.Items.Add(runbook);
 
-                        Tags.Add(menuItem);
+                        Execute.OnUIThread(() => { Tags.Add(menuItem); });
                     }
                 }
             }
 
-            Tags = Tags.OrderBy(x => x.Title).ToObservableCollection();
+            Execute.OnUIThread(() =>
+            {
+                // We want unmatched at the bottom
+                Tags.Add(unmatchedTagMenuItem);
 
-            // We want unmatched at the bottom
-            Tags.Add(unmatchedTagMenuItem);
+                NotifyOfPropertyChange(() => Tags);
+            });
         }
 
         public string GetContent(string url)
@@ -234,8 +243,8 @@ namespace SMAStudiovNext.Core
 
                 _isReady = value;
 
-                if (_isReady)
-                    _statusManager.SetText("");
+                //if (_isReady)
+                //    _statusManager.SetText("");
             }
         }
     }

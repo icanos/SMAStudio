@@ -85,16 +85,7 @@ namespace SMAStudiovNext.Modules.Startup
                 foreach (var agent in _agents)
                     agent.Stop();
             };
-
-            /*AsyncExecution.Run(ThreadPriority.Normal, () =>
-            {
-                var smaService = AppContext.Resolve<IBackendService>("SMA");
-                smaService.Load();
-
-                var azureService = AppContext.Resolve<IBackendService>("Azure");
-                azureService.Load();
-            });*/
-
+            
             // Retrieve all agents
             var agentTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.GetInterfaces().Contains(typeof(IAgent))).ToList();
 
@@ -129,6 +120,12 @@ namespace SMAStudiovNext.Modules.Startup
             backend.Start();
 
             _backendContexts.Add(backend);
+
+            var environment = IoC.Get<EnvironmentExplorerViewModel>();
+            Execute.OnUIThread(() =>
+            {
+                environment.Items.Add(backend.GetStructure());
+            });
         }
 
         public IList<IBackendContext> GetContexts()
@@ -142,6 +139,19 @@ namespace SMAStudiovNext.Modules.Startup
 
             if (environment != null)
                 environment.OnBackendReady(sender, e);
+
+            bool allContextsReady = true;
+            foreach (var context in GetContexts())
+            {
+                if (!context.IsReady)
+                {
+                    allContextsReady = false;
+                    break;
+                }
+            }
+
+            if (allContextsReady)
+                AppContext.Resolve<IStatusManager>().SetText("");
         }
 
         private void RefreshInspector()

@@ -692,19 +692,26 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                         parameters.Add(pair);
                     }
 
+                    var executionViewModel = new ExecutionResultViewModel(this);
+                    var shell = IoC.Get<IShell>();
+                    shell.OpenDocument(executionViewModel);
+
                     AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
                     {
                         var guid = Owner.TestRunbook(_runbook, parameters);
 
-                        if (guid != null)
+                        if (guid.HasValue)
+                        {
                             _runbook.JobID = (Guid)guid;
+                        }
+                        else
+                        {
+                            Execute.OnUIThread(() =>
+                            {
+                                shell.CloseDocument(executionViewModel);
+                            });
+                        }
                     });
-
-                    if (_runbook.JobID != null && _runbook.JobID != Guid.Empty)
-                    {
-                        var shell = IoC.Get<IShell>();
-                        shell.OpenDocument(new ExecutionResultViewModel(this));
-                    }
                 }
                 catch (DataServiceQueryException ex)
                 {
