@@ -64,8 +64,7 @@ namespace SMAStudiovNext.Services
 
         public Task<bool> CheckRunningJobs(RunbookModelProxy runbook, bool checkDraft)
         {
-            
-            return Task.Run(() => { return false; });
+            return Task.Run(() => { if (runbook.JobID != Guid.Empty) { return true; } else { return false; } });
         }
 
         public bool Delete(ModelProxyBase model)
@@ -418,12 +417,12 @@ namespace SMAStudiovNext.Services
 
         public void PauseExecution(Guid jobId)
         {
-            throw new NotImplementedException();
+            SendRequest("jobs/" + jobId + "/suspend", "POST", "", "0");
         }
 
         public void ResumeExecution(Guid jobId)
         {
-            throw new NotImplementedException();
+            SendRequest("jobs/" + jobId + "/resume", "POST", "", "0");
         }
 
         public void Save(IViewModel instance)
@@ -607,7 +606,7 @@ namespace SMAStudiovNext.Services
 
         public void StopExecution(Guid jobId)
         {
-            throw new NotImplementedException();
+            SendRequest("jobs/" + jobId + "/stop", "POST", "", "0");
         }
 
         public Guid? TestRunbook(RunbookModelProxy runbookProxy, List<SMA.NameValuePair> parameters)
