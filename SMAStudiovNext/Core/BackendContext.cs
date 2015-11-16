@@ -60,6 +60,11 @@ namespace SMAStudiovNext.Core
 
         public void Start()
         {
+            Runbooks.Clear();
+            Credentials.Clear();
+            Schedules.Clear();
+            Variables.Clear();
+
             _statusManager.SetText("Loading data from " + _backendConnection.Name + "...");
             _backendService.Load();
         }
