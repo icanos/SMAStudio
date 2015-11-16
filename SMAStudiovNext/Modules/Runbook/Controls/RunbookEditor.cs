@@ -36,7 +36,7 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
             _foldingStrategy = new PowershellFoldingStrategy();
 
             var foldingUpdateTimer = new DispatcherTimer();
-            foldingUpdateTimer.Interval = TimeSpan.FromSeconds(2);
+            foldingUpdateTimer.Interval = TimeSpan.FromSeconds(4);
             foldingUpdateTimer.Tick += delegate { UpdateFoldings(); };
             foldingUpdateTimer.Start();
         }

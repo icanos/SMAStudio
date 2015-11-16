@@ -10,6 +10,7 @@ namespace SMAStudiovNext.Modules.Runbook.Resources
 {
     public class PowershellFoldingStrategy
     {
+        public Dictionary<string, string> foldingKeywords = new Dictionary<string, string>() { { "#region", "#endregion" } };
         /// <summary>
 		/// Gets/Sets the opening brace. The default value is '{'.
 		/// </summary>
@@ -25,8 +26,8 @@ namespace SMAStudiovNext.Modules.Runbook.Resources
         /// </summary>
         public PowershellFoldingStrategy()
         {
-            this.OpeningBrace = '{';
-            this.ClosingBrace = '}';
+            OpeningBrace = '{';
+            ClosingBrace = '}';
         }
 
         public void UpdateFoldings(FoldingManager manager, TextDocument document)
@@ -54,8 +55,33 @@ namespace SMAStudiovNext.Modules.Runbook.Resources
 
             Stack<int> startOffsets = new Stack<int>();
             int lastNewLineOffset = 0;
-            char openingBrace = this.OpeningBrace;
-            char closingBrace = this.ClosingBrace;
+            char openingBrace = OpeningBrace;
+            char closingBrace = ClosingBrace;
+
+            foreach (var startKeyword in foldingKeywords.Keys)
+            {
+                int lastKeywordPos = 0;
+                int pos = 0;
+
+                while ((pos = document.Text.IndexOf(startKeyword, pos)) > lastKeywordPos)
+                {
+                    int endOffset = document.Text.IndexOf(foldingKeywords[startKeyword], pos);
+
+                    if (endOffset > pos)
+                    {
+                        var offset = document.Text.IndexOf("\r\n", pos);
+                        var name = document.Text.Substring(pos + 8, offset - (pos + 8));
+                        var folding = new NewFolding(pos, endOffset + 10);
+                        folding.Name = name;
+
+                        // Add the folding
+                        newFoldings.Add(folding);
+                    }
+
+                    lastKeywordPos = pos;
+                }
+            }
+
             for (int i = 0; i < document.TextLength; i++)
             {
                 char c = document.GetCharAt(i);
@@ -77,7 +103,9 @@ namespace SMAStudiovNext.Modules.Runbook.Resources
                     lastNewLineOffset = i + 1;
                 }
             }
+
             newFoldings.Sort((a, b) => a.StartOffset.CompareTo(b.StartOffset));
+
             return newFoldings;
         }
     }
