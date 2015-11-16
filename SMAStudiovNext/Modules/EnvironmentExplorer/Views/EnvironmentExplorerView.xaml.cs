@@ -26,6 +26,11 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.Views
             return ((ResourceContainer)treeView.SelectedItem).Context;
         }
 
+        public ResourceContainer SelectedObject
+        {
+            get { return (ResourceContainer)treeView.SelectedItem; }
+        }
+
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);

@@ -12,5 +12,7 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.Views
         void RefreshSource();
 
         IBackendContext GetCurrentContext();
+
+        ResourceContainer SelectedObject { get; }
     }
 }

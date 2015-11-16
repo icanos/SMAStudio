@@ -28,9 +28,9 @@
                             </MenuItem>
                             <MenuItem Header="Job History" Command="{Binding HistoryCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
                                                                           AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}" />
-                            <MenuItem x:Name="btnCompare" Header="Compare to..." />
+                            <!--<MenuItem x:Name="btnCompare" Header="Compare to..." />-->
                             <Separator />
-                            <MenuItem Header="Publish" Command="{Binding CheckInCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
+                            <MenuItem Header="Publish" Command="{Binding PublishCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
                                                                           AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}"/>
                             <Separator />
                             <MenuItem Header="Delete" Command="{Binding DeleteCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,

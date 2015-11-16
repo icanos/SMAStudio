@@ -3,8 +3,8 @@ using Gemini.Framework;
 using Gemini.Framework.Services;
 using Gemini.Modules.Output;
 using SMAStudiovNext.Core;
+using SMAStudiovNext.Modules.EnvironmentExplorer.Commands;
 using SMAStudiovNext.Modules.EnvironmentExplorer.Views;
-using SMAStudiovNext.Modules.Startup;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Windows.Input;
@@ -15,6 +15,7 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels
     public class EnvironmentExplorerViewModel : Tool
     {
         private readonly ObservableCollection<ResourceContainer> _items;
+        private readonly ICommand _publishCommand;
         private IEnvironmentExplorerView _view;
 
         #region ITool Properties
@@ -53,21 +54,12 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels
         public EnvironmentExplorerViewModel()
         {
             _items = new ObservableCollection<ResourceContainer>();
+            _publishCommand = new PublishCommand();
         }
 
         protected override void OnViewLoaded(object view)
         {
             _view = (IEnvironmentExplorerView)view;
-
-            /*var application = IoC.Get<IModule>();
-            var contexts = (application as Module).GetContexts();
-
-            foreach (var context in contexts)
-            {
-                Items.Add(context.GetStructure());
-            }
-
-            NotifyOfPropertyChange(() => Items);*/
         }
 
         public IBackendContext GetCurrentContext()
@@ -115,6 +107,13 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels
         public ICommand DeleteCommand
         {
             get { return AppContext.Resolve<ICommand>("DeleteCommand"); }
+        }
+
+        public ICommand PublishCommand
+        {
+            get {
+                return _publishCommand;
+            }
         }
 
         public ICommand NewCredentialCommand

@@ -218,6 +218,7 @@
     </Compile>
     <Compile Include="Modules\EnvironmentExplorer\Commands\DeleteCommand.cs" />
     <Compile Include="Modules\EnvironmentExplorer\Commands\HistoryCommand.cs" />
+    <Compile Include="Modules\EnvironmentExplorer\Commands\PublishCommand.cs" />
     <Compile Include="Modules\EnvironmentExplorer\Views\IEnvironmentExplorerView.cs" />
     <Compile Include="Modules\ExecutionResult\ToolBarDefinitions.cs" />
     <Compile Include="Modules\ExecutionResult\ViewModels\ExecutionResultViewModel.cs" />
