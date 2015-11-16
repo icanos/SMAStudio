@@ -239,6 +239,7 @@
     <Compile Include="Modules\Runbook\CodeCompletion\ICompletionEntry.cs" />
     <Compile Include="Modules\Runbook\CodeCompletion\ILocalCodeCompletionContext.cs" />
     <Compile Include="Commands\PublishCommandDefinition.cs" />
+    <Compile Include="Modules\Runbook\Resources\PowershellFoldingStrategy.cs" />
     <Compile Include="Modules\Runbook\Snippets\ISnippetsCollection.cs" />
     <Compile Include="Modules\Runbook\Snippets\SnippetsCollection.cs" />
     <Compile Include="Modules\Schedule\ViewModels\ScheduleViewModel.cs" />

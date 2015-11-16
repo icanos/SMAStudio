@@ -18,6 +18,7 @@ using Gemini.Framework;
 using System.Windows;
 using SMAStudiovNext.Modules.Runbook.CodeCompletion;
 using Newtonsoft.Json;
+using System.Security.Cryptography;
 
 namespace SMAStudiovNext.Services
 {
@@ -476,16 +477,35 @@ namespace SMAStudiovNext.Services
             if (runbook.RunbookID == Guid.Empty)
             {
                 // New runbook that doesn't exist in Azure Automation yet
-                MessageBox.Show("Not supported yet as we need to utilize Azure Storage as well.");
-            }
-            else
-            {
-                // Update the runbook
-                SendRequest("runbooks/" + runbook.RunbookName.ToUrlSafeString() + "/draft/content", "PUT", viewModel.Content, "text/powershell");
+                var json = new Dictionary<string, object>();
+                var properties = new Dictionary<string, object>();
+                properties.Add("runbookType", "Script");
+                properties.Add("logProgress", false);
+                properties.Add("logVerbose", false);
 
-                // Reset the unsaved changes flag
-                viewModel.UnsavedChanges = false;
+                var draft = new Dictionary<string, object>();
+                draft.Add("inEdit", true);
+                draft.Add("creationTime", DateTime.Now);
+                draft.Add("lastModifiedTime", DateTime.Now);
+                properties.Add("draft", draft);
+
+                json.Add("properties", properties);
+
+                var cryptoProvider = new SHA256CryptoServiceProvider();
+                var encoding = System.Text.Encoding.UTF8;
+
+                var rbBytes = encoding.GetBytes(viewModel.Content);
+                var resultHash = cryptoProvider.ComputeHash(rbBytes);
+                var resultHashB64 = Convert.ToBase64String(resultHash);
+
+                SendRequest("runbooks/" + runbook.RunbookName.ToUrlSafeString(), "PUT", JsonConvert.SerializeObject(json), "application/json");
             }
+            
+            // Update the runbook
+            SendRequest("runbooks/" + runbook.RunbookName.ToUrlSafeString() + "/draft/content", "PUT", viewModel.Content, "text/powershell");
+
+            // Reset the unsaved changes flag
+            viewModel.UnsavedChanges = false;
         }
 
         private void SaveAzureVariable(IViewModel viewModel)

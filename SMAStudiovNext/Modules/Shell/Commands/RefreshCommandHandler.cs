@@ -22,7 +22,11 @@ namespace SMAStudiovNext.Modules.Shell.Commands
             var contexts = (application as Module).GetContexts();
 
             foreach (var context in contexts)
+            {
+                //context.ParseTags();
+                context.Tags.Clear();
                 context.Start();
+            }
 
             return TaskUtility.Completed;
         }

@@ -1,9 +1,13 @@
 ﻿using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
+using SMAStudiovNext.Modules.Runbook.Resources;
+using System;
 using System.IO;
 using System.Reflection;
 using System.Windows.Media;
+using System.Windows.Threading;
 using System.Xml;
 
 namespace SMAStudiovNext.Modules.Runbook.Controls
@@ -16,6 +20,9 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
     /// </summary>
     public class RunbookEditor : TextEditor
     {
+        private FoldingManager _foldingManager;
+        private PowershellFoldingStrategy _foldingStrategy;
+
         public RunbookEditor()
         {
             FontFamily = new FontFamily("Consolas");
@@ -25,6 +32,13 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
             {
                 ConvertTabsToSpaces = true
             };
+
+            _foldingStrategy = new PowershellFoldingStrategy();
+
+            var foldingUpdateTimer = new DispatcherTimer();
+            foldingUpdateTimer.Interval = TimeSpan.FromSeconds(2);
+            foldingUpdateTimer.Tick += delegate { UpdateFoldings(); };
+            foldingUpdateTimer.Start();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
@@ -42,6 +56,14 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
 
             reader.Close();
             stream.Close();
+
+            _foldingManager = FoldingManager.Install(TextArea);
+            UpdateFoldings();
+        }
+
+        private void UpdateFoldings()
+        {
+            _foldingStrategy.UpdateFoldings(_foldingManager, Document);
         }
     }
 }
