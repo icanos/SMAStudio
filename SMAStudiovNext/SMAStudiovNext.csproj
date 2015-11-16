@@ -184,6 +184,7 @@
     <Compile Include="Commands\GenerateCertificateCommand.cs" />
     <Compile Include="Commands\GoToDefinitionCommand.cs" />
     <Compile Include="Commands\PauseCommandDefinition.cs" />
+    <Compile Include="Commands\EditPublishedCommandDefinition.cs" />
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Core\BackendContext.cs" />
     <Compile Include="Core\CertificateManager.cs" />

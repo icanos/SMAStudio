@@ -11,6 +11,10 @@ namespace SMAStudiovNext.Modules.Runbook
             Shell.ToolBarDefinitions.ExecutionToolBarGroup, 0, ToolBarItemDisplay.IconAndText);
 
         [Export]
+        public static ToolBarItemDefinition CheckOutItem = new CommandToolBarItemDefinition<EditPublishedCommandDefinition>(
+            Shell.ToolBarDefinitions.ExecutionToolBarGroup, 1, ToolBarItemDisplay.IconAndText);
+
+        [Export]
         public static ToolBarItemDefinition CheckInItem = new CommandToolBarItemDefinition<PublishCommandDefinition>(
             Shell.ToolBarDefinitions.ExecutionToolBarGroup, 1, ToolBarItemDisplay.IconAndText);
     }

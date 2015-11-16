@@ -31,21 +31,35 @@ namespace SMAStudiovNext.Core
         {
             var content = string.Empty;
 
-            Execute.OnUIThread(() =>
+            try
             {
-                content = _statusBar.Items[0].Message;
-            });
+                Execute.OnUIThread(() =>
+                {
+                    content = _statusBar.Items[0].Message;
+                });
+            }
+            catch (Exception)
+            {
+                // Don't remember which error to capture ;-)
+            }
 
             return content;
         }
 
         public void SetText(string message)
         {
-            Execute.OnUIThread(() =>
+            try
             {
-                _statusBar.Items[0].Message = message;
-                _cachedText = message;
-            });
+                Execute.OnUIThread(() =>
+                {
+                    _statusBar.Items[0].Message = message;
+                    _cachedText = message;
+                });
+            }
+            catch (Exception)
+            {
+
+            }
         }
 
         public void SetTimeoutText(string message, int timeoutInSeconds)

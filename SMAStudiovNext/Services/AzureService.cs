@@ -57,9 +57,19 @@ namespace SMAStudiovNext.Services
             });
         }
 
-        public Task<bool> CheckOut(RunbookViewModel runbook)
+        public async Task<bool> CheckOut(RunbookViewModel runbook)
         {
-            throw new NotImplementedException();
+            return await Task.Run(() =>
+            {
+                // Check out the runbok
+                SendRequest("runbooks/" + runbook.Runbook.RunbookName.ToUrlSafeString() + "/draft/content", "PUT", "");
+
+                // Notify SMA Studio that we have a draft and download the content
+                runbook.Runbook.DraftRunbookVersionID = Guid.NewGuid();
+                runbook.GetContent(RunbookType.Draft, true);
+
+                return true;
+            });
         }
 
         public Task<bool> CheckRunningJobs(RunbookModelProxy runbook, bool checkDraft)

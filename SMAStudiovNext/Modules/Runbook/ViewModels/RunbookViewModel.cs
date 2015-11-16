@@ -34,7 +34,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         ICommandHandler<TestCommandDefinition>, 
         ICommandHandler<RunCommandDefinition>, 
         ICommandHandler<SaveCommandDefinition>,
-        ICommandHandler<PublishCommandDefinition>
+        ICommandHandler<PublishCommandDefinition>,
+        ICommandHandler<EditPublishedCommandDefinition>
     {
         private readonly IBackendContext _backendContext;
         private readonly ISnippetsCollection _snippetsCollection;
@@ -581,12 +582,12 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 var result = await Owner.CheckOut(this);
                 if (!result)
                 {
-                    output.AppendLine("Unable to check out the runbook.");
+                    output.AppendLine("Unable to edit the runbook.");
                 }
             }
             catch (Exception ex)
             {
-                output.AppendLine("There was an error while checking in the runbook, see the error below.");
+                output.AppendLine("There was an error while editing the runbook, see the error below.");
                 output.AppendLine(ex.Message);
             }
         }
@@ -654,6 +655,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
             var snippet = codeSnippet.CreateAvalonEditSnippet(_runbook);
             snippet.Insert(_view.TextEditor.TextArea);
+
+            UnsavedChanges = true;
         }
 
         #region ICommandHandler<TestCommandDefinition>
@@ -818,13 +821,28 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         #region ICommandHandler<CheckInCommandDefinition>
         void ICommandHandler<PublishCommandDefinition>.Update(Command command)
         {
-            // Do we have a running job already?
-            command.Enabled = true;
+            if (_runbook.DraftRunbookVersionID.HasValue)
+                command.Enabled = true;
+            else
+                command.Enabled = false;
         }
 
         async Task ICommandHandler<PublishCommandDefinition>.Run(Command command)
         {
             await CheckIn();
+        }
+
+        void ICommandHandler<EditPublishedCommandDefinition>.Update(Command command)
+        {
+            if (_runbook.DraftRunbookVersionID.HasValue)
+                command.Enabled = false;
+            else
+                command.Enabled = true;
+        }
+
+        async Task ICommandHandler<EditPublishedCommandDefinition>.Run(Command command)
+        {
+            await CheckOut();
         }
         #endregion
 
