@@ -664,6 +664,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
         async Task ICommandHandler<TestCommandDefinition>.Run(Command command)
         {
+            var output = IoC.Get<IOutput>();
             var dialog = new PrepareRunWindow(this);
 
             if ((bool)dialog.ShowDialog())
@@ -696,6 +697,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                     var shell = IoC.Get<IShell>();
                     shell.OpenDocument(executionViewModel);
 
+                    output.AppendLine("Starting a test of '" + _runbook.RunbookName + "'...");
+
                     AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
                     {
                         var guid = Owner.TestRunbook(_runbook, parameters);
@@ -715,7 +718,6 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 }
                 catch (DataServiceQueryException ex)
                 {
-                    var output = IoC.Get<IOutput>();
                     output.AppendLine("Error when trying to test the runbook:\r\n" + ex.Message);
                 }
             }

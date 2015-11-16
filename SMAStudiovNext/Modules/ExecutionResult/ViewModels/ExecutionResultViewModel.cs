@@ -3,6 +3,7 @@ using Gemini.Framework;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
 using Gemini.Framework.Threading;
+using Gemini.Modules.Output;
 using SMAStudiovNext.Commands;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Icons;
@@ -108,7 +109,10 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
                     Thread.Sleep(1 * 1000);
                 }
 
-                job = _backendService.GetJobDetails(_runbookViewModel.Runbook);
+                if (_runbookViewModel.Runbook.JobID != Guid.Empty)
+                    job = _backendService.GetJobDetails(_runbookViewModel.Runbook);
+                else if (_jobId != Guid.Empty)
+                    job = _backendService.GetJobDetails(_jobId);
 
                 if (job != null)
                 {
@@ -166,6 +170,9 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
 
                 // The job is completed
                 _runbookViewModel.Runbook.JobID = Guid.Empty;
+
+                var output = IoC.Get<IOutput>();
+                output.AppendLine("Job executed with status: " + job.JobStatus);
             });
         }
 

@@ -53,46 +53,45 @@ namespace SMAStudiovNext.Services
             if (!String.IsNullOrEmpty(_connectionData.SmaConnectionUrl))
             {
                 var context = GetConnection();
-                
-                AsyncExecution.Run(System.Threading.ThreadPriority.Normal, delegate ()
+
+                if (context != null)
                 {
-                    var runbooks = context.Runbooks.OrderBy(r => r.RunbookName).ToList();
-                    foreach (var runbook in runbooks)
-                        _backendContext.AddToRunbooks(new RunbookModelProxy(runbook, Context));
+                    AsyncExecution.Run(System.Threading.ThreadPriority.Normal, delegate ()
+                    {
+                        var runbooks = context.Runbooks.OrderBy(r => r.RunbookName).ToList();
+                        foreach (var runbook in runbooks)
+                            _backendContext.AddToRunbooks(new RunbookModelProxy(runbook, Context));
 
-                    var credentials = context.Credentials.OrderBy(c => c.Name).ToList();
-                    foreach (var credential in credentials)
-                        _backendContext.AddToCredentials(new CredentialModelProxy(credential, Context));
+                        var credentials = context.Credentials.OrderBy(c => c.Name).ToList();
+                        foreach (var credential in credentials)
+                            _backendContext.AddToCredentials(new CredentialModelProxy(credential, Context));
 
-                    var variables = context.Variables.OrderBy(v => v.Name).ToList();
-                    foreach (var variable in variables)
-                        _backendContext.AddToVariables(new VariableModelProxy(variable, Context));
+                        var variables = context.Variables.OrderBy(v => v.Name).ToList();
+                        foreach (var variable in variables)
+                            _backendContext.AddToVariables(new VariableModelProxy(variable, Context));
 
-                    var schedules = context.Schedules.OrderBy(s => s.Name).ToList();
-                    foreach (var schedule in schedules)
-                        _backendContext.AddToSchedules(new ScheduleModelProxy(schedule, Context));
-                    //_backendContext.Runbooks = context.Runbooks.OrderBy(r => r.RunbookName).Select(r => new ResourceContainer(r.RunbookName, new RunbookModelProxy(r, Context), IconsDescription.Runbook, Context)).ToObservableCollection();
-                    //_backendContext.Credentials = context.Credentials.OrderBy(x => x.Name).Select(c => new ResourceContainer(c.Name, new CredentialModelProxy(c, Context), IconsDescription.Credential, Context)).ToObservableCollection();
-                    //_backendContext.Variables = context.Variables.OrderBy(x => x.Name).Select(v => new ResourceContainer(v.Name, new VariableModelProxy(v, Context), IconsDescription.Variable, Context)).ToObservableCollection();
-                    //_backendContext.Schedules = context.Schedules.OrderBy(x => x.Name).Select(s => new ResourceContainer(s.Name, new ScheduleModelProxy(s, Context), IconsDescription.Schedule, Context)).ToObservableCollection();
-
+                        var schedules = context.Schedules.OrderBy(s => s.Name).ToList();
+                        foreach (var schedule in schedules)
+                            _backendContext.AddToSchedules(new ScheduleModelProxy(schedule, Context));
+                    
                     _backendContext.ParseTags();
 
-                    AsyncExecution.ExecuteOnUIThread(delegate ()
-                    {
-                        var output = IoC.Get<IOutput>();
-                        output.AppendLine(" ");
-                        output.AppendLine("Statistics:");
-                        output.AppendLine("Found Runbooks: " + _backendContext.Runbooks.Count);
-                        output.AppendLine("Found Credentials: " + _backendContext.Credentials.Count);
-                        output.AppendLine("Found Variables: " + _backendContext.Variables.Count);
-                        output.AppendLine("Found Schedules: " + _backendContext.Schedules.Count);
-                        output.AppendLine(" ");
+                        AsyncExecution.ExecuteOnUIThread(delegate ()
+                        {
+                            var output = IoC.Get<IOutput>();
+                            output.AppendLine(" ");
+                            output.AppendLine("Statistics:");
+                            output.AppendLine("Found Runbooks: " + _backendContext.Runbooks.Count);
+                            output.AppendLine("Found Credentials: " + _backendContext.Credentials.Count);
+                            output.AppendLine("Found Variables: " + _backendContext.Variables.Count);
+                            output.AppendLine("Found Schedules: " + _backendContext.Schedules.Count);
+                            output.AppendLine(" ");
 
-                        _backendContext.SignalCompleted();
-                        _backendContext.IsReady = true;
+                            _backendContext.SignalCompleted();
+                            _backendContext.IsReady = true;
+                        });
                     });
-                });
+                }
             }
         }
 
@@ -429,7 +428,7 @@ namespace SMAStudiovNext.Services
             {
                 connection.Runbooks.First();
             }
-            catch (WebException ex)
+            catch (DataServiceTransportException ex)
             {
                 if (!silent)
                     MessageBox.Show("A connection could not be established to the Service Management Automation webservice, please verify connectivity. Error: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -447,16 +446,21 @@ namespace SMAStudiovNext.Services
         /// <returns>Proxy object or null</returns>
         public JobModelProxy GetJobDetails(RunbookModelProxy runbook)
         {
+            return GetJobDetails(runbook.JobID);
+        }
+
+        public JobModelProxy GetJobDetails(Guid jobId)
+        {
             var context = GetConnection();
-            var model = context.Jobs.Where(j => j.JobID.Equals(runbook.JobID)).Select(j => new JobModelProxy(j, Context)).FirstOrDefault();
+            var model = context.Jobs.Where(j => j.JobID.Equals(jobId)).Select(j => new JobModelProxy(j, Context)).FirstOrDefault();
 
             if (model.LastDownloadTime != null)
             {
-                var entries = GetJobContent(runbook.JobID, "Any");
+                var entries = GetJobContent(jobId, "Any");
                 model.Result = entries.Where(e => e.StreamTime > model.LastDownloadTime).ToList();
             }
             else
-                model.Result = GetJobContent(runbook.JobID, "Any");
+                model.Result = GetJobContent(jobId, "Any");
 
             var entry = model.Result.OrderByDescending(m => m.StreamTime).FirstOrDefault();
 

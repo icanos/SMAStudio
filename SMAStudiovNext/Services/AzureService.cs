@@ -160,7 +160,15 @@ namespace SMAStudiovNext.Services
             if (runbook.IsTestRun)
                 return GetDraftJobDetails(runbook);
 
-            return GetPublishedJobDetails(runbook.JobID);
+            if (runbook.JobID != Guid.Empty)
+                return GetPublishedJobDetails(runbook.JobID);
+
+            return new JobModelProxy(new Job(), Context);
+        }
+
+        public JobModelProxy GetJobDetails(Guid jobId)
+        {
+            return GetPublishedJobDetails(jobId);
         }
 
         private JobModelProxy GetDraftJobDetails(RunbookModelProxy runbook)
