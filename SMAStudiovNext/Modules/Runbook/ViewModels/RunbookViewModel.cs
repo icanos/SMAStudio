@@ -700,7 +700,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                     var shell = IoC.Get<IShell>();
                     shell.OpenDocument(executionViewModel);
 
-                    output.AppendLine("Starting a test of '" + _runbook.RunbookName + "'...");
+                    Execute.OnUIThread(() =>
+                    {
+                        output.AppendLine("Starting a test of '" + _runbook.RunbookName + "'...");
+                    });
 
                     AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
                     {
@@ -721,7 +724,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 }
                 catch (DataServiceQueryException ex)
                 {
-                    output.AppendLine("Error when trying to test the runbook:\r\n" + ex.Message);
+                    Execute.OnUIThread(() =>
+                    {
+                        output.AppendLine("Error when trying to test the runbook:\r\n" + ex.Message);
+                    });
                 }
             }
         }
@@ -739,6 +745,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
         async Task ICommandHandler<RunCommandDefinition>.Run(Command command)
         {
+            var output = IoC.Get<IOutput>();
             var dialog = new PrepareRunWindow(this);
 
             if ((bool)dialog.ShowDialog())
@@ -761,25 +768,41 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                     foreach (var param in dialog.Inputs)
                     {
                         var pair = new NameValuePair();
-                        pair.Name = param.Name;
-                        pair.Value = ((ParameterCompletionData)param).Text;
+                        pair.Name = (param as ParameterCompletionData).RawName;
+                        pair.Value = ((ParameterCompletionData)param).Value;
 
                         parameters.Add(pair);
                     }
 
-                    var guid = Owner.StartRunbook(_runbook, parameters);
-                    if (guid != null)
-                    {
-                        _runbook.JobID = (Guid)guid;
+                    var executionViewModel = new ExecutionResultViewModel(this);
+                    var shell = IoC.Get<IShell>();
+                    shell.OpenDocument(executionViewModel);
 
-                        var shell = IoC.Get<IShell>();
-                        shell.OpenDocument(new ExecutionResultViewModel(this));
-                    }
+                    Execute.OnUIThread(() => { output.AppendLine("Starting a run of the published version of '" + _runbook.RunbookName + "'..."); });
+
+                    AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
+                    {
+                        var guid = Owner.StartRunbook(_runbook, parameters);
+
+                        if (guid.HasValue)
+                        {
+                            _runbook.JobID = (Guid)guid;
+                        }
+                        else
+                        {
+                            Execute.OnUIThread(() =>
+                            {
+                                shell.CloseDocument(executionViewModel);
+                            });
+                        }
+                    });
                 }
                 catch (DataServiceQueryException ex)
                 {
-                    var output = IoC.Get<IOutput>();
-                    output.AppendLine("Error when trying to start the runbook:\r\n" + ex.Message);
+                    Execute.OnUIThread(() =>
+                    {
+                        output.AppendLine("Error when trying to run the runbook:\r\n" + ex.Message);
+                    });
                 }
             }
         }
