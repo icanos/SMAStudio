@@ -15,11 +15,8 @@ namespace SMAStudiovNext.Core
         public static void Start()
         {
             _container = new UnityContainer();
-
-            //_container.RegisterInstance<IBackendContext>(new BackendContext());
+            
             _container.RegisterInstance<ISettingsService>(new SettingsService());
-            //_container.RegisterInstance<IBackendService>("SMA", new SmaService());
-            //_container.RegisterInstance<IBackendService>("Azure", new AzureService());
             _container.RegisterInstance<ISnippetsCollection>(new SnippetsCollection());
             _container.RegisterInstance<IStatusManager>(new StatusManager());
 
@@ -47,6 +44,11 @@ namespace SMAStudiovNext.Core
         public static T Resolve<T>(string name)
         {
             return _container.Resolve<T>(name);
+        }
+
+        public static string Version
+        {
+            get { return "0.5.0"; }
         }
     }
 }

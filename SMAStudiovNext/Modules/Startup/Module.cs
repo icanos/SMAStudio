@@ -42,8 +42,6 @@ namespace SMAStudiovNext.Modules.Startup
 
         public override void Initialize()
         {
-            Console.WriteLine("Initializing SMA Studio");
-
             Application.Current.MainWindow.Icon = new BitmapImage(new Uri("pack://application:,,," + IconsDescription.SMAStudio32, UriKind.RelativeOrAbsolute));
             AppContext.Start();
             CertificateManager.Configure();
@@ -52,7 +50,7 @@ namespace SMAStudiovNext.Modules.Startup
 
             Shell.ShowFloatingWindowsInTaskbar = true;
             Shell.ToolBars.Visible = true;
-            Shell.StatusBar.AddItem("Starting SMA Studio...", new System.Windows.GridLength(1, System.Windows.GridUnitType.Star));
+            Shell.StatusBar.AddItem("Starting SMA Studio v. " + AppContext.Version + "...", new System.Windows.GridLength(1, System.Windows.GridUnitType.Star));
             Shell.ActiveDocumentChanged += (sender, e) => RefreshInspector();
             
             try
