@@ -24,6 +24,9 @@ namespace SMAStudiovNext.Modules.Shell
         public static ExcludeMenuItemDefinition ToolboxItem = new ExcludeMenuItemDefinition(Gemini.Modules.Toolbox.MenuDefinitions.ViewToolboxMenuItem);
 
         [Export]
+        public static ExcludeMenuItemDefinition HistoryItem = new ExcludeMenuItemDefinition(Gemini.Modules.UndoRedo.MenuDefinitions.ViewHistoryMenuItem);
+
+        [Export]
         public static MenuItemDefinition ViewFullscreenItem = new CommandMenuItemDefinition<ViewFullscreenCommandDefinition>(
             Gemini.Modules.MainMenu.MenuDefinitions.ViewPropertiesMenuGroup, 0);
     }

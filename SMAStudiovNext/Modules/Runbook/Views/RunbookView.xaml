@@ -14,7 +14,7 @@
         <diff:BlockColorConverterB x:Key="BlockColorConverterB"/>
     </UserControl.Resources>
     
-    <Grid>
+    <Grid Background="Transparent">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="40" />
             <ColumnDefinition Width="*" />

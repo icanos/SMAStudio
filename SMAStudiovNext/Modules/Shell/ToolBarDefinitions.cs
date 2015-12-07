@@ -33,9 +33,9 @@ namespace SMAStudiovNext.Modules.Shell
         // Items to add
         //
 
-        [Export]
-        public static ToolBarItemDefinition RefreshItem = new CommandToolBarItemDefinition<RefreshCommandDefinition>(
-            Gemini.Modules.Shell.ToolBarDefinitions.StandardOpenSaveToolBarGroup, 0);
+        //[Export]
+        //public static ToolBarItemDefinition RefreshItem = new CommandToolBarItemDefinition<RefreshCommandDefinition>(
+        //    Gemini.Modules.Shell.ToolBarDefinitions.StandardOpenSaveToolBarGroup, 0);
 
         [Export]
         public static ToolBarItemDefinition SaveDefinition = new CommandToolBarItemDefinition<SaveCommandDefinition>(

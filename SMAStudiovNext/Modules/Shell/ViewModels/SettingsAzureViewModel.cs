@@ -11,8 +11,8 @@ using System.Threading.Tasks;
 
 namespace SMAStudiovNext.Modules.Shell.ViewModels
 {
-    [Export(typeof(ISettingsEditor))]
-    [PartCreationPolicy(CreationPolicy.NonShared)]
+    //[Export(typeof(ISettingsEditor))]
+    //[PartCreationPolicy(CreationPolicy.NonShared)]
     public class SettingsAzureViewModel : PropertyChangedBase, ISettingsEditor
     {
         private string _azureKey = string.Empty;

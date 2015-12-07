@@ -63,7 +63,16 @@ namespace SMAStudiovNext.Core
         [XmlIgnore]
         public string CleartextPassword { get; set; }
 
-        public bool SmaImpersonatedLogin { get; set; }
+        private bool _smaImpersonatedLogin = false;
+        public bool SmaImpersonatedLogin
+        {
+            get { return _smaImpersonatedLogin; }
+            set
+            {
+                _smaImpersonatedLogin = value;
+                NotifyOfPropertyChange(() => SmaImpersonatedLogin);
+            }
+        }
 
         public string AzureSubscriptionId { get; set; }
 

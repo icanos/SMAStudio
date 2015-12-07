@@ -13,8 +13,8 @@ using Xceed.Wpf.Toolkit;
 
 namespace SMAStudiovNext.Modules.Shell.ViewModels
 {
-    [Export(typeof(ISettingsEditor))]
-    [PartCreationPolicy(CreationPolicy.NonShared)]
+    //[Export(typeof(ISettingsEditor))]
+    //[PartCreationPolicy(CreationPolicy.NonShared)]
     public class SettingsSMAViewModel : PropertyChangedBase, ISettingsEditor
     {
         private string _smaWebserviceUrl;
