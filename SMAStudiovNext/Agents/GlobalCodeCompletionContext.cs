@@ -1,16 +1,13 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework;
-using SMAStudiovNext.Core;
 using SMAStudiovNext.Icons;
 using SMAStudiovNext.Models;
 using SMAStudiovNext.Modules.Runbook.CodeCompletion;
-using SMAStudiovNext.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace SMAStudiovNext.Agents
 {
@@ -73,8 +70,10 @@ namespace SMAStudiovNext.Agents
 
             while (_isRunning)
             {
-                foreach (var context in contexts)
+                for (var i = 0; i < contexts.Count; i++)
                 {
+                    var context = contexts[i];
+
                     if (context.Runbooks != null)
                     {
                         var runbooks = context.Runbooks;

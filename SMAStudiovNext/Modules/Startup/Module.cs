@@ -100,9 +100,9 @@ namespace SMAStudiovNext.Modules.Startup
             // Initialize all connections
             AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
             {
-                foreach (var connection in SettingsService.CurrentSettings.Connections)
+                for (int i = 0; i < SettingsService.CurrentSettings.Connections.Count; i++)
                 {
-                    StartConnection(connection);
+                    StartConnection(SettingsService.CurrentSettings.Connections[i]);
                 }
             });
 

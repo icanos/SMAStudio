@@ -26,6 +26,9 @@ namespace SMAStudiovNext.Core
 
         public static byte[] Unprotect(byte[] data)
         {
+            if (data == null)
+                return null;
+
             try
             {
                 //Decrypt the data using DataProtectionScope.CurrentUser. 

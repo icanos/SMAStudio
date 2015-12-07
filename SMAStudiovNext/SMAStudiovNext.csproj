@@ -14,6 +14,7 @@
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -26,7 +27,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>0.5.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -206,6 +206,7 @@
     <Compile Include="Core\CollectionExtensions.cs" />
     <Compile Include="Core\IBackendContext.cs" />
     <Compile Include="Core\IEnvironmentExplorerItem.cs" />
+    <Compile Include="Core\InverseBoolConverter.cs" />
     <Compile Include="Core\IStatusManager.cs" />
     <Compile Include="Core\JobOutput.cs" />
     <Compile Include="Core\JsonConverter.cs" />
@@ -227,12 +228,16 @@
     <Compile Include="Modules\Azure\Windows\AzureWindow.xaml.cs">
       <DependentUpon>AzureWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Modules\ConnectionManager\Windows\ConnectionManagerWindow.xaml.cs">
+      <DependentUpon>ConnectionManagerWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Modules\Credential\ViewModels\CredentialViewModel.cs" />
     <Compile Include="Modules\Credential\Views\CredentialView.xaml.cs">
       <DependentUpon>CredentialView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\EnvironmentExplorer\Commands\DeleteCommand.cs" />
     <Compile Include="Modules\EnvironmentExplorer\Commands\HistoryCommand.cs" />
+    <Compile Include="Modules\EnvironmentExplorer\Commands\NewConnectionCommand.cs" />
     <Compile Include="Modules\EnvironmentExplorer\Commands\PublishCommand.cs" />
     <Compile Include="Modules\EnvironmentExplorer\Views\IEnvironmentExplorerView.cs" />
     <Compile Include="Modules\ExecutionResult\ToolBarDefinitions.cs" />
@@ -368,6 +373,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Modules\Runbook\SyntaxHighlightning\Powershell.xshd" />
     <None Include="packages.config" />
+    <None Include="Properties\DataSources\SMAStudiovNext.SMA.OrchestratorApi.datasource" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -380,6 +386,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Modules\Azure\Windows\AzureWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\ConnectionManager\Windows\ConnectionManagerWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -516,6 +526,15 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\AddConnection.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\DeleteConnection.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\ListConnections.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

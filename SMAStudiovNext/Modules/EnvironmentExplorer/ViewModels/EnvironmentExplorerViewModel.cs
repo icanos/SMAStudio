@@ -135,5 +135,10 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels
         {
             get { return AppContext.Resolve<ICommand>("NewRunbookCommand"); }
         }
+
+        public ICommand NewConnectionCommand
+        {
+            get { return AppContext.Resolve<ICommand>("NewConnectionCommand"); }
+        }
     }
 }

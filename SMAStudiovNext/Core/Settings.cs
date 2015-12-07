@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Caliburn.Micro;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Xml.Serialization;
 
 namespace SMAStudiovNext.Core
 {
@@ -18,36 +20,34 @@ namespace SMAStudiovNext.Core
 
         public List<BackendConnection> Connections { get; set; }
 
-        public List<string> TrustedCertificates { get; set; }
-
-        //public string AzureSubscriptionId { get; set; }
-
-        //public string AzureAutomationAccount { get; set; }
-
-        //public bool AzureEnabled { get; set; }
-
-        //public string SmaWebserviceUrl { get; set; }
-
-        //public bool ImpersonatedLogin { get; set; }
-
-        //public string Username { get; set; }
-
-        //public string Domain { get; set; }
-
-        //public byte[] Password { get; set; }
-
-        //public string SmaCertificateThumbprint { get; set; }
-
-        //public string AzureCertificateThumbprint { get; set; }
+        public List<string> TrustedCertificates { get; set; }        
     }
 
-    public class BackendConnection
+    public class BackendConnection : PropertyChangedBase
     {
+        public BackendConnection()
+        {
+            Id = Guid.NewGuid();
+            IsAzure = false;
+        }
+
         public Guid Id { get; set; }
 
         public bool IsAzure { get; set; }
 
-        public string Name { get; set; }
+        private string _name = string.Empty;
+        public string Name
+        {
+            get
+            {
+                return _name;
+            }
+            set
+            {
+                _name = value;
+                NotifyOfPropertyChange(() => Name);
+            }
+        }
 
         public string SmaConnectionUrl { get; set; }
 
@@ -56,6 +56,12 @@ namespace SMAStudiovNext.Core
         public string SmaDomain { get; set; }
 
         public byte[] SmaPassword { get; set; }
+
+        /// <summary>
+        /// Used to store the password while editing the connection, nulled when saved.
+        /// </summary>
+        [XmlIgnore]
+        public string CleartextPassword { get; set; }
 
         public bool SmaImpersonatedLogin { get; set; }
 
@@ -79,6 +85,11 @@ namespace SMAStudiovNext.Core
             }
 
             return secStr;
+        }
+
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }
