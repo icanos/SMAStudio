@@ -9,6 +9,7 @@ using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using System.Linq;
 
 namespace SMAStudiovNext.Modules.Shell.Commands
 {
@@ -37,28 +38,43 @@ namespace SMAStudiovNext.Modules.Shell.Commands
                 reader.Close();
                 
                 var context = IoC.Get<EnvironmentExplorerViewModel>().GetCurrentContext();
-                var viewModel = default(RunbookViewModel);
-
-                switch (context.ContextType)
+                if (context != null)
                 {
-                    case Core.ContextType.SMA:
-                        var runbook = new SMA.Runbook();
-                        runbook.RunbookName = dialog.CreatedName;
+                    var viewModel = default(RunbookViewModel);
 
-                        viewModel = new RunbookViewModel(new RunbookModelProxy(runbook, context));
-                        viewModel.AddSnippet(runbookContent);
-                        break;
-                    case Core.ContextType.Azure:
-                        var azureRunbook = new Vendor.Azure.Runbook();
-                        azureRunbook.RunbookName = dialog.CreatedName;
+                    var check = context.Runbooks.FirstOrDefault(r => r.Title.Equals(dialog.CreatedName, StringComparison.InvariantCultureIgnoreCase));
+                    if (check == null)
+                    {
+                        switch (context.ContextType)
+                        {
+                            case Core.ContextType.SMA:
+                                var runbook = new SMA.Runbook();
+                                runbook.RunbookName = dialog.CreatedName;
 
-                        viewModel = new RunbookViewModel(new RunbookModelProxy(azureRunbook, context));
-                        viewModel.AddSnippet(runbookContent);
-                        break;
+                                viewModel = new RunbookViewModel(new RunbookModelProxy(runbook, context));
+                                viewModel.AddSnippet(runbookContent);
+                                break;
+                            case Core.ContextType.Azure:
+                                var azureRunbook = new Vendor.Azure.Runbook();
+                                azureRunbook.RunbookName = dialog.CreatedName;
+
+                                viewModel = new RunbookViewModel(new RunbookModelProxy(azureRunbook, context));
+                                viewModel.AddSnippet(runbookContent);
+                                break;
+                        }
+
+                        if (viewModel != null)
+                            shell.OpenDocument(viewModel);
+                    }
+                    else
+                    {
+                        MessageBox.Show("A runbook with the same name already exists.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
-
-                if (viewModel != null)
-                    shell.OpenDocument(viewModel);
+                else
+                {
+                    MessageBox.Show("Unable to determine context.");
+                }
             }
         }
     }

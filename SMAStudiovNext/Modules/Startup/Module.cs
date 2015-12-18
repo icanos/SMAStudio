@@ -44,6 +44,7 @@ namespace SMAStudiovNext.Modules.Startup
         {
             Application.Current.MainWindow.Icon = new BitmapImage(new Uri("pack://application:,,," + IconsDescription.SMAStudio32, UriKind.RelativeOrAbsolute));
             AppContext.Start();
+            GlobalExceptionHandler.Configure();
             CertificateManager.Configure();
 
             MainWindow.Title = "SMA Studio 2015";
@@ -98,13 +99,16 @@ namespace SMAStudiovNext.Modules.Startup
             }
 
             // Initialize all connections
-            AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
+            if (SettingsService.CurrentSettings != null)
             {
-                for (int i = 0; i < SettingsService.CurrentSettings.Connections.Count; i++)
+                AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
                 {
-                    StartConnection(SettingsService.CurrentSettings.Connections[i]);
-                }
-            });
+                    for (int i = 0; i < SettingsService.CurrentSettings.Connections.Count; i++)
+                    {
+                        StartConnection(SettingsService.CurrentSettings.Connections[i]);
+                    }
+                });
+            }
 
             _output.AppendLine("Started SMA Studio");
 

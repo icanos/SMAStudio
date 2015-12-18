@@ -34,7 +34,12 @@ namespace SMAStudio.Language
         {
             var context = new List<PowershellSegment>();
 
-            var parts = _segments.Where(s => s.Start <= position).ToList();
+            List<PowershellSegment> parts = null;
+            lock (_segments)
+            {
+                parts = _segments.Where(s => s.Start <= position).ToList();
+            }
+
             parts.Reverse();
 
             var inBlockToSkip = false;

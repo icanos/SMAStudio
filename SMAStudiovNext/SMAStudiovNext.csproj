@@ -204,6 +204,7 @@
     <Compile Include="Core\BackendContext.cs" />
     <Compile Include="Core\CertificateManager.cs" />
     <Compile Include="Core\CollectionExtensions.cs" />
+    <Compile Include="Core\GlobalExceptionHandler.cs" />
     <Compile Include="Core\IBackendContext.cs" />
     <Compile Include="Core\IEnvironmentExplorerItem.cs" />
     <Compile Include="Core\InverseBoolConverter.cs" />
@@ -216,6 +217,7 @@
     <Compile Include="Core\SerializableDictionary.cs" />
     <Compile Include="Core\StatusManager.cs" />
     <Compile Include="Core\StringExtensions.cs" />
+    <Compile Include="Core\XmlExceptionHandler.cs" />
     <Compile Include="Models\CredentialModelProxy.cs" />
     <Compile Include="Models\JobModelProxy.cs" />
     <Compile Include="Models\ModelProxyBase.cs" />

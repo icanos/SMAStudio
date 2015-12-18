@@ -53,7 +53,8 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.Commands
             if (((ResourceContainer)parameter).Tag == null)
                 return;
 
-            var backendService = AppContext.Resolve<IBackendService>();
+            var backendService = (parameter as ResourceContainer).Context.Service;
+            //var backendService = AppContext.Resolve<IBackendService>();
             var environmentExplorer = IoC.Get<EnvironmentExplorerViewModel>();
 
             if (MessageBox.Show("Are you sure you want to delete the object? This cannot be reverted.", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)

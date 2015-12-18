@@ -203,12 +203,17 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
 
         Task ICommandHandler<PauseCommandDefinition>.Run(Command command)
         {
-            var _backendService = AppContext.Resolve<IBackendService>();
+            /*var _backendService = AppContext.Resolve<IBackendService>();
 
             if (command.Text.Equals("Pause"))
                 _backendService.PauseExecution(_jobId);
             else
-                _backendService.ResumeExecution(_jobId);
+                _backendService.ResumeExecution(_jobId);*/
+            var backendService = (_runbookViewModel.Model as RunbookModelProxy).Context.Service;
+            if (command.Text.Equals("Pause"))
+                backendService.PauseExecution(_jobId);
+            else
+                backendService.ResumeExecution(_jobId);
 
             return TaskUtility.Completed;
         }
@@ -224,8 +229,10 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
 
         Task ICommandHandler<StopCommandDefinition>.Run(Command command)
         {
-            var _backendService = AppContext.Resolve<IBackendService>();
-            _backendService.StopExecution(_jobId);
+            //var _backendService = AppContext.Resolve<IBackendService>();
+            //_backendService.StopExecution(_jobId);
+            var backendService = (_runbookViewModel.Model as RunbookModelProxy).Context.Service;
+            backendService.StopExecution(_jobId);
 
             return TaskUtility.Completed;
         }

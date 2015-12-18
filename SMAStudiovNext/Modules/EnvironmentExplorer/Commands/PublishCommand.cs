@@ -43,13 +43,13 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.Commands
             return false;
         }
 
-        public void Execute(object parameter)
+        public async void Execute(object parameter)
         {
             var item = (ResourceContainer)parameter;
             var runbook = (RunbookModelProxy)item.Tag;
 
             var viewModel = (item.Tag as RunbookModelProxy).GetViewModel<RunbookViewModel>();
-            viewModel.CheckIn();
+            await viewModel.CheckIn();
         }
 
         /// <summary>

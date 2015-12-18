@@ -3,7 +3,6 @@ using Gemini.Framework;
 using Gemini.Framework.Services;
 using Gemini.Modules.Output;
 using SMAStudiovNext.Core;
-using SMAStudiovNext.Icons;
 using SMAStudiovNext.Models;
 using SMAStudiovNext.Modules.Runbook.CodeCompletion;
 using SMAStudiovNext.Modules.Runbook.ViewModels;
@@ -17,7 +16,6 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Xml;
 using System.Xml.Linq;
 
 namespace SMAStudiovNext.Services
@@ -103,37 +101,44 @@ namespace SMAStudiovNext.Services
         {
             var context = GetConnection();
 
-            if (instance.Model is RunbookModelProxy)
-            {
-                SaveSmaRunbook(context, instance);
-            }
-            else if (instance.Model is VariableModelProxy)
-            {
-                var proxy = (VariableModelProxy)instance.Model;
+            try {
+                if (instance.Model is RunbookModelProxy)
+                {
+                    SaveSmaRunbook(context, instance);
+                }
+                else if (instance.Model is VariableModelProxy)
+                {
+                    var proxy = (VariableModelProxy)instance.Model;
 
-                if (proxy.GetSubType().Equals(typeof(SMA.Variable)))
-                    SaveSmaVariable(context, instance);
+                    if (proxy.GetSubType().Equals(typeof(SMA.Variable)))
+                        SaveSmaVariable(context, instance);
+                }
+                else if (instance.Model is CredentialModelProxy)
+                {
+                    var proxy = (CredentialModelProxy)instance.Model;
+
+                    if (proxy.GetSubType().Equals(typeof(SMA.Credential)))
+                        SaveSmaCredential(context, instance);
+                }
+                else if (instance.Model is ScheduleModelProxy)
+                {
+                    var proxy = (ScheduleModelProxy)instance.Model;
+
+                    if (proxy.GetSubType().Equals(typeof(SMA.Schedule)))
+                        SaveSmaSchedule(context, instance);
+                }
+                else
+                    throw new NotImplementedException();
+
+                // And lastly, open the document (or put focus on it if its open)
+                var shell = IoC.Get<IShell>();
+                shell.OpenDocument((IDocument)instance);
             }
-            else if (instance.Model is CredentialModelProxy)
+            catch (DataServiceClientException ex)
             {
-                var proxy = (CredentialModelProxy)instance.Model;
-
-                if (proxy.GetSubType().Equals(typeof(SMA.Credential)))
-                    SaveSmaCredential(context, instance);
+                var xml = ex.Message;
+                XmlExceptionHandler.Show(xml);
             }
-            else if (instance.Model is ScheduleModelProxy)
-            {
-                var proxy = (ScheduleModelProxy)instance.Model;
-
-                if (proxy.GetSubType().Equals(typeof(SMA.Schedule)))
-                    SaveSmaSchedule(context, instance);
-            }
-            else
-                throw new NotImplementedException();
-
-            // And lastly, open the document (or put focus on it if its open)
-            var shell = IoC.Get<IShell>();
-            shell.OpenDocument((IDocument)instance);
         }
 
         private void SaveSmaSchedule(OrchestratorApi context, IViewModel instance)
@@ -227,7 +232,7 @@ namespace SMAStudiovNext.Services
 
             context.SaveChanges();
         }
-        
+
         private void SaveSmaRunbook(OrchestratorApi context, IViewModel instance)
         {
             var runbook = (SMA.Runbook)((RunbookModelProxy)instance.Model).Model;
@@ -253,7 +258,7 @@ namespace SMAStudiovNext.Services
                 context.SetSaveStream(runbookVersion, baseStream, true, "application/octet-stream", string.Empty);
                 context.SaveChanges();
 
-                var savedRunbook = context.Runbooks.FirstOrDefault(x => x.RunbookID == runbookVersion.RunbookID);
+                var savedRunbook = context.Runbooks.Where(x => x.RunbookID == runbookVersion.RunbookID).FirstOrDefault();
 
                 if (savedRunbook == null)
                 {
@@ -261,53 +266,56 @@ namespace SMAStudiovNext.Services
                 }
 
                 instance.Model = savedRunbook;
-
-                //_backendContext.AddToRunbooks(new RunbookModelProxy(savedRunbook));
-                MessageBox.Show("Reimplement this with support for both Azure and SMA!");
-                /*Runbooks.Add(savedRunbook);
-                Runbooks = Runbooks.OrderBy(x => x.RunbookName).ToList();
-
-                if (OnLoaded != null)
-                    OnLoaded(this);*/
+                runbook = savedRunbook;
             }
-            else
+
+            try
             {
+                context.AttachTo("Runbooks", runbook);
+            }
+            catch (InvalidOperationException) { /* already attached */ }
+
+            // Save the updated runbook
+            if (!runbook.DraftRunbookVersionID.HasValue || runbook.DraftRunbookVersionID == Guid.Empty)
+            {
+                runbook.DraftRunbookVersionID = new Guid?(runbook.Edit(context));
+            }
+
+            try
+            {
+                var ms = new MemoryStream();
+                var bytes = Encoding.UTF8.GetBytes(instance.Content);
+                ms.Write(bytes, 0, bytes.Length);
+                ms.Seek(0, SeekOrigin.Begin);
+
+                var baseStream = (Stream)ms;
+                var entity = (from rv in context.RunbookVersions
+                              where (Guid?)rv.RunbookVersionID == runbook.DraftRunbookVersionID
+                              select rv).FirstOrDefault<RunbookVersion>();
+
                 try
                 {
                     context.AttachTo("Runbooks", runbook);
                 }
-                catch (InvalidOperationException) { /* already attached */ }
+                catch (InvalidOperationException) { }
 
-                // Save the updated runbook
-                if (!runbook.DraftRunbookVersionID.HasValue || runbook.DraftRunbookVersionID == Guid.Empty)
-                {
-                    runbook.DraftRunbookVersionID = new Guid?(runbook.Edit(context));
-                }
+                context.SetSaveStream(entity, baseStream, true, "application/octet-stream", string.Empty);
+                context.SaveChanges();
 
-                try
-                {
-                    var ms = new MemoryStream();
-                    var bytes = Encoding.UTF8.GetBytes(instance.Content);
-                    ms.Write(bytes, 0, bytes.Length);
-                    ms.Seek(0, SeekOrigin.Begin);
+                var smaRunbook = context.Runbooks.Where(r => r.RunbookID.Equals(runbook.RunbookID)).FirstOrDefault();
+                smaRunbook.Tags = runbook.Tags;
+                smaRunbook.Description = runbook.Description;
+                smaRunbook.DraftRunbookVersionID = runbook.DraftRunbookVersionID;
+                smaRunbook.PublishedRunbookVersionID = runbook.PublishedRunbookVersionID;
 
-                    var baseStream = (Stream)ms;
-                    var entity = (from rv in context.RunbookVersions
-                                  where (Guid?)rv.RunbookVersionID == runbook.DraftRunbookVersionID
-                                  select rv).FirstOrDefault<RunbookVersion>();
+                context.UpdateObject(smaRunbook);
+                context.SaveChanges();
 
-                    context.SetSaveStream(entity, baseStream, true, "application/octet-stream", string.Empty);
-                    context.SaveChanges();
-
-                    context.UpdateObject(runbook);
-                    context.SaveChanges();
-
-                    instance.UnsavedChanges = false;
-                }
-                catch (Exception e)
-                {
-                    throw new PersistenceException("Unable to save the changes, error: " + e.Message);
-                }
+                instance.UnsavedChanges = false;
+            }
+            catch (Exception e)
+            {
+                throw new PersistenceException("Unable to save the changes, error: " + e.Message);
             }
         }
 
@@ -338,7 +346,7 @@ namespace SMAStudiovNext.Services
                 context.DeleteObject(foundRunbook);
                 context.SaveChanges();
             }
-            catch (DataServiceQueryException)
+            catch (DataServiceClientException)
             {
                 return false;
             }
@@ -359,7 +367,7 @@ namespace SMAStudiovNext.Services
                 context.DeleteObject(foundVariable);
                 context.SaveChanges();
             }
-            catch (DataServiceQueryException)
+            catch (DataServiceClientException)
             {
                 return false; // Probably already deleted
             }
@@ -380,7 +388,7 @@ namespace SMAStudiovNext.Services
                 context.DeleteObject(foundCredential);
                 context.SaveChanges();
             }
-            catch (DataServiceQueryException)
+            catch (DataServiceClientException)
             {
                 return false; // Probably already deleted
             }
@@ -401,7 +409,7 @@ namespace SMAStudiovNext.Services
                 context.DeleteObject(foundSchedule);
                 context.SaveChanges();
             }
-            catch (DataServiceQueryException)
+            catch (DataServiceClientException)
             {
                 return false;
             }
@@ -449,23 +457,24 @@ namespace SMAStudiovNext.Services
             return GetJobDetails(runbook.JobID);
         }
 
+        private DateTime lastJobDownloadTime = DateTime.MinValue;
         public JobModelProxy GetJobDetails(Guid jobId)
         {
             var context = GetConnection();
             var model = context.Jobs.Where(j => j.JobID.Equals(jobId)).Select(j => new JobModelProxy(j, Context)).FirstOrDefault();
 
-            if (model.LastDownloadTime != null)
-            {
-                var entries = GetJobContent(jobId, "Any");
-                model.Result = entries.Where(e => e.StreamTime > model.LastDownloadTime).ToList();
-            }
+            //if (model.LastDownloadTime != null)
+            //{
+            var entries = GetJobContent(jobId, "Any");
+            model.Result = entries.Where(e => e.StreamTime > lastJobDownloadTime).ToList();
+            /*}
             else
-                model.Result = GetJobContent(jobId, "Any");
+                model.Result = GetJobContent(jobId, "Any");*/
 
             var entry = model.Result.OrderByDescending(m => m.StreamTime).FirstOrDefault();
 
             if (entry != null)
-                model.LastDownloadTime = entry.StreamTime;
+                lastJobDownloadTime = entry.StreamTime;
 
             return model;
         }
@@ -586,7 +595,15 @@ namespace SMAStudiovNext.Services
                     return true;
                 }
 
-                runbook.PublishedRunbookVersionID = ((Runbook)runbook.Model).Publish(context);
+                try
+                {
+                    runbook.PublishedRunbookVersionID = ((Runbook)runbook.Model).Publish(context);
+                }
+                catch (DataServiceClientException ex)
+                {
+                    var xml = ex.Message;
+                    XmlExceptionHandler.Show(xml);
+                }
 
                 return true;
             });
@@ -612,7 +629,15 @@ namespace SMAStudiovNext.Services
 
                 if (!runbook.DraftRunbookVersionID.HasValue || runbook.DraftRunbookVersionID == Guid.Empty)
                 {
-                    runbook.DraftRunbookVersionID = new Guid?(((SMA.Runbook)runbook.Model).Edit(context));
+                    try
+                    {
+                        runbook.DraftRunbookVersionID = new Guid?(((SMA.Runbook)runbook.Model).Edit(context));
+                    }
+                    catch (DataServiceClientException ex)
+                    {
+                        var xml = ex.Message;
+                        XmlExceptionHandler.Show(xml);
+                    }
                 }
                 else
                 {
@@ -692,8 +717,18 @@ namespace SMAStudiovNext.Services
             var context = GetConnection();
             var runbook = (SMA.Runbook)runbookProxy.Model;
 
-            runbookProxy.IsTestRun = true;
-            return runbook.TestRunbook(context, parameters);
+            try
+            {
+                runbookProxy.IsTestRun = true;
+                return runbook.TestRunbook(context, parameters);
+            }
+            catch (DataServiceClientException ex)
+            {
+                var xml = ex.Message;
+                XmlExceptionHandler.Show(xml);
+            }
+
+            return null;
         }
 
         public IList<JobModelProxy> GetJobs(Guid runbookVersionId)
@@ -733,22 +768,10 @@ namespace SMAStudiovNext.Services
             {
                 job.Suspend(context);
             }
-            catch (DataServiceQueryException ex)
+            catch (DataServiceClientException ex)
             {
-                var output = IoC.Get<IOutput>();
-
-                var xml = new XmlDocument();
-                xml.LoadXml(ex.InnerException.Message);
-
-                var message = xml.GetElementsByTagName("message");
-
-                if (message.Count > 0)
-                    output.AppendLine("Error while trying to pause job:\r\n" + message[0].InnerText);
-
-                if (ex.InnerException.InnerException != null)
-                {
-                    output.AppendLine("Inner Exception: " + ex.InnerException.InnerException.ToString());
-                }
+                var xml = ex.Message;
+                XmlExceptionHandler.Show(xml);
             }
         }
 
@@ -768,22 +791,10 @@ namespace SMAStudiovNext.Services
             {
                 job.Resume(context);
             }
-            catch (DataServiceQueryException ex)
+            catch (DataServiceClientException ex)
             {
-                var output = IoC.Get<IOutput>();
-
-                var xml = new XmlDocument();
-                xml.LoadXml(ex.InnerException.Message);
-
-                var message = xml.GetElementsByTagName("message");
-
-                if (message.Count > 0)
-                    output.AppendLine("Error while trying to resume job:\r\n" + message[0].InnerText);
-
-                if (ex.InnerException.InnerException != null)
-                {
-                    output.AppendLine("Inner Exception: " + ex.InnerException.InnerException.ToString());
-                }
+                var xml = ex.Message;
+                XmlExceptionHandler.Show(xml);
             }
         }
 
@@ -803,22 +814,10 @@ namespace SMAStudiovNext.Services
             {
                 job.Stop(context);
             }
-            catch (DataServiceQueryException ex)
+            catch (DataServiceClientException ex)
             {
-                var output = IoC.Get<IOutput>();
-
-                var xml = new XmlDocument();
-                xml.LoadXml(ex.InnerException.Message);
-
-                var message = xml.GetElementsByTagName("message");
-
-                if (message.Count > 0)
-                    output.AppendLine("Error while trying to stop the job:\r\n" + message[0].InnerText);
-
-                if (ex.InnerException.InnerException != null)
-                {
-                    output.AppendLine("Inner Exception: " + ex.InnerException.InnerException.ToString());
-                }
+                var xml = ex.Message;
+                XmlExceptionHandler.Show(xml);
             }
         }
 
@@ -830,8 +829,18 @@ namespace SMAStudiovNext.Services
             var context = GetConnection();
             var runbook = (SMA.Runbook)runbookProxy.Model;
 
-            runbookProxy.IsTestRun = false;
-            return runbook.StartRunbook(context, parameters);
+            try
+            {
+                runbookProxy.IsTestRun = false;
+                return runbook.StartRunbook(context, parameters);
+            }
+            catch (DataServiceClientException ex)
+            {
+                var xml = ex.Message;
+                XmlExceptionHandler.Show(xml);
+            }
+
+            return null;
         }
 
         public string GetContent(string url)

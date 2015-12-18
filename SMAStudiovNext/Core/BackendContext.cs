@@ -140,6 +140,7 @@ namespace SMAStudiovNext.Core
         {
             var unmatchedTag = new Tag("(untagged)");
             var unmatchedTagMenuItem = new ResourceContainer("(untagged)", unmatchedTag, IconsDescription.Folder);
+            unmatchedTagMenuItem.Context = this;
 
             foreach (var runbook in Runbooks)
             {
@@ -176,6 +177,7 @@ namespace SMAStudiovNext.Core
                     {
                         var tagObj = new Tag(fixedTagName);
                         var menuItem = new ResourceContainer(fixedTagName, tagObj, IconsDescription.Folder);
+                        menuItem.Context = this;
                         menuItem.Items.Add(runbook);
 
                         Execute.OnUIThread(() => { Tags.Add(menuItem); });

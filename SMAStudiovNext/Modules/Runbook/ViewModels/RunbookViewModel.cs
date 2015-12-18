@@ -217,6 +217,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             }
         }
 
+        private DateTime lastKeystrokeTime = DateTime.MinValue;
+
         /// <summary>
         /// Fired when text has been entered in the TextEditor, this is triggered after the text
         /// is rendered in the editor and is also responsible for displaying code completion (if needed).
@@ -228,32 +230,41 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             var cachedCaretOffset = _view.TextEditor.CaretOffset;
             var cachedText = Content;
 
-            AsyncExecution.Run(System.Threading.ThreadPriority.BelowNormal, delegate ()
+
+            if ((DateTime.Now - lastKeystrokeTime).TotalMilliseconds > 500)
             {
-                _codeContext.Parse(cachedText);
-
-                var context = _codeContext.GetContext(cachedCaretOffset);
-
-                if (context[0].Type == ExpressionType.Parameter ||
-                    context[0].Type == ExpressionType.Keyword ||
-                    context[0].Type == ExpressionType.Variable)
+                AsyncExecution.Run(System.Threading.ThreadPriority.BelowNormal, delegate ()
                 {
-                    // We need to find the "whole" word before showing auto completion
-                    string word = "";
+                    _codeContext.Parse(cachedText);
 
-                    for (int i = cachedCaretOffset - 1; i >= 0; i--)
+                    var context = _codeContext.GetContext(cachedCaretOffset);
+
+                    if (context != null)
                     {
-                        var ch = cachedText[i];
+                        if (context[0].Type == ExpressionType.Parameter ||
+                            context[0].Type == ExpressionType.Keyword ||
+                            context[0].Type == ExpressionType.Variable)
+                        {
+                            // We need to find the "whole" word before showing auto completion
+                            string word = "";
 
-                        if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
-                            break;
+                            for (int i = cachedCaretOffset - 1; i >= 0; i--)
+                            {
+                                var ch = cachedText[i];
 
-                        word = cachedText[i] + word;
+                                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
+                                    break;
+
+                                word = cachedText[i] + word;
+                            }
+
+                            ShowCompletion(cachedCaretOffset, context, word, false);
+                        }
                     }
+                });
+            }
 
-                    ShowCompletion(cachedCaretOffset, context, word, false);
-                }
-            });
+            lastKeystrokeTime = DateTime.Now;
         }
 
         /// <summary>
@@ -281,7 +292,9 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 case ExpressionType.None:
                 case ExpressionType.Script:
                 case ExpressionType.Keyword:
-                    data.AddRange(_snippetsCollection.Snippets.Select(s => new SnippetCompletionData(s)).ToList());
+                    if (_snippetsCollection.Snippets != null)
+                        data.AddRange(_snippetsCollection.Snippets.Select(s => new SnippetCompletionData(s)).ToList());
+
                     data.AddRange(CodeCompletionContext.Keywords);
                     data.AddRange(CodeCompletionContext.GlobalKeywords);
                     data.AddRange(CodeCompletionContext.GlobalRunbooks);
@@ -310,15 +323,18 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                             }
                             else
                             {
-                                var keyword = CodeCompletionContext.Keywords.FirstOrDefault(k => k.Name.Equals(context.Value));
+                                if (CodeCompletionContext.Keywords != null)
+                                {
+                                    var keyword = CodeCompletionContext.Keywords.FirstOrDefault(k => k.Name.Equals(context.Value));
 
-                                if (keyword == null)
-                                    keyword = CodeCompletionContext.GlobalKeywords.FirstOrDefault(k => k.Name.Equals(context.Value));
+                                    if (keyword == null)
+                                        keyword = CodeCompletionContext.GlobalKeywords.FirstOrDefault(k => k.Name.Equals(context.Value));
 
-                                if (keyword != null)
-                                    ((ICodeCompletionContext)CodeCompletionContext).CurrentKeyword = keyword;
+                                    if (keyword != null)
+                                        ((ICodeCompletionContext)CodeCompletionContext).CurrentKeyword = keyword;
 
-                                data.AddRange(((ICodeCompletionContext)CodeCompletionContext).GetParameters());
+                                    data.AddRange(((ICodeCompletionContext)CodeCompletionContext).GetParameters());
+                                }
                             }
                         }
                     }
@@ -328,33 +344,36 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             if (data.Count == 0)
                 return;
 
+            if (data == null)
+                return;
+
             data = data.OrderBy(d => d.DisplayText).ToList();
 
-            lock (data)
+            AsyncExecution.ExecuteOnUIThread(delegate ()
             {
-                AsyncExecution.ExecuteOnUIThread(delegate ()
+                _completionWindow = new CompletionWindow(_view.TextEditor.TextArea);
+                _completionWindow.CloseAutomatically = true;
+                _completionWindow.CloseWhenCaretAtBeginning = true;
+                _completionWindow.MinWidth = 260;
+
+                if (text != null)
+                    _completionWindow.StartOffset -= text.Length;
+
+                if (controlSpace)
+                    _completionWindow.StartOffset = cachedCaretOffset + 1;
+
+                lock (data)
                 {
-                    _completionWindow = new CompletionWindow(_view.TextEditor.TextArea);
-                    _completionWindow.CloseAutomatically = true;
-                    _completionWindow.CloseWhenCaretAtBeginning = true;
-                    _completionWindow.MinWidth = 260;
-
-                    if (text != null)
-                        _completionWindow.StartOffset -= text.Length;
-
-                    if (controlSpace)
-                        _completionWindow.StartOffset = cachedCaretOffset + 1;
-
                     foreach (var dataItem in data)
                         _completionWindow.CompletionList.CompletionData.Add((ICompletionData)dataItem);
+                }
 
-                    if (text != null)
-                        _completionWindow.CompletionList.SelectItem(text);
+                if (text != null)
+                    _completionWindow.CompletionList.SelectItem(text);
 
-                    _completionWindow.Show();
-                    _completionWindow.Closed += (o, args) => _completionWindow = null;
-                });
-            }
+                _completionWindow.Show();
+                _completionWindow.Closed += (o, args) => _completionWindow = null;
+            });
         }
 
         /// <summary>
@@ -601,6 +620,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             var output = IoC.Get<IOutput>();
 
             try {
+                await SaveRunbook(null);
+
                 var result = await Owner.CheckIn(_runbook);
                 if (!result)
                 {
@@ -612,10 +633,15 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                     output.AppendLine("The runbook has been published.");
 
                     // Since when publishing a runbook, it removes the draft, we have to clear the editor
-                    // and set DraftRunbookID to Guid.Empty so that we mimic the behaviour of SMA. This is done
+                    // and set DraftRunbookID to null so that we mimic the behaviour of SMA. This is done
                     // so that if we start editing the runbook again, it will create a new draft.
                     Content = string.Empty;
-                    _runbook.DraftRunbookVersionID = Guid.Empty;
+                    _runbook.DraftRunbookVersionID = null;
+
+                    // Download the newly published runbook
+                    GetContent(RunbookType.Published, true);
+
+                    UnsavedChanges = false;
                 }
             }
             catch (Exception ex)
@@ -825,7 +851,14 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         private async Task SaveRunbook(Command command)
         {
             await Task.Run(delegate () {
-                Owner.Save(this);
+                //try
+                //{
+                    Owner.Save(this);
+                //}
+                //catch (PersistenceException ex)
+               // {
+                //    MessageBox.Show("Error: " + ex.Message, "Unable to save", MessageBoxButton.OK, MessageBoxImage.Error);
+                //}
 
                 _runbook.ViewModel = this;
 
@@ -844,7 +877,11 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         #region ICommandHandler<CheckInCommandDefinition>
         void ICommandHandler<PublishCommandDefinition>.Update(Command command)
         {
-            if (_runbook.DraftRunbookVersionID.HasValue)
+            /*if (_runbook.DraftRunbookVersionID.HasValue)
+                command.Enabled = true;
+            else
+                command.Enabled = false;*/
+            if (!_view.PublishedTextEditor.Text.Equals(_view.TextEditor.Text))
                 command.Enabled = true;
             else
                 command.Enabled = false;
@@ -857,10 +894,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
         void ICommandHandler<EditPublishedCommandDefinition>.Update(Command command)
         {
-            if (_runbook.DraftRunbookVersionID.HasValue)
-                command.Enabled = false;
-            else
+            if (_runbook.PublishedRunbookVersionID.HasValue)
                 command.Enabled = true;
+            else
+                command.Enabled = false;
         }
 
         async Task ICommandHandler<EditPublishedCommandDefinition>.Run(Command command)

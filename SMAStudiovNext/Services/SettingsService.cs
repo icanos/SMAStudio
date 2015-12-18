@@ -51,6 +51,8 @@ namespace SMAStudiovNext.Services
                         ((ISizableTool)tool).PreferredHeight = CurrentSettings.ControlSizes[toolName].Height;
                 }*/
             }
+            else
+                CurrentSettings = new Settings();
         }
 
         public void Save()

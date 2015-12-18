@@ -22,14 +22,14 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels
         public override PaneLocation PreferredLocation
         {
             get { return PaneLocation.Left; }
-        }
+        } 
 
         public ObservableCollection<ResourceContainer> Items
         {
             get { return _items; }
         }
         
-        /// <summary>
+        /*/// <summary>
         /// Declare new instead of override since we want to add a set method as well
         /// </summary>
         public new double PreferredWidth
@@ -43,7 +43,7 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels
         public new double PreferredHeight
         {
             get; set;
-        }
+        }*/
 
         public override string DisplayName
         {
@@ -139,6 +139,11 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels
         public ICommand NewConnectionCommand
         {
             get { return AppContext.Resolve<ICommand>("NewConnectionCommand"); }
+        }
+
+        public ICommand RefreshCommand
+        {
+            get { return AppContext.Resolve<ICommand>("RefreshCommand"); }
         }
     }
 }
