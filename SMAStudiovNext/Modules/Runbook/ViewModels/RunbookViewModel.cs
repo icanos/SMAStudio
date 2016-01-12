@@ -239,7 +239,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
                     var context = _codeContext.GetContext(cachedCaretOffset);
 
-                    if (context != null)
+                    if (context != null && context.Count > 0)
                     {
                         if (context[0].Type == ExpressionType.Parameter ||
                             context[0].Type == ExpressionType.Keyword ||

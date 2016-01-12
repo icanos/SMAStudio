@@ -53,14 +53,15 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.Commands
             if (((ResourceContainer)parameter).Tag == null)
                 return;
 
-            var backendService = (parameter as ResourceContainer).Context.Service;
-            //var backendService = AppContext.Resolve<IBackendService>();
+            var backendService = ((parameter as ResourceContainer).Tag as ModelProxyBase).Context.Service;
             var environmentExplorer = IoC.Get<EnvironmentExplorerViewModel>();
 
             if (MessageBox.Show("Are you sure you want to delete the object? This cannot be reverted.", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
-                if (backendService.Delete((ModelProxyBase)((ResourceContainer)parameter).Tag))
-                    environmentExplorer.Delete((ResourceContainer)parameter);
+                var item = (ModelProxyBase)(parameter as ResourceContainer).Tag;
+                
+                if (backendService.Delete(item))
+                    environmentExplorer.Delete(parameter as ResourceContainer);
             }
         }
 
