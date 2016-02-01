@@ -309,7 +309,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                         {
                             // Check if it's a runbook
                             var runbookCompletion = CodeCompletionContext.GlobalRunbooks.FirstOrDefault(r => r.Name.Equals(context.Value));
-                            if (runbookCompletion != null)
+                            if (runbookCompletion != null && _backendContext != null && _backendContext.Runbooks != null)
                             {
                                 var runbook = _backendContext.Runbooks.FirstOrDefault(r => ((RunbookModelProxy)r.Tag).RunbookName.Equals(runbookCompletion.Name));
 
@@ -327,7 +327,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                                 {
                                     var keyword = CodeCompletionContext.Keywords.FirstOrDefault(k => k.Name.Equals(context.Value));
 
-                                    if (keyword == null)
+                                    if (keyword == null && CodeCompletionContext.GlobalKeywords != null)
                                         keyword = CodeCompletionContext.GlobalKeywords.FirstOrDefault(k => k.Name.Equals(context.Value));
 
                                     if (keyword != null)
@@ -347,7 +347,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             if (data == null)
                 return;
 
-            data = data.OrderBy(d => d.DisplayText).ToList();
+            //data = data.OrderBy(d => d.DisplayText).ToList();
+            data.Sort((e1, e2) => String.Compare(e1.DisplayText, e2.DisplayText));
 
             AsyncExecution.ExecuteOnUIThread(delegate ()
             {

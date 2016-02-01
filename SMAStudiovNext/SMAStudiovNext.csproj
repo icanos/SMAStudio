@@ -212,6 +212,7 @@
     <Compile Include="Core\JobOutput.cs" />
     <Compile Include="Core\JsonConverter.cs" />
     <Compile Include="Core\ListExtensions.cs" />
+    <Compile Include="Core\Logger.cs" />
     <Compile Include="Core\PasswordBoxExtensions.cs" />
     <Compile Include="Core\ResourceContainer.cs" />
     <Compile Include="Core\SerializableDictionary.cs" />

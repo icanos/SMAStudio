@@ -45,6 +45,8 @@ namespace SMAStudiovNext.Services
         /// </summary>
         public void Load()
         {
+            Logger.DebugFormat("Load()");
+
             if (SettingsService.CurrentSettings == null)
                 return;
 
@@ -99,6 +101,7 @@ namespace SMAStudiovNext.Services
         /// <param name="instance"></param>
         public void Save(IViewModel instance)
         {
+            Logger.DebugFormat("Save({0})", instance);
             var context = GetConnection();
 
             try {
@@ -143,12 +146,15 @@ namespace SMAStudiovNext.Services
                 else
                     xml = ex.Message;
 
+                Logger.Error("Error when saving the object.", ex);
                 XmlExceptionHandler.Show(xml);
             }
         }
 
         private void SaveSmaSchedule(OrchestratorApi context, IViewModel instance)
         {
+            Logger.DebugFormat("SaveSmaSchedule(...)");
+
             var schedule = (SMA.Schedule)((ScheduleModelProxy)instance.Model).Model;
 
             if (schedule.ScheduleID == Guid.Empty)
@@ -177,6 +183,8 @@ namespace SMAStudiovNext.Services
 
         private void SaveSmaCredential(OrchestratorApi context, IViewModel instance)
         {
+            Logger.DebugFormat("SaveSmaCredential(...)");
+
             var credential = (SMA.Credential)((CredentialModelProxy)instance.Model).Model;
 
             if (credential.CredentialID == Guid.Empty)
@@ -207,6 +215,8 @@ namespace SMAStudiovNext.Services
         
         private void SaveSmaVariable(OrchestratorApi context, IViewModel instance)
         {
+            Logger.DebugFormat("SaveSmaVariable(...)");
+
             var variable = (SMA.Variable)((VariableModelProxy)instance.Model).Model;
 
             if (variable.VariableID == Guid.Empty)
@@ -241,10 +251,14 @@ namespace SMAStudiovNext.Services
 
         private void SaveSmaRunbook(OrchestratorApi context, IViewModel instance)
         {
+            Logger.DebugFormat("SaveSmaRunbook(...)");
+
             var runbook = (SMA.Runbook)((RunbookModelProxy)instance.Model).Model;
 
             if (runbook == null || runbook.RunbookID == Guid.Empty)
             {
+                Logger.DebugFormat("Runbook does not exist yet, generate a new ID and set it as draft.");
+
                 // This is a new runbook
                 var runbookVersion = new RunbookVersion
                 {
@@ -321,12 +335,15 @@ namespace SMAStudiovNext.Services
             }
             catch (Exception e)
             {
+                Logger.Error("Error when saving the runbook.", e);
                 throw new PersistenceException("Unable to save the changes, error: " + e.Message);
             }
         }
 
         public bool Delete(ModelProxyBase model)
         {
+            Logger.DebugFormat("Delete(...)");
+
             if (model is RunbookModelProxy)
                 return DeleteRunbook((Runbook)model.Model);
             else if (model is VariableModelProxy)
@@ -341,6 +358,8 @@ namespace SMAStudiovNext.Services
 
         private bool DeleteRunbook(Runbook runbook)
         {
+            Logger.DebugFormat("DeleteRunbook(...)");
+
             var context = GetConnection();
             try
             {
@@ -352,8 +371,9 @@ namespace SMAStudiovNext.Services
                 context.DeleteObject(foundRunbook);
                 context.SaveChanges();
             }
-            catch (DataServiceClientException)
+            catch (DataServiceClientException ex)
             {
+                Logger.Error("Error when deleting the runbook.", ex);
                 return false;
             }
 
@@ -362,6 +382,8 @@ namespace SMAStudiovNext.Services
 
         private bool DeleteVariable(Variable variable)
         {
+            Logger.DebugFormat("DeleteVariable(...)");
+
             var context = GetConnection();
             try
             {
@@ -373,8 +395,9 @@ namespace SMAStudiovNext.Services
                 context.DeleteObject(foundVariable);
                 context.SaveChanges();
             }
-            catch (DataServiceQueryException)
+            catch (DataServiceQueryException ex)
             {
+                Logger.Error("Error when deleting the variable.", ex);
                 return false; // Probably already deleted
             }
 
@@ -383,6 +406,8 @@ namespace SMAStudiovNext.Services
 
         private bool DeleteCredential(Credential credential)
         {
+            Logger.DebugFormat("DeleteCredential(...)");
+
             var context = GetConnection();
             try
             {
@@ -394,8 +419,9 @@ namespace SMAStudiovNext.Services
                 context.DeleteObject(foundCredential);
                 context.SaveChanges();
             }
-            catch (DataServiceQueryException)
+            catch (DataServiceQueryException ex)
             {
+                Logger.Error("Error when deleting the credential.", ex);
                 return false; // Probably already deleted
             }
 
@@ -404,6 +430,8 @@ namespace SMAStudiovNext.Services
 
         private bool DeleteSchedule(Schedule schedule)
         {
+            Logger.DebugFormat("DeleteSchedule(...)");
+
             var context = GetConnection();
             try
             {
@@ -415,8 +443,9 @@ namespace SMAStudiovNext.Services
                 context.DeleteObject(foundSchedule);
                 context.SaveChanges();
             }
-            catch (DataServiceQueryException)
+            catch (DataServiceQueryException ex)
             {
+                Logger.Error("Error when deleting the schedule.", ex);
                 return false;
             }
 
@@ -430,6 +459,8 @@ namespace SMAStudiovNext.Services
         /// <returns></returns>
         public OrchestratorApi GetConnection(bool silent = false)
         {
+            Logger.DebugFormat("GetConnection(silent = {0})", silent ? "True" : "False");
+
             var connection = new OrchestratorApi(new Uri(_connectionData.SmaConnectionUrl));
 
             if (_connectionData.SmaImpersonatedLogin)
@@ -444,6 +475,8 @@ namespace SMAStudiovNext.Services
             }
             catch (DataServiceTransportException ex)
             {
+                Logger.Error("Unable to establish a connection to SMA.", ex);
+
                 if (!silent)
                     MessageBox.Show("A connection could not be established to the Service Management Automation webservice, please verify connectivity. Error: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 
@@ -460,12 +493,16 @@ namespace SMAStudiovNext.Services
         /// <returns>Proxy object or null</returns>
         public JobModelProxy GetJobDetails(RunbookModelProxy runbook)
         {
+            Logger.DebugFormat("GetJobDetails(runbook = {0})", runbook.RunbookName);
+
             return GetJobDetails(runbook.JobID);
         }
 
         private DateTime lastJobDownloadTime = DateTime.MinValue;
         public JobModelProxy GetJobDetails(Guid jobId)
         {
+            Logger.DebugFormat("GetJobDetails(jobId = {0})", jobId);
+
             var context = GetConnection();
             var model = context.Jobs.Where(j => j.JobID.Equals(jobId)).Select(j => new JobModelProxy(j, Context)).FirstOrDefault();
 
@@ -492,6 +529,8 @@ namespace SMAStudiovNext.Services
         /// <returns>List of output</returns>
         private IList<JobOutput> GetJobContent(Guid jobId, string streamType = "Any")
         {
+            Logger.DebugFormat("GetJobContent(jobId = {0}, streamType = {1})", jobId, streamType);
+
             var request = (HttpWebRequest)WebRequest.Create(_connectionData.SmaConnectionUrl + "/JobStreams/GetStreamItems?jobId='" + jobId + "'&streamType='" + streamType + "'");
             if (_connectionData.SmaImpersonatedLogin)
                 request.Credentials = CredentialCache.DefaultCredentials;
@@ -506,6 +545,8 @@ namespace SMAStudiovNext.Services
             }
             catch (WebException e)
             {
+                Logger.Error("Error when communicating with the SMA webservice.", e);
+
                 var output = IoC.Get<IOutput>();
                 output.AppendLine("Unable to load data about job '" + jobId + "' from SMA. Error: " + e.Message);
 
@@ -585,6 +626,8 @@ namespace SMAStudiovNext.Services
         /// <returns></returns>
         public async Task<bool> CheckIn(RunbookModelProxy runbook)
         {
+            Logger.DebugFormat("CheckIn(runbook = {0})", runbook.RunbookName);
+
             return await Task.Run(delegate ()
             {
                 var context = GetConnection();
@@ -601,9 +644,12 @@ namespace SMAStudiovNext.Services
                     return true;
                 }
 
+                var publishedGuid = Guid.Empty;
+
                 try
                 {
-                    runbook.PublishedRunbookVersionID = ((Runbook)runbook.Model).Publish(context);
+                    //runbook.PublishedRunbookVersionID = ((Runbook)runbook.Model).Publish(context);
+                    publishedGuid = ((Runbook)runbook.Model).Publish(context);
                 }
                 catch (DataServiceQueryException ex)
                 {
@@ -614,8 +660,13 @@ namespace SMAStudiovNext.Services
                     else
                         xml = ex.Message;
 
+                    Logger.Error("Error when publishing the runbook.", ex);
                     XmlExceptionHandler.Show(xml);
+
+                    return false;
                 }
+
+                runbook.PublishedRunbookVersionID = publishedGuid;
 
                 return true;
             });
@@ -628,6 +679,8 @@ namespace SMAStudiovNext.Services
         /// <returns></returns>
         public async Task<bool> CheckOut(RunbookViewModel runbookViewModel)
         {
+            Logger.DebugFormat("CheckOut(runbook = {0})", runbookViewModel.DisplayName);
+
             return await Task.Run(delegate ()
             {
                 var context = GetConnection();
@@ -654,7 +707,10 @@ namespace SMAStudiovNext.Services
                         else
                             xml = ex.Message;
 
+                        Logger.Error("Error when checking out the runbook.", ex);
                         XmlExceptionHandler.Show(xml);
+
+                        return false;
                     }
                 }
                 else
@@ -705,6 +761,7 @@ namespace SMAStudiovNext.Services
         /// <returns>True/false</returns>
         public async Task<bool> CheckRunningJobs(RunbookModelProxy runbook, bool checkDraft)
         {
+            Logger.DebugFormat("CheckRunningJobs(runbook = {0}, checkDraft = {1})", runbook.RunbookName, checkDraft ? "True" : "False");
             var context = GetConnection();
 
             return await Task.Run(delegate ()
@@ -729,6 +786,8 @@ namespace SMAStudiovNext.Services
 
         public Guid? TestRunbook(RunbookModelProxy runbookProxy, List<NameValuePair> parameters)
         {
+            Logger.DebugFormat("TestRunbook(...)");
+
             if (!(runbookProxy.Model is SMA.Runbook))
                 return null;
 
@@ -749,6 +808,7 @@ namespace SMAStudiovNext.Services
                 else
                     xml = ex.Message;
 
+                Logger.Error("Error when testing the runbook.", ex);
                 XmlExceptionHandler.Show(xml);
             }
 
@@ -757,6 +817,8 @@ namespace SMAStudiovNext.Services
 
         public IList<JobModelProxy> GetJobs(Guid runbookVersionId)
         {
+            Logger.DebugFormat("GetJobs(runbookVersionId = {0})", runbookVersionId);
+
             var context = GetConnection();
 
             var jobContexts = context.JobContexts.Where(j => j.RunbookVersionID == runbookVersionId).ToList();
@@ -782,6 +844,8 @@ namespace SMAStudiovNext.Services
         /// <param name="jobId">ID of the job to pause</param>
         public void PauseExecution(Guid jobId)
         {
+            Logger.DebugFormat("PauseExecution(jobId = {0})", jobId);
+
             var context = GetConnection();
             var job = context.Jobs.Where(j => j.JobID == jobId).FirstOrDefault();
 
@@ -801,6 +865,7 @@ namespace SMAStudiovNext.Services
                 else
                     xml = ex.Message;
 
+                Logger.Error("Error when trying to pause the runbook.", ex);
                 XmlExceptionHandler.Show(xml);
             }
         }
@@ -811,6 +876,8 @@ namespace SMAStudiovNext.Services
         /// <param name="jobId">ID of the job to resume</param>
         public void ResumeExecution(Guid jobId)
         {
+            Logger.DebugFormat("ResumeExecution(jobId = {0})", jobId);
+
             var context = GetConnection();
             var job = context.Jobs.Where(j => j.JobID == jobId).FirstOrDefault();
 
@@ -830,6 +897,7 @@ namespace SMAStudiovNext.Services
                 else
                     xml = ex.Message;
 
+                Logger.Error("Error when trying to resume the runbook.", ex);
                 XmlExceptionHandler.Show(xml);
             }
         }
@@ -840,6 +908,8 @@ namespace SMAStudiovNext.Services
         /// <param name="jobId">ID of the job to stop</param>
         public void StopExecution(Guid jobId)
         {
+            Logger.DebugFormat("StopExecution(jobId = {0})", jobId);
+
             var context = GetConnection();
             var job = context.Jobs.Where(j => j.JobID == jobId).FirstOrDefault();
 
@@ -859,12 +929,15 @@ namespace SMAStudiovNext.Services
                 else
                     xml = ex.Message;
 
+                Logger.Error("Error when trying to stop the runbook.", ex);
                 XmlExceptionHandler.Show(xml);
             }
         }
 
         public Guid? StartRunbook(RunbookModelProxy runbookProxy, List<NameValuePair> parameters)
         {
+            Logger.DebugFormat("StartRunbook(runbook = {0}, ...)", runbookProxy.RunbookName);
+
             if (!(runbookProxy.Model is SMA.Runbook))
                 return null;
 
@@ -885,6 +958,7 @@ namespace SMAStudiovNext.Services
                 else
                     xml = ex.Message;
 
+                Logger.Error("Error when trying to start the runbook.", ex);
                 XmlExceptionHandler.Show(xml);
             }
 
@@ -893,6 +967,8 @@ namespace SMAStudiovNext.Services
 
         public string GetContent(string url)
         {
+            Logger.DebugFormat("GetContent(url = {0})", url);
+
             var content = string.Empty;
 
             var request = (HttpWebRequest)HttpWebRequest.Create(url);
@@ -913,6 +989,8 @@ namespace SMAStudiovNext.Services
 
         public string GetBackendUrl(RunbookType runbookType, RunbookModelProxy runbook)
         {
+            Logger.DebugFormat("GetBackendUrl(runbookType = {0}, runbook = {1})", runbookType, runbook.RunbookName);
+
             switch (runbookType)
             {
                 case RunbookType.Draft:

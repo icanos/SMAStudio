@@ -18,6 +18,8 @@ namespace SMAStudiovNext.Core
             Connections = new List<BackendConnection>();
         }
 
+        public bool Debug { get; set; }
+
         public List<BackendConnection> Connections { get; set; }
 
         public List<string> TrustedCertificates { get; set; }        
