@@ -231,9 +231,9 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             var cachedText = Content;
 
 
-            if ((DateTime.Now - lastKeystrokeTime).TotalMilliseconds > 500)
+            if ((DateTime.Now - lastKeystrokeTime).TotalMilliseconds > 300)
             {
-                AsyncExecution.Run(System.Threading.ThreadPriority.BelowNormal, delegate ()
+                AsyncExecution.Run(System.Threading.ThreadPriority.Normal, delegate ()
                 {
                     _codeContext.Parse(cachedText);
 
@@ -1021,8 +1021,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 if (_runbook == null)
                     return;
 
-                if (_runbook.Tags.Equals(value))
-                    return;
+                //if (_runbook.Tags.Equals(value))
+                //    return;
 
                 _runbook.Tags = value;
                 UnsavedChanges = true;

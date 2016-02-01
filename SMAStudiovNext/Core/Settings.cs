@@ -82,6 +82,9 @@ namespace SMAStudiovNext.Core
 
         public SecureString GetPassword()
         {
+            if (SmaPassword == null || SmaPassword.Length == 0)
+                return new SecureString();
+
             byte[] pw = DataProtection.Unprotect(SmaPassword);
             char[] chars = new char[pw.Length / sizeof(char)];
 

@@ -134,9 +134,15 @@ namespace SMAStudiovNext.Services
                 var shell = IoC.Get<IShell>();
                 shell.OpenDocument((IDocument)instance);
             }
-            catch (DataServiceClientException ex)
+            catch (DataServiceQueryException ex)
             {
-                var xml = ex.Message;
+                var xml = default(string);
+
+                if (ex.InnerException != null)
+                    xml = ex.InnerException.Message;
+                else
+                    xml = ex.Message;
+
                 XmlExceptionHandler.Show(xml);
             }
         }
@@ -367,7 +373,7 @@ namespace SMAStudiovNext.Services
                 context.DeleteObject(foundVariable);
                 context.SaveChanges();
             }
-            catch (DataServiceClientException)
+            catch (DataServiceQueryException)
             {
                 return false; // Probably already deleted
             }
@@ -388,7 +394,7 @@ namespace SMAStudiovNext.Services
                 context.DeleteObject(foundCredential);
                 context.SaveChanges();
             }
-            catch (DataServiceClientException)
+            catch (DataServiceQueryException)
             {
                 return false; // Probably already deleted
             }
@@ -409,7 +415,7 @@ namespace SMAStudiovNext.Services
                 context.DeleteObject(foundSchedule);
                 context.SaveChanges();
             }
-            catch (DataServiceClientException)
+            catch (DataServiceQueryException)
             {
                 return false;
             }
@@ -599,9 +605,15 @@ namespace SMAStudiovNext.Services
                 {
                     runbook.PublishedRunbookVersionID = ((Runbook)runbook.Model).Publish(context);
                 }
-                catch (DataServiceClientException ex)
+                catch (DataServiceQueryException ex)
                 {
-                    var xml = ex.Message;
+                    var xml = default(string);
+
+                    if (ex.InnerException != null)
+                        xml = ex.InnerException.Message;
+                    else
+                        xml = ex.Message;
+
                     XmlExceptionHandler.Show(xml);
                 }
 
@@ -633,9 +645,15 @@ namespace SMAStudiovNext.Services
                     {
                         runbook.DraftRunbookVersionID = new Guid?(((SMA.Runbook)runbook.Model).Edit(context));
                     }
-                    catch (DataServiceClientException ex)
+                    catch (DataServiceQueryException ex)
                     {
-                        var xml = ex.Message;
+                        var xml = default(string);
+
+                        if (ex.InnerException != null)
+                            xml = ex.InnerException.Message;
+                        else
+                            xml = ex.Message;
+
                         XmlExceptionHandler.Show(xml);
                     }
                 }
@@ -722,9 +740,15 @@ namespace SMAStudiovNext.Services
                 runbookProxy.IsTestRun = true;
                 return runbook.TestRunbook(context, parameters);
             }
-            catch (DataServiceClientException ex)
+            catch (DataServiceQueryException ex)
             {
-                var xml = ex.Message;
+                var xml = default(string);
+
+                if (ex.InnerException != null)
+                    xml = ex.InnerException.Message;
+                else
+                    xml = ex.Message;
+
                 XmlExceptionHandler.Show(xml);
             }
 
@@ -768,9 +792,15 @@ namespace SMAStudiovNext.Services
             {
                 job.Suspend(context);
             }
-            catch (DataServiceClientException ex)
+            catch (DataServiceQueryException ex)
             {
-                var xml = ex.Message;
+                var xml = default(string);
+
+                if (ex.InnerException != null)
+                    xml = ex.InnerException.Message;
+                else
+                    xml = ex.Message;
+
                 XmlExceptionHandler.Show(xml);
             }
         }
@@ -791,9 +821,15 @@ namespace SMAStudiovNext.Services
             {
                 job.Resume(context);
             }
-            catch (DataServiceClientException ex)
+            catch (DataServiceQueryException ex)
             {
-                var xml = ex.Message;
+                var xml = default(string);
+
+                if (ex.InnerException != null)
+                    xml = ex.InnerException.Message;
+                else
+                    xml = ex.Message;
+
                 XmlExceptionHandler.Show(xml);
             }
         }
@@ -814,9 +850,15 @@ namespace SMAStudiovNext.Services
             {
                 job.Stop(context);
             }
-            catch (DataServiceClientException ex)
+            catch (DataServiceQueryException ex)
             {
-                var xml = ex.Message;
+                var xml = default(string);
+
+                if (ex.InnerException != null)
+                    xml = ex.InnerException.Message;
+                else
+                    xml = ex.Message;
+
                 XmlExceptionHandler.Show(xml);
             }
         }
@@ -834,9 +876,15 @@ namespace SMAStudiovNext.Services
                 runbookProxy.IsTestRun = false;
                 return runbook.StartRunbook(context, parameters);
             }
-            catch (DataServiceClientException ex)
+            catch (DataServiceQueryException ex)
             {
-                var xml = ex.Message;
+                var xml = default(string);
+
+                if (ex.InnerException != null)
+                    xml = ex.InnerException.Message;
+                else
+                    xml = ex.Message;
+
                 XmlExceptionHandler.Show(xml);
             }
 
