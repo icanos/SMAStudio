@@ -1,5 +1,7 @@
 # SMA Studio
 
+Download the latest release at the release page. Latest version is 1.0.1
+
 ## Overview
 SMA Studio is a free IDE for developing and managing a Microsoft System Center Service Management Automation environment as well as Microsoft Azure Automation. It comes with a wide range of great features to ease your work.
 
