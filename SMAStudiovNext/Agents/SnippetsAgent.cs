@@ -1,5 +1,5 @@
 ﻿using SMAStudiovNext.Core;
-using SMAStudiovNext.Modules.Runbook.Snippets;
+using SMAStudiovNext.Language.Snippets;
 using System;
 using System.Collections.Generic;
 using System.IO;

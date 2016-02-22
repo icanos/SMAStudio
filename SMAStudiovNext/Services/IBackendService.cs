@@ -1,12 +1,10 @@
 ﻿using SMAStudiovNext.Core;
+using SMAStudiovNext.Language.Completion;
 using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.Runbook.CodeCompletion;
 using SMAStudiovNext.Modules.Runbook.ViewModels;
 using SMAStudiovNext.SMA;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SMAStudiovNext.Services

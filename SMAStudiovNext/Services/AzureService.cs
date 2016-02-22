@@ -19,6 +19,7 @@ using System.Windows;
 using SMAStudiovNext.Modules.Runbook.CodeCompletion;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
+using SMAStudiovNext.Language.Completion;
 
 namespace SMAStudiovNext.Services
 {

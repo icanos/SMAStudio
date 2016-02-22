@@ -1,9 +1,12 @@
 ﻿using Caliburn.Micro;
+using Gemini.Framework;
 using Gemini.Framework.Services;
 using Gemini.Modules.ErrorList;
 using Gemini.Modules.Output;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Icons;
+using SMAStudiovNext.Language.Completion;
+using SMAStudiovNext.Models;
 using SMAStudiovNext.Modules.Runbook.CodeCompletion;
 using SMAStudiovNext.Modules.Runbook.ViewModels;
 using System;
@@ -27,6 +30,7 @@ namespace SMAStudiovNext.Agents
         private readonly IErrorList _errorList;
         private readonly IOutput _output;
         private readonly IShell _shell;
+        private readonly ICompletionProvider _completionProvider;
 
         private readonly object _syncLock = new object();
         private readonly Thread _backgroundThread;
@@ -41,6 +45,7 @@ namespace SMAStudiovNext.Agents
             _backgroundThread = new Thread(new ThreadStart(StartInternal));
             _backgroundThread.Priority = ThreadPriority.BelowNormal;
 
+            _completionProvider = AppContext.Resolve<ICompletionProvider>();
             _errorList = IoC.Get<IErrorList>();
             _output = IoC.Get<IOutput>();
             _shell = IoC.Get<IShell>();
@@ -78,80 +83,47 @@ namespace SMAStudiovNext.Agents
                     if (tokens != null && tokens.Length > 0)
                     {
                         if (_shell.ActiveItem is RunbookViewModel)
-                            ParseRunbook(((RunbookViewModel)_shell.ActiveItem), tokens);
+                        {
+                            (_shell.ActiveItem as RunbookViewModel).ParseContent();
+                        }
                     }
+                }
+
+                var contexts = ((Modules.Startup.Module)IoC.Get<IModule>()).GetContexts();
+                var runbookHash = 0;
+                var lastRunbookHash = 0;
+
+                for (var i = 0; i < contexts.Count; i++)
+                {
+                    var context = contexts[i];
+
+                    if (context.Runbooks != null)
+                    {
+                        var runbooks = context.Runbooks;
+
+                        foreach (var runbook in runbooks)
+                            runbookHash += ((RunbookModelProxy)runbook.Tag).RunbookName.Length;
+
+                        if (runbookHash.Equals(lastRunbookHash))
+                        {
+                            Thread.Sleep(5 * 1000);
+                            continue;
+                        }
+
+                        _completionProvider.Runbooks.Clear();
+                        foreach (var runbook in runbooks)
+                        {
+                            _completionProvider.Runbooks.Add(new KeywordCompletionData(((RunbookModelProxy)runbook.Tag).RunbookName, IconsDescription.Runbook));
+                        }
+                    }
+
+                    lastRunbookHash = runbookHash;
                 }
 
                 Thread.Sleep(2 * 1000);
             }
         }
-
-        private void ParseRunbook(RunbookViewModel runbookViewModel, Token[] tokens)
-        {
-            // Clean out
-            runbookViewModel.CodeCompletionContext.Variables.Clear();
-
-            int idx = 0;
-            foreach (var token in tokens)
-            {
-                switch (token.Kind)
-                {
-                    case TokenKind.Variable:
-                        if (token.Extent.StartOffset > runbookViewModel.CaretOffset)
-                            continue;
-
-                        if (idx > 2 && idx < (tokens.Length - 2))
-                        {
-                            // We might have a definition of what this variable contains
-                            if (tokens[idx - 1].Text.Equals("]"))
-                            {
-                                var identifier = tokens[idx - 2];
-
-                                var variableObject = new VariableCompletionData(token.Text, identifier.Text);
-
-                                if (runbookViewModel.CodeCompletionContext.Variables.FirstOrDefault(v => v.Equals(variableObject)) == null)
-                                    runbookViewModel.CodeCompletionContext.Variables.Add(variableObject);
-                            }
-                            else
-                            {
-                                var variableObject = new VariableCompletionData(token.Text, ""); 
-
-                                if (runbookViewModel.CodeCompletionContext.Variables.FirstOrDefault(v => v.Equals(variableObject)) == null)
-                                    runbookViewModel.CodeCompletionContext.Variables.Add(variableObject);
-                            }
-                        }
-                        else
-                        {
-                            var variableObject = new VariableCompletionData(token.Text, "");
-
-                            if (runbookViewModel.CodeCompletionContext.Variables.FirstOrDefault(v => v.Equals(variableObject)) == null)
-                                runbookViewModel.CodeCompletionContext.Variables.Add(variableObject);
-                        }
-
-                        break;
-                }
-
-                switch (token.TokenFlags)
-                {
-                    case TokenFlags.CommandName:
-                        // TODO: Try to retrieve the parameters for the cmdlet/runbook
-                        if (token.Text.Equals("import-module", StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            if (tokens.Length > idx)
-                            {
-                                var moduleToImport = tokens[idx + 1];
-
-                                if (moduleToImport.Text.Length > 0)
-                                    runbookViewModel.CodeCompletionContext.AddModule(runbookViewModel.DisplayName.Replace("*", ""), moduleToImport.Text);
-                            }
-                        }
-                        break;
-                }
-
-                idx++;
-            }
-        }
-
+        
         /// <summary>
         /// Handles notifying the user that there is somekind of parse error in the runbook.
         /// </summary>

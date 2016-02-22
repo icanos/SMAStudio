@@ -1,165 +1,20 @@
-﻿using SMAStudiovNext.Agents;
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Management.Automation;
-using System.Threading.Tasks;
-using SMAStudiovNext.Core;
-using ICSharpCode.AvalonEdit.CodeCompletion;
+﻿using System;
+using System.Windows.Media;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
-using System.Windows.Media;
-using SMAStudiovNext.Modules.Runbook.Snippets;
+using System.Threading.Tasks;
+using ICSharpCode.AvalonEdit.CodeCompletion;
+using SMAStudiovNext.Language.Snippets;
 using System.Windows.Media.Imaging;
 using SMAStudiovNext.Icons;
+using System.Collections.Generic;
 
-namespace SMAStudiovNext.Modules.Runbook.CodeCompletion
+namespace SMAStudiovNext.Language.Completion
 {
-    /// <summary>
-    /// TODO: Implement a powershell module resolver that can cache requests in powershell to speed up!
-    /// </summary>
-    public class CodeCompletionContext : ICodeCompletionContext, ILocalCodeCompletionContext
-    {
-        #region Language Constructs
-        private readonly IList<string> _keywords = new List<string>
-        {
-            "Begin", "Break", "Catch", "Continue", "Data", "Do", "DynamicParam", "Else", "ElseIf", "End",
-            "Exit", "Filter", "Finally", "For", "ForEach", "From", "Function", "If", "In", "InlineScript",
-            "Hidden", "Parallel", "Param", "Process", "Return", "Sequence", "Switch", "Throw", "Trap", "Try",
-            "Until", "While", "Workflow"
-        };
-
-        private readonly IList<string> _defaultParameters = new List<string>
-        {
-            "Debug", "ErrorAction", "ErrorVariable", "InformationAction", "InformationVariable",
-            "OutVariable", "OutBuffer", "PiplineVariable", "Verbose", "WarningAction",
-            "WarningVariable", "WhatIf", "Confirm"
-        };
-
-        private readonly IList<string> _smaCmdlets = new List<string>
-        {
-            "Get-AutomationVariable", "Get-AutomationPSCredential", "Get-AutomationCertificate", "Set-AutomationVariable", "Get-AutomationConnection"
-        };
-        #endregion
-
-        private readonly GlobalCodeCompletionContext _globalCompletionContext;
-
-        public CodeCompletionContext()
-        {
-            _globalCompletionContext = (GlobalCodeCompletionContext)AppContext.Resolve<IAgent>("GlobalCodeCompletionContext");
-
-            Variables = new List<ICompletionEntry>();
-            Keywords = new List<ICompletionEntry>();
-            AllModules = new List<string>();
-            UsedModules = new Dictionary<string, IList<string>>();
-        }
-
-        #region Properties
-        public IList<ICompletionEntry> Variables { get; set; }
-
-        public IList<ICompletionEntry> Keywords { get; set; }
-
-        public IList<ICompletionEntry> GlobalKeywords { get { return _globalCompletionContext.Keywords; } }
-
-        public IList<ICompletionEntry> GlobalRunbooks { get { return _globalCompletionContext.Runbooks; } }
-
-        public IList<string> AllModules { get; set; }
-
-        public IDictionary<string, IList<string>> UsedModules { get; set; }
-
-        public ICompletionEntry CurrentKeyword { get; set; }
-        #endregion
-
-        public void AddModule(string runbookName, string moduleName)
-        {
-            if (UsedModules.ContainsKey(runbookName) && UsedModules[runbookName].Contains(moduleName))
-                return;
-
-            var alreadyLoaded = UsedModules.Values.FirstOrDefault(v => v.Equals(moduleName));
-            if (alreadyLoaded != null)
-            {
-                if (UsedModules.ContainsKey(runbookName))
-                    UsedModules[runbookName].Add(moduleName);
-                else
-                {
-                    UsedModules.Add(runbookName, new List<string>());
-                    UsedModules[runbookName].Add(moduleName);
-                }
-
-                return;
-            }
-
-            // Enumerate the used module to find out which commands exists inside the module
-            AsyncExecution.Run(System.Threading.ThreadPriority.BelowNormal, delegate ()
-            {
-                try {
-                    using (var context = PowerShell.Create())
-                    {
-                        context.AddScript("Import-Module " + moduleName + "; Get-Command -Module " + moduleName);
-                        var commands = context.Invoke();
-
-                        var parallelOptions = new ParallelOptions();
-                        parallelOptions.MaxDegreeOfParallelism = 10;
-
-                        Parallel.ForEach(commands, parallelOptions, (command) =>
-                        {
-                            Keywords.Add(new KeywordCompletionData(command.ToString(), moduleName, this, IconsDescription.Cmdlet));
-                        });
-                    }
-                }
-                catch (ParseException)
-                {
-                    // Ignore
-                }
-            });
-
-
-            if (UsedModules.ContainsKey(runbookName))
-                UsedModules[runbookName].Add(moduleName);
-            else
-            {
-                UsedModules.Add(runbookName, new List<string>());
-                UsedModules[runbookName].Add(moduleName);
-            }
-        }
-
-        #region IAgent Implementation
-        public void Start()
-        {
-            // Add language constructs
-            foreach (var keyword in _keywords)
-                Keywords.Add(new KeywordCompletionData(keyword, this, IconsDescription.LanguageConstruct));
-
-            // SMA cmdlets
-            foreach (var cmdlet in _smaCmdlets)
-                Keywords.Add(new KeywordCompletionData(cmdlet, this, IconsDescription.Cmdlet));
-        }
-
-        public void Stop()
-        {
-
-        }
-        #endregion
-
-        public IList<ICompletionEntry> GetParameters()
-        {
-            if (CurrentKeyword == null && _globalCompletionContext.CurrentKeyword == null)
-                return new List<ICompletionEntry>();
-
-            if (CurrentKeyword != null)
-                _globalCompletionContext.CurrentKeyword = CurrentKeyword;
-
-            return _globalCompletionContext.GetParameters();
-        }
-    }
-
-    #region CompletionDataBase
 #pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
     public abstract class CompletionDataBase : ICompletionData
 #pragma warning restore CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
     {
-        private ICodeCompletionContext _completionContext;
-
         public CompletionDataBase()
         {
 
@@ -185,13 +40,7 @@ namespace SMAStudiovNext.Modules.Runbook.CodeCompletion
         {
             get; set;
         }
-
-        public ICodeCompletionContext CodeCompletionContext
-        {
-            private get { return _completionContext; }
-            set { _completionContext = value; }
-        }
-
+        
         #region ICompletionData
         public virtual ImageSource Image
         {
@@ -260,7 +109,7 @@ namespace SMAStudiovNext.Modules.Runbook.CodeCompletion
             {
                 var ch = text[i];
 
-                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '(')
+                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '(' || ch == ':')
                 {
                     startOffset = i + 1;
                     break;
@@ -273,7 +122,7 @@ namespace SMAStudiovNext.Modules.Runbook.CodeCompletion
             segment.StartOffset = startOffset;
             segment.EndOffset = caretOffset;
 
-            if (CodeCompletionContext != null && (this is KeywordCompletionData))
+            /*if (CodeCompletionContext != null && (this is KeywordCompletionData))
             {
                 Console.WriteLine(this.ToString());
                 CodeCompletionContext.CurrentKeyword = (ICompletionEntry)this;
@@ -282,12 +131,11 @@ namespace SMAStudiovNext.Modules.Runbook.CodeCompletion
                 {
                     CodeCompletionContext.GetParameters();
                 });
-            }
+            }*/
 
             textArea.Document.Replace(segment, Name);
         }
     }
-    #endregion
 
     #region VariableCompletionData
 
@@ -316,7 +164,7 @@ namespace SMAStudiovNext.Modules.Runbook.CodeCompletion
                 return new BitmapImage(new Uri(IconsDescription.Variable, UriKind.RelativeOrAbsolute));
             }
         }
-        
+
         public string Type
         {
             get; set;
@@ -348,7 +196,7 @@ namespace SMAStudiovNext.Modules.Runbook.CodeCompletion
                 return new BitmapImage(new Uri(IconsDescription.Snippet, UriKind.RelativeOrAbsolute));
             }
         }
-        
+
         public override void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionRequestEventArgs)
         {
             var text = textArea.Document.Text;
@@ -393,34 +241,35 @@ namespace SMAStudiovNext.Modules.Runbook.CodeCompletion
             DisplayText = name;
         }
 
-        public KeywordCompletionData(string name, ICodeCompletionContext completionContext)
+        /*public KeywordCompletionData(string name)
             : this(name)
         {
-            CodeCompletionContext = completionContext;
-        }
+            //CodeCompletionContext = completionContext;
+        }*/
 
-        public KeywordCompletionData(string name, ICodeCompletionContext completionContext, string icon)
+        public KeywordCompletionData(string name, string icon)
             : this(name)
         {
-            CodeCompletionContext = completionContext;
+            //CodeCompletionContext = completionContext;
 
             _icon = icon;
         }
 
-        public KeywordCompletionData(string name, string module)
+        public KeywordCompletionData(string name, string icon, string module)
             : this(name)
         {
             Module = module;
+            _icon = icon;
         }
 
-        public KeywordCompletionData(string name, string module, ICodeCompletionContext completionContext)
+        /*public KeywordCompletionData(string name, string module, ICodeCompletionContext completionContext)
             : this(name)
         {
             Module = module;
             CodeCompletionContext = completionContext;
-        }
+        }*/
 
-        public KeywordCompletionData(string name, string module, string icon)
+        /*public KeywordCompletionData(string name, string module, string icon)
             : this(name)
         {
             Module = module;
@@ -434,7 +283,7 @@ namespace SMAStudiovNext.Modules.Runbook.CodeCompletion
             CodeCompletionContext = completionContext;
 
             _icon = icon;
-        }
+        }*/
 
         public override ImageSource Image
         {
@@ -443,7 +292,7 @@ namespace SMAStudiovNext.Modules.Runbook.CodeCompletion
                 return new BitmapImage(new Uri(_icon, UriKind.RelativeOrAbsolute));
             }
         }
-        
+
         public string Module { get; set; }
 
         public IList<ICompletionEntry> Parameters { get; set; }
@@ -491,6 +340,24 @@ namespace SMAStudiovNext.Modules.Runbook.CodeCompletion
                 DisplayText = Name;
 
             if (!Name.StartsWith("-"))
+                DisplayText = "-" + Name;
+        }
+
+        public ParameterCompletionData(string name, string typeName, bool includeDash = true)
+        {
+            Name = name;
+
+            Type = typeName;
+
+            if (!Name.StartsWith("-") && includeDash)
+                Name = "-" + name;
+
+            if (!String.IsNullOrEmpty(Type))
+                DisplayText = Name + " : " + Type;
+            else
+                DisplayText = Name;
+
+            if (!Name.StartsWith("-") && includeDash)
                 DisplayText = "-" + Name;
         }
 

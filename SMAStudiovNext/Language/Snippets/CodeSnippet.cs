@@ -5,10 +5,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 
 using ICSharpCode.AvalonEdit.Snippets;
-using SMAStudiovNext.Modules.Runbook.Controls;
 using SMAStudiovNext.Models;
 
-namespace SMAStudiovNext.Modules.Runbook.Snippets
+namespace SMAStudiovNext.Language.Snippets
 {
     /// <summary>
     /// Code is based on the SharpDevelop implementation of CodeSnippet.cs but has been customized to work with

@@ -1,7 +1,8 @@
 ﻿using Microsoft.Practices.Unity;
 using SMAStudiovNext.Commands;
+using SMAStudiovNext.Language.Completion;
+using SMAStudiovNext.Language.Snippets;
 using SMAStudiovNext.Modules.EnvironmentExplorer.Commands;
-using SMAStudiovNext.Modules.Runbook.Snippets;
 using SMAStudiovNext.Modules.Shell.Commands;
 using SMAStudiovNext.Services;
 using System.Windows.Input;
@@ -19,6 +20,7 @@ namespace SMAStudiovNext.Core
             _container.RegisterInstance<ISettingsService>(new SettingsService());
             _container.RegisterInstance<ISnippetsCollection>(new SnippetsCollection());
             _container.RegisterInstance<IStatusManager>(new StatusManager());
+            _container.RegisterInstance<ICompletionProvider>(new CompletionProvider());
 
             _container.RegisterType<ICommand, LoadCommand>("LoadCommand");
             _container.RegisterType<ICommand, HistoryCommand>("HistoryCommand");

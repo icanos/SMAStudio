@@ -9,6 +9,10 @@ using System.Reflection;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml;
+using System.Windows.Input;
+using SMAStudiovNext.Modules.Runbook.ViewModels;
+using ICSharpCode.AvalonEdit.Rendering;
+using SMAStudio.Language;
 
 namespace SMAStudiovNext.Modules.Runbook.Controls
 {
@@ -23,6 +27,8 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
         private FoldingManager _foldingManager;
         private PowershellFoldingStrategy _foldingStrategy;
 
+        private SyntaxHighlightning.HighlightingColorizer _highlightingColorizer = null;
+
         public RunbookEditor()
         {
             FontFamily = new FontFamily("Consolas");
@@ -30,7 +36,10 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
             ShowLineNumbers = true;
             Options = new TextEditorOptions
             {
-                ConvertTabsToSpaces = true
+                ConvertTabsToSpaces = true,
+                HighlightCurrentLine = true,
+                IndentationSize = 4,
+                AllowScrollBelowDocument = true
             };
 
             _foldingStrategy = new PowershellFoldingStrategy();
@@ -46,6 +55,14 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
         {
             base.BeginInit();
 
+            _foldingManager = FoldingManager.Install(TextArea);
+            UpdateFoldings();
+        }
+
+        public void InitializeColorizer(LanguageContext languageContext)
+        {
+            _highlightingColorizer = new SyntaxHighlightning.HighlightingColorizer(languageContext);
+
             var assembly = Assembly.GetExecutingAssembly();
             var resourceName = "SMAStudiovNext.Modules.Runbook.SyntaxHighlightning.Powershell.xshd";
 
@@ -56,11 +73,13 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
 
             reader.Close();
             stream.Close();
-
-            _foldingManager = FoldingManager.Install(TextArea);
-            UpdateFoldings();
         }
 
+        protected override IVisualLineTransformer CreateColorizer(IHighlightingDefinition highlightingDefinition)
+        {
+            return _highlightingColorizer;
+        }
+        
         private void UpdateFoldings()
         {
             _foldingStrategy.UpdateFoldings(_foldingManager, Document);

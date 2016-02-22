@@ -11,7 +11,7 @@ using System.Threading;
 
 namespace SMAStudiovNext.Agents
 {
-    public class GlobalCodeCompletionContext : ICodeCompletionContext, IAgent
+    /*public class GlobalCodeCompletionContext : IAgent
     {
         private readonly IModule _application;
         private readonly Thread _backgroundThread;
@@ -64,40 +64,7 @@ namespace SMAStudiovNext.Agents
 
         private void StartInternal()
         {
-            var runbookHash = 0;
-            var lastRunbookHash = 0;
-            var contexts = ((SMAStudiovNext.Modules.Startup.Module)_application).GetContexts();
-
-            while (_isRunning)
-            {
-                for (var i = 0; i < contexts.Count; i++)
-                {
-                    var context = contexts[i];
-
-                    if (context.Runbooks != null)
-                    {
-                        var runbooks = context.Runbooks;
-
-                        foreach (var runbook in runbooks)
-                            runbookHash += ((RunbookModelProxy)runbook.Tag).RunbookName.Length;
-
-                        if (runbookHash.Equals(lastRunbookHash))
-                        {
-                            Thread.Sleep(5 * 1000);
-                            continue;
-                        }
-
-                        Runbooks.Clear();
-                        foreach (var runbook in runbooks)
-                        {
-                            Runbooks.Add(new KeywordCompletionData(((RunbookModelProxy)runbook.Tag).RunbookName, this, IconsDescription.Runbook));
-                        }
-                    }
-                }
-
-                lastRunbookHash = runbookHash;
-                Thread.Sleep(5 * 1000);
-            }
+            
         }
 
         public void Stop()
@@ -139,5 +106,5 @@ namespace SMAStudiovNext.Agents
 
             return ((KeywordCompletionData)CurrentKeyword).Parameters;
         }
-    }
+    }*/
 }

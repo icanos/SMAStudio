@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SMAStudiovNext.Language.Completion;
+using System.Collections.Generic;
 
 namespace SMAStudiovNext.Language
 {
@@ -28,14 +29,16 @@ namespace SMAStudiovNext.Language
         MultilineComment,
         MultilineCommentStart,
         MultilineCommentEnd,
-        LanguageConstruct
+        LanguageConstruct,
+        Property,
+        Argument
     }
 
-    public class PowershellSegment
+    public class LanguageSegment
     {
-        public PowershellSegment()
+        public LanguageSegment()
         {
-            Segments = new List<PowershellSegment>();
+            Segments = new List<LanguageSegment>();
         }
 
         public int Start { get; set; }
@@ -46,8 +49,8 @@ namespace SMAStudiovNext.Language
 
         public string Value { get; set; }
 
-        public List<PowershellSegment> Segments { get; set; }
-
+        public List<LanguageSegment> Segments { get; set; }
+    
         public override string ToString()
         {
             //return "(" + Start + ":" + Stop + ") " + Type.ToString() + ": " + Value;

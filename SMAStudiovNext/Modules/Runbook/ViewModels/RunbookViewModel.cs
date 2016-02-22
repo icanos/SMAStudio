@@ -7,12 +7,12 @@ using ICSharpCode.AvalonEdit.CodeCompletion;
 using SMAStudio.Language;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Language;
+using SMAStudiovNext.Language.Completion;
 using SMAStudiovNext.Models;
 using SMAStudiovNext.Modules.ExecutionResult.ViewModels;
 using SMAStudiovNext.Modules.JobHistory.ViewModels;
 using SMAStudiovNext.Modules.Runbook.CodeCompletion;
 using SMAStudiovNext.Modules.Runbook.Commands;
-using SMAStudiovNext.Modules.Runbook.Snippets;
 using SMAStudiovNext.Modules.Runbook.Views;
 using SMAStudiovNext.Modules.Shell.Commands;
 using SMAStudiovNext.Modules.StartRunDialog.Windows;
@@ -21,12 +21,15 @@ using SMAStudiovNext.SMA;
 using System;
 using System.Collections.Generic;
 using System.Data.Services.Client;
-using System.Linq;
 using System.Management.Automation.Language;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Linq;
+using System.Threading;
+using SMAStudiovNext.Language.Snippets;
+using System.Diagnostics;
 
 namespace SMAStudiovNext.Modules.Runbook.ViewModels
 {
@@ -42,8 +45,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         private readonly IStatusManager _statusManager;
         private readonly object _syncLock = new object();
 
-        private readonly PowershellContext _codeContext = null;
-        private readonly ILocalCodeCompletionContext _completionContext;
+        private readonly ICompletionProvider _completionProvider;
         private CompletionWindow _completionWindow = null;
 
         private RunbookModelProxy _runbook;
@@ -53,6 +55,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         private string _cachedSnippetContent = string.Empty;
 
         private IRunbookView _view;
+        private Timer _completionTimer;
 
         public RunbookViewModel(RunbookModelProxy runbook)
         {
@@ -61,12 +64,16 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             _snippetsCollection = AppContext.Resolve<ISnippetsCollection>();
             _statusManager = AppContext.Resolve<IStatusManager>();
 
-            _codeContext = new PowershellContext();
-            _completionContext = new CodeCompletionContext();
+            _completionProvider = AppContext.Resolve<ICompletionProvider>();//new CompletionProvider();
 
-            _completionContext.Start();
+            //_codeContext = new PowershellContext();
+            //_completionContext = new CodeCompletionContext();
+
+            //_completionContext.Start();
 
             Owner = runbook.Context.Service;
+
+            //_completionTimer = new Timer(new TimerCallback(ShowCompletionWindow));
         }
 
         /// <summary>
@@ -98,6 +105,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         protected override void OnViewLoaded(object view)
         {
             _view = (IRunbookView)view;
+            _view.TextEditor.InitializeColorizer(_completionProvider.Context);
 
             if (!String.IsNullOrEmpty(_cachedSnippetContent))
             {
@@ -173,8 +181,24 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         /// <param name="e"></param>
         private void OnCtrlSpaceCommand(object sender, ExecutedRoutedEventArgs e)
         {
-            var context = _codeContext.GetContext(CaretOffset);
-            ShowCompletion(CaretOffset, context, null, true);
+            ShowCompletion(completionWord: "", controlSpace: true).ConfigureAwait(true);
+            //var context = _codeContext.GetContext(CaretOffset);
+            //ShowCompletion(CaretOffset, context, null, true);
+
+
+
+
+
+
+            // TODO :::::::::
+
+
+
+
+
+
+
+            // 
         }
 
         /// <summary>
@@ -227,44 +251,102 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         /// <param name="e"></param>
         private void OnTextEntered(object sender, TextCompositionEventArgs e)
         {
-            var cachedCaretOffset = _view.TextEditor.CaretOffset;
-            var cachedText = Content;
+            //_completionTimer.Change(200, 0);
+            ShowCompletionWindow(sender).ConfigureAwait(true);
+        }
 
+        private void GetCompletionOffset(out int offset)
+        {
+            offset = _view.TextEditor.CaretOffset;
+        }
 
-            if ((DateTime.Now - lastKeystrokeTime).TotalMilliseconds > 300)
+        private async Task ShowCompletionWindow(object sender)
+        {
+            var word = string.Empty;
+            var lineStr = string.Empty;
+            var content = string.Empty;
+            var caretOffset = 0;
+
+            AsyncExecution.ExecuteOnUIThread(() =>
             {
-                AsyncExecution.Run(System.Threading.ThreadPriority.Normal, delegate ()
+                var line = _view.TextEditor.Document.GetLineByOffset(_view.TextEditor.CaretOffset);
+                lineStr = _view.TextEditor.Document.GetText(line);
+                caretOffset = _view.TextEditor.CaretOffset;
+                content = _view.TextEditor.Document.Text;
+            });
+
+            var result = await _completionProvider.Context.ParseLineAsync(lineStr);
+            var segment = default(LanguageSegment);
+
+            if (result != null && result.Count > 0)
+                segment = result[result.Count - 1];
+
+            if (segment != null)
+            {
+                if (segment.Type == ExpressionType.Comment || segment.Type == ExpressionType.MultilineCommentStart ||
+                    segment.Type == ExpressionType.MultilineComment || segment.Type == ExpressionType.QuotedString)
                 {
-                    _codeContext.Parse(cachedText);
-
-                    var context = _codeContext.GetContext(cachedCaretOffset);
-
-                    if (context != null && context.Count > 0)
-                    {
-                        if (context[0].Type == ExpressionType.Parameter ||
-                            context[0].Type == ExpressionType.Keyword ||
-                            context[0].Type == ExpressionType.Variable)
-                        {
-                            // We need to find the "whole" word before showing auto completion
-                            string word = "";
-
-                            for (int i = cachedCaretOffset - 1; i >= 0; i--)
-                            {
-                                var ch = cachedText[i];
-
-                                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
-                                    break;
-
-                                word = cachedText[i] + word;
-                            }
-
-                            ShowCompletion(cachedCaretOffset, context, word, false);
-                        }
-                    }
-                });
+                    return;
+                }
             }
 
-            lastKeystrokeTime = DateTime.Now;
+            for (int i = caretOffset - 1; i >= 0; i--)
+            {
+                var ch = content[i];
+
+                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
+                    break;
+
+                word = content[i] + word;
+            }
+
+            if (word == string.Empty)
+                return;
+
+            await ShowCompletion(completionWord: word, controlSpace: false);
+        }
+
+        private async Task ShowCompletion(string completionWord, bool controlSpace)
+        {
+            if (_completionWindow == null)
+            {
+                int offset;
+                GetCompletionOffset(out offset);
+
+                var line = _view.TextEditor.Document.GetLineByOffset(offset);
+                var lineStr = _view.TextEditor.Document.GetText(line);
+                var completionChar = controlSpace ? (char?)null : _view.TextEditor.Document.GetCharAt(offset - 1);
+                var results = await _completionProvider.GetCompletionData(completionWord, lineStr, offset, completionChar).ConfigureAwait(true);
+
+                AsyncExecution.ExecuteOnUIThread(() =>
+                {
+                    if (_completionWindow == null && results.CompletionData.Any())
+                    {
+                        _completionWindow = new CompletionWindow(_view.TextEditor.TextArea)
+                        {
+                            CloseWhenCaretAtBeginning = controlSpace
+                        };
+
+                        if (completionChar != null && char.IsLetterOrDigit(completionChar.Value))
+                            _completionWindow.StartOffset -= 1;
+
+                        var data = _completionWindow.CompletionList.CompletionData;
+                        foreach (var completion in results.CompletionData)
+                        {
+                            data.Add(completion);
+                        }
+
+                        _completionWindow.Show();
+
+                        _completionWindow.Closed += (o, args) =>
+                        {
+                            _completionWindow = null;
+                        };
+                    }
+                    else
+                        Debug.WriteLine("No completion data available.");
+                });
+            }
         }
 
         /// <summary>
@@ -274,7 +356,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         /// <param name="contextName">Context name is the name of the current position in the document based on the parsed context from PowershellParser.</param>
         /// <param name="text">Text that is being parsed (code content).</param>
         /// <param name="controlSpace">True if ctrl+space has been pressed, otherwise false.</param>
-        private void ShowCompletion(int cachedCaretOffset, List<PowershellSegment> contextList, string text, bool controlSpace)
+        /*private void ShowCompletion(int cachedCaretOffset, List<PowershellSegment> contextList, string text, bool controlSpace)
         {
             if (_completionWindow != null)
                 return;
@@ -375,7 +457,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 _completionWindow.Show();
                 _completionWindow.Closed += (o, args) => _completionWindow = null;
             });
-        }
+        }*/
 
         /// <summary>
         /// Called when the tab has been confirmed to close and is being closed, this should take care of
@@ -386,11 +468,11 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         {
             // We only want the active one to contain data so that we
             // don't chew up all memory on the machine we're working on.
-            if (_codeContext != null)
-                _codeContext.ClearCache();
+            //if (_codeContext != null)
+            //    _codeContext.ClearCache();
 
-            if (close)
-                _completionContext.Stop();
+            //if (close)
+            //    _completionContext.Stop();
 
             base.OnDeactivate(close);
         }
@@ -423,11 +505,12 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                             start = DateTime.Now;
 
                             //Content = _backendContext.GetContent(Uri.AbsoluteUri + "/DraftRunbookVersion/$value");
-                            lock (Content)
-                            {
-                                Content = _backendContext.GetContent(_backendContext.Service.GetBackendUrl(runbookType, _runbook));
-                            }
-                            _codeContext.Parse(Content);
+                            //lock (Content)
+                            //{
+                            Content = _backendContext.GetContent(_backendContext.Service.GetBackendUrl(runbookType, _runbook));
+                            //}
+                            //_codeContext.Parse(Content);
+                            _completionProvider.Context.Parse(Content).ConfigureAwait(false);
 
                             stop = DateTime.Now;
                             output.AppendLine("Content fetched in " + (stop - start).TotalMilliseconds + " ms");
@@ -467,6 +550,17 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                     output.AppendLine("Unable to retrieve any content for the runbook. Error: " + ex.Message);
                 }
             }
+        }
+
+        /// <summary>
+        /// Triggers a parse of the runbook
+        /// </summary>
+        public void ParseContent()
+        {
+            AsyncExecution.ExecuteOnUIThread(async () =>
+            {
+                await _completionProvider.Context.Parse(_view.TextEditor.Text);
+            });
         }
 
         /// <summary>
@@ -580,14 +674,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         /// Returns the context in which the caret currenlty is located.
         /// </summary>
         /// <returns></returns>
-        public PowershellSegment GetCurrentContext()
+        public LanguageSegment GetCurrentContext()
         {
-            var context = _codeContext.GetContext(CaretOffset);
-
-            if (context.Count > 0)
-                return context[0];
-
-            return null;
+            //var context = _codeContext.GetContext(CaretOffset);
+            return _completionProvider.Context.GetCurrentContext(CaretOffset);
         }
 
         /// <summary>
@@ -924,10 +1014,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             get { return _runbook; }
         }
 
-        public ILocalCodeCompletionContext CodeCompletionContext
+        /*public ILocalCodeCompletionContext CodeCompletionContext
         {
             get { return _completionContext; }
-        }
+        }*/
 
         public int CaretOffset
         {

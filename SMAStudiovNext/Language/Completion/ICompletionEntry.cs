@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SMAStudiovNext.Modules.Runbook.CodeCompletion
+namespace SMAStudiovNext.Language.Completion
 {
     public interface ICompletionEntry
     {
