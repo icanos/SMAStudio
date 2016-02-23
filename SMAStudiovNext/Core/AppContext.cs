@@ -5,6 +5,7 @@ using SMAStudiovNext.Language.Snippets;
 using SMAStudiovNext.Modules.EnvironmentExplorer.Commands;
 using SMAStudiovNext.Modules.Shell.Commands;
 using SMAStudiovNext.Services;
+using SMAStudiovNext.Themes;
 using System.Windows.Input;
 
 namespace SMAStudiovNext.Core
@@ -21,6 +22,7 @@ namespace SMAStudiovNext.Core
             _container.RegisterInstance<ISnippetsCollection>(new SnippetsCollection());
             _container.RegisterInstance<IStatusManager>(new StatusManager());
             _container.RegisterInstance<ICompletionProvider>(new CompletionProvider());
+            _container.RegisterInstance<IThemeManager>(new ThemeManager());
 
             _container.RegisterType<ICommand, LoadCommand>("LoadCommand");
             _container.RegisterType<ICommand, HistoryCommand>("HistoryCommand");

@@ -10,6 +10,7 @@ namespace SMAStudiovNext.Language
         //private string _content = string.Empty;
         private ExpressionType _expr = ExpressionType.None;
 
+        //private List<LanguageSegment> _segments = new List<LanguageSegment>();
         private List<LanguageSegment> _segments = new List<LanguageSegment>();
         private List<string> _language = new List<string> { "if", "else", "elseif", "for", "foreach", "do", "while", "until", "switch", "break", "continue", "return" };
         private List<string> _operators = new List<string> { "-eq", "-gt", "-lt", "-le", "-ge", "-and", "-or", "-ne", "-like", "-notlike", "-match", "-notmatch", "-replace", "-contains", "-notcontains", "-shl", "-shr", "-in", "-notin" };
@@ -38,25 +39,21 @@ namespace SMAStudiovNext.Language
 
         public List<LanguageSegment> Parse(string content)
         {
-            if (_content.Equals(content) && _segments.Count > 0)
-                return _segments;
+            if (String.IsNullOrEmpty(content))
+                return new List<LanguageSegment>();
 
-            _content = content;
-            Clear();
-
-            InternalParse(_content);
-
-            return _segments;
+            return InternalParse(content);
         }
 
         private List<LanguageSegment> InternalParse(string content)
         {
-            var tmpContent = content + "\n";
+            var result = new List<LanguageSegment>();
+            var tmpContent = content;
 
             var contentLength = tmpContent.Length;
             var chunk = new StringBuilder();
             var startPos = 0;
-
+            
             for (int i = 0; i < contentLength; i++)
             {
                 if (chunk.Length == 0)
@@ -69,7 +66,7 @@ namespace SMAStudiovNext.Language
                 {
                     if (ch == '\n' && _expr != ExpressionType.MultilineComment)
                     {
-                        chunk = CreateSegment(chunk, startPos, i);
+                        chunk = CreateSegment(chunk, startPos, i, ref result);
 
                         if (_expr != ExpressionType.MultilineComment)
                             _expr = ExpressionType.None;
@@ -81,14 +78,16 @@ namespace SMAStudiovNext.Language
                         if (tmpContent[i - 1] == '#')
                         {
                             // End the multi line comment
-                            chunk = CreateSegment(chunk, startPos, i);
+                            chunk.Append(ch);
+                            chunk = CreateSegment(chunk, startPos, i, ref result);
                             _expr = ExpressionType.None;
                             continue;
                         }
                     }
                     else if (ch == '"' && _expr == ExpressionType.QuotedString)
                     {
-                        chunk = CreateSegment(chunk, startPos, i);
+                        chunk.Append(ch);
+                        chunk = CreateSegment(chunk, startPos, i, ref result);
                         _expr = ExpressionType.None;
                         continue;
                     }
@@ -105,21 +104,35 @@ namespace SMAStudiovNext.Language
                             {
                                 if (tmpContent[a] == '(')
                                     openingBraces++;
-
-                                subExpr += tmpContent[a];
-
-                                if (tmpContent[a] == ')')
+                                else if (tmpContent[a] == ')')
                                     openingBraces--;
+                                else
+                                    subExpr += tmpContent[a];
 
                                 if (openingBraces == 0)
                                     break;
                             }
 
-                            CreateSegment(chunk, startPos, i);
+                            chunk = CreateSegment(chunk, startPos, i, ref result);
                             _expr = ExpressionType.ExpressionStart;
 
-                            InternalParse(subExpr);
-                            i += subExpr.Length; // we need to increment past the sub expression, since this is already parsed
+                            var subResults = InternalParse(subExpr);
+
+                            // We need to increment each sub result start/stop with i to get correct offsets
+                            foreach (var subResult in subResults)
+                            {
+                                subResult.Start += i + 2;
+                                subResult.Stop += i + 2;
+                            }
+
+                            result.AddRange(subResults);
+
+                            i += subExpr.Length + 1; // we need to increment past the sub expression, since this is already parsed
+
+                            // Add the closing bracket
+                            chunk.Append(")");
+                            chunk = CreateSegment(chunk, startPos, i + 1, ref result);
+                            i++;
 
                             _expr = ExpressionType.QuotedString;
                             continue;
@@ -130,15 +143,18 @@ namespace SMAStudiovNext.Language
                     else if (_expr == ExpressionType.String && ch == ' ')
                     {
                         // We've reached the end of the string
-                        CreateSegment(chunk, startPos, i);
+                        CreateSegment(chunk, startPos, i, ref result);
                         _expr = ExpressionType.None;
                         continue;
                     }
                     else if (_expr == ExpressionType.String && ch == '"')
                     {
+                        chunk.Append(ch);
                         _expr = ExpressionType.QuotedString;
                         continue;
                     }
+                    else if (_expr == ExpressionType.String && ch == '\r') // always ignore carrige returns
+                        continue;
 
                     chunk.Append(ch);
                     continue;
@@ -147,7 +163,7 @@ namespace SMAStudiovNext.Language
                 switch (ch)
                 {
                     case ',':
-                        chunk = CreateSegment(chunk, startPos, i);
+                        chunk = CreateSegment(chunk, startPos, i, ref result);
                         break;
                     case ';':
                     case '\n':
@@ -163,7 +179,7 @@ namespace SMAStudiovNext.Language
                         else if (_language.Contains(chunk.ToString()))
                             _expr = ExpressionType.LanguageConstruct;
 
-                        chunk = CreateSegment(chunk, startPos, i);
+                        chunk = CreateSegment(chunk, startPos, i, ref result);
 
                         if (_expr == ExpressionType.Parameter && nextCh != '-')
                             _expr = ExpressionType.None;
@@ -196,7 +212,7 @@ namespace SMAStudiovNext.Language
 
                         chunk.Append(ch);
                         break;
-                    case '\r':
+                    case '\r': // Ignore carrige return
                         break;
                     case '"':
                         // Start/end of a quoted string
@@ -205,19 +221,21 @@ namespace SMAStudiovNext.Language
                         else if (_expr == ExpressionType.QuotedString)
                         {
                             // We've reached the end
-                            chunk = CreateSegment(chunk, startPos, i);
+                            chunk.Append(ch);
+                            chunk = CreateSegment(chunk, startPos, i, ref result);
                             _expr = ExpressionType.None;
                         }
                         else
                         {
                             _expr = ExpressionType.QuotedString;
+                            chunk.Append(ch);
                         }
                         break;
                     case '(':
                         // Expression start, eg. (Get-Content -Path "C:\\Test\\Test.txt")
                         // we first need to take care of all data in the chunk before creating expression start
                         if (chunk.Length > 0)
-                            chunk = CreateSegment(chunk, startPos, i);
+                            chunk = CreateSegment(chunk, startPos, i, ref result);
 
                         if (_expr == ExpressionType.Property)
                         {
@@ -228,7 +246,7 @@ namespace SMAStudiovNext.Language
                         {
                             _expr = ExpressionType.ExpressionStart;
                             chunk.Append(ch);
-                            chunk = CreateSegment(chunk, startPos, i);
+                            chunk = CreateSegment(chunk, startPos, i, ref result);
 
                             if (_expr == ExpressionType.Property)
                                 _expr = ExpressionType.Argument;
@@ -238,13 +256,13 @@ namespace SMAStudiovNext.Language
                         // Expression end, eg. (Get-Content -Path "C:\\Test\\Test.txt")
                         // we first need to take care of all data in the chunk before creating expression end
                         if (chunk.Length > 0)
-                            chunk = CreateSegment(chunk, startPos, i);
+                            chunk = CreateSegment(chunk, startPos, i, ref result);
 
                         if (!IgnoreBlockMarks)
                         {
                             _expr = ExpressionType.ExpressionEnd;
                             chunk.Append(ch);
-                            chunk = CreateSegment(chunk, startPos, i);
+                            chunk = CreateSegment(chunk, startPos, i, ref result);
                         }
 
                         _expr = ExpressionType.None;
@@ -253,50 +271,50 @@ namespace SMAStudiovNext.Language
                         // Block start, eg. if (junk) {
                         // we first need to take care of all data in the chunk before creating block start
                         if (chunk.Length > 0)
-                            chunk = CreateSegment(chunk, startPos, i);
+                            chunk = CreateSegment(chunk, startPos, i, ref result);
 
                         if (!IgnoreBlockMarks)
                         {
                             _expr = ExpressionType.BlockStart;
                             chunk.Append(ch);
-                            chunk = CreateSegment(chunk, startPos, i);
+                            chunk = CreateSegment(chunk, startPos, i, ref result);
                         }
                         break;
                     case '}':
                         // Block end, eg. if (junk) {
                         // we first need to take care of all data in the chunk before creating block end
                         if (chunk.Length > 0)
-                            chunk = CreateSegment(chunk, startPos, i);
+                            chunk = CreateSegment(chunk, startPos, i, ref result);
 
                         if (!IgnoreBlockMarks)
                         {
                             _expr = ExpressionType.BlockEnd;
                             chunk.Append(ch);
-                            chunk = CreateSegment(chunk, startPos, i);
+                            chunk = CreateSegment(chunk, startPos, i, ref result);
                         }
                         break;
                     case '[':
                         if (chunk.Length > 0)
-                            chunk = CreateSegment(chunk, startPos, i);
+                            chunk = CreateSegment(chunk, startPos, i, ref result);
 
                         if (!IgnoreBlockMarks)
                         {
                             _expr = ExpressionType.TypeStart;
                             chunk.Append(ch);
-                            chunk = CreateSegment(chunk, startPos, i);
+                            chunk = CreateSegment(chunk, startPos, i, ref result);
                         }
 
                         _expr = ExpressionType.Type;
                         break;
                     case ']':
                         if (chunk.Length > 0)
-                            chunk = CreateSegment(chunk, startPos, i);
+                            chunk = CreateSegment(chunk, startPos, i, ref result);
 
                         if (!IgnoreBlockMarks)
                         {
                             _expr = ExpressionType.TypeEnd;
                             chunk.Append(ch);
-                            chunk = CreateSegment(chunk, startPos, i);
+                            chunk = CreateSegment(chunk, startPos, i, ref result);
                         }
                         break;
                     case '$':
@@ -308,7 +326,7 @@ namespace SMAStudiovNext.Language
                         _expr = ExpressionType.Operator;
                         chunk.Append(ch);
 
-                        chunk = CreateSegment(chunk, startPos, i);
+                        chunk = CreateSegment(chunk, startPos, i, ref result);
                         _expr = ExpressionType.None;
                         break;
                     case ':':
@@ -328,14 +346,18 @@ namespace SMAStudiovNext.Language
                         chunk.Append(ch);
                         break;
                     case '<':
+                        chunk.Append(ch);
                         _expr = ExpressionType.MultilineCommentStart;
                         break;
                     case '>':
+                        chunk.Append(ch);
+                        /*chunk.Append(ch);
+
                         if (_expr == ExpressionType.MultilineComment)
                         {
-                            chunk = CreateSegment(chunk, startPos, i);
+                            chunk = CreateSegment(chunk, startPos, i, ref result);
                             _expr = ExpressionType.None;
-                        }
+                        }*/
                         break;
                     case '#':
                         // Comment
@@ -343,11 +365,13 @@ namespace SMAStudiovNext.Language
                             _expr = ExpressionType.MultilineComment;
                         else
                             _expr = ExpressionType.Comment;
+
+                        chunk.Append(ch);
                         break;
                     case '.':
                         if (_expr == ExpressionType.Variable || _expr == ExpressionType.Property)
                         {
-                            chunk = CreateSegment(chunk, startPos, i);
+                            chunk = CreateSegment(chunk, startPos, i, ref result);
                             _expr = ExpressionType.Property;
                         }
                         break;
@@ -357,8 +381,21 @@ namespace SMAStudiovNext.Language
                         _expr = ExpressionType.Operator;
                         chunk.Append(ch);
 
-                        chunk = CreateSegment(chunk, startPos, i);
+                        chunk = CreateSegment(chunk, startPos, i, ref result);
                         _expr = ExpressionType.None;
+                        break;
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                        _expr = ExpressionType.Integer;
+                        chunk.Append(ch);
                         break;
                     default:
                         if ((_expr == ExpressionType.None ||
@@ -378,17 +415,17 @@ namespace SMAStudiovNext.Language
 
             if (chunk.Length != 0)
             {
-                chunk = CreateSegment(chunk, startPos, contentLength);
+                chunk = CreateSegment(chunk, startPos, contentLength, ref result);
             }
             
-            return _segments;
+            return result;
         }
 
         public bool IgnoreBlockMarks { get; set; }
 
-        private StringBuilder CreateSegment(StringBuilder chunk, int startPos, int endPos)
+        private StringBuilder CreateSegment(StringBuilder chunk, int startPos, int endPos, ref List<LanguageSegment> segments)
         {
-            _segments.Add(new LanguageSegment
+            segments.Add(new LanguageSegment
             {
                 Start = startPos,
                 Stop = startPos + chunk.Length,

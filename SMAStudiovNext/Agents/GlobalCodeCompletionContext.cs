@@ -2,7 +2,6 @@
 using Gemini.Framework;
 using SMAStudiovNext.Icons;
 using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.Runbook.CodeCompletion;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;

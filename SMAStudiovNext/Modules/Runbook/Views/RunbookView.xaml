@@ -27,7 +27,7 @@
         <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Tags, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,5,5" />
         <TabControl Grid.Row="1" Grid.ColumnSpan="2" TabStripPlacement="Bottom">
             <TabItem Header="Draft">
-                <local:RunbookEditor x:Name="CodeEditor" Foreground="#F8F8F2" Background="#272822" Padding="5,5,5,5">
+                <local:RunbookEditor x:Name="CodeEditor" Padding="5,5,5,5">
                     <local:RunbookEditor.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Go To Definition" Command="{Binding GoToDefinitionCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
@@ -44,7 +44,7 @@
                 </local:RunbookEditor>
             </TabItem>
             <TabItem Header="Published">
-                <local:RunbookEditor x:Name="PublishedCodeEditor" IsReadOnly="True" Foreground="#F8F8F2" Background="#272822" Padding="5,5,5,5" />
+                <local:RunbookEditor x:Name="PublishedCodeEditor" IsReadOnly="True" Padding="5,5,5,5" />
             </TabItem>
             <TabItem Header="View Changes">
                 <Grid>

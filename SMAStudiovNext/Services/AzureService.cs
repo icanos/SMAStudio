@@ -16,7 +16,6 @@ using SMAStudiovNext.Icons;
 using Gemini.Framework.Services;
 using Gemini.Framework;
 using System.Windows;
-using SMAStudiovNext.Modules.Runbook.CodeCompletion;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
 using SMAStudiovNext.Language.Completion;

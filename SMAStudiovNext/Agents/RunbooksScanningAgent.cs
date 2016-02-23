@@ -7,7 +7,6 @@ using SMAStudiovNext.Core;
 using SMAStudiovNext.Icons;
 using SMAStudiovNext.Language.Completion;
 using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.Runbook.CodeCompletion;
 using SMAStudiovNext.Modules.Runbook.ViewModels;
 using System;
 using System.Collections.Generic;

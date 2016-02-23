@@ -4,15 +4,14 @@ using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using SMAStudiovNext.Modules.Runbook.Resources;
 using System;
-using System.IO;
 using System.Reflection;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml;
-using System.Windows.Input;
-using SMAStudiovNext.Modules.Runbook.ViewModels;
 using ICSharpCode.AvalonEdit.Rendering;
 using SMAStudio.Language;
+using SMAStudiovNext.Core;
+using SMAStudiovNext.Themes;
 
 namespace SMAStudiovNext.Modules.Runbook.Controls
 {
@@ -54,6 +53,12 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
         public override void BeginInit()
         {
             base.BeginInit();
+
+            // Configure themeing
+            var themeManager = AppContext.Resolve<IThemeManager>();
+            FontFamily = new FontFamily(themeManager.CurrentTheme.Font);
+            FontSize = themeManager.CurrentTheme.FontSize;
+            Background = (SolidColorBrush)(new BrushConverter().ConvertFrom(themeManager.CurrentTheme.Background));
 
             _foldingManager = FoldingManager.Install(TextArea);
             UpdateFoldings();

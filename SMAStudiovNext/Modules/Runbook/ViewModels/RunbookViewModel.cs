@@ -11,7 +11,6 @@ using SMAStudiovNext.Language.Completion;
 using SMAStudiovNext.Models;
 using SMAStudiovNext.Modules.ExecutionResult.ViewModels;
 using SMAStudiovNext.Modules.JobHistory.ViewModels;
-using SMAStudiovNext.Modules.Runbook.CodeCompletion;
 using SMAStudiovNext.Modules.Runbook.Commands;
 using SMAStudiovNext.Modules.Runbook.Views;
 using SMAStudiovNext.Modules.Shell.Commands;
@@ -147,6 +146,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
             _view.TextEditor.TextArea.TextEntered += OnTextEntered;
             _view.TextEditor.TextArea.TextEntering += OnTextEntering;
+            _view.TextEditor.TextArea.KeyUp += OnEditorKeyUp;
 
             #region Command Bindings
             // Open auto complete
@@ -172,6 +172,11 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             #endregion
 
             _statusManager.SetTimeoutText("Tips! Use Ctrl+H to view job history.", 10);
+        }
+
+        private void OnEditorKeyUp(object sender, KeyEventArgs e)
+        {
+            _completionProvider.Context.Parse(_view.TextEditor.Text).ConfigureAwait(true);
         }
 
         /// <summary>
@@ -275,7 +280,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 content = _view.TextEditor.Document.Text;
             });
 
-            var result = await _completionProvider.Context.ParseLineAsync(lineStr);
+            /*var result = await _completionProvider.Context.ParseLineAsync(lineStr);
             var segment = default(LanguageSegment);
 
             if (result != null && result.Count > 0)
@@ -288,7 +293,9 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 {
                     return;
                 }
-            }
+            }*/
+            //_completionProvider.Context.ClearCache();
+            //await _completionProvider.Context.Parse(content);
 
             for (int i = caretOffset - 1; i >= 0; i--)
             {
@@ -510,7 +517,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                             Content = _backendContext.GetContent(_backendContext.Service.GetBackendUrl(runbookType, _runbook));
                             //}
                             //_codeContext.Parse(Content);
-                            _completionProvider.Context.Parse(Content).ConfigureAwait(false);
+                            _completionProvider.Context.Parse(Content).ConfigureAwait(true);
 
                             stop = DateTime.Now;
                             output.AppendLine("Content fetched in " + (stop - start).TotalMilliseconds + " ms");
@@ -557,6 +564,9 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         /// </summary>
         public void ParseContent()
         {
+            if (_view == null)
+                return;
+
             AsyncExecution.ExecuteOnUIThread(async () =>
             {
                 await _completionProvider.Context.Parse(_view.TextEditor.Text);

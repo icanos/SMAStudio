@@ -7,6 +7,7 @@ using SMAStudiovNext.Core;
 using SMAStudiovNext.Icons;
 using SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels;
 using SMAStudiovNext.Services;
+using SMAStudiovNext.Themes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -47,7 +48,10 @@ namespace SMAStudiovNext.Modules.Startup
             GlobalExceptionHandler.Configure();
             CertificateManager.Configure();
 
-            MainWindow.Title = "SMA Studio 2015";
+            var themeManager = AppContext.Resolve<IThemeManager>();
+            themeManager.LoadThemes();
+
+            MainWindow.Title = "SMA Studio";
 
             Shell.ShowFloatingWindowsInTaskbar = true;
             Shell.ToolBars.Visible = true;

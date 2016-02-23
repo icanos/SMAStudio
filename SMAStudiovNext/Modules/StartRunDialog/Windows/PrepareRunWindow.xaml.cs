@@ -1,5 +1,4 @@
 ﻿using SMAStudiovNext.Language.Completion;
-using SMAStudiovNext.Modules.Runbook.CodeCompletion;
 using SMAStudiovNext.Modules.Runbook.ViewModels;
 using System;
 using System.Collections.ObjectModel;

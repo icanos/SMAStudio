@@ -45,6 +45,8 @@ namespace SMAStudiovNext.Language
 
         public int Stop { get; set; }
 
+        public int LineNumber { get; set; }
+
         public ExpressionType Type { get; set; }
 
         public string Value { get; set; }
@@ -53,8 +55,8 @@ namespace SMAStudiovNext.Language
     
         public override string ToString()
         {
-            //return "(" + Start + ":" + Stop + ") " + Type.ToString() + ": " + Value;
-            return Value;
+            return "(" + Start + ":" + Stop + ") " + Type.ToString() + ": " + Value;
+            //return Value;
         }
     }
 }

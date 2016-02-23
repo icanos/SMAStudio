@@ -8,18 +8,24 @@ using ICSharpCode.AvalonEdit.Document;
 using SMAStudio.Language;
 using System.Windows.Media;
 using SMAStudiovNext.Language;
+using SMAStudiovNext.Themes;
+using SMAStudiovNext.Core;
+using System.Windows;
 
 namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlightning
 {
     public class HighlightingColorizer : DocumentColorizingTransformer
     {
         private readonly LanguageParser _parser;
+        private readonly LanguageContext _languageContext;
+        private readonly IThemeManager _themeManager;
         private TextView _textView;
 
         public HighlightingColorizer(LanguageContext languageContext)
         {
-            //_languageContext = languageContext;
+            _languageContext = languageContext;
             _parser = new LanguageParser();
+            _themeManager = AppContext.Resolve<IThemeManager>();
         }
 
         protected override void OnAddToTextView(TextView textView)
@@ -31,11 +37,15 @@ namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlightning
 
         protected override void ColorizeLine(DocumentLine line)
         {
-            //Task.Run(async () =>
-            //{
+            //_parser.Clear();
+            var parser = new LanguageParser();
             var textLine = _textView.Document.GetLineByNumber(line.LineNumber);
             var lineStr = _textView.Document.GetText(textLine);
-            var result = _parser.Parse(lineStr);//_languageContext.ParseLine(lineStr);
+
+            if (lineStr == string.Empty)
+                return;
+            
+            var result = _languageContext.GetLine(_textView.Document.Text, line.Offset, line.EndOffset);
 
             if (result == null || result.Count == 0)
                 return;
@@ -48,24 +58,29 @@ namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlightning
                     continue;
                 }
 
-                if (_textView.Document.TextLength < (line.Offset + item.Stop))
-                    continue;
-
-                try {
-                    ChangeLinePart(line.Offset + item.Start, line.Offset + item.Stop,
-                        visualLineElement => ApplyColorToElement(visualLineElement, item, Brushes.Gray));
-                }
-                catch (Exception) { }
+                ChangeLinePart(Math.Max(item.Start, line.Offset), Math.Min(item.Stop, line.EndOffset),
+                    visualLineElement => ApplyColorToElement(visualLineElement, item, item.Type));
             }
-            //});
         }
 
-        private void ApplyColorToElement(VisualLineElement element, LanguageSegment segment, Brush brush)
+        private void ApplyColorToElement(VisualLineElement element, LanguageSegment segment, ExpressionType exprType)
         {
-            if (segment.Type != ExpressionType.Keyword)
+            var style = _themeManager.CurrentTheme.GetStyle(exprType);
+            if (style == null)
+            {
+                element.TextRunProperties.SetForegroundBrush(Brushes.Black);
                 return;
+            }
+
+            var brush = _themeManager.CurrentTheme.GetBrush(style);
 
             element.TextRunProperties.SetForegroundBrush(brush);
+
+            var typeface = element.TextRunProperties.Typeface;
+            if (style.Bold)
+                element.TextRunProperties.SetTypeface(new Typeface(typeface.FontFamily, FontStyles.Normal, FontWeights.Bold, typeface.Stretch));
+            else if (style.Italic)
+                element.TextRunProperties.SetTypeface(new Typeface(typeface.FontFamily, FontStyles.Italic, FontWeights.Normal, typeface.Stretch));
         }
     }
 }
