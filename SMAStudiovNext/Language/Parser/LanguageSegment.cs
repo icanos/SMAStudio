@@ -10,6 +10,7 @@ namespace SMAStudiovNext.Language
         Parameter,
         String,
         QuotedString,
+        SingleQuotedString,
         Integer,
         BlockStart,
         BlockEnd,

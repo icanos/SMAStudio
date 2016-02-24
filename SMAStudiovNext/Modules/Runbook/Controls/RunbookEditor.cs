@@ -59,6 +59,7 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
             FontFamily = new FontFamily(themeManager.CurrentTheme.Font);
             FontSize = themeManager.CurrentTheme.FontSize;
             Background = (SolidColorBrush)(new BrushConverter().ConvertFrom(themeManager.CurrentTheme.Background));
+            Foreground = (SolidColorBrush)(new BrushConverter().ConvertFrom(themeManager.CurrentTheme.Foreground));
 
             _foldingManager = FoldingManager.Install(TextArea);
             UpdateFoldings();

@@ -23,6 +23,8 @@ namespace SMAStudiovNext.Themes
 
         public string Background { get; set; }
 
+        public string Foreground { get; set; }
+
         public List<StylePart> Colors { get; set; }
 
         public StylePart GetStyle(ExpressionType exprType)

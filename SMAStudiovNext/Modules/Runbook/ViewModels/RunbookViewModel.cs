@@ -104,7 +104,6 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         protected override void OnViewLoaded(object view)
         {
             _view = (IRunbookView)view;
-            _view.TextEditor.InitializeColorizer(_completionProvider.Context);
 
             if (!String.IsNullOrEmpty(_cachedSnippetContent))
             {
@@ -126,6 +125,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
                 Execute.OnUIThreadAsync(() =>
                 {
+                    _view.TextEditor.InitializeColorizer(_completionProvider.Context);
+
                     var diff = new GitSharp.Diff(_view.TextEditor.Text, _view.PublishedTextEditor.Text);
                     DiffSectionA = diff.Sections;
                     DiffSectionB = diff.Sections;
@@ -146,7 +147,6 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
             _view.TextEditor.TextArea.TextEntered += OnTextEntered;
             _view.TextEditor.TextArea.TextEntering += OnTextEntering;
-            _view.TextEditor.TextArea.KeyUp += OnEditorKeyUp;
 
             #region Command Bindings
             // Open auto complete
@@ -173,12 +173,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
             _statusManager.SetTimeoutText("Tips! Use Ctrl+H to view job history.", 10);
         }
-
-        private void OnEditorKeyUp(object sender, KeyEventArgs e)
-        {
-            _completionProvider.Context.Parse(_view.TextEditor.Text).ConfigureAwait(true);
-        }
-
+        
         /// <summary>
         /// Called when the user uses ctrl+space command in the textarea
         /// </summary>
@@ -187,23 +182,6 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         private void OnCtrlSpaceCommand(object sender, ExecutedRoutedEventArgs e)
         {
             ShowCompletion(completionWord: "", controlSpace: true).ConfigureAwait(true);
-            //var context = _codeContext.GetContext(CaretOffset);
-            //ShowCompletion(CaretOffset, context, null, true);
-
-
-
-
-
-
-            // TODO :::::::::
-
-
-
-
-
-
-
-            // 
         }
 
         /// <summary>
@@ -279,24 +257,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 caretOffset = _view.TextEditor.CaretOffset;
                 content = _view.TextEditor.Document.Text;
             });
-
-            /*var result = await _completionProvider.Context.ParseLineAsync(lineStr);
-            var segment = default(LanguageSegment);
-
-            if (result != null && result.Count > 0)
-                segment = result[result.Count - 1];
-
-            if (segment != null)
-            {
-                if (segment.Type == ExpressionType.Comment || segment.Type == ExpressionType.MultilineCommentStart ||
-                    segment.Type == ExpressionType.MultilineComment || segment.Type == ExpressionType.QuotedString)
-                {
-                    return;
-                }
-            }*/
-            //_completionProvider.Context.ClearCache();
-            //await _completionProvider.Context.Parse(content);
-
+            
             for (int i = caretOffset - 1; i >= 0; i--)
             {
                 var ch = content[i];
@@ -350,121 +311,9 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                             _completionWindow = null;
                         };
                     }
-                    else
-                        Debug.WriteLine("No completion data available.");
                 });
             }
         }
-
-        /// <summary>
-        /// Gets called when code completion should be shown.
-        /// </summary>
-        /// <param name="cachedCaretOffset">Location of where the cursor is at the moment. This is a cached value since the control is thread sensitive.</param>
-        /// <param name="contextName">Context name is the name of the current position in the document based on the parsed context from PowershellParser.</param>
-        /// <param name="text">Text that is being parsed (code content).</param>
-        /// <param name="controlSpace">True if ctrl+space has been pressed, otherwise false.</param>
-        /*private void ShowCompletion(int cachedCaretOffset, List<PowershellSegment> contextList, string text, bool controlSpace)
-        {
-            if (_completionWindow != null)
-                return;
-
-            if (!controlSpace && text.Trim().Length == 0)
-                return;
-
-            var data = new List<ICompletionEntry>();
-            
-            switch (contextList[0].Type)
-            {
-                case ExpressionType.Variable:
-                    data.AddRange(CodeCompletionContext.Variables);
-                    break;
-                case ExpressionType.None:
-                case ExpressionType.Script:
-                case ExpressionType.Keyword:
-                    if (_snippetsCollection.Snippets != null)
-                        data.AddRange(_snippetsCollection.Snippets.Select(s => new SnippetCompletionData(s)).ToList());
-
-                    data.AddRange(CodeCompletionContext.Keywords);
-                    data.AddRange(CodeCompletionContext.GlobalKeywords);
-                    data.AddRange(CodeCompletionContext.GlobalRunbooks);
-                    break;
-                case ExpressionType.Parameter:
-                    //if (((ICodeCompletionContext)CodeCompletionContext).CurrentKeyword == null)
-                    if (contextList.Count > 0)
-                    {
-                        // We need to find which keyword we're focused on
-                        var context = contextList.FirstOrDefault(c => c.Type == ExpressionType.Keyword);
-                        if (context != null)
-                        {
-                            // Check if it's a runbook
-                            var runbookCompletion = CodeCompletionContext.GlobalRunbooks.FirstOrDefault(r => r.Name.Equals(context.Value));
-                            if (runbookCompletion != null && _backendContext != null && _backendContext.Runbooks != null)
-                            {
-                                var runbook = _backendContext.Runbooks.FirstOrDefault(r => ((RunbookModelProxy)r.Tag).RunbookName.Equals(runbookCompletion.Name));
-
-                                if (runbook != null)
-                                {
-                                    var viewModel = ((RunbookModelProxy)runbook.Tag).GetViewModel<RunbookViewModel>();
-
-                                    if (viewModel != null)
-                                        data.AddRange(viewModel.GetParameters((KeywordCompletionData)runbookCompletion));
-                                }
-                            }
-                            else
-                            {
-                                if (CodeCompletionContext.Keywords != null)
-                                {
-                                    var keyword = CodeCompletionContext.Keywords.FirstOrDefault(k => k.Name.Equals(context.Value));
-
-                                    if (keyword == null && CodeCompletionContext.GlobalKeywords != null)
-                                        keyword = CodeCompletionContext.GlobalKeywords.FirstOrDefault(k => k.Name.Equals(context.Value));
-
-                                    if (keyword != null)
-                                        ((ICodeCompletionContext)CodeCompletionContext).CurrentKeyword = keyword;
-
-                                    data.AddRange(((ICodeCompletionContext)CodeCompletionContext).GetParameters());
-                                }
-                            }
-                        }
-                    }
-                    break;
-            }
-
-            if (data.Count == 0)
-                return;
-
-            if (data == null)
-                return;
-
-            //data = data.OrderBy(d => d.DisplayText).ToList();
-            data.Sort((e1, e2) => String.Compare(e1.DisplayText, e2.DisplayText));
-
-            AsyncExecution.ExecuteOnUIThread(delegate ()
-            {
-                _completionWindow = new CompletionWindow(_view.TextEditor.TextArea);
-                _completionWindow.CloseAutomatically = true;
-                _completionWindow.CloseWhenCaretAtBeginning = true;
-                _completionWindow.MinWidth = 260;
-
-                if (text != null)
-                    _completionWindow.StartOffset -= text.Length;
-
-                if (controlSpace)
-                    _completionWindow.StartOffset = cachedCaretOffset + 1;
-
-                lock (data)
-                {
-                    foreach (var dataItem in data)
-                        _completionWindow.CompletionList.CompletionData.Add((ICompletionData)dataItem);
-                }
-
-                if (text != null)
-                    _completionWindow.CompletionList.SelectItem(text);
-
-                _completionWindow.Show();
-                _completionWindow.Closed += (o, args) => _completionWindow = null;
-            });
-        }*/
 
         /// <summary>
         /// Called when the tab has been confirmed to close and is being closed, this should take care of

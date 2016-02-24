@@ -11,6 +11,7 @@ using SMAStudiovNext.Language;
 using SMAStudiovNext.Themes;
 using SMAStudiovNext.Core;
 using System.Windows;
+using SMAStudiovNext.Modules.Runbook.Controls;
 
 namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlightning
 {
@@ -19,7 +20,10 @@ namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlightning
         private readonly LanguageParser _parser;
         private readonly LanguageContext _languageContext;
         private readonly IThemeManager _themeManager;
+
         private TextView _textView;
+        private Brush _foregroundBrush;
+        private string _foreground;
 
         public HighlightingColorizer(LanguageContext languageContext)
         {
@@ -68,7 +72,12 @@ namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlightning
             var style = _themeManager.CurrentTheme.GetStyle(exprType);
             if (style == null)
             {
-                element.TextRunProperties.SetForegroundBrush(Brushes.Black);
+                if (_foreground == null)
+                {
+                    _foreground = _themeManager.CurrentTheme.Foreground;
+                    _foregroundBrush = (SolidColorBrush)(new BrushConverter().ConvertFrom(_themeManager.CurrentTheme.Foreground));
+                }
+
                 return;
             }
 

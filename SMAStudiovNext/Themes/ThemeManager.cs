@@ -12,7 +12,7 @@ namespace SMAStudiovNext.Themes
     public class ThemeManager : IThemeManager
     {
         private const string THEMES_FOLDER = "Themes";
-        private const string DEFAULT_THEME = "Github";
+        private const string DEFAULT_THEME = "Monokai";
 
         private IList<Theme> _themes;
         private Theme _currentTheme = null;
@@ -36,16 +36,14 @@ namespace SMAStudiovNext.Themes
                         var theme = (Theme)serializer.Deserialize(fileReader);
 
                         _themes.Add(theme);
-                        //CurrentSettings = (Settings)serializer.Deserialize(fileReader);
+
+                        if (file.EndsWith(DEFAULT_THEME + ".theme"))
+                            _currentTheme = theme;
                     }
                 }
             }
 
-            if (_themes.Count > 0)
-            {
-                _currentTheme = _themes[0];
-            }
-            else
+            if (_themes.Count == 0)
                 throw new Exception("Missing theme, installation is possibly corrupt. Please reinstall.");
         }
 

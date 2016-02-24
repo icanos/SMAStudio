@@ -57,10 +57,10 @@ namespace SMAStudiovNext.Agents
 
             textWriter.Close();
 
-            textWriter = new StreamWriter(Path.Combine(AppHelper.CachePath, "Snippets", "if.snippet"));
+            /*textWriter = new StreamWriter(Path.Combine(AppHelper.CachePath, "Snippets", "if.snippet"));
             textWriter.Write("if (${true}) {\r\n\r\n}");
 
-            textWriter.Close();
+            textWriter.Close();*/
 
             textWriter = new StreamWriter(Path.Combine(AppHelper.CachePath, "Snippets", "foreach.snippet"));
             textWriter.Write("foreach (${variable} in ${collection}) {\r\n\r\n}");

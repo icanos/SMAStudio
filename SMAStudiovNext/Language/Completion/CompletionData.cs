@@ -255,10 +255,10 @@ namespace SMAStudiovNext.Language.Completion
             _icon = icon;
         }
 
-        public KeywordCompletionData(string name, string icon, string module)
+        public KeywordCompletionData(string name, string icon, string description)
             : this(name)
         {
-            Module = module;
+            Description = description;
             _icon = icon;
         }
 
@@ -359,6 +359,26 @@ namespace SMAStudiovNext.Language.Completion
 
             if (!Name.StartsWith("-") && includeDash)
                 DisplayText = "-" + Name;
+        }
+
+        public ParameterCompletionData(string name, string typeName, string description, bool includeDash = true)
+        {
+            Name = name;
+
+            Type = typeName;
+
+            if (!Name.StartsWith("-") && includeDash)
+                Name = "-" + name;
+
+            if (!String.IsNullOrEmpty(Type))
+                DisplayText = Name + " : " + Type;
+            else
+                DisplayText = Name;
+
+            if (!Name.StartsWith("-") && includeDash)
+                DisplayText = "-" + Name;
+
+            Description = description;
         }
 
         public string Type { get; set; }

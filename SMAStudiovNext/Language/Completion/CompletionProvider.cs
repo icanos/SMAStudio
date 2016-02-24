@@ -1,6 +1,8 @@
 ﻿using ICSharpCode.AvalonEdit.CodeCompletion;
 using SMAStudio.Language;
+using SMAStudiovNext.Core;
 using SMAStudiovNext.Icons;
+using SMAStudiovNext.Language.Snippets;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -109,11 +111,14 @@ namespace SMAStudiovNext.Language.Completion
                             else
                             {
                                 // We add the native powershell cmdlets when the first dash is typed instead (minimizing lag)
-                                //includeNativePowershell = true;
+                                includeNativePowershell = true;
 
                                 completionData.AddRange(_languageContext.GetVariables().Where(item => item.Text.StartsWith(completionWord, StringComparison.InvariantCultureIgnoreCase)).Distinct().ToList());
                                 completionData.AddRange(Runbooks.Where(item => item.Name.Contains(completionWord)).Select(item => new KeywordCompletionData(item.DisplayText, IconsDescription.Runbook)).ToList());
                             }
+
+                            var snippetsCollection = AppContext.Resolve<ISnippetsCollection>();
+                            completionData.AddRange(snippetsCollection.Snippets.Where(item => item.Name.StartsWith(completionWord)).Select(item => new SnippetCompletionData(item)));
                             break;
                     }
 
@@ -131,6 +136,7 @@ namespace SMAStudiovNext.Language.Completion
                                 item.ResultType == System.Management.Automation.CompletionResultType.Command ||
                                 item.ResultType == System.Management.Automation.CompletionResultType.ParameterName ||
                                 item.ResultType == System.Management.Automation.CompletionResultType.Property ||
+                                item.ResultType == System.Management.Automation.CompletionResultType.Type ||
                                 item.ResultType == System.Management.Automation.CompletionResultType.Keyword
                             ).ToList();
 
@@ -138,17 +144,18 @@ namespace SMAStudiovNext.Language.Completion
                         {
                             switch (item.ResultType)
                             {
+                                case System.Management.Automation.CompletionResultType.Type:
                                 case System.Management.Automation.CompletionResultType.Keyword:
-                                    completionData.Add(new KeywordCompletionData(item.CompletionText, IconsDescription.LanguageConstruct));
+                                    completionData.Add(new KeywordCompletionData(item.CompletionText, IconsDescription.LanguageConstruct, item.ToolTip));
                                     break;
                                 case System.Management.Automation.CompletionResultType.Command:
-                                    completionData.Add(new KeywordCompletionData(item.CompletionText, IconsDescription.Cmdlet));
+                                    completionData.Add(new KeywordCompletionData(item.CompletionText, IconsDescription.Cmdlet, item.ToolTip));
                                     break;
                                 case System.Management.Automation.CompletionResultType.ParameterName:
-                                    completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty));
+                                    completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty, item.ToolTip));
                                     break;
                                 case System.Management.Automation.CompletionResultType.Property:
-                                    completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty, false));
+                                    completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty, item.ToolTip, false));
                                     break;
                             }
                         }
