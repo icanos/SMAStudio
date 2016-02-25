@@ -29,6 +29,7 @@ using System.Linq;
 using System.Threading;
 using SMAStudiovNext.Language.Snippets;
 using System.Diagnostics;
+using ICSharpCode.AvalonEdit.Document;
 
 namespace SMAStudiovNext.Modules.Runbook.ViewModels
 {
@@ -147,7 +148,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
             _view.TextEditor.TextArea.TextEntered += OnTextEntered;
             _view.TextEditor.TextArea.TextEntering += OnTextEntering;
-
+            
             #region Command Bindings
             // Open auto complete
             var ctrlSpace = new RoutedCommand();
@@ -249,15 +250,17 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             var lineStr = string.Empty;
             var content = string.Empty;
             var caretOffset = 0;
+            var line = default(DocumentLine);
 
             AsyncExecution.ExecuteOnUIThread(() =>
             {
-                var line = _view.TextEditor.Document.GetLineByOffset(_view.TextEditor.CaretOffset);
+                line = _view.TextEditor.Document.GetLineByOffset(_view.TextEditor.CaretOffset);
                 lineStr = _view.TextEditor.Document.GetText(line);
+
                 caretOffset = _view.TextEditor.CaretOffset;
                 content = _view.TextEditor.Document.Text;
             });
-            
+
             for (int i = caretOffset - 1; i >= 0; i--)
             {
                 var ch = content[i];
@@ -284,7 +287,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 var line = _view.TextEditor.Document.GetLineByOffset(offset);
                 var lineStr = _view.TextEditor.Document.GetText(line);
                 var completionChar = controlSpace ? (char?)null : _view.TextEditor.Document.GetCharAt(offset - 1);
-                var results = await _completionProvider.GetCompletionData(completionWord, lineStr, offset, completionChar).ConfigureAwait(true);
+                var results = await _completionProvider.GetCompletionData(completionWord, lineStr, line.LineNumber, offset, completionChar).ConfigureAwait(true);
+
+                if (results.CompletionData == null)
+                    return;
 
                 AsyncExecution.ExecuteOnUIThread(() =>
                 {
@@ -425,26 +431,38 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         /// <summary>
         /// Parses the document and retrieves any parameters found in the Param( ... ) block of the code.
         /// </summary>
-        /// <param name="completionData">KeywordCompletionData that the parameters should be added to.</param>
+        /// <param name="completionWord">Word that the parameter needs to start with</param>
         /// <returns>List of parameters found</returns>
-        public IList<ICompletionEntry> GetParameters(KeywordCompletionData completionData)
+        public IList<ICompletionData> GetParameters(string completionWord)//(KeywordCompletionData completionData)
         {
-            //GetContent(RunbookType.Draft, false); // we need to make sure that we have the content downloaded
-
+            var completionEntries = new List<ICompletionData>();
+            var fixedCompletionWord = completionWord.Replace("-", "");
             Token[] tokens;
             ParseError[] parseErrors;
 
-            if (completionData == null)
-                completionData = new KeywordCompletionData("");
+            //if (completionData == null)
+            //    completionData = new KeywordCompletionData("");
+            string contentToParse = Content;
+            if (String.IsNullOrEmpty(Content))
+            {
+                GetContent(RunbookType.Draft, true);
+                contentToParse = Content;
 
-            var scriptBlock = System.Management.Automation.Language.Parser.ParseInput(Content, out tokens, out parseErrors);
+                if (String.IsNullOrEmpty(Content))
+                {
+                    GetContent(RunbookType.Published, true);
+                    contentToParse = _view.PublishedTextEditor.Text;
+                }
+            }
+            
+            var scriptBlock = System.Management.Automation.Language.Parser.ParseInput(contentToParse, out tokens, out parseErrors);
 
             if ((scriptBlock.EndBlock == null || scriptBlock.EndBlock.Statements.Count == 0))
             {
                 //if (!silent)
                 //    MessageBox.Show("Your runbook is broken and it's possible that the runbook won't run. Please fix any errors.", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 
-                return new List<ICompletionEntry>();
+                return new List<ICompletionData>();
             }
 
             var functionBlock = (FunctionDefinitionAst)scriptBlock.EndBlock.Statements[0];
@@ -453,7 +471,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             {
                 if (functionBlock.Body.ParamBlock.Parameters == null)
                 {
-                    return new List<ICompletionEntry>();
+                    return new List<ICompletionData>();
                 }
 
                 foreach (var param in functionBlock.Body.ParamBlock.Parameters)
@@ -463,6 +481,9 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                         bool isMandatory = false;
                         AttributeBaseAst attrib = null;
                         attrib = param.Attributes[param.Attributes.Count - 1]; // always the last one
+
+                        if (!param.Name.Extent.Text.Substring(1).StartsWith(fixedCompletionWord, StringComparison.InvariantCultureIgnoreCase))
+                            continue;
 
                         if (param.Attributes.Count > 1)
                         {
@@ -488,7 +509,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                         var input = new ParameterCompletionData
                         {
                             RawName = param.Name.Extent.Text.Substring(1),
-                            DisplayText = "-" + ConvertToNiceName(param.Name.Extent.Text),
+                            DisplayText = "-" + ConvertToNiceName(param.Name.Extent.Text) + (isMandatory ? " (required)" : ""),
                             Name = "-" + param.Name.Extent.Text.Substring(1),                  // Remove the $
                             IsArray = (attrib.TypeName.IsArray ? true : false),
                             Type = attrib.TypeName.Name,
@@ -496,7 +517,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                         };
 
                         //parameters.Add(input);
-                        completionData.Parameters.Add(input);
+                        completionEntries.Add(input);
                     }
                     catch (Exception)
                     {
@@ -506,7 +527,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
             //completionData.Parameters = _backendContext.Service.GetParameters(this, completionData);
 
-            return completionData.Parameters;
+            return completionEntries;
         }
 
         /// <summary>

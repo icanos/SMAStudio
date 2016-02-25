@@ -1,4 +1,5 @@
-﻿using SMAStudiovNext.Language.Completion;
+﻿using ICSharpCode.AvalonEdit.CodeCompletion;
+using SMAStudiovNext.Language.Completion;
 using SMAStudiovNext.Modules.Runbook.ViewModels;
 using System;
 using System.Collections.ObjectModel;
@@ -20,7 +21,7 @@ namespace SMAStudiovNext.Modules.StartRunDialog.Windows
             InitializeComponent();
 
             DataContext = this;
-            Inputs = new ObservableCollection<ICompletionEntry>();
+            Inputs = new ObservableCollection<ICompletionData>();
 
             Loaded += PrepareRunWindowLoaded;
         }
@@ -33,7 +34,7 @@ namespace SMAStudiovNext.Modules.StartRunDialog.Windows
                 Inputs.Add(param);
         }
 
-        public ObservableCollection<ICompletionEntry> Inputs
+        public ObservableCollection<ICompletionData> Inputs
         {
             get;
             set;
@@ -50,7 +51,7 @@ namespace SMAStudiovNext.Modules.StartRunDialog.Windows
                 if (parameter.IsRequired && String.IsNullOrEmpty(parameter.Text))
                 {
                     hasErrors = true;
-                    MessageBox.Show("Missing required parameter: " + input.Name, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Missing required parameter: " + input.Text, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     break;
                 }
             }

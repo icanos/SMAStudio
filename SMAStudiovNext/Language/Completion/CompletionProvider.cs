@@ -1,20 +1,29 @@
-﻿using ICSharpCode.AvalonEdit.CodeCompletion;
+﻿using Caliburn.Micro;
+using Gemini.Framework;
+using ICSharpCode.AvalonEdit.CodeCompletion;
 using SMAStudio.Language;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Icons;
 using SMAStudiovNext.Language.Snippets;
+using SMAStudiovNext.Models;
+using SMAStudiovNext.Modules.Runbook.ViewModels;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SMAStudiovNext.Language.Completion
 {
     public class CompletionProvider : ICompletionProvider
     {
+        /// <summary>
+        /// Language parsing context
+        /// </summary>
         private readonly LanguageContext _languageContext;
+
+        /// <summary>
+        /// List of keywords that is part of the Powershell language
+        /// </summary>
         private readonly IList<string> _keywords = new List<string>
         {
             "Begin", "Break", "Catch", "Continue", "Data", "Do", "DynamicParam", "Else", "ElseIf", "End",
@@ -23,10 +32,34 @@ namespace SMAStudiovNext.Language.Completion
             "Until", "While", "Workflow"
         };
 
+        /// <summary>
+        /// List of cmdlets that is part of SMA (but not resolved by native PS completion)
+        /// </summary>
         private readonly IList<string> _smaCmdlets = new List<string>
         {
             "Get-AutomationVariable", "Get-AutomationPSCredential", "Get-AutomationCertificate", "Set-AutomationVariable", "Get-AutomationConnection"
         };
+
+        /// <summary>
+        /// This is set to true until a space or new line is added if we don't find a completion
+        /// match for the word we're typing. This is to prevent the engine to look for matches
+        /// even though we won't find anything.
+        /// </summary>
+        private bool _foundNoCompletions = false;
+
+        /// <summary>
+        /// Line number we're currently working with, this is used so that we know when the input
+        /// continues on a new line (to flip _foundNoCompletions to false again).
+        /// </summary>
+        private int _cachedLineNumber = 0;
+
+        /// <summary>
+        /// Cached position in the line, this is also used to be able to flip the _foundNoCompletions flag
+        /// if we're removing a letter or typing a new character.
+        /// </summary>
+        private int _cachedPosition = 0;
+
+        private char? _cachedTriggerChar = null;
 
         public CompletionProvider()
         {
@@ -36,21 +69,36 @@ namespace SMAStudiovNext.Language.Completion
             Runbooks = new List<ICompletionEntry>();
         }
 
-        public async Task<CompletionResult> GetCompletionData(string completionWord, string line, int position, char? triggerChar)
+        public async Task<CompletionResult> GetCompletionData(string completionWord, string line, int lineNumber, int position, char? triggerChar)
         {
-            var contextTree = _languageContext.GetContext(position);
+            if (lineNumber == _cachedLineNumber && _foundNoCompletions && triggerChar == _cachedTriggerChar)
+                return new CompletionResult(null);
+            else if (position <= (_cachedPosition + 1))
+                _foundNoCompletions = false;
+            else if (position < _cachedPosition)
+                _foundNoCompletions = false;
+            else if (lineNumber != _cachedLineNumber)
+                _foundNoCompletions = false;
+            else if (triggerChar != _cachedTriggerChar)
+                _foundNoCompletions = false;
+
+            var contextTree = _languageContext.GetContext(lineNumber, position);
             var context = contextTree.FirstOrDefault();
+
+            _cachedLineNumber = lineNumber;
+            _cachedPosition = position;
+            _cachedTriggerChar = triggerChar;
             
             return await Task.Run(() =>
             {
                 List<ICompletionData> completionData = null;
                 bool includeNativePowershell = false;
 
+                if (context != null && (context.Type == ExpressionType.QuotedString || context.Type == ExpressionType.SingleQuotedString))
+                    return new CompletionResult(null);
+                
                 if (triggerChar != null)
                 {
-                    //if (!char.IsLetterOrDigit(triggerChar.Value))
-                    //    return null;
-
                     completionData = new List<ICompletionData>();
 
                     switch (triggerChar.Value)
@@ -61,8 +109,31 @@ namespace SMAStudiovNext.Language.Completion
                             break;
                         case '-':
                             // Parameters
-                            includeNativePowershell = true;
-                            completionData.AddRange(_smaCmdlets.Where(item => item.StartsWith(completionWord, StringComparison.InvariantCultureIgnoreCase)).Select(item => new KeywordCompletionData(item, IconsDescription.Cmdlet)));
+                            var runbookContext = contextTree.FirstOrDefault(item => item.Type == ExpressionType.Keyword);
+                            if (runbookContext != null)
+                            {
+                                var runbookComplete = Runbooks.FirstOrDefault(item => item.Name.Equals(runbookContext.Value, StringComparison.InvariantCultureIgnoreCase));
+
+                                if (runbookComplete != null)
+                                {
+                                    var runbook = GetRunbook(runbookComplete.Name);
+
+                                    if (runbook != null)
+                                    {
+                                        completionData.AddRange(runbook.GetParameters(completionWord));
+                                    }
+                                }
+                                else
+                                {
+                                    includeNativePowershell = true;
+                                    completionData.AddRange(_smaCmdlets.Where(item => item.StartsWith(completionWord, StringComparison.InvariantCultureIgnoreCase)).Select(item => new KeywordCompletionData(item, IconsDescription.Cmdlet)));
+                                }
+                            }
+                            else
+                            {
+                                includeNativePowershell = true;
+                                completionData.AddRange(_smaCmdlets.Where(item => item.StartsWith(completionWord, StringComparison.InvariantCultureIgnoreCase)).Select(item => new KeywordCompletionData(item, IconsDescription.Cmdlet)));
+                            }
                             break;
                         case ':':
                             // Variables or .NET assembly
@@ -104,14 +175,14 @@ namespace SMAStudiovNext.Language.Completion
 
                             if (foundInLang != null)
                             {
-                                includeNativePowershell = false;
+                                includeNativePowershell = true;
 
                                 completionData.AddRange(_keywords.Select(item => new KeywordCompletionData(item, IconsDescription.LanguageConstruct)));
                             }
                             else
                             {
-                                // We add the native powershell cmdlets when the first dash is typed instead (minimizing lag)
-                                includeNativePowershell = true;
+                                // COMMENTED: We add the native powershell cmdlets when the first dash is typed instead (minimizing lag)
+                                //includeNativePowershell = true;
 
                                 completionData.AddRange(_languageContext.GetVariables().Where(item => item.Text.StartsWith(completionWord, StringComparison.InvariantCultureIgnoreCase)).Distinct().ToList());
                                 completionData.AddRange(Runbooks.Where(item => item.Name.Contains(completionWord)).Select(item => new KeywordCompletionData(item.DisplayText, IconsDescription.Runbook)).ToList());
@@ -135,6 +206,7 @@ namespace SMAStudiovNext.Language.Completion
                         var result = candidates.Where(item =>
                                 item.ResultType == System.Management.Automation.CompletionResultType.Command ||
                                 item.ResultType == System.Management.Automation.CompletionResultType.ParameterName ||
+                                item.ResultType == System.Management.Automation.CompletionResultType.ParameterValue ||
                                 item.ResultType == System.Management.Automation.CompletionResultType.Property ||
                                 item.ResultType == System.Management.Automation.CompletionResultType.Type ||
                                 item.ResultType == System.Management.Automation.CompletionResultType.Keyword
@@ -154,6 +226,9 @@ namespace SMAStudiovNext.Language.Completion
                                 case System.Management.Automation.CompletionResultType.ParameterName:
                                     completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty, item.ToolTip));
                                     break;
+                                case System.Management.Automation.CompletionResultType.ParameterValue:
+                                    completionData.Add(new ParameterValueCompletionData(item.CompletionText, item.ToolTip));
+                                    break;
                                 case System.Management.Automation.CompletionResultType.Property:
                                     completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty, item.ToolTip, false));
                                     break;
@@ -161,11 +236,39 @@ namespace SMAStudiovNext.Language.Completion
                         }
                     }
 
+                    if (completionData.Count == 0)
+                        _foundNoCompletions = true;
+
                     completionData = completionData.OrderBy(item => item.Text).ToList();
                 }
 
                 return new CompletionResult(completionData);
             });
+        }
+
+        /// <summary>
+        /// Finds the actual runbook object
+        /// </summary>
+        /// <param name="runbookName"></param>
+        /// <returns></returns>
+        private RunbookViewModel GetRunbook(string runbookName)
+        {
+            var application = IoC.Get<IModule>();
+            var contexts = (application as Modules.Startup.Module).GetContexts();
+            var runbook = default(ResourceContainer);
+
+            foreach (var context in contexts)
+            {
+                runbook = context.Runbooks.FirstOrDefault(item => (item.Tag as RunbookModelProxy).RunbookName.Equals(runbookName, StringComparison.InvariantCultureIgnoreCase));
+
+                if (runbook != null)
+                    break;
+            }
+
+            if (runbook == null)
+                return null;
+
+            return (runbook.Tag as RunbookModelProxy).GetViewModel<RunbookViewModel>();
         }
 
         public LanguageContext Context

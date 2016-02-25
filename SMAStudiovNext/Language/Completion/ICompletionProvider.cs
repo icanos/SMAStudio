@@ -9,7 +9,7 @@ namespace SMAStudiovNext.Language.Completion
 {
     public interface ICompletionProvider
     {
-        Task<CompletionResult> GetCompletionData(string completionWord, string line, int position, char? triggerChar);
+        Task<CompletionResult> GetCompletionData(string completionWord, string line, int lineNumber, int position, char? triggerChar);
 
         IList<ICompletionEntry> Keywords { get; set; }
 

@@ -2,9 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace SMAStudiovNext.Themes
@@ -12,7 +9,7 @@ namespace SMAStudiovNext.Themes
     public class ThemeManager : IThemeManager
     {
         private const string THEMES_FOLDER = "Themes";
-        private const string DEFAULT_THEME = "Monokai";
+        private const string DEFAULT_THEME = "Github";
 
         private IList<Theme> _themes;
         private Theme _currentTheme = null;

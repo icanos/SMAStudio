@@ -5,10 +5,14 @@ using System.Text;
 
 namespace SMAStudiovNext.Language
 {
+    /// <summary>
+    /// Is responsible for parsing Powershell code and mapping the code into
+    /// expressions.
+    /// </summary>
     public class LanguageParser
     {
         //private string _content = string.Empty;
-        private ExpressionType _expr = ExpressionType.None;
+        //private ExpressionType expr = ExpressionType.None;
 
         private List<string> _language = new List<string> { "if", "else", "elseif", "for", "foreach", "do", "while", "until", "switch", "break", "continue", "return", "workflow", "inlinescript", "param", "InlineScript", "Workflow", "Param" };
         private List<string> _operators = new List<string> { "-eq", "-gt", "-lt", "-le", "-ge", "-and", "-or", "-ne", "-like", "-notlike", "-match", "-notmatch", "-replace", "-contains", "-notcontains", "-shl", "-shr", "-in", "-notin" };
@@ -20,16 +24,27 @@ namespace SMAStudiovNext.Language
             IgnoreBlockMarks = false;
         }
 
+        /// <summary>
+        /// Returns a list of different operators that are valid in Powershell
+        /// </summary>
         public List<string> Operators
         {
             get { return _operators; }
         }
 
+        /// <summary>
+        /// Returns a list of different keywords that is part of the language
+        /// </summary>
         public List<string> Language
         {
             get { return _language; }
         }
-        
+
+        /// <summary>
+        /// Parses the string and applies our expression types to the information found in the line
+        /// </summary>
+        /// <param name="content">Content to parse</param>
+        /// <returns>List of segments found</returns>
         public List<LanguageSegment> Parse(string content)
         {
             if (String.IsNullOrEmpty(content))
@@ -38,15 +53,21 @@ namespace SMAStudiovNext.Language
             return InternalParse(content);
         }
 
+        /// <summary>
+        /// Parses the string and applies our expression types to the information found in the line
+        /// </summary>
+        /// <param name="content">Content to parse</param>
+        /// <returns>List of segments found</returns>
         private List<LanguageSegment> InternalParse(string content)
         {
             var result = new List<LanguageSegment>();
             var tmpContent = content;
 
+            var expr = ExpressionType.None;
             var contentLength = tmpContent.Length;
             var chunk = new StringBuilder();
             var startPos = 0;
-            var lineNumber = 0;
+            var lineNumber = 1;
             
             for (int i = 0; i < contentLength; i++)
             {
@@ -56,43 +77,44 @@ namespace SMAStudiovNext.Language
                 var ch = tmpContent[i];
                 var nextCh = tmpContent.Length > i + 1 ? tmpContent[i + 1] : '\0';
 
-                if (_expr == ExpressionType.String || _expr == ExpressionType.QuotedString || _expr == ExpressionType.SingleQuotedString || _expr == ExpressionType.Comment || _expr == ExpressionType.MultilineComment)
+                if (expr == ExpressionType.String || expr == ExpressionType.QuotedString || expr == ExpressionType.SingleQuotedString || expr == ExpressionType.Comment || expr == ExpressionType.MultilineComment)
                 {
-                    if (ch == '\n' && _expr != ExpressionType.MultilineComment)
+                    if (ch == '\n')// && _expr != ExpressionType.MultilineComment)
                     {
-                        chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
+                        chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
+                        lineNumber++;
 
-                        if (_expr != ExpressionType.MultilineComment)
-                            _expr = ExpressionType.None;
+                        if (expr != ExpressionType.MultilineComment)
+                            expr = ExpressionType.None;
 
                         continue;
                     }
-                    else if (ch == '>' && _expr == ExpressionType.MultilineComment)
+                    else if (ch == '>' && expr == ExpressionType.MultilineComment)
                     {
                         if (tmpContent[i - 1] == '#')
                         {
                             // End the multi line comment
                             chunk.Append(ch);
-                            chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
-                            _expr = ExpressionType.None;
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
+                            expr = ExpressionType.None;
                             continue;
                         }
                     }
-                    else if (ch == '"' && _expr == ExpressionType.QuotedString)
+                    else if (ch == '"' && expr == ExpressionType.QuotedString)
                     {
                         chunk.Append(ch);
-                        chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
-                        _expr = ExpressionType.None;
+                        chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
+                        expr = ExpressionType.None;
                         continue;
                     }
-                    else if (ch == '\'' && _expr == ExpressionType.SingleQuotedString)
+                    else if (ch == '\'' && expr == ExpressionType.SingleQuotedString)
                     {
                         chunk.Append(ch);
-                        chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
-                        _expr = ExpressionType.None;
+                        chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
+                        expr = ExpressionType.None;
                         continue;
                     }
-                    else if (ch == '$' && _expr == ExpressionType.QuotedString)
+                    else if (ch == '$' && expr == ExpressionType.QuotedString)
                     {
                         if (nextCh == '(' && (i + 2) < tmpContent.Length)
                         {
@@ -114,8 +136,8 @@ namespace SMAStudiovNext.Language
                                     break;
                             }
 
-                            chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
-                            _expr = ExpressionType.ExpressionStart;
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
+                            expr = ExpressionType.ExpressionStart;
 
                             var subResults = InternalParse(subExpr);
 
@@ -132,27 +154,27 @@ namespace SMAStudiovNext.Language
 
                             // Add the closing bracket
                             chunk.Append(")");
-                            chunk = CreateSegment(chunk, i, lineNumber, ref result);
+                            chunk = CreateSegment(expr, chunk, i, lineNumber, ref result);
                             i++;
 
-                            _expr = ExpressionType.QuotedString;
+                            expr = ExpressionType.QuotedString;
                             continue;
                         }
                     }
-                    else if (_expr == ExpressionType.String && ch == ' ')
+                    else if (expr == ExpressionType.String && ch == ' ')
                     {
                         // We've reached the end of the string
-                        CreateSegment(chunk, startPos, lineNumber, ref result);
-                        _expr = ExpressionType.None;
+                        CreateSegment(expr, chunk, startPos, lineNumber, ref result);
+                        expr = ExpressionType.None;
                         continue;
                     }
-                    else if (_expr == ExpressionType.String && ch == '"')
+                    else if (expr == ExpressionType.String && ch == '"')
                     {
                         chunk.Append(ch);
-                        _expr = ExpressionType.QuotedString;
+                        expr = ExpressionType.QuotedString;
                         continue;
                     }
-                    else if (_expr == ExpressionType.String && ch == '\r') // always ignore carrige returns
+                    else if (expr == ExpressionType.String && ch == '\r') // always ignore carrige returns
                         continue;
 
                     chunk.Append(ch);
@@ -162,53 +184,53 @@ namespace SMAStudiovNext.Language
                 switch (ch)
                 {
                     case ',':
-                        chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
+                        chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
                         break;
                     case ';':
                     case '\n':
                     case '\t':
                     case ' ':
-                        if (chunk.Length == 0)
-                            continue;
-
-                        if (_operators.Contains("-" + chunk.ToString()))
-                            _expr = ExpressionType.Operator;
-                        else if (chunk.ToString().Equals("Function", StringComparison.InvariantCultureIgnoreCase))
-                            _expr = ExpressionType.Function;
-                        else if (_language.Contains(chunk.ToString()))
-                            _expr = ExpressionType.LanguageConstruct;
-
-                        chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
-
-                        if (_expr == ExpressionType.Parameter && nextCh != '-')
-                            _expr = ExpressionType.None;
-                        else if (_expr == ExpressionType.Keyword && (nextCh == '"' || char.IsLetter(nextCh)))
-                        {
-                            _expr = ExpressionType.String;
-                        }
-                        else if (_expr == ExpressionType.MultilineComment)
-                            _expr = ExpressionType.MultilineComment;
-                        else
-                            _expr = ExpressionType.None;
-
                         if (ch == '\n')
                         {
                             lineNumber++;
                         }
+
+                        if (chunk.Length == 0)
+                            continue;
+
+                        if (_operators.Contains("-" + chunk.ToString()))
+                            expr = ExpressionType.Operator;
+                        else if (chunk.ToString().Equals("Function", StringComparison.InvariantCultureIgnoreCase))
+                            expr = ExpressionType.Function;
+                        else if (_language.Contains(chunk.ToString()))
+                            expr = ExpressionType.LanguageConstruct;
+
+                        chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
+
+                        if (expr == ExpressionType.Parameter && nextCh != '-')
+                            expr = ExpressionType.None;
+                        else if (expr == ExpressionType.Keyword && (nextCh == '"' || char.IsLetter(nextCh)))
+                        {
+                            expr = ExpressionType.String;
+                        }
+                        else if (expr == ExpressionType.MultilineComment)
+                            expr = ExpressionType.MultilineComment;
+                        else
+                            expr = ExpressionType.None;
                         break;
                     case '-':
                         // Parameter
-                        if (_expr == ExpressionType.Keyword && chunk.Length > 0)
+                        if (expr == ExpressionType.Keyword && chunk.Length > 0)
                         {
 
                         }
-                        else if (chunk.Length == 0 && _expr != ExpressionType.QuotedString && _expr != ExpressionType.SingleQuotedString && _expr != ExpressionType.String)
+                        else if (chunk.Length == 0 && expr != ExpressionType.QuotedString && expr != ExpressionType.SingleQuotedString && expr != ExpressionType.String)
                         {
-                            _expr = ExpressionType.Parameter;
+                            expr = ExpressionType.Parameter;
                         }
-                        else if (_expr == ExpressionType.Variable && chunk.Length == 0)
+                        else if (expr == ExpressionType.Variable && chunk.Length == 0)
                         {
-                            _expr = ExpressionType.Operator;
+                            expr = ExpressionType.Operator;
                         }
 
                         chunk.Append(ch);
@@ -217,41 +239,41 @@ namespace SMAStudiovNext.Language
                         break;
                     case '\'':
                         // Start/end of a single quoted string
-                        if (_expr == ExpressionType.String)
+                        if (expr == ExpressionType.String)
                         {
-                            _expr = ExpressionType.SingleQuotedString;
+                            expr = ExpressionType.SingleQuotedString;
                             chunk.Append(ch);
                         }
-                        else if (_expr == ExpressionType.SingleQuotedString)
+                        else if (expr == ExpressionType.SingleQuotedString)
                         {
                             // We've reached the end
                             chunk.Append(ch);
-                            chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
-                            _expr = ExpressionType.None;
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
+                            expr = ExpressionType.None;
                         }
                         else
                         {
-                            _expr = ExpressionType.SingleQuotedString;
+                            expr = ExpressionType.SingleQuotedString;
                             chunk.Append(ch);
                         }
                         break;
                     case '"':
                         // Start/end of a quoted string
-                        if (_expr == ExpressionType.String)
+                        if (expr == ExpressionType.String)
                         {
-                            _expr = ExpressionType.QuotedString;
+                            expr = ExpressionType.QuotedString;
                             chunk.Append(ch);
                         }
-                        else if (_expr == ExpressionType.QuotedString)
+                        else if (expr == ExpressionType.QuotedString)
                         {
                             // We've reached the end
                             chunk.Append(ch);
-                            chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
-                            _expr = ExpressionType.None;
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
+                            expr = ExpressionType.None;
                         }
                         else
                         {
-                            _expr = ExpressionType.QuotedString;
+                            expr = ExpressionType.QuotedString;
                             chunk.Append(ch);
                         }
                         break;
@@ -259,99 +281,99 @@ namespace SMAStudiovNext.Language
                         // Expression start, eg. (Get-Content -Path "C:\\Test\\Test.txt")
                         // we first need to take care of all data in the chunk before creating expression start
                         if (chunk.Length > 0)
-                            chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
 
-                        if (_expr == ExpressionType.Property)
+                        if (expr == ExpressionType.Property)
                         {
-                            _expr = ExpressionType.Argument;
+                            expr = ExpressionType.Argument;
                         }
 
                         if (!IgnoreBlockMarks)
                         {
-                            _expr = ExpressionType.ExpressionStart;
+                            expr = ExpressionType.ExpressionStart;
                             chunk.Append(ch);
-                            chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
 
-                            if (_expr == ExpressionType.Property)
-                                _expr = ExpressionType.Argument;
+                            if (expr == ExpressionType.Property)
+                                expr = ExpressionType.Argument;
                         }
                         break;
                     case ')':
                         // Expression end, eg. (Get-Content -Path "C:\\Test\\Test.txt")
                         // we first need to take care of all data in the chunk before creating expression end
                         if (chunk.Length > 0)
-                            chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
 
                         if (!IgnoreBlockMarks)
                         {
-                            _expr = ExpressionType.ExpressionEnd;
+                            expr = ExpressionType.ExpressionEnd;
                             chunk.Append(ch);
-                            chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
                         }
 
-                        _expr = ExpressionType.None;
+                        expr = ExpressionType.None;
                         break;
                     case '{':
                         // Block start, eg. if (junk) {
                         // we first need to take care of all data in the chunk before creating block start
                         if (chunk.Length > 0)
-                            chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
 
                         if (!IgnoreBlockMarks)
                         {
-                            _expr = ExpressionType.BlockStart;
+                            expr = ExpressionType.BlockStart;
                             chunk.Append(ch);
-                            chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
                         }
                         break;
                     case '}':
                         // Block end, eg. if (junk) {
                         // we first need to take care of all data in the chunk before creating block end
                         if (chunk.Length > 0)
-                            chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
 
                         if (!IgnoreBlockMarks)
                         {
-                            _expr = ExpressionType.BlockEnd;
+                            expr = ExpressionType.BlockEnd;
                             chunk.Append(ch);
-                            chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
                         }
                         break;
                     case '[':
                         if (chunk.Length > 0)
-                            chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
 
                         if (!IgnoreBlockMarks)
                         {
-                            _expr = ExpressionType.TypeStart;
+                            expr = ExpressionType.TypeStart;
                             chunk.Append(ch);
-                            chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
                         }
 
-                        _expr = ExpressionType.Type;
+                        expr = ExpressionType.Type;
                         break;
                     case ']':
                         if (chunk.Length > 0)
-                            chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
 
                         if (!IgnoreBlockMarks)
                         {
-                            _expr = ExpressionType.TypeEnd;
+                            expr = ExpressionType.TypeEnd;
                             chunk.Append(ch);
-                            chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
                         }
                         break;
                     case '$':
                         // A variable always starts with a $
-                        _expr = ExpressionType.Variable;
+                        expr = ExpressionType.Variable;
                         chunk.Append(ch);
                         break;
                     case '=':
-                        _expr = ExpressionType.Operator;
+                        expr = ExpressionType.Operator;
                         chunk.Append(ch);
 
-                        chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
-                        _expr = ExpressionType.None;
+                        chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
+                        expr = ExpressionType.None;
                         break;
                     case ':':
                         // .NET function call or ($Using:...)
@@ -360,46 +382,46 @@ namespace SMAStudiovNext.Language
                         if (i > 0)
                         {
                             if (tmpContent[i - 1] == ':')
-                                _expr = ExpressionType.FunctionCall;
-                            else if (tmpContent.Length > i && tmpContent[i + 1] == ':')
-                                _expr = ExpressionType.FunctionCall;
+                                expr = ExpressionType.FunctionCall;
+                            else if (tmpContent.Length > (i + 1) && tmpContent[i + 1] == ':')
+                                expr = ExpressionType.FunctionCall;
                             else
-                                _expr = ExpressionType.Variable;
+                                expr = ExpressionType.Variable;
                         }
 
                         chunk.Append(ch);
                         break;
                     case '<':
                         chunk.Append(ch);
-                        _expr = ExpressionType.MultilineCommentStart;
+                        expr = ExpressionType.MultilineCommentStart;
                         break;
                     case '>':
                         chunk.Append(ch);
                         break;
                     case '#':
                         // Comment
-                        if (_expr == ExpressionType.MultilineCommentStart)
-                            _expr = ExpressionType.MultilineComment;
+                        if (expr == ExpressionType.MultilineCommentStart)
+                            expr = ExpressionType.MultilineComment;
                         else
-                            _expr = ExpressionType.Comment;
+                            expr = ExpressionType.Comment;
 
                         chunk.Append(ch);
                         break;
                     case '.':
-                        if (_expr == ExpressionType.Variable || _expr == ExpressionType.Property)
+                        if (expr == ExpressionType.Variable || expr == ExpressionType.Property)
                         {
-                            chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
-                            _expr = ExpressionType.Property;
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
+                            expr = ExpressionType.Property;
                         }
                         break;
                     case '|':
                     case '%':
                     case '+':
-                        _expr = ExpressionType.Operator;
+                        expr = ExpressionType.Operator;
                         chunk.Append(ch);
 
-                        chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
-                        _expr = ExpressionType.None;
+                        chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
+                        expr = ExpressionType.None;
                         break;
                     case '0':
                     case '1':
@@ -412,22 +434,22 @@ namespace SMAStudiovNext.Language
                     case '8':
                     case '9':
                         if (chunk.Length == 0)
-                            _expr = ExpressionType.Integer;
+                            expr = ExpressionType.Integer;
 
                         chunk.Append(ch);
                         break;
                     default:
-                        if ((_expr == ExpressionType.None ||
-                                _expr == ExpressionType.ExpressionStart ||
-                                _expr == ExpressionType.ExpressionEnd ||
-                                _expr == ExpressionType.BlockStart ||
-                                _expr == ExpressionType.BlockEnd)
+                        if ((expr == ExpressionType.None ||
+                                expr == ExpressionType.ExpressionStart ||
+                                expr == ExpressionType.ExpressionEnd ||
+                                expr == ExpressionType.BlockStart ||
+                                expr == ExpressionType.BlockEnd)
                             && char.IsLetter(ch))
                         {
                             if (result.Count > 0 && result[result.Count - 1].LineNumber == lineNumber && result[result.Count - 1].Type == ExpressionType.Parameter)
-                                _expr = ExpressionType.String;
+                                expr = ExpressionType.String;
                             else
-                                _expr = ExpressionType.Keyword;
+                                expr = ExpressionType.Keyword;
                         }
 
                         chunk.Append(ch);
@@ -437,7 +459,7 @@ namespace SMAStudiovNext.Language
 
             if (chunk.Length != 0)
             {
-                chunk = CreateSegment(chunk, startPos, lineNumber, ref result);
+                chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
             }
             
             return result;
@@ -445,13 +467,22 @@ namespace SMAStudiovNext.Language
 
         public bool IgnoreBlockMarks { get; set; }
 
-        private StringBuilder CreateSegment(StringBuilder chunk, int startPos, int lineNumber, ref List<LanguageSegment> segments)
+        /// <summary>
+        /// Create a contextual segment in the current line
+        /// </summary>
+        /// <param name="expr">Type of expression in this part of the expression</param>
+        /// <param name="chunk">Text that is mapped to the expression</param>
+        /// <param name="startPos">Start position in the line</param>
+        /// <param name="lineNumber">Line number that we're processing</param>
+        /// <param name="segments">Segment list to add the segment to</param>
+        /// <returns>An empty chunk</returns>
+        private StringBuilder CreateSegment(ExpressionType expr, StringBuilder chunk, int startPos, int lineNumber, ref List<LanguageSegment> segments)
         {
             segments.Add(new LanguageSegment
             {
                 Start = startPos,
                 Stop = startPos + chunk.Length,
-                Type = _expr,
+                Type = expr,
                 LineNumber = lineNumber,
                 Value = chunk.ToString()
             });

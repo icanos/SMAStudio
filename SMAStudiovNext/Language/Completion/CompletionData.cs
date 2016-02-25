@@ -40,7 +40,7 @@ namespace SMAStudiovNext.Language.Completion
         {
             get; set;
         }
-        
+
         #region ICompletionData
         public virtual ImageSource Image
         {
@@ -70,7 +70,7 @@ namespace SMAStudiovNext.Language.Completion
         {
             get
             {
-                return null;
+                return Description;
             }
         }
 
@@ -313,8 +313,8 @@ namespace SMAStudiovNext.Language.Completion
 
             //if (!Name.StartsWith("-"))
             //    Name = "-" + name;
-            if (Name.StartsWith("-"))
-                Name = Name.Substring(1);
+            //if (Name.StartsWith("-"))
+            //    Name = Name.Substring(1);
 
             if (!String.IsNullOrEmpty(Type))
                 DisplayText = Name + " : " + Type;
@@ -322,7 +322,7 @@ namespace SMAStudiovNext.Language.Completion
                 DisplayText = Name;
 
             //if (!Name.StartsWith("-"))
-            DisplayText = "-" + Name;
+            //DisplayText = "-" + Name;
         }
 
         public ParameterCompletionData(string name, string typeName)
@@ -396,6 +396,28 @@ namespace SMAStudiovNext.Language.Completion
             get
             {
                 return Type + ": " + Name + (IsRequired ? " (required)" : "");
+            }
+        }
+    }
+
+    public class ParameterValueCompletionData : CompletionDataBase, ICompletionEntry
+    {
+        private string _icon;
+
+        public ParameterValueCompletionData(string value, string description)
+        {
+            Name = value;
+            DisplayText = value;
+            Description = description;
+
+            _icon = IconsDescription.Flag;
+        }
+
+        public override ImageSource Image
+        {
+            get
+            {
+                return new BitmapImage(new Uri(_icon, UriKind.RelativeOrAbsolute));
             }
         }
     }

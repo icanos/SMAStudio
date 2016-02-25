@@ -41,15 +41,23 @@ namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlightning
 
         protected override void ColorizeLine(DocumentLine line)
         {
-            //_parser.Clear();
             var parser = new LanguageParser();
             var textLine = _textView.Document.GetLineByNumber(line.LineNumber);
             var lineStr = _textView.Document.GetText(textLine);
 
             if (lineStr == string.Empty)
                 return;
-            
-            var result = _languageContext.GetLine(_textView.Document.Text, line.Offset, line.EndOffset);
+
+            var currentContext = _languageContext.PredictContext(line.LineNumber, lineStr);
+            var result = default(List<LanguageSegment>);
+
+            if (currentContext != ExpressionType.MultilineComment)
+                result = _languageContext.GetLine(lineStr, line.Offset, line.EndOffset);
+            else
+            {
+                result = new List<LanguageSegment>();
+                result.Add(new LanguageSegment { Start = 0, Stop = lineStr.Length, Type = ExpressionType.MultilineComment, Value = lineStr, LineNumber = line.LineNumber });
+            }
 
             if (result == null || result.Count == 0)
                 return;
@@ -62,7 +70,7 @@ namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlightning
                     continue;
                 }
 
-                ChangeLinePart(Math.Max(item.Start, line.Offset), Math.Min(item.Stop, line.EndOffset),
+                ChangeLinePart(Math.Max(line.Offset + item.Start, line.Offset), Math.Min(line.Offset + item.Stop, line.EndOffset),
                     visualLineElement => ApplyColorToElement(visualLineElement, item, item.Type));
             }
         }
