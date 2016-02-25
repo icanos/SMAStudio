@@ -276,7 +276,42 @@ namespace SMAStudiovNext.Services
                 var baseStream = (Stream)ms;
 
                 context.SetSaveStream(runbookVersion, baseStream, true, "application/octet-stream", string.Empty);
-                context.SaveChanges();
+
+                EntityDescriptor ed = null;
+                try
+                {
+                    ChangeOperationResponse cor =
+                        (ChangeOperationResponse)context.SaveChanges().FirstOrDefault<OperationResponse>();
+
+                    if (cor != null)
+                    {
+                        ed = (cor.Descriptor as EntityDescriptor);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Unable to verify the saved runbook.", e);
+                    throw new PersistenceException("Sorry, we were unable to save your runbook. Please refer to the log for more information.");
+                }
+
+                if (ed != null && ed.EditLink != null)
+                {
+                    MergeOption mergeOption = context.MergeOption;
+                    context.MergeOption = MergeOption.OverwriteChanges;
+                    try
+                    {
+                        context.Execute<RunbookVersion>(ed.EditLink).Count<RunbookVersion>();
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error("Unable to save the runbook.", e);
+                        throw new PersistenceException("There was an error when saving the runbook. Please try again later.");
+                    }
+                    finally
+                    {
+                        context.MergeOption = mergeOption;
+                    }
+                }
 
                 var savedRunbook = context.Runbooks.Where(x => x.RunbookID == runbookVersion.RunbookID).FirstOrDefault();
 
