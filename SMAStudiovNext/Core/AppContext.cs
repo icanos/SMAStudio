@@ -34,6 +34,7 @@ namespace SMAStudiovNext.Core
             _container.RegisterType<ICommand, GenerateCertificateCommand>("GenerateCertificateCommand");
             _container.RegisterType<ICommand, NewConnectionCommand>("NewConnectionCommand");
             _container.RegisterType<ICommand, RefreshCommand>("RefreshCommand");
+            _container.RegisterType<ICommand, DocumentationCommand>("DocumentationCommand");
         }
 
         public static void Register<T>(T obj, string name)

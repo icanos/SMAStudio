@@ -145,5 +145,10 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels
         {
             get { return AppContext.Resolve<ICommand>("RefreshCommand"); }
         }
+
+        public ICommand DocumentationCommand
+        {
+            get { return AppContext.Resolve<ICommand>("DocumentationCommand"); }
+        }
     }
 }

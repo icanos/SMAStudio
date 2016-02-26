@@ -61,6 +61,10 @@
       <HintPath>..\packages\Caliburn.Micro.2.0.2\lib\net45\Caliburn.Micro.Platform.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="DocX, Version=1.0.0.19, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DocX.1.0.0.19\lib\net40\DocX.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Gemini, Version=0.6.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\GeminiWpf.0.6.2\lib\net45\Gemini.dll</HintPath>
       <Private>True</Private>
@@ -204,6 +208,7 @@
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Core\BackendContext.cs" />
     <Compile Include="Core\CertificateManager.cs" />
+    <Compile Include="Modules\PartEnvironmentExplorer\Commands\DocumentationCommand.cs" />
     <Compile Include="Modules\Shell\Commands\AboutCommandHandler.cs" />
     <Compile Include="Themes\IThemeManager.cs" />
     <Compile Include="Themes\StylePart.cs" />
@@ -233,50 +238,50 @@
     <Compile Include="Models\JobModelProxy.cs" />
     <Compile Include="Models\ModelProxyBase.cs" />
     <Compile Include="Models\RunbookModelProxy.cs" />
-    <Compile Include="Modules\AddNewItemDialog\Models\RunbookTemplate.cs" />
+    <Compile Include="Modules\DialogAddNewItem\Models\RunbookTemplate.cs" />
     <Compile Include="Models\ScheduleModelProxy.cs" />
     <Compile Include="Models\VariableModelProxy.cs" />
-    <Compile Include="Modules\AddNewItemDialog\ViewModels\AddNewItemDialogViewModel.cs" />
-    <Compile Include="Modules\Azure\ViewModels\AzureWindowViewModel.cs" />
-    <Compile Include="Modules\Azure\Windows\AzureWindow.xaml.cs">
+    <Compile Include="Modules\DialogAddNewItem\ViewModels\AddNewItemDialogViewModel.cs" />
+    <Compile Include="Modules\DialogConnectAzure\ViewModels\AzureWindowViewModel.cs" />
+    <Compile Include="Modules\DialogConnectAzure\Windows\AzureWindow.xaml.cs">
       <DependentUpon>AzureWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\ConnectionManager\Windows\ConnectionManagerWindow.xaml.cs">
+    <Compile Include="Modules\DialogConnectionManager\Windows\ConnectionManagerWindow.xaml.cs">
       <DependentUpon>ConnectionManagerWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\Credential\ViewModels\CredentialViewModel.cs" />
-    <Compile Include="Modules\Credential\Views\CredentialView.xaml.cs">
+    <Compile Include="Modules\WindowCredential\ViewModels\CredentialViewModel.cs" />
+    <Compile Include="Modules\WindowCredential\Views\CredentialView.xaml.cs">
       <DependentUpon>CredentialView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\EnvironmentExplorer\Commands\DeleteCommand.cs" />
-    <Compile Include="Modules\EnvironmentExplorer\Commands\HistoryCommand.cs" />
-    <Compile Include="Modules\EnvironmentExplorer\Commands\NewConnectionCommand.cs" />
-    <Compile Include="Modules\EnvironmentExplorer\Commands\PublishCommand.cs" />
-    <Compile Include="Modules\EnvironmentExplorer\Commands\RefreshCommand.cs" />
-    <Compile Include="Modules\EnvironmentExplorer\Views\IEnvironmentExplorerView.cs" />
-    <Compile Include="Modules\ExecutionResult\ToolBarDefinitions.cs" />
-    <Compile Include="Modules\ExecutionResult\ViewModels\ExecutionResultViewModel.cs" />
-    <Compile Include="Modules\ExecutionResult\Views\ExecutionResultView.xaml.cs">
+    <Compile Include="Modules\PartEnvironmentExplorer\Commands\DeleteCommand.cs" />
+    <Compile Include="Modules\PartEnvironmentExplorer\Commands\HistoryCommand.cs" />
+    <Compile Include="Modules\PartEnvironmentExplorer\Commands\NewConnectionCommand.cs" />
+    <Compile Include="Modules\PartEnvironmentExplorer\Commands\PublishCommand.cs" />
+    <Compile Include="Modules\PartEnvironmentExplorer\Commands\RefreshCommand.cs" />
+    <Compile Include="Modules\PartEnvironmentExplorer\Views\IEnvironmentExplorerView.cs" />
+    <Compile Include="Modules\WindowExecutionResult\ToolBarDefinitions.cs" />
+    <Compile Include="Modules\WindowExecutionResult\ViewModels\ExecutionResultViewModel.cs" />
+    <Compile Include="Modules\WindowExecutionResult\Views\ExecutionResultView.xaml.cs">
       <DependentUpon>ExecutionResultView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\JobHistory\ViewModels\JobHistoryViewModel.cs" />
-    <Compile Include="Modules\JobHistory\Views\JobHistoryView.xaml.cs">
+    <Compile Include="Modules\WindowJobHistory\ViewModels\JobHistoryViewModel.cs" />
+    <Compile Include="Modules\WindowJobHistory\Views\JobHistoryView.xaml.cs">
       <DependentUpon>JobHistoryView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\PropertyGrid\IPropertyGrid.cs" />
-    <Compile Include="Modules\PropertyGrid\ViewModels\PropertyGridViewModel.cs" />
-    <Compile Include="Modules\PropertyGrid\Views\PropertyGridView.xaml.cs">
+    <Compile Include="Modules\PartPropertyGrid\IPropertyGrid.cs" />
+    <Compile Include="Modules\PartPropertyGrid\ViewModels\PropertyGridViewModel.cs" />
+    <Compile Include="Modules\PartPropertyGrid\Views\PropertyGridView.xaml.cs">
       <DependentUpon>PropertyGridView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\Runbook\Resources\Converters.cs" />
+    <Compile Include="Modules\WindowRunbook\Resources\Converters.cs" />
     <Compile Include="Language\Completion\ICompletionEntry.cs" />
     <Compile Include="Commands\PublishCommandDefinition.cs" />
-    <Compile Include="Modules\Runbook\Resources\PowershellFoldingStrategy.cs" />
+    <Compile Include="Modules\WindowRunbook\Resources\PowershellFoldingStrategy.cs" />
     <Compile Include="Language\Snippets\ISnippetsCollection.cs" />
     <Compile Include="Language\Snippets\SnippetsCollection.cs" />
-    <Compile Include="Modules\Runbook\SyntaxHighlightning\HighlightingColorizer.cs" />
-    <Compile Include="Modules\Schedule\ViewModels\ScheduleViewModel.cs" />
-    <Compile Include="Modules\Schedule\Views\ScheduleView.xaml.cs">
+    <Compile Include="Modules\WindowRunbook\SyntaxHighlightning\HighlightingColorizer.cs" />
+    <Compile Include="Modules\WindowSchedule\ViewModels\ScheduleViewModel.cs" />
+    <Compile Include="Modules\WindowSchedule\Views\ScheduleView.xaml.cs">
       <DependentUpon>ScheduleView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\Shell\Commands\NewRunbookCommand.cs" />
@@ -294,14 +299,14 @@
     <Compile Include="Exceptions\PersistenceException.cs" />
     <Compile Include="Core\Settings.cs" />
     <Compile Include="Icons\IconsDescription.cs" />
-    <Compile Include="Modules\EnvironmentExplorer\Commands\LoadCommand.cs" />
+    <Compile Include="Modules\PartEnvironmentExplorer\Commands\LoadCommand.cs" />
     <Compile Include="Commands\RunCommandDefinition.cs" />
     <Compile Include="Commands\StopCommandDefinition.cs" />
     <Compile Include="Commands\TestCommandDefinition.cs" />
-    <Compile Include="Modules\Runbook\Controls\RunbookEditor.cs" />
-    <Compile Include="Modules\Runbook\ToolBarDefinitions.cs" />
-    <Compile Include="Modules\Runbook\Views\IRunbookView.cs" />
-    <Compile Include="Modules\Runbook\Views\RunbookView.xaml.cs">
+    <Compile Include="Modules\WindowRunbook\Controls\RunbookEditor.cs" />
+    <Compile Include="Modules\WindowRunbook\ToolBarDefinitions.cs" />
+    <Compile Include="Modules\WindowRunbook\Views\IRunbookView.cs" />
+    <Compile Include="Modules\WindowRunbook\Views\RunbookView.xaml.cs">
       <DependentUpon>RunbookView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Commands\SaveCommandDefinition.cs" />
@@ -317,9 +322,9 @@
     <Compile Include="Modules\Shell\Views\SettingsSMAView.xaml.cs">
       <DependentUpon>SettingsSMAView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\StartRunDialog\Windows\PrepareRunWindow.xaml.cs" />
-    <Compile Include="Modules\Variable\ViewModels\VariableViewModel.cs" />
-    <Compile Include="Modules\Variable\Views\VariableView.xaml.cs">
+    <Compile Include="Modules\DialogStartRun\Windows\PrepareRunWindow.xaml.cs" />
+    <Compile Include="Modules\WindowVariable\ViewModels\VariableViewModel.cs" />
+    <Compile Include="Modules\WindowVariable\Views\VariableView.xaml.cs">
       <DependentUpon>VariableView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Language\Parser\LanguageContext.cs" />
@@ -335,7 +340,7 @@
     <Compile Include="Services\ISettingsService.cs" />
     <Compile Include="Services\SmaService.cs" />
     <Compile Include="Services\SettingsService.cs" />
-    <Compile Include="Modules\AddNewItemDialog\Windows\UIAddNewItemDialog.xaml.cs" />
+    <Compile Include="Modules\DialogAddNewItem\Windows\UIAddNewItemDialog.xaml.cs" />
     <Compile Include="Language\Snippets\CodeSnippet.cs" />
     <Compile Include="Vendor\Azure\Credential.cs" />
     <Compile Include="Vendor\Azure\Job.cs" />
@@ -358,13 +363,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ViewEnvironmentExplorerCommandDefinition.cs" />
-    <Compile Include="Modules\EnvironmentExplorer\Commands\ViewEnvironmentExplorerCommandHandler.cs" />
-    <Compile Include="Modules\EnvironmentExplorer\MenuDefinitions.cs" />
-    <Compile Include="Modules\EnvironmentExplorer\ViewModels\EnvironmentExplorerViewModel.cs" />
-    <Compile Include="Modules\EnvironmentExplorer\Views\EnvironmentExplorerView.xaml.cs">
+    <Compile Include="Modules\PartEnvironmentExplorer\Commands\ViewEnvironmentExplorerCommandHandler.cs" />
+    <Compile Include="Modules\PartEnvironmentExplorer\MenuDefinitions.cs" />
+    <Compile Include="Modules\PartEnvironmentExplorer\ViewModels\EnvironmentExplorerViewModel.cs" />
+    <Compile Include="Modules\PartEnvironmentExplorer\Views\EnvironmentExplorerView.xaml.cs">
       <DependentUpon>EnvironmentExplorerView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\Runbook\ViewModels\RunbookViewModel.cs" />
+    <Compile Include="Modules\WindowRunbook\ViewModels\RunbookViewModel.cs" />
     <Compile Include="Modules\Startup\Module.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -383,7 +388,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="Modules\Runbook\SyntaxHighlightning\Powershell.xshd" />
+    <EmbeddedResource Include="Modules\WindowRunbook\SyntaxHighlightning\Powershell.xshd" />
     <None Include="packages.config" />
     <None Include="Properties\DataSources\SMAStudiovNext.SMA.OrchestratorApi.datasource" />
     <None Include="Properties\Settings.settings">
@@ -397,39 +402,39 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Modules\Azure\Windows\AzureWindow.xaml">
+    <Page Include="Modules\DialogConnectAzure\Windows\AzureWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\ConnectionManager\Windows\ConnectionManagerWindow.xaml">
+    <Page Include="Modules\DialogConnectionManager\Windows\ConnectionManagerWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\Credential\Views\CredentialView.xaml">
+    <Page Include="Modules\WindowCredential\Views\CredentialView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\EnvironmentExplorer\Views\EnvironmentExplorerView.xaml">
+    <Page Include="Modules\PartEnvironmentExplorer\Views\EnvironmentExplorerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\ExecutionResult\Views\ExecutionResultView.xaml">
+    <Page Include="Modules\WindowExecutionResult\Views\ExecutionResultView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\JobHistory\Views\JobHistoryView.xaml">
+    <Page Include="Modules\WindowJobHistory\Views\JobHistoryView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\PropertyGrid\Views\PropertyGridView.xaml">
+    <Page Include="Modules\PartPropertyGrid\Views\PropertyGridView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\Runbook\Views\RunbookView.xaml">
+    <Page Include="Modules\WindowRunbook\Views\RunbookView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\Schedule\Views\ScheduleView.xaml">
+    <Page Include="Modules\WindowSchedule\Views\ScheduleView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -441,15 +446,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\StartRunDialog\Windows\PrepareRunWindow.xaml">
+    <Page Include="Modules\DialogStartRun\Windows\PrepareRunWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Modules\Variable\Views\VariableView.xaml">
+    <Page Include="Modules\WindowVariable\Views\VariableView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\AddNewItemDialog\Windows\UIAddNewItemDialog.xaml">
+    <Page Include="Modules\DialogAddNewItem\Windows\UIAddNewItemDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -504,9 +509,10 @@
     <Resource Include="Icons\Parameter.png" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Modules\ExecutionResult\Command\" />
-    <Folder Include="Modules\PropertyGrid\Commands\" />
-    <Folder Include="Modules\StartRunDialog\ViewModels\" />
+    <Folder Include="Modules\DialogDocumentation\" />
+    <Folder Include="Modules\DialogStartRun\ViewModels\" />
+    <Folder Include="Modules\PartPropertyGrid\Commands\" />
+    <Folder Include="Modules\WindowExecutionResult\Command\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icons\Properties.png" />
