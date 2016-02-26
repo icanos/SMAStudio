@@ -78,7 +78,7 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
             _highlightingColorizer = new SyntaxHighlightning.HighlightingColorizer(_languageContext);
 
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "SMAStudiovNext.Modules.Runbook.SyntaxHighlightning.Powershell.xshd";
+            var resourceName = "SMAStudiovNext.Modules.WindowRunbook.SyntaxHighlightning.Powershell.xshd";
 
             var stream = assembly.GetManifestResourceStream(resourceName);
             var reader = new XmlTextReader(stream);

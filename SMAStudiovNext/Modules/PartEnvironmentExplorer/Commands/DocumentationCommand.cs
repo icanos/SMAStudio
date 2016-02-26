@@ -1,4 +1,5 @@
 ﻿using SMAStudiovNext.Core;
+using SMAStudiovNext.Modules.DialogDocumentation.Windows;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,7 +41,10 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.Commands
 
         public void Execute(object parameter)
         {
-            
+            var dialog = new DocumentationWindow(((parameter as ResourceContainer).Tag as IBackendContext));
+            dialog.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+
+            dialog.ShowDialog();
         }
 
         /// <summary>

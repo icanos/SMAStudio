@@ -38,7 +38,7 @@
                                 </MenuItem>
                                 <MenuItem Header="Job History" Command="{Binding HistoryCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
                                                                                   AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}" />
-                                <MenuItem Header="Generate Documentation" Command="{Binding DocumentationCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
+                                <MenuItem Header="Auto Documentation" Command="{Binding DocumentationCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
                                                                                   AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}" />
                                 <!--<MenuItem x:Name="btnCompare" Header="Compare to..." />-->
                                 <Separator />

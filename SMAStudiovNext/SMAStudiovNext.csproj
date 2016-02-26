@@ -208,6 +208,12 @@
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Core\BackendContext.cs" />
     <Compile Include="Core\CertificateManager.cs" />
+    <Compile Include="Core\Documentation\DocumentationComment.cs" />
+    <Compile Include="Core\Documentation\DocumentationManager.cs" />
+    <Compile Include="Modules\DialogDocumentation\ViewModels\DocumentationViewModel.cs" />
+    <Compile Include="Modules\DialogDocumentation\Windows\DocumentationWindow.xaml.cs">
+      <DependentUpon>DocumentationWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Modules\PartEnvironmentExplorer\Commands\DocumentationCommand.cs" />
     <Compile Include="Modules\Shell\Commands\AboutCommandHandler.cs" />
     <Compile Include="Themes\IThemeManager.cs" />
@@ -410,6 +416,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Modules\DialogDocumentation\Windows\DocumentationWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Modules\WindowCredential\Views\CredentialView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -509,7 +519,6 @@
     <Resource Include="Icons\Parameter.png" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Modules\DialogDocumentation\" />
     <Folder Include="Modules\DialogStartRun\ViewModels\" />
     <Folder Include="Modules\PartPropertyGrid\Commands\" />
     <Folder Include="Modules\WindowExecutionResult\Command\" />

@@ -48,7 +48,7 @@ namespace SMAStudiovNext.Services
             return await Task.Run(() =>
             {
                 // Publish the draft runbook
-                SendRequest("runbooks/" + runbook.RunbookName + "/draft/publish", "POST", "");
+                SendRequest("runbooks/" + runbook.RunbookName.ToUrlSafeString() + "/draft/publish", "POST", "");
 
                 // Move the draft to published
                 runbook.PublishedRunbookVersionID = runbook.DraftRunbookVersionID;
@@ -149,6 +149,16 @@ namespace SMAStudiovNext.Services
 
             if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created || response.StatusCode == HttpStatusCode.Accepted)
             {
+                
+                
+                
+                
+                
+                // TODO: Handle errors in comm with the API
+
+
+
+
                 var responseStream = new StreamReader(response.GetResponseStream());
 
                 string content = responseStream.ReadToEnd();

@@ -62,17 +62,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             _runbook = runbook;
             _snippetsCollection = AppContext.Resolve<ISnippetsCollection>();
             _statusManager = AppContext.Resolve<IStatusManager>();
-
-            //_completionProvider = AppContext.Resolve<ICompletionProvider>();//new CompletionProvider();
-
-            //_codeContext = new PowershellContext();
-            //_completionContext = new CodeCompletionContext();
-
-            //_completionContext.Start();
-
+            
             Owner = runbook.Context.Service;
-
-            //_completionTimer = new Timer(new TimerCallback(ShowCompletionWindow));
         }
 
         /// <summary>
@@ -347,12 +338,13 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         /// </summary>
         /// <param name="runbookType"></param>
         /// <param name="forceDownload"></param>
-        public void GetContent(RunbookType runbookType, bool forceDownload = false)
+        public string GetContent(RunbookType runbookType, bool forceDownload = false)
         {
             var output = IoC.Get<IOutput>();
+            var contentToReturn = string.Empty;
 
             if (!forceDownload && !String.IsNullOrEmpty(_content))
-                return;
+                return _content;
 
             output.AppendLine("Downloading content of '" + _runbook.RunbookName + "'...");
 
@@ -369,13 +361,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                             output.AppendLine("Fetching 'Draft' of runbook.");
                             start = DateTime.Now;
 
-                            //Content = _backendContext.GetContent(Uri.AbsoluteUri + "/DraftRunbookVersion/$value");
-                            //lock (Content)
-                            //{
                             Content = _backendContext.GetContent(_backendContext.Service.GetBackendUrl(runbookType, _runbook));
-                            //}
-                            //_codeContext.Parse(Content);
-                            //_completionProvider.Context.Parse(Content).ConfigureAwait(true);
+                            contentToReturn = Content;
 
                             stop = DateTime.Now;
                             output.AppendLine("Content fetched in " + (stop - start).TotalMilliseconds + " ms");
@@ -384,12 +371,13 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                             output.AppendLine("Fetching 'Published' of runbook.");
                             start = DateTime.Now;
 
-                            //Content = GetContentInternal(Uri.AbsoluteUri + "/PublishedRunbookVersion");
-                            //var publishedContent = _backendContext.GetContent(Uri.AbsoluteUri + "/PublishedRunbookVersion/$value");
                             var publishedContent = _backendContext.GetContent(_backendContext.Service.GetBackendUrl(runbookType, _runbook));
                             Execute.OnUIThread(() =>
                             {
-                                _view.PublishedTextEditor.Text = publishedContent;
+                                if (_view != null)
+                                    _view.PublishedTextEditor.Text = publishedContent;
+
+                                contentToReturn = publishedContent;
                             });
 
                             stop = DateTime.Now;
@@ -415,6 +403,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                     output.AppendLine("Unable to retrieve any content for the runbook. Error: " + ex.Message);
                 }
             }
+
+            return contentToReturn;
         }
 
         /// <summary>

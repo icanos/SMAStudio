@@ -1,0 +1,55 @@
+﻿using Caliburn.Micro;
+using SMAStudiovNext.Core;
+using SMAStudiovNext.Core.Documentation;
+using System.Threading.Tasks;
+using System.Windows;
+
+namespace SMAStudiovNext.Modules.DialogDocumentation.ViewModels
+{
+    public delegate void NoArgumentDelegate();
+
+    public class DocumentationViewModel : PropertyChangedBase
+    {
+        private readonly IBackendContext _backendContext;
+
+        public event NoArgumentDelegate OnFinished;
+
+        public DocumentationViewModel(IBackendContext backendContext)
+        {
+            _backendContext = backendContext;
+            ButtonText = "Start";
+        }
+
+        public void SetTemplate(string templatePath)
+        {
+            TemplatePath = templatePath;
+            NotifyOfPropertyChange(() => TemplatePath);
+        }
+
+        public void GenerateDocumentation()
+        {
+            using (var documentation = new DocumentationManager(_backendContext))
+            {
+                ButtonText = "Generating...";
+                NotifyOfPropertyChange(() => ButtonText);
+
+                Task.Run(() =>
+                {
+                    documentation.Generate(TemplatePath);
+
+                    Execute.OnUIThread(() =>
+                    {
+                        MessageBox.Show("The documentation has been successfully generated.", "Documentation completed", MessageBoxButton.OK);
+
+                        if (OnFinished != null)
+                            OnFinished();
+                    });
+                });
+            }
+        }
+
+        public string TemplatePath { get; set; }
+
+        public string ButtonText { get; set; }
+    }
+}
