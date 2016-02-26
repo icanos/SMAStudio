@@ -26,9 +26,7 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
     {
         private FoldingManager _foldingManager;
         private PowershellFoldingStrategy _foldingStrategy;
-
         private LanguageContext _languageContext;
-        private bool _hasContent = false;
 
         private SyntaxHighlightning.HighlightingColorizer _highlightingColorizer = null;
 

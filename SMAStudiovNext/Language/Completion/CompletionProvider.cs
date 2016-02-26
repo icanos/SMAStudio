@@ -88,6 +88,9 @@ namespace SMAStudiovNext.Language.Completion
             var contextTree = _languageContext.GetContext(lineNumber, position);
             var context = contextTree.FirstOrDefault();
 
+            if (context != null && (context.Type == ExpressionType.QuotedString || context.Type == ExpressionType.SingleQuotedString || context.Type == ExpressionType.Comment || context.Type == ExpressionType.MultilineComment))
+                return new CompletionResult(null);
+
             _cachedLineNumber = lineNumber;
             _cachedPosition = position;
             _cachedTriggerChar = triggerChar;

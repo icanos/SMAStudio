@@ -316,24 +316,6 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         }
 
         /// <summary>
-        /// Called when the tab has been confirmed to close and is being closed, this should take care of
-        /// closing any open connections, clear caches etc.
-        /// </summary>
-        /// <param name="close"></param>
-        protected override void OnDeactivate(bool close)
-        {
-            // We only want the active one to contain data so that we
-            // don't chew up all memory on the machine we're working on.
-            //if (_codeContext != null)
-            //    _codeContext.ClearCache();
-
-            //if (close)
-            //    _completionContext.Stop();
-
-            base.OnDeactivate(close);
-        }
-
-        /// <summary>
         /// Retrieve content for the specified runbook from SMA
         /// </summary>
         /// <param name="runbookType"></param>
@@ -415,10 +397,23 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             if (_view == null)
                 return;
 
-            AsyncExecution.ExecuteOnUIThread(async () =>
+            var contentToParse = string.Empty;
+            var context = default(LanguageContext);
+
+            Execute.OnUIThread(() =>
             {
-                //await _completionProvider.Context.Parse(_view.TextEditor.Text);
-                await _view.TextEditor.LanguageContext.Parse(_view.TextEditor.Text);
+                contentToParse = _view.TextEditor.Text;
+                context = _view.TextEditor.LanguageContext;
+            });
+
+            Task.Run(async () =>
+            {
+                await context.Parse(contentToParse);
+
+                Execute.OnUIThread(() =>
+                {
+                    _view.TextEditor.InvalidateVisual();
+                });
             });
         }
 
@@ -968,6 +963,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
                             _view.TextEditor.Text = value;
                             _content = value;
+
+                            _view.TextEditor.InvalidateVisual();
                         }
                     });
                 }
