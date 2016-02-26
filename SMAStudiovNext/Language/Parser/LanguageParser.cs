@@ -209,7 +209,7 @@ namespace SMAStudiovNext.Language
 
                         if (expr == ExpressionType.Parameter && nextCh != '-')
                             expr = ExpressionType.None;
-                        else if (expr == ExpressionType.Keyword && (nextCh == '"' || char.IsLetter(nextCh)))
+                        else if ((expr == ExpressionType.Keyword || expr == ExpressionType.LanguageConstruct) && (nextCh == '"' || char.IsLetter(nextCh)))
                         {
                             expr = ExpressionType.String;
                         }

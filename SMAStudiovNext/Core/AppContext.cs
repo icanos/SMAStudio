@@ -21,7 +21,6 @@ namespace SMAStudiovNext.Core
             _container.RegisterInstance<ISettingsService>(new SettingsService());
             _container.RegisterInstance<ISnippetsCollection>(new SnippetsCollection());
             _container.RegisterInstance<IStatusManager>(new StatusManager());
-            _container.RegisterInstance<ICompletionProvider>(new CompletionProvider());
             _container.RegisterInstance<IThemeManager>(new ThemeManager());
 
             _container.RegisterType<ICommand, LoadCommand>("LoadCommand");
@@ -54,7 +53,7 @@ namespace SMAStudiovNext.Core
 
         public static string Version
         {
-            get { return "1.0.1"; }
+            get { return "1.0.11"; }
         }
     }
 }

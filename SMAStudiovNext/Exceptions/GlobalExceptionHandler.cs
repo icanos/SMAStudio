@@ -16,7 +16,7 @@ namespace SMAStudiovNext.Core
                 textWriter.Flush();
                 textWriter.Close();
 
-                MessageBox.Show("SMA Studio crashed and the log file containing more information can be found here:\r\n" + AppHelper.GetCustomCachePath("error.log"), "Error");
+                MessageBox.Show("Automation Studio crashed and the log file containing more information can be found here:\r\n" + AppHelper.GetCustomCachePath("error.log"), "Error");
             };
         }
     }

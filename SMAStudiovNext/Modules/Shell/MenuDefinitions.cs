@@ -29,5 +29,15 @@ namespace SMAStudiovNext.Modules.Shell
         [Export]
         public static MenuItemDefinition ViewFullscreenItem = new CommandMenuItemDefinition<ViewFullscreenCommandDefinition>(
             Gemini.Modules.MainMenu.MenuDefinitions.ViewPropertiesMenuGroup, 0);
+
+        //[Export]
+        //public static MenuDefinition AboutMenu = new MenuDefinition(Gemini.Modules.MainMenu.MenuDefinitions.HelpMenu, 10, "Help");
+
+        [Export]
+        public static MenuItemGroupDefinition HelpMenuGroup = new MenuItemGroupDefinition(Gemini.Modules.MainMenu.MenuDefinitions.HelpMenu, 10);
+
+        [Export]
+        public static MenuItemDefinition AboutItem = new CommandMenuItemDefinition<AboutCommandDefinition>(
+            HelpMenuGroup, 0);
     }
 }

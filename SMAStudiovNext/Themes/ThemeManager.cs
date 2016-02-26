@@ -40,8 +40,16 @@ namespace SMAStudiovNext.Themes
                 }
             }
 
+            //if (_themes.Count == 0)
+            //    throw new Exception("Missing theme, installation is possibly corrupt. Please reinstall.");
             if (_themes.Count == 0)
-                throw new Exception("Missing theme, installation is possibly corrupt. Please reinstall.");
+                _currentTheme = new Theme
+                {
+                    Background = "#ffffff",
+                    Foreground = "#000000",
+                    Font = "Consolas",
+                    FontSize = 12
+                };
         }
 
         public Theme CurrentTheme

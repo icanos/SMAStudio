@@ -189,10 +189,12 @@
     <Compile Include="Agents\IAgent.cs" />
     <Compile Include="Agents\RunbooksScanningAgent.cs" />
     <Compile Include="Agents\SnippetsAgent.cs" />
+    <Compile Include="Agents\ThemesAgent.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Commands\AboutCommandDefinition.cs" />
     <Compile Include="Commands\ConnectWithAzureCommandDefinition.cs" />
     <Compile Include="Commands\ConnectWithAzureCommandHandler.cs" />
     <Compile Include="Commands\GenerateCertificateCommand.cs" />
@@ -202,6 +204,7 @@
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Core\BackendContext.cs" />
     <Compile Include="Core\CertificateManager.cs" />
+    <Compile Include="Modules\Shell\Commands\AboutCommandHandler.cs" />
     <Compile Include="Themes\IThemeManager.cs" />
     <Compile Include="Themes\StylePart.cs" />
     <Compile Include="Themes\Theme.cs" />

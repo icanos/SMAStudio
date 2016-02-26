@@ -44,7 +44,7 @@ namespace SMAStudiovNext.Agents
             _backgroundThread = new Thread(new ThreadStart(StartInternal));
             _backgroundThread.Priority = ThreadPriority.BelowNormal;
 
-            _completionProvider = AppContext.Resolve<ICompletionProvider>();
+            //_completionProvider = AppContext.Resolve<ICompletionProvider>();
             _errorList = IoC.Get<IErrorList>();
             _output = IoC.Get<IOutput>();
             _shell = IoC.Get<IShell>();
@@ -92,7 +92,7 @@ namespace SMAStudiovNext.Agents
                 var runbookHash = 0;
                 var lastRunbookHash = 0;
 
-                _completionProvider.Runbooks.Clear();
+                //_completionProvider.Runbooks.Clear();
 
                 for (var i = 0; i < contexts.Count; i++)
                 {
@@ -111,10 +111,11 @@ namespace SMAStudiovNext.Agents
                             continue;
                         }
 
-                        foreach (var runbook in runbooks)
-                        {
-                            _completionProvider.Runbooks.Add(new KeywordCompletionData(((RunbookModelProxy)runbook.Tag).RunbookName, IconsDescription.Runbook));
-                        }
+                        // TODO: Restore this somehow!
+                        //foreach (var runbook in runbooks)
+                        //{
+                        //    _completionProvider.Runbooks.Add(new KeywordCompletionData(((RunbookModelProxy)runbook.Tag).RunbookName, IconsDescription.Runbook));
+                        //}
                     }
 
                     lastRunbookHash = runbookHash;

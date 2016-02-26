@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework;
+using Gemini.Framework.Services;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using SMAStudio.Language;
 using SMAStudiovNext.Core;
@@ -20,6 +21,7 @@ namespace SMAStudiovNext.Language.Completion
         /// Language parsing context
         /// </summary>
         private readonly LanguageContext _languageContext;
+        private readonly IBackendContext _backendContext;
 
         /// <summary>
         /// List of keywords that is part of the Powershell language
@@ -61,9 +63,10 @@ namespace SMAStudiovNext.Language.Completion
 
         private char? _cachedTriggerChar = null;
 
-        public CompletionProvider()
+        public CompletionProvider(IBackendContext backendContext, LanguageContext languageContext)
         {
-            _languageContext = new LanguageContext();
+            _languageContext = languageContext;
+            _backendContext = backendContext;
 
             Keywords = new List<ICompletionEntry>();
             Runbooks = new List<ICompletionEntry>();
@@ -71,7 +74,7 @@ namespace SMAStudiovNext.Language.Completion
 
         public async Task<CompletionResult> GetCompletionData(string completionWord, string line, int lineNumber, int position, char? triggerChar)
         {
-            if (lineNumber == _cachedLineNumber && _foundNoCompletions && triggerChar == _cachedTriggerChar)
+            if (lineNumber == _cachedLineNumber && _foundNoCompletions && triggerChar == _cachedTriggerChar && position > _cachedPosition)
                 return new CompletionResult(null);
             else if (position <= (_cachedPosition + 1))
                 _foundNoCompletions = false;
@@ -112,15 +115,22 @@ namespace SMAStudiovNext.Language.Completion
                             var runbookContext = contextTree.FirstOrDefault(item => item.Type == ExpressionType.Keyword);
                             if (runbookContext != null)
                             {
-                                var runbookComplete = Runbooks.FirstOrDefault(item => item.Name.Equals(runbookContext.Value, StringComparison.InvariantCultureIgnoreCase));
+                                //var runbookComplete = Runbooks.FirstOrDefault(item => item.Name.Equals(runbookContext.Value, StringComparison.InvariantCultureIgnoreCase));
+                                var runbookComplete = _backendContext.Runbooks.FirstOrDefault(item => (item.Tag as RunbookModelProxy).RunbookName.Equals(runbookContext.Value, StringComparison.InvariantCultureIgnoreCase));
 
                                 if (runbookComplete != null)
                                 {
-                                    var runbook = GetRunbook(runbookComplete.Name);
+                                    var shell = IoC.Get<IShell>();
+                                    var statusManager = AppContext.Resolve<IStatusManager>();
+                                    statusManager.SetText("Loading parameters from " + (runbookComplete.Tag as RunbookModelProxy).RunbookName);
+                                    //Shell.StatusBar.Items[0].Message = "";
+
+                                    var runbook = GetRunbook((runbookComplete.Tag as RunbookModelProxy).RunbookName);
 
                                     if (runbook != null)
                                     {
                                         completionData.AddRange(runbook.GetParameters(completionWord));
+                                        statusManager.SetTimeoutText("Parameters loaded.", 5);
                                     }
                                 }
                                 else
@@ -185,7 +195,7 @@ namespace SMAStudiovNext.Language.Completion
                                 //includeNativePowershell = true;
 
                                 completionData.AddRange(_languageContext.GetVariables().Where(item => item.Text.StartsWith(completionWord, StringComparison.InvariantCultureIgnoreCase)).Distinct().ToList());
-                                completionData.AddRange(Runbooks.Where(item => item.Name.Contains(completionWord)).Select(item => new KeywordCompletionData(item.DisplayText, IconsDescription.Runbook)).ToList());
+                                completionData.AddRange(_backendContext.Runbooks.Where(item => (item.Tag as RunbookModelProxy).RunbookName.Contains(completionWord)).Select(item => new KeywordCompletionData((item.Tag as RunbookModelProxy).RunbookName, IconsDescription.Runbook)));
                             }
 
                             var snippetsCollection = AppContext.Resolve<ISnippetsCollection>();

@@ -51,11 +51,11 @@ namespace SMAStudiovNext.Modules.Startup
             var themeManager = AppContext.Resolve<IThemeManager>();
             themeManager.LoadThemes();
 
-            MainWindow.Title = "SMA Studio";
+            MainWindow.Title = "Automation Studio";
 
             Shell.ShowFloatingWindowsInTaskbar = true;
             Shell.ToolBars.Visible = true;
-            Shell.StatusBar.AddItem("Starting SMA Studio v. " + AppContext.Version + "...", new System.Windows.GridLength(1, System.Windows.GridUnitType.Star));
+            Shell.StatusBar.AddItem("Starting Automation Studio v. " + AppContext.Version + "...", new System.Windows.GridLength(1, System.Windows.GridUnitType.Star));
             Shell.ActiveDocumentChanged += (sender, e) => RefreshInspector();
             
             try
@@ -114,7 +114,7 @@ namespace SMAStudiovNext.Modules.Startup
                 });
             }
 
-            _output.AppendLine("Started SMA Studio");
+            _output.AppendLine("Started Automation Studio");
 
             Shell.StatusBar.Items[0].Message = "";
         }

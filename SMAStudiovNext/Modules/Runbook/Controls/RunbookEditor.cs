@@ -12,6 +12,7 @@ using ICSharpCode.AvalonEdit.Rendering;
 using SMAStudio.Language;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Themes;
+using System.Threading.Tasks;
 
 namespace SMAStudiovNext.Modules.Runbook.Controls
 {
@@ -26,10 +27,15 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
         private FoldingManager _foldingManager;
         private PowershellFoldingStrategy _foldingStrategy;
 
+        private LanguageContext _languageContext;
+        private bool _hasContent = false;
+
         private SyntaxHighlightning.HighlightingColorizer _highlightingColorizer = null;
 
         public RunbookEditor()
         {
+            _languageContext = new LanguageContext();
+
             FontFamily = new FontFamily("Consolas");
             FontSize = 12;
             ShowLineNumbers = true;
@@ -47,6 +53,8 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
             foldingUpdateTimer.Interval = TimeSpan.FromSeconds(4);
             foldingUpdateTimer.Tick += delegate { UpdateFoldings(); };
             foldingUpdateTimer.Start();
+
+            InitializeColorizer();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
@@ -65,9 +73,9 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
             UpdateFoldings();
         }
 
-        public void InitializeColorizer(LanguageContext languageContext)
+        private void InitializeColorizer()
         {
-            _highlightingColorizer = new SyntaxHighlightning.HighlightingColorizer(languageContext);
+            _highlightingColorizer = new SyntaxHighlightning.HighlightingColorizer(_languageContext);
 
             var assembly = Assembly.GetExecutingAssembly();
             var resourceName = "SMAStudiovNext.Modules.Runbook.SyntaxHighlightning.Powershell.xshd";
@@ -85,7 +93,12 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
         {
             return _highlightingColorizer;
         }
-        
+
+        public LanguageContext LanguageContext
+        {
+            get { return _languageContext; }
+        }
+
         private void UpdateFoldings()
         {
             _foldingStrategy.UpdateFoldings(_foldingManager, Document);

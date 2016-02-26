@@ -45,7 +45,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         private readonly IStatusManager _statusManager;
         private readonly object _syncLock = new object();
 
-        private readonly ICompletionProvider _completionProvider;
+        private ICompletionProvider _completionProvider;
         private CompletionWindow _completionWindow = null;
 
         private RunbookModelProxy _runbook;
@@ -55,7 +55,6 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         private string _cachedSnippetContent = string.Empty;
 
         private IRunbookView _view;
-        private Timer _completionTimer;
 
         public RunbookViewModel(RunbookModelProxy runbook)
         {
@@ -64,7 +63,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             _snippetsCollection = AppContext.Resolve<ISnippetsCollection>();
             _statusManager = AppContext.Resolve<IStatusManager>();
 
-            _completionProvider = AppContext.Resolve<ICompletionProvider>();//new CompletionProvider();
+            //_completionProvider = AppContext.Resolve<ICompletionProvider>();//new CompletionProvider();
 
             //_codeContext = new PowershellContext();
             //_completionContext = new CodeCompletionContext();
@@ -106,6 +105,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         {
             _view = (IRunbookView)view;
 
+            _completionProvider = new CompletionProvider(Owner.Context, _view.TextEditor.LanguageContext);
+
             if (!String.IsNullOrEmpty(_cachedSnippetContent))
             {
                 AddSnippet(_cachedSnippetContent);
@@ -117,6 +118,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 if (_runbook.DraftRunbookVersionID.HasValue)
                 {
                     GetContent(RunbookType.Draft, false);
+                    _view.TextEditor.LanguageContext.Parse(Content).ConfigureAwait(true);
                 }
 
                 if (_runbook.PublishedRunbookVersionID.HasValue)
@@ -126,7 +128,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
                 Execute.OnUIThreadAsync(() =>
                 {
-                    _view.TextEditor.InitializeColorizer(_completionProvider.Context);
+                    //_view.TextEditor.InitializeColorizer(_completionProvider.Context);
+                    _view.PublishedTextEditor.LanguageContext.Parse(_view.PublishedTextEditor.Text).ConfigureAwait(true);
 
                     var diff = new GitSharp.Diff(_view.TextEditor.Text, _view.PublishedTextEditor.Text);
                     DiffSectionA = diff.Sections;
@@ -372,7 +375,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                             Content = _backendContext.GetContent(_backendContext.Service.GetBackendUrl(runbookType, _runbook));
                             //}
                             //_codeContext.Parse(Content);
-                            _completionProvider.Context.Parse(Content).ConfigureAwait(true);
+                            //_completionProvider.Context.Parse(Content).ConfigureAwait(true);
 
                             stop = DateTime.Now;
                             output.AppendLine("Content fetched in " + (stop - start).TotalMilliseconds + " ms");
@@ -424,7 +427,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
             AsyncExecution.ExecuteOnUIThread(async () =>
             {
-                await _completionProvider.Context.Parse(_view.TextEditor.Text);
+                //await _completionProvider.Context.Parse(_view.TextEditor.Text);
+                await _view.TextEditor.LanguageContext.Parse(_view.TextEditor.Text);
             });
         }
 
