@@ -1,4 +1,5 @@
 ﻿using SMAStudiovNext.Core;
+using SMAStudiovNext.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,6 +7,8 @@ using System.Xml.Serialization;
 
 namespace SMAStudiovNext.Themes
 {
+    public delegate void UpdateCurrentThemeDelegate();
+
     public class ThemeManager : IThemeManager
     {
         private const string THEMES_FOLDER = "Themes";
@@ -14,6 +17,8 @@ namespace SMAStudiovNext.Themes
         private IList<Theme> _themes;
         private Theme _currentTheme = null;
 
+        public event UpdateCurrentThemeDelegate UpdateCurrentTheme;
+
         public ThemeManager()
         {
             _themes = new List<Theme>();
@@ -21,6 +26,8 @@ namespace SMAStudiovNext.Themes
 
         public void LoadThemes()
         {
+            string currentTheme = SettingsService.CurrentSettings.Theme == null ? DEFAULT_THEME : SettingsService.CurrentSettings.Theme;
+
             if (Directory.Exists(Path.Combine(AppHelper.CachePath, THEMES_FOLDER)))
             {
                 var files = Directory.GetFiles(Path.Combine(AppHelper.CachePath, THEMES_FOLDER), "*.theme");
@@ -34,14 +41,12 @@ namespace SMAStudiovNext.Themes
 
                         _themes.Add(theme);
 
-                        if (file.EndsWith(DEFAULT_THEME + ".theme"))
+                        if (file.EndsWith(currentTheme + ".theme"))
                             _currentTheme = theme;
                     }
                 }
             }
 
-            //if (_themes.Count == 0)
-            //    throw new Exception("Missing theme, installation is possibly corrupt. Please reinstall.");
             if (_themes.Count == 0)
                 _currentTheme = new Theme
                 {
@@ -52,9 +57,22 @@ namespace SMAStudiovNext.Themes
                 };
         }
 
+        public void SetCurrentTheme(Theme theme)
+        {
+            _currentTheme = theme;
+
+            if (UpdateCurrentTheme != null)
+                UpdateCurrentTheme();
+        }
+
         public Theme CurrentTheme
         {
             get { return _currentTheme; }
+        }
+
+        public IList<Theme> Themes
+        {
+            get { return _themes; }
         }
     }
 }

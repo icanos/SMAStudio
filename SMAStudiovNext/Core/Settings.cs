@@ -18,11 +18,25 @@ namespace SMAStudiovNext.Core
             Connections = new List<BackendConnection>();
         }
 
+        /// <summary>
+        /// If debug is set to True, some extended logging is enabled
+        /// </summary>
         public bool Debug { get; set; }
 
+        /// <summary>
+        /// List of connections to different SMA or Azure Automation accounts
+        /// </summary>
         public List<BackendConnection> Connections { get; set; }
 
-        public List<string> TrustedCertificates { get; set; }        
+        /// <summary>
+        /// List of trusted certificates
+        /// </summary>
+        public List<string> TrustedCertificates { get; set; }
+
+        /// <summary>
+        /// Name of the current theme to use
+        /// </summary>
+        public string Theme { get; set; }
     }
 
     public class BackendConnection : PropertyChangedBase

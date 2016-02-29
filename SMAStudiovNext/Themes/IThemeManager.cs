@@ -8,8 +8,14 @@ namespace SMAStudiovNext.Themes
 {
     public interface IThemeManager
     {
+        event UpdateCurrentThemeDelegate UpdateCurrentTheme;
+
         void LoadThemes();
 
+        void SetCurrentTheme(Theme theme);
+
         Theme CurrentTheme { get; }
+
+        IList<Theme> Themes { get; }
     }
 }

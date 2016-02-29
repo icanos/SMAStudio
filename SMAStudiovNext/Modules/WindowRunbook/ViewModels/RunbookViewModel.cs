@@ -26,9 +26,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Linq;
-using System.Threading;
 using SMAStudiovNext.Language.Snippets;
-using System.Diagnostics;
 using ICSharpCode.AvalonEdit.Document;
 
 namespace SMAStudiovNext.Modules.Runbook.ViewModels

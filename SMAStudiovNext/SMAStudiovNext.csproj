@@ -216,6 +216,10 @@
     </Compile>
     <Compile Include="Modules\PartEnvironmentExplorer\Commands\DocumentationCommand.cs" />
     <Compile Include="Modules\Shell\Commands\AboutCommandHandler.cs" />
+    <Compile Include="Modules\Shell\ViewModels\SettingsEditorThemeViewModel.cs" />
+    <Compile Include="Modules\Shell\Views\SettingsEditorThemeView.xaml.cs">
+      <DependentUpon>SettingsEditorThemeView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Themes\IThemeManager.cs" />
     <Compile Include="Themes\StylePart.cs" />
     <Compile Include="Themes\Theme.cs" />
@@ -419,6 +423,10 @@
     <Page Include="Modules\DialogDocumentation\Windows\DocumentationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\Shell\Views\SettingsEditorThemeView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Modules\WindowCredential\Views\CredentialView.xaml">
       <SubType>Designer</SubType>

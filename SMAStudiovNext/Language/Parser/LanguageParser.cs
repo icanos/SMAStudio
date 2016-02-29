@@ -174,6 +174,11 @@ namespace SMAStudiovNext.Language
                         expr = ExpressionType.QuotedString;
                         continue;
                     }
+                    else if (expr == ExpressionType.String && ch == '.')
+                    {
+                        chunk.Append(ch);
+                        expr = ExpressionType.Type;
+                    }
                     else if (expr == ExpressionType.String && ch == '\r') // always ignore carrige returns
                         continue;
 
@@ -413,6 +418,13 @@ namespace SMAStudiovNext.Language
                             chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
                             expr = ExpressionType.Property;
                         }
+                        // TESTING 20160227
+                        else if (expr == ExpressionType.String)
+                        {
+                            expr = ExpressionType.Type;
+                        }
+
+                        chunk.Append(ch);
                         break;
                     case '|':
                     case '%':
@@ -446,8 +458,12 @@ namespace SMAStudiovNext.Language
                                 expr == ExpressionType.BlockEnd)
                             && char.IsLetter(ch))
                         {
-                            if (result.Count > 0 && result[result.Count - 1].LineNumber == lineNumber && result[result.Count - 1].Type == ExpressionType.Parameter)
+                            if (result.Count > 0
+                                && result[result.Count - 1].LineNumber == lineNumber
+                                && result[result.Count - 1].Type == ExpressionType.Parameter)
+                            {
                                 expr = ExpressionType.String;
+                            }
                             else
                                 expr = ExpressionType.Keyword;
                         }

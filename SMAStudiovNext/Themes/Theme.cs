@@ -17,6 +17,8 @@ namespace SMAStudiovNext.Themes
             _brushCache = new Dictionary<string, SolidColorBrush>();
         }
 
+        public string Name { get; set; }
+
         public string Font { get; set; }
 
         public double FontSize { get; set; }
@@ -48,6 +50,11 @@ namespace SMAStudiovNext.Themes
             _brushCache.Add(hexColor, brush);
 
             return brush;
+        }
+
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }
