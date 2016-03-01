@@ -11,17 +11,21 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <gemini:ClippingHwndHost>
         <gemini:ClippingHwndHost.Content>
-            <ScrollViewer Background="White">
-                <StackPanel Orientation="Vertical">
-                    <ToolBar BandIndex="0">
-                        <Button Command="{Binding RefreshCommand}">
-                            <Image Source="/SMAStudiovNext;component/Icons/Refresh.png" />
-                        </Button>
-                        <Separator />
-                        <Button Command="{Binding NewConnectionCommand}">
-                            <Image Source="/SMAStudiovNext;component/Icons/ListConnections.png" />
-                        </Button>
-                    </ToolBar>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <ToolBar Grid.Row="0" BandIndex="0">
+                    <Button Command="{Binding RefreshCommand}">
+                        <Image Source="/SMAStudiovNext;component/Icons/Refresh.png" />
+                    </Button>
+                    <Separator />
+                    <Button Command="{Binding NewConnectionCommand}">
+                        <Image Source="/SMAStudiovNext;component/Icons/ListConnections.png" />
+                    </Button>
+                </ToolBar>
+                <ScrollViewer Grid.Row="1" Background="White">
                     <TreeView x:Name="treeView" BorderThickness="0" Background="Transparent" ItemsSource="{Binding Items}" HorizontalContentAlignment="Stretch">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="MouseDoubleClick">
@@ -70,8 +74,8 @@
                             </HierarchicalDataTemplate>
                         </TreeView.ItemTemplate>
                     </TreeView>
-                </StackPanel>
-            </ScrollViewer>
+                </ScrollViewer>
+            </Grid>
         </gemini:ClippingHwndHost.Content>
     </gemini:ClippingHwndHost>
 </UserControl>
