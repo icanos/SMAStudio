@@ -214,6 +214,7 @@
     <Compile Include="Core\CertificateManager.cs" />
     <Compile Include="Core\Documentation\DocumentationComment.cs" />
     <Compile Include="Core\Documentation\DocumentationManager.cs" />
+    <Compile Include="Models\OperationResult.cs" />
     <Compile Include="Modules\DialogDocumentation\ViewModels\DocumentationViewModel.cs" />
     <Compile Include="Modules\DialogDocumentation\Windows\DocumentationWindow.xaml.cs">
       <DependentUpon>DocumentationWindow.xaml</DependentUpon>
@@ -307,7 +308,6 @@
     <Compile Include="Utils\ActionExtensions.cs" />
     <Compile Include="Utils\AppHelper.cs" />
     <Compile Include="Core\AppContext.cs" />
-    <Compile Include="Utils\AsyncExecution.cs" />
     <Compile Include="Utils\DataProtection.cs" />
     <Compile Include="Core\IViewModel.cs" />
     <Compile Include="Exceptions\PersistenceException.cs" />

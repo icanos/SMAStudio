@@ -257,7 +257,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             var caretOffset = 0;
             var line = default(DocumentLine);
 
-            AsyncExecution.ExecuteOnUIThread(() =>
+            //AsyncExecution.ExecuteOnUIThread(() =>
+            Execute.OnUIThread(() =>
             {
                 line = _view.TextEditor.Document.GetLineByOffset(_view.TextEditor.CaretOffset);
                 lineStr = _view.TextEditor.Document.GetText(line);
@@ -297,7 +298,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 if (results.CompletionData == null)
                     return;
 
-                AsyncExecution.ExecuteOnUIThread(() =>
+                //AsyncExecution.ExecuteOnUIThread(() =>
+                Execute.OnUIThread(() =>
                 {
                     if (_completionWindow == null && results.CompletionData.Any())
                     {
@@ -705,7 +707,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                         output.AppendLine("Starting a test of '" + _runbook.RunbookName + "'...");
                     });
 
-                    AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
+                    //AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
+                    await Task.Run(() =>
                     {
                         var guid = Owner.TestRunbook(_runbook, parameters);
 
@@ -780,7 +783,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
                     Execute.OnUIThread(() => { output.AppendLine("Starting a run of the published version of '" + _runbook.RunbookName + "'..."); });
 
-                    AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
+                    //AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
+                    await Task.Run(() =>
                     {
                         var guid = Owner.StartRunbook(_runbook, parameters);
 
@@ -824,27 +828,24 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
         private async Task SaveRunbook(Command command)
         {
-            await Task.Run(delegate () {
-                //try
-                //{
-                    Owner.Save(this);
-                //}
-                //catch (PersistenceException ex)
-               // {
-                //    MessageBox.Show("Error: " + ex.Message, "Unable to save", MessageBoxButton.OK, MessageBoxImage.Error);
-                //}
+            var statusManager = AppContext.Resolve<IStatusManager>();
+            statusManager.SetText("Saving runbook...");
 
-                _runbook.ViewModel = this;
+            var result = await Owner.Save(this);
 
-                //var backendContext = AppContext.Resolve<IBackendContext>();
-                _backendContext.AddToRunbooks(_runbook);
+            if (result.Status == OperationStatus.Succeeded)
+                statusManager.SetTimeoutText("Successfully saved the runbook.", 5);
+            else if (result.Status == OperationStatus.Failed)
+                statusManager.SetTimeoutText("Error when saving the runbook, please check the output.", 5);
 
-                // Update the UI to notify that the changes has been saved
-                UnsavedChanges = false;
+            _runbook.ViewModel = this;
+            _backendContext.AddToRunbooks(_runbook);
 
-                if (command != null)
-                    command.Enabled = true;
-            });
+            // Update the UI to notify that the changes has been saved
+            UnsavedChanges = false;
+
+            if (command != null)
+                command.Enabled = true;
         }
         #endregion
 

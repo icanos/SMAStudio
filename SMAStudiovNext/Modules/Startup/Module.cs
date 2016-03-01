@@ -15,6 +15,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
 
@@ -83,7 +84,7 @@ namespace SMAStudiovNext.Modules.Startup
             {
                 settingsService.Save();
 
-                AsyncExecution.Stop();
+                //AsyncExecution.Stop();
 
                 foreach (var agent in _agents)
                     agent.Stop();
@@ -105,7 +106,8 @@ namespace SMAStudiovNext.Modules.Startup
             // Initialize all connections
             if (SettingsService.CurrentSettings != null)
             {
-                AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
+                //AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
+                Task.Run(() =>
                 {
                     for (int i = 0; i < SettingsService.CurrentSettings.Connections.Count; i++)
                     {

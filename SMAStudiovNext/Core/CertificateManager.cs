@@ -16,18 +16,6 @@ namespace SMAStudiovNext.Core
                 {
                     if (SettingsService.CurrentSettings.TrustedCertificates.Contains(cert.GetCertHashString()))
                         return true;
-                    /*var connections = SettingsService.CurrentSettings.Connections;
-
-                    foreach (var connection in connections)
-                    {
-                        if (!String.IsNullOrEmpty(connection.AzureCertificateThumbprint) &&
-                            connection.AzureCertificateThumbprint.Equals(cert.GetCertHashString()))
-                            return true;
-
-                        //if (!String.IsNullOrEmpty(connection.SmaCertificateThumbprint) &&
-                        //    connection.SmaCertificateThumbprint.Equals(cert.GetCertHashString()))
-                        //    return true;
-                    }*/
                     
                     bool chainStatusOk = true;
                     bool containsBaltimoreIssuer = false;

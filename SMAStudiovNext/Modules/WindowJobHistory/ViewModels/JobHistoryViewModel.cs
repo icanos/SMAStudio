@@ -26,7 +26,8 @@ namespace SMAStudiovNext.Modules.JobHistory.ViewModels
 
             Jobs = new ObservableCollection<JobModelProxy>();
 
-            AsyncExecution.Run(ThreadPriority.Normal, () =>
+            //AsyncExecution.Run(ThreadPriority.Normal, () =>
+            Task.Run(() =>
             {
                 IList<JobModelProxy> draftJobs = null;
                 IList<JobModelProxy> publishedJobs = null;

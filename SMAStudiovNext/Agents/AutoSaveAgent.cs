@@ -12,6 +12,7 @@ using System.Data.Services.Client;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace SMAStudiovNext.Agents
@@ -64,7 +65,8 @@ namespace SMAStudiovNext.Agents
 
                     contentReader.Close();
 
-                    AsyncExecution.Run(ThreadPriority.Normal, delegate ()
+                    //AsyncExecution.Run(ThreadPriority.Normal, delegate ()
+                    Task.Run(() =>
                     {
                         try
                         {

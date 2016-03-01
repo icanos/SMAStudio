@@ -19,7 +19,7 @@ namespace SMAStudiovNext.Services
         /// <summary>
         /// Save the instance of the provided object
         /// </summary>
-        void Save(IViewModel instance);
+        Task<OperationResult> Save(IViewModel instance);
         
         /// <summary>
         /// Publishes as runbook in SMA

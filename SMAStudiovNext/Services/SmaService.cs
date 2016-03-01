@@ -56,7 +56,8 @@ namespace SMAStudiovNext.Services
 
                 if (context != null)
                 {
-                    AsyncExecution.Run(System.Threading.ThreadPriority.Normal, delegate ()
+                    //AsyncExecution.Run(System.Threading.ThreadPriority.Normal, delegate ()
+                    Task.Run(() =>
                     {
                         var runbooks = context.Runbooks.OrderBy(r => r.RunbookName).ToList();
                         foreach (var runbook in runbooks)
@@ -74,9 +75,10 @@ namespace SMAStudiovNext.Services
                         foreach (var schedule in schedules)
                             _backendContext.AddToSchedules(new ScheduleModelProxy(schedule, Context));
                     
-                    _backendContext.ParseTags();
+                        _backendContext.ParseTags();
 
-                        AsyncExecution.ExecuteOnUIThread(delegate ()
+                        //AsyncExecution.ExecuteOnUIThread(delegate ()
+                        Execute.OnUIThread(() =>
                         {
                             var output = IoC.Get<IOutput>();
                             output.AppendLine(" ");
@@ -99,7 +101,7 @@ namespace SMAStudiovNext.Services
         /// Save changes to a runbook, credential, schedule or variable.
         /// </summary>
         /// <param name="instance"></param>
-        public void Save(IViewModel instance)
+        public async Task<OperationResult> Save(IViewModel instance)
         {
             Logger.DebugFormat("Save({0})", instance);
             var context = GetConnection();
@@ -149,6 +151,12 @@ namespace SMAStudiovNext.Services
                 Logger.Error("Error when saving the object.", ex);
                 XmlExceptionHandler.Show(xml);
             }
+
+            return new OperationResult
+            {
+                Status = OperationStatus.Succeeded,
+                HttpStatusCode = HttpStatusCode.OK
+            };
         }
 
         private void SaveSmaSchedule(OrchestratorApi context, IViewModel instance)

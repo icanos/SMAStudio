@@ -99,15 +99,18 @@ namespace SMAStudiovNext.Agents
 
                     if (context.Runbooks != null)
                     {
-                        var runbooks = context.Runbooks;
-
-                        foreach (var runbook in runbooks)
-                            runbookHash += ((RunbookModelProxy)runbook.Tag).RunbookName.Length;
-
-                        if (runbookHash.Equals(lastRunbookHash))
+                        lock (_syncLock)
                         {
-                            Thread.Sleep(5 * 1000);
-                            continue;
+                            var runbooks = context.Runbooks;
+
+                            foreach (var runbook in runbooks)
+                                runbookHash += ((RunbookModelProxy)runbook.Tag).RunbookName.Length;
+
+                            if (runbookHash.Equals(lastRunbookHash))
+                            {
+                                Thread.Sleep(5 * 1000);
+                                continue;
+                            }
                         }
 
                         // TODO: Restore this somehow!

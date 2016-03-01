@@ -19,13 +19,23 @@ using System.Windows;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
 using SMAStudiovNext.Language.Completion;
+using System.Threading;
+using System.Xml.Linq;
 
 namespace SMAStudiovNext.Services
 {
+    public enum OperationStatus
+    {
+        InProgress,
+        Succeeded,
+        Failed
+    }
+
     public class AzureService : IBackendService
     {
         private const string AzureBaseUrl = "https://management.core.windows.net/";
         private const string AzureResourceUrl = "{0}/cloudServices/OaaSCS/resources/automation/~/automationAccounts/{1}/{2}?api-version=2014-12-08";
+        private const string AzureXNS = "http://schemas.microsoft.com/windowsazure";
 
         private readonly IBackendContext _backendContext;
         private readonly BackendConnection _connectionData;
@@ -124,6 +134,15 @@ namespace SMAStudiovNext.Services
             return SendRawRequest(url, requestMethod, requestBody, contentType);
         }
 
+        /// <summary>
+        /// Executes a raw HTTP request and returns a x-ms-request-id if retrieved. This ID is used in async operations to determine status
+        /// of the job that is executed.
+        /// </summary>
+        /// <param name="url">URL to send the request to</param>
+        /// <param name="requestMethod">HTTP method to use (GET, POST, PUT, DELETE etc)</param>
+        /// <param name="requestBody">Body to send with the request</param>
+        /// <param name="contentType">Content type of the request</param>
+        /// <returns>x-ms-request-id if existing in the response</returns>
         private string SendRawRequest(string url, string requestMethod = "GET", string requestBody = null, string contentType = null)
         {
             var request = (HttpWebRequest)WebRequest.Create(url);
@@ -149,24 +168,27 @@ namespace SMAStudiovNext.Services
 
             if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created || response.StatusCode == HttpStatusCode.Accepted)
             {
-                
-                
-                
-                
-                
-                // TODO: Handle errors in comm with the API
+                if (response.StatusCode == HttpStatusCode.Accepted)
+                {
+                    // ASYNC OPERATION
+                    // This is an asynchronous operation which means that we need to monitor
+                    // it in order to know if it completed or an error occurred.
 
+                    var requestUrl = response.Headers["x-ms-location"];
+                    return requestUrl;
+                }
+                else
+                {
+                    // SYNC OPERATION
+                    var responseStream = new StreamReader(response.GetResponseStream());
 
+                    string content = responseStream.ReadToEnd();
 
+                    responseStream.Close();
+                    response.Close();
 
-                var responseStream = new StreamReader(response.GetResponseStream());
-
-                string content = responseStream.ReadToEnd();
-
-                responseStream.Close();
-                response.Close();
-
-                return content;
+                    return content;
+                }
             }
 
             response.Close();
@@ -174,6 +196,86 @@ namespace SMAStudiovNext.Services
             MessageBox.Show("The Azure Automation API is currently unavailable. Please try again later.", "Connectivity Issues", MessageBoxButton.OK);
 
             return string.Empty;
+        }
+
+        /// <summary>
+        /// Retrieves the operation result from the Azure webservice
+        /// </summary>
+        /// <param name="requestId">Request to check status on</param>
+        /// <returns>Operation result</returns>
+        private async Task<OperationResult> GetOperationResultAsync(string requestUrl)
+        {
+            var operationStatus = new OperationResult();
+
+            if (requestUrl == null)
+                throw new ArgumentNullException("requestUrl");
+
+            //var requestUrl = String.Format("{0}/operations/{1}", AzureBaseUrl, requestId.Replace(" ", "%20"));
+            requestUrl = requestUrl.Replace("https://oaas.azure-automation.net/subscriptions/", AzureBaseUrl);
+            requestUrl = requestUrl.Replace("resources/~/", "resources/automation/~/");
+
+            var asyncResponse = default(WebResponse);
+            var asyncRequest = (HttpWebRequest)WebRequest.Create(requestUrl);
+            asyncRequest.Method = "GET";
+            asyncRequest.Accept = "application/json";
+            asyncRequest.Headers.Add("x-ms-version", "2013-06-01");
+            asyncRequest.ClientCertificates.Add(_certificate);
+
+            asyncResponse = await asyncRequest.GetResponseAsync();
+
+            using (var responseStream = new StreamReader(asyncResponse.GetResponseStream()))
+            {
+                var statusCode = (asyncResponse as HttpWebResponse).StatusCode;
+
+                var content = await responseStream.ReadToEndAsync().ConfigureAwait(false);
+                if (content != null && content.Length > 0)
+                {
+                    var document = XDocument.Parse(content);
+
+                    var opElement = document.Element(XName.Get("Operation", AzureXNS));
+                    if (opElement != null)
+                    {
+                        var statusElement = opElement.Element(XName.Get("Status", AzureXNS));
+                        if (statusElement != null)
+                            operationStatus.Status = (OperationStatus)Enum.Parse(typeof(OperationStatus), statusElement.Value, true);
+
+                        var httpStatusElement = opElement.Element(XName.Get("HttpStatusCode", AzureXNS));
+                        if (httpStatusElement != null)
+                            operationStatus.HttpStatusCode = (HttpStatusCode)Enum.Parse(typeof(HttpStatusCode), httpStatusElement.Value, true);
+
+                        var errorElement = opElement.Element(XName.Get("Error", AzureXNS));
+                        if (errorElement != null)
+                        {
+                            var codeElement = errorElement.Element(XName.Get("Code", AzureXNS));
+                            if (codeElement != null)
+                                operationStatus.ErrorCode = codeElement.Value;
+
+                            var messageElement = errorElement.Element(XName.Get("Message", AzureXNS));
+                            if (messageElement != null)
+                                operationStatus.ErrorMessage = messageElement.Value;
+                        }
+                    }
+                }
+                else
+                {
+                    if (statusCode == HttpStatusCode.NotFound || statusCode == HttpStatusCode.BadRequest)
+                        operationStatus.Status = OperationStatus.Failed;
+                    else if (statusCode == HttpStatusCode.Created || statusCode == HttpStatusCode.NoContent || statusCode == HttpStatusCode.OK)
+                        operationStatus.Status = OperationStatus.Succeeded;
+
+                    operationStatus.HttpStatusCode = statusCode;
+                }
+            }
+            
+            if (asyncResponse.Headers["x-ms-request-id"] != null)
+            {
+                operationStatus.RequestUrl = asyncResponse.Headers["x-ms-request-id"];
+            }
+
+            if (asyncResponse != null)
+                asyncResponse.Dispose();
+
+            return operationStatus;
         }
 
         public JobModelProxy GetJobDetails(RunbookModelProxy runbook)
@@ -333,7 +435,8 @@ namespace SMAStudiovNext.Services
             if (SettingsService.CurrentSettings == null)
                 return;
 
-            AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
+            //AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
+            Task.Run(() =>
             {
                 // Load all runbooks
                 var runbooksContent = SendRequest("runbooks");
@@ -363,84 +466,87 @@ namespace SMAStudiovNext.Services
                 {
                     _backendContext.SignalCompleted();
                 });
-            });
 
-            AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
-            {
-                // Load all variables
-                var variablesContent = SendRequest("variables");
-
-                if (variablesContent.Length > 0)
+                // Just load the runbooks first, so that we don't get 100+ message boxes with certificate errors
+                Task.Run(() =>
                 {
-                    dynamic variablesRaw = JObject.Parse(variablesContent);
+                    // Load all variables
+                    var variablesContent = SendRequest("variables");
 
-                    foreach (var entry in variablesRaw.value)
+                    if (variablesContent.Length > 0)
                     {
-                        var variable = new Variable();
-                        variable.VariableID = Guid.NewGuid();
-                        variable.Name = entry.name;
-                        variable.IsEncrypted = entry.properties.isEncrypted;
-                        variable.Value = (entry.properties.value != null ? entry.properties.value : "");
+                        dynamic variablesRaw = JObject.Parse(variablesContent);
 
-                        //_backendContext.Variables.Add(new ResourceContainer(variable.Name, new VariableModelProxy(variable, Context), IconsDescription.Variable));
-                        _backendContext.AddToVariables(new VariableModelProxy(variable, Context));
+                        foreach (var entry in variablesRaw.value)
+                        {
+                            var variable = new Variable();
+                            variable.VariableID = Guid.NewGuid();
+                            variable.Name = entry.name;
+                            variable.IsEncrypted = entry.properties.isEncrypted;
+                            variable.Value = (entry.properties.value != null ? entry.properties.value : "");
+
+                            //_backendContext.Variables.Add(new ResourceContainer(variable.Name, new VariableModelProxy(variable, Context), IconsDescription.Variable));
+                            _backendContext.AddToVariables(new VariableModelProxy(variable, Context));
+                        }
+
+                        variablesRaw = null;
                     }
+                });
 
-                    variablesRaw = null;
-                }
-            });
-
-            AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
-            {
-                // Load all credentials
-                var credentialsContent = SendRequest("credentials");
-
-                if (credentialsContent.Length > 0)
+                //AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
+                Task.Run(() =>
                 {
-                    dynamic credentialsRaw = JObject.Parse(credentialsContent);
+                    // Load all credentials
+                    var credentialsContent = SendRequest("credentials");
 
-                    foreach (var entry in credentialsRaw.value)
+                    if (credentialsContent.Length > 0)
                     {
-                        var credential = new Credential();
-                        credential.CredentialID = Guid.NewGuid();
-                        credential.Name = entry.name;
-                        credential.UserName = entry.properties.userName;
+                        dynamic credentialsRaw = JObject.Parse(credentialsContent);
 
-                        _backendContext.AddToCredentials(new CredentialModelProxy(credential, Context));
+                        foreach (var entry in credentialsRaw.value)
+                        {
+                            var credential = new Credential();
+                            credential.CredentialID = Guid.NewGuid();
+                            credential.Name = entry.name;
+                            credential.UserName = entry.properties.userName;
+
+                            _backendContext.AddToCredentials(new CredentialModelProxy(credential, Context));
+                        }
+
+                        credentialsRaw = null;
                     }
+                });
 
-                    credentialsRaw = null;
-                }
-            });
-
-            AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
-            {
-                // Load all schedules
-                var schedulesContent = SendRequest("schedules");
-
-                if (schedulesContent.Length > 0)
+                //AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
+                Task.Run(() =>
                 {
-                    dynamic schedulesRaw = JObject.Parse(schedulesContent);
+                    // Load all schedules
+                    var schedulesContent = SendRequest("schedules");
 
-                    foreach (var entry in schedulesRaw.value)
+                    if (schedulesContent.Length > 0)
                     {
-                        var schedule = new Schedule();
-                        schedule.ScheduleID = Guid.NewGuid();
-                        schedule.Name = entry.name;
-                        schedule.StartTime = entry.properties.startTime;
-                        schedule.ExpiryTime = entry.properties.expiryTime;
-                        schedule.IsEnabled = entry.properties.isEnabled;
+                        dynamic schedulesRaw = JObject.Parse(schedulesContent);
 
-                        if (entry.properties.frequency.Equals("day"))
-                            schedule.DayInterval = entry.properties.interval;
-                        else if (entry.properties.frequency.Equals("hour"))
-                            schedule.HourInterval = entry.properties.interval;
+                        foreach (var entry in schedulesRaw.value)
+                        {
+                            var schedule = new Schedule();
+                            schedule.ScheduleID = Guid.NewGuid();
+                            schedule.Name = entry.name;
+                            schedule.StartTime = entry.properties.startTime;
+                            schedule.ExpiryTime = entry.properties.expiryTime;
+                            schedule.IsEnabled = entry.properties.isEnabled;
 
-                        _backendContext.AddToSchedules(new ScheduleModelProxy(schedule, Context));
+                            if (entry.properties.frequency.Equals("day"))
+                                schedule.DayInterval = entry.properties.interval;
+                            else if (entry.properties.frequency.Equals("hour"))
+                                schedule.HourInterval = entry.properties.interval;
+
+                            _backendContext.AddToSchedules(new ScheduleModelProxy(schedule, Context));
+                        }
+
+                        schedulesRaw = null;
                     }
-
-                    schedulesRaw = null;
-                }
+                });
             });
         }
 
@@ -454,11 +560,13 @@ namespace SMAStudiovNext.Services
             SendRequest("jobs/" + jobId + "/resume", "POST", "", "0");
         }
 
-        public void Save(IViewModel instance)
+        public async Task<OperationResult> Save(IViewModel instance)
         {
+            var operationResult = default(OperationResult);
+
             if (instance.Model is RunbookModelProxy)
             {
-                SaveAzureRunbook(instance);
+                operationResult = await SaveAzureRunbook(instance);
             }
             else if (instance.Model is VariableModelProxy)
             {
@@ -478,9 +586,23 @@ namespace SMAStudiovNext.Services
             // And lastly, open the document (or put focus on it if its open)
             var shell = IoC.Get<IShell>();
             shell.OpenDocument((IDocument)instance);
+
+            // Wait for the operation to complete
+            if (operationResult.Status == OperationStatus.InProgress && !String.IsNullOrEmpty(operationResult.RequestUrl) && operationResult.RequestUrl.StartsWith("https://"))
+            {
+                do
+                {
+                    operationResult = await GetOperationResultAsync(operationResult.RequestUrl);
+
+                    Thread.Sleep(1000);
+                }
+                while (operationResult.Status == OperationStatus.InProgress);
+            }
+
+            return operationResult;
         }
 
-        private void SaveAzureRunbook(IViewModel viewModel)
+        private async Task<OperationResult> SaveAzureRunbook(IViewModel viewModel)
         {
             var runbook = viewModel.Model as RunbookModelProxy;
 
@@ -512,10 +634,21 @@ namespace SMAStudiovNext.Services
             }
             
             // Update the runbook
-            SendRequest("runbooks/" + runbook.RunbookName.ToUrlSafeString() + "/draft/content", "PUT", viewModel.Content, "text/powershell");
+            var result = SendRequest("runbooks/" + runbook.RunbookName.ToUrlSafeString() + "/draft/content", "PUT", viewModel.Content, "text/powershell");
+            
+            if (!String.IsNullOrEmpty(result))
+            {
+                return await GetOperationResultAsync(result);
+            }
 
             // Reset the unsaved changes flag
             viewModel.UnsavedChanges = false;
+
+            return new OperationResult
+            {
+                Status = OperationStatus.Succeeded,
+                HttpStatusCode = HttpStatusCode.OK
+            };
         }
 
         private void SaveAzureVariable(IViewModel viewModel)

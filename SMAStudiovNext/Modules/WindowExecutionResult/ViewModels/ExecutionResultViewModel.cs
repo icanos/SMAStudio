@@ -98,7 +98,8 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
         {
             var job = default(JobModelProxy);
 
-            AsyncExecution.Run(ThreadPriority.Normal, () =>
+            //AsyncExecution.Run(ThreadPriority.Normal, () =>
+            Task.Run(() =>
             {
                 // Wait for the job ID to be set by our backend service
                 while (_jobId == Guid.Empty)
