@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SMAStudiovNext.Modules.DialogDocumentation.Windows"
         mc:Ignorable="d"
-        Title="Select Documentation Template" Height="224" Width="508">
+        Title="Select Documentation Template" Height="277" Width="508">
     <Grid Margin="5,5,5,5">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200" />
@@ -15,6 +15,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
             <RowDefinition Height="70" />
+            <RowDefinition Height="28" />
+            <RowDefinition Height="28" />
             <RowDefinition Height="28" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
@@ -29,6 +31,14 @@
         <TextBox Grid.Column="1" Grid.Row="2" Padding="5,5,5,5" Margin="0,1,5,1" Text="{Binding TemplatePath}" />
         <Button Grid.Column="3" Grid.Row="2" Content="..." Width="30" HorizontalAlignment="Right" Margin="0,0,5,0" Click="OnLocateClicked" />
 
-        <Button Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="3" Content="{Binding ButtonText}" Margin="5,10,0,5" HorizontalAlignment="Right" Width="82" Click="OnGenerateClicked" />
+        <TextBlock Grid.Column="0" Grid.Row="3" Text="Document Output" HorizontalAlignment="Right" Margin="5,5,5,5" />
+        <TextBox Grid.Column="1" Grid.Row="3" Padding="5,5,5,5" Margin="0,1,5,1" Text="{Binding DocumentOutputPath}" />
+        <Button Grid.Column="3" Grid.Row="3" Content="..." Width="30" HorizontalAlignment="Right" Margin="0,0,5,0" Click="OnLocateDocumentOutputClicked" />
+
+        <TextBlock Grid.Column="0" Grid.Row="4" Text="Drawing Output" HorizontalAlignment="Right" Margin="5,5,5,5" />
+        <TextBox Grid.Column="1" Grid.Row="4" Padding="5,5,5,5" Margin="0,1,5,1" Text="{Binding DrawingOutputPath}" />
+        <Button Grid.Column="3" Grid.Row="4" Content="..." Width="30" HorizontalAlignment="Right" Margin="0,0,5,0" Click="OnLocateDrawingOutputClicked" />
+
+        <Button Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="3" Content="{Binding ButtonText}" Margin="5,10,0,5" HorizontalAlignment="Right" Width="82" Click="OnGenerateClicked" />
     </Grid>
 </Window>

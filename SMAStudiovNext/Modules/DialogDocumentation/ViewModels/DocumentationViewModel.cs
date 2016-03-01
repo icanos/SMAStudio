@@ -26,6 +26,18 @@ namespace SMAStudiovNext.Modules.DialogDocumentation.ViewModels
             NotifyOfPropertyChange(() => TemplatePath);
         }
 
+        public void SetDocumentOutputPath(string documentPath)
+        {
+            DocumentOutputPath = documentPath;
+            NotifyOfPropertyChange(() => DocumentOutputPath);
+        }
+
+        public void SetDrawingOutputPath(string documentPath)
+        {
+            DrawingOutputPath = documentPath;
+            NotifyOfPropertyChange(() => DrawingOutputPath);
+        }
+
         public void GenerateDocumentation()
         {
             using (var documentation = new DocumentationManager(_backendContext))
@@ -35,7 +47,7 @@ namespace SMAStudiovNext.Modules.DialogDocumentation.ViewModels
 
                 Task.Run(() =>
                 {
-                    documentation.Generate(TemplatePath);
+                    documentation.Generate(TemplatePath, DocumentOutputPath, DrawingOutputPath);
 
                     Execute.OnUIThread(() =>
                     {
@@ -49,6 +61,10 @@ namespace SMAStudiovNext.Modules.DialogDocumentation.ViewModels
         }
 
         public string TemplatePath { get; set; }
+
+        public string DocumentOutputPath { get; set; }
+
+        public string DrawingOutputPath { get; set; }
 
         public string ButtonText { get; set; }
     }

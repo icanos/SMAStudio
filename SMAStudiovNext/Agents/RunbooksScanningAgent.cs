@@ -29,7 +29,6 @@ namespace SMAStudiovNext.Agents
         private readonly IErrorList _errorList;
         private readonly IOutput _output;
         private readonly IShell _shell;
-        private readonly ICompletionProvider _completionProvider;
 
         private readonly object _syncLock = new object();
         private readonly Thread _backgroundThread;

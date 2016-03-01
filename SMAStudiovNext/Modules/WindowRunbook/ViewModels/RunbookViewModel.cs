@@ -51,6 +51,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         private string _content = string.Empty;
         private bool _unsavedChanges = false;
         private string _cachedSnippetContent = string.Empty;
+        private string _publishedContent = string.Empty;
 
         private IRunbookView _view;
 
@@ -107,7 +108,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 if (_runbook.DraftRunbookVersionID.HasValue)
                 {
                     GetContent(RunbookType.Draft, false);
-                    _view.TextEditor.LanguageContext.Parse(Content).ConfigureAwait(true);
+                    _view.TextEditor.LanguageContext.ParseAsync(Content).ConfigureAwait(true);
                 }
 
                 if (_runbook.PublishedRunbookVersionID.HasValue)
@@ -118,7 +119,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 Execute.OnUIThreadAsync(() =>
                 {
                     //_view.TextEditor.InitializeColorizer(_completionProvider.Context);
-                    _view.PublishedTextEditor.LanguageContext.Parse(_view.PublishedTextEditor.Text).ConfigureAwait(true);
+                    _view.PublishedTextEditor.LanguageContext.ParseAsync(_view.PublishedTextEditor.Text).ConfigureAwait(true);
 
                     var diff = new GitSharp.Diff(_view.TextEditor.Text, _view.PublishedTextEditor.Text);
                     DiffSectionA = diff.Sections;
@@ -358,6 +359,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                                     _view.PublishedTextEditor.Text = publishedContent;
 
                                 contentToReturn = publishedContent;
+                                _publishedContent = publishedContent;
                             });
 
                             stop = DateTime.Now;
@@ -406,7 +408,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
             Task.Run(async () =>
             {
-                await context.Parse(contentToParse);
+                await context.ParseAsync(contentToParse);
 
                 Execute.OnUIThread(() =>
                 {
@@ -871,6 +873,11 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             set;
         }
 
+        public ICompletionProvider CompletionProvider
+        {
+            get { return _completionProvider; }
+        }
+
         public ICommand GoToDefinitionCommand
         {
             get { return AppContext.Resolve<ICommand>("GoToDefinitionCommand"); }
@@ -880,11 +887,6 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         {
             get { return _runbook; }
         }
-
-        /*public ILocalCodeCompletionContext CodeCompletionContext
-        {
-            get { return _completionContext; }
-        }*/
 
         public int CaretOffset
         {
@@ -973,6 +975,11 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             }
         }
 
+        public string PublishedContent
+        {
+            get { return _publishedContent; }
+        }
+
         public string Tags
         {
             get { return _runbook != null ? _runbook.Tags : ""; }
@@ -994,12 +1001,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             get { return _unsavedChanges; }
             set { _unsavedChanges = value; NotifyOfPropertyChange(() => DisplayName); }
         }
-        /*
-        public Uri Uri
-        {
-            get { return new Uri(_backendContext.ConnectionUrl + "/Runbooks(guid'" + _runbook.RunbookID + "')"); }
-        }
-        */
+        
         public IEnumerable<GitSharp.Diff.Section> DiffSectionA { get; set; }
 
         public IEnumerable<GitSharp.Diff.Section> DiffSectionB { get; set; }

@@ -57,5 +57,39 @@ namespace SMAStudiovNext.Modules.DialogDocumentation.Windows
                 (DataContext as DocumentationViewModel).SetTemplate(fileOpenDialog.FileName);
             }
         }
+
+        private void OnLocateDocumentOutputClicked(object sender, EventArgs e)
+        {
+            var fileOpenDialog = new SaveFileDialog();
+            fileOpenDialog.Filter = "Word Documents|*.docx";
+            fileOpenDialog.Title = "Select where to save the documentation";
+            
+            var result = fileOpenDialog.ShowDialog();
+
+            if (result == null)
+                return;
+
+            if (result.Value)
+            {
+                (DataContext as DocumentationViewModel).SetDocumentOutputPath(fileOpenDialog.FileName);
+            }
+        }
+
+        private void OnLocateDrawingOutputClicked(object sender, EventArgs e)
+        {
+            var fileOpenDialog = new SaveFileDialog();
+            fileOpenDialog.Filter = "Visio Drawing|*.vdx";
+            fileOpenDialog.Title = "Select where to save the drawing";
+            
+            var result = fileOpenDialog.ShowDialog();
+
+            if (result == null)
+                return;
+
+            if (result.Value)
+            {
+                (DataContext as DocumentationViewModel).SetDrawingOutputPath(fileOpenDialog.FileName);
+            }
+        }
     }
 }

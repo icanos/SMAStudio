@@ -26,7 +26,7 @@ namespace SMAStudiovNext.Themes
 
         public void LoadThemes()
         {
-            string currentTheme = SettingsService.CurrentSettings.Theme == null ? DEFAULT_THEME : SettingsService.CurrentSettings.Theme;
+            string currentTheme = SettingsService.CurrentSettings != null && SettingsService.CurrentSettings.Theme != null ? SettingsService.CurrentSettings.Theme : DEFAULT_THEME;
 
             if (Directory.Exists(Path.Combine(AppHelper.CachePath, THEMES_FOLDER)))
             {

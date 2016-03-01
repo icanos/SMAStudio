@@ -3,13 +3,8 @@ using Gemini.Modules.Settings;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Services;
 using SMAStudiovNext.Themes;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SMAStudiovNext.Modules.Shell.ViewModels
 {
