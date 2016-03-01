@@ -39,6 +39,8 @@
                                     <MenuItem Header="New Runbook..." Command="{Binding NewRunbookCommand}" />
                                     <MenuItem Header="New Schedule..." Command="{Binding NewScheduleCommand}" />
                                     <MenuItem Header="New Variable..." Command="{Binding NewVariableCommand}" />
+                                    <Separator />
+                                    <MenuItem Header="Add Module" Command="{Binding NewModuleCommand}" />
                                 </MenuItem>
                                 <MenuItem Header="Job History" Command="{Binding HistoryCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
                                                                                   AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}" />
