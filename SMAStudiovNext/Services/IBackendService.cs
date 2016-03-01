@@ -17,6 +17,12 @@ namespace SMAStudiovNext.Services
         void Load();
 
         /// <summary>
+        /// Retrieve the structure to be displayed in the Environment Explorer
+        /// </summary>
+        /// <returns></returns>
+        ResourceContainer GetStructure();
+
+        /// <summary>
         /// Save the instance of the provided object
         /// </summary>
         Task<OperationResult> Save(IViewModel instance);

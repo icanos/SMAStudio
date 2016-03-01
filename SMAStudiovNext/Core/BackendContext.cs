@@ -54,6 +54,7 @@ namespace SMAStudiovNext.Core
             Schedules = new ObservableCollection<ResourceContainer>();
             Variables = new ObservableCollection<ResourceContainer>();
             Tags = new ObservableCollection<ResourceContainer>();
+            Modules = new ObservableCollection<ResourceContainer>();
 
             IsReady = false;
         }
@@ -64,6 +65,7 @@ namespace SMAStudiovNext.Core
             Credentials.Clear();
             Schedules.Clear();
             Variables.Clear();
+            Modules.Clear();
 
             _statusManager.SetText("Loading data from " + _backendConnection.Name + "...");
             _backendService.Load();
@@ -71,37 +73,7 @@ namespace SMAStudiovNext.Core
 
         public ResourceContainer GetStructure()
         {
-            var resource = new ResourceContainer(_backendConnection.Name, this, ContextType == ContextType.Azure ? IconsDescription.Cloud : IconsDescription.SMAStudio32);
-            resource.Context = this;
-            resource.IsExpanded = true;
-            resource.Title = _backendConnection.Name;
-
-            // Runbooks
-            var runbooks = new ResourceContainer("Runbooks", new Folder("Runbooks"), IconsDescription.Folder);
-            runbooks.Context = this;
-            runbooks.Items = Tags;
-            runbooks.IsExpanded = true;
-            resource.Items.Add(runbooks);
-
-            // Credentials
-            var credentials = new ResourceContainer("Credentials", new Folder("Credentials"), IconsDescription.Folder);
-            credentials.Context = this;
-            credentials.Items = Credentials;
-            resource.Items.Add(credentials);
-
-            // Schedules
-            var schedules = new ResourceContainer("Schedules", new Folder("Schedules"), IconsDescription.Folder);
-            schedules.Context = this;
-            schedules.Items = Schedules;
-            resource.Items.Add(schedules);
-
-            // Variables
-            var variables = new ResourceContainer("Variables", new Folder("Variables"), IconsDescription.Folder);
-            variables.Context = this;
-            variables.Items = Variables;
-            resource.Items.Add(variables);
-
-            return resource;
+            return _backendService.GetStructure();
         }
 
         public void AddToRunbooks(RunbookModelProxy runbook)
@@ -112,6 +84,14 @@ namespace SMAStudiovNext.Core
             });
         }
 
+        public void AddToModules(ModuleModelProxy module)
+        {
+            Execute.OnUIThread(() =>
+            {
+                Modules.Add(new ResourceContainer(module.ModuleName, module, IconsDescription.Folder));
+            });
+        }
+        
         public void AddToCredentials(CredentialModelProxy credential)
         {
             Execute.OnUIThread(() =>
@@ -233,6 +213,11 @@ namespace SMAStudiovNext.Core
         /// Contains a constructed tree of all runbooks based on tags
         /// </summary>
         public ObservableCollection<ResourceContainer> Tags { get; set; }
+
+        /// <summary>
+        /// Contains all modules found in the backend
+        /// </summary>
+        public ObservableCollection<ResourceContainer> Modules { get; set; }
 
         public IBackendService Service
         {

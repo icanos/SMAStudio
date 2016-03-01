@@ -214,6 +214,7 @@
     <Compile Include="Core\CertificateManager.cs" />
     <Compile Include="Core\Documentation\DocumentationComment.cs" />
     <Compile Include="Core\Documentation\DocumentationManager.cs" />
+    <Compile Include="Models\ModuleModelProxy.cs" />
     <Compile Include="Models\OperationResult.cs" />
     <Compile Include="Modules\DialogDocumentation\ViewModels\DocumentationViewModel.cs" />
     <Compile Include="Modules\DialogDocumentation\Windows\DocumentationWindow.xaml.cs">
@@ -221,6 +222,7 @@
     </Compile>
     <Compile Include="Modules\PartEnvironmentExplorer\Commands\DocumentationCommand.cs" />
     <Compile Include="Modules\Shell\Commands\AboutCommandHandler.cs" />
+    <Compile Include="Modules\Shell\Commands\NewModuleCommand.cs" />
     <Compile Include="Modules\Shell\ViewModels\SettingsEditorThemeViewModel.cs" />
     <Compile Include="Modules\Shell\Views\SettingsEditorThemeView.xaml.cs">
       <DependentUpon>SettingsEditorThemeView.xaml</DependentUpon>
@@ -358,6 +360,7 @@
     <Compile Include="Language\Snippets\CodeSnippet.cs" />
     <Compile Include="Vendor\Azure\Credential.cs" />
     <Compile Include="Vendor\Azure\Job.cs" />
+    <Compile Include="Vendor\Azure\Module.cs" />
     <Compile Include="Vendor\Azure\Parameter.cs" />
     <Compile Include="Vendor\Azure\Runbook.cs" />
     <Compile Include="Vendor\Azure\Schedule.cs" />

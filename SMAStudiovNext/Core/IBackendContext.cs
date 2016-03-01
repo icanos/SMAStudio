@@ -38,6 +38,8 @@ namespace SMAStudiovNext.Core
 
         void AddToSchedules(ScheduleModelProxy schedule);
 
+        void AddToModules(ModuleModelProxy module);
+
         void ParseTags();
         
         void SignalCompleted();
@@ -60,6 +62,8 @@ namespace SMAStudiovNext.Core
         ObservableCollection<ResourceContainer> Schedules { get; set; }
 
         ObservableCollection<ResourceContainer> Tags { get; set; }
+
+        ObservableCollection<ResourceContainer> Modules { get; set; }
 
         Guid ID { get; }
 

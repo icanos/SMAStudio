@@ -3,6 +3,7 @@ using Gemini.Framework;
 using Gemini.Framework.Services;
 using Gemini.Modules.Output;
 using SMAStudiovNext.Core;
+using SMAStudiovNext.Icons;
 using SMAStudiovNext.Language.Completion;
 using SMAStudiovNext.Models;
 using SMAStudiovNext.Modules.Runbook.ViewModels;
@@ -95,6 +96,41 @@ namespace SMAStudiovNext.Services
                     });
                 }
             }
+        }
+
+        public ResourceContainer GetStructure()
+        {
+            var resource = new ResourceContainer(_connectionData.Name, this, _backendContext.ContextType == ContextType.Azure ? IconsDescription.Cloud : IconsDescription.SMAStudio32);
+            resource.Context = _backendContext;
+            resource.IsExpanded = true;
+            resource.Title = _connectionData.Name;
+
+            // Runbooks
+            var runbooks = new ResourceContainer("Runbooks", new Folder("Runbooks"), IconsDescription.Folder);
+            runbooks.Context = _backendContext;
+            runbooks.Items = _backendContext.Tags;
+            runbooks.IsExpanded = true;
+            resource.Items.Add(runbooks);
+
+            // Credentials
+            var credentials = new ResourceContainer("Credentials", new Folder("Credentials"), IconsDescription.Folder);
+            credentials.Context = _backendContext;
+            credentials.Items = _backendContext.Credentials;
+            resource.Items.Add(credentials);
+
+            // Schedules
+            var schedules = new ResourceContainer("Schedules", new Folder("Schedules"), IconsDescription.Folder);
+            schedules.Context = _backendContext;
+            schedules.Items = _backendContext.Schedules;
+            resource.Items.Add(schedules);
+
+            // Variables
+            var variables = new ResourceContainer("Variables", new Folder("Variables"), IconsDescription.Folder);
+            variables.Context = _backendContext;
+            variables.Items = _backendContext.Variables;
+            resource.Items.Add(variables);
+
+            return resource;
         }
 
         /// <summary>

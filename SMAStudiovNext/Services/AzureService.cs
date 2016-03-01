@@ -517,6 +517,26 @@ namespace SMAStudiovNext.Services
                     }
                 });
 
+                Task.Run(() =>
+                {
+                    var modulesContent = SendRequest("modules");
+
+                    if (modulesContent.Length > 0)
+                    {
+                        dynamic modulesRaw = JObject.Parse(modulesContent);
+
+                        foreach (var entry in modulesRaw.value)
+                        {
+                            var module = new Module();
+                            module.ModuleName = entry.name;
+                            module.CreationTime = entry.properties.creationTime;
+                            module.LastModifiedTime = entry.properties.lastModifiedTime;
+
+                            _backendContext.AddToModules(new ModuleModelProxy(module, Context));
+                        }
+                    }
+                });
+
                 //AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
                 Task.Run(() =>
                 {
@@ -548,6 +568,53 @@ namespace SMAStudiovNext.Services
                     }
                 });
             });
+        }
+
+        public ResourceContainer GetStructure()
+        {
+            var resource = new ResourceContainer(_connectionData.Name, this, IconsDescription.Cloud);
+            resource.Context = _backendContext;
+            resource.IsExpanded = true;
+            resource.Title = _connectionData.Name;
+
+            // Runbooks
+            var runbooks = new ResourceContainer("Runbooks", new Folder("Runbooks"), IconsDescription.Folder);
+            runbooks.Context = _backendContext;
+            runbooks.Items = _backendContext.Tags;
+            runbooks.IsExpanded = true;
+            resource.Items.Add(runbooks);
+
+            // Connections
+            var connections = new ResourceContainer("Connections", new Folder("Connections"), IconsDescription.Folder);
+            connections.Context = _backendContext;
+            //credentials.Items = _backendContext.Credentials;
+            resource.Items.Add(connections);
+
+            // Credentials
+            var credentials = new ResourceContainer("Credentials", new Folder("Credentials"), IconsDescription.Folder);
+            credentials.Context = _backendContext;
+            credentials.Items = _backendContext.Credentials;
+            resource.Items.Add(credentials);
+
+            // Modules
+            var modules = new ResourceContainer("Modules", new Folder("Modules"), IconsDescription.Folder);
+            modules.Context = _backendContext;
+            modules.Items = _backendContext.Modules;
+            resource.Items.Add(modules);
+
+            // Schedules
+            var schedules = new ResourceContainer("Schedules", new Folder("Schedules"), IconsDescription.Folder);
+            schedules.Context = _backendContext;
+            schedules.Items = _backendContext.Schedules;
+            resource.Items.Add(schedules);
+
+            // Variables
+            var variables = new ResourceContainer("Variables", new Folder("Variables"), IconsDescription.Folder);
+            variables.Context = _backendContext;
+            variables.Items = _backendContext.Variables;
+            resource.Items.Add(variables);
+
+            return resource;
         }
 
         public void PauseExecution(Guid jobId)
