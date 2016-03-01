@@ -52,7 +52,9 @@ namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlightning
             var result = default(List<LanguageSegment>);
 
             if (currentContext != ExpressionType.MultilineComment)
+            {
                 result = _languageContext.GetLine(lineStr, line.Offset, line.EndOffset);
+            }
             else
             {
                 result = new List<LanguageSegment>();

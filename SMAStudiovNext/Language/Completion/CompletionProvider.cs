@@ -102,7 +102,7 @@ namespace SMAStudiovNext.Language.Completion
 
                 if (context != null && (context.Type == ExpressionType.QuotedString || context.Type == ExpressionType.SingleQuotedString))
                     return new CompletionResult(null);
-                
+
                 if (triggerChar != null)
                 {
                     completionData = new List<ICompletionData>();
@@ -206,54 +206,57 @@ namespace SMAStudiovNext.Language.Completion
                             break;
                     }
 
-                    if (includeNativePowershell)
+                }
+                else
+                    includeNativePowershell = true;
+
+                if (includeNativePowershell)
+                {
+                    // Get built in PS completion
+                    var ret = System.Management.Automation.CommandCompletion.MapStringInputToParsedInput(line, line.Length);
+                    var candidates =
+                        System.Management.Automation.CommandCompletion.CompleteInput(
+                            ret.Item1, ret.Item2, ret.Item3, null,
+                            System.Management.Automation.PowerShell.Create()
+                        ).CompletionMatches;
+
+                    var result = candidates.Where(item =>
+                            item.ResultType == System.Management.Automation.CompletionResultType.Command ||
+                            item.ResultType == System.Management.Automation.CompletionResultType.ParameterName ||
+                            item.ResultType == System.Management.Automation.CompletionResultType.ParameterValue ||
+                            item.ResultType == System.Management.Automation.CompletionResultType.Property ||
+                            item.ResultType == System.Management.Automation.CompletionResultType.Type ||
+                            item.ResultType == System.Management.Automation.CompletionResultType.Keyword
+                        ).ToList();
+
+                    foreach (var item in result)
                     {
-                        // Get built in PS completion
-                        var ret = System.Management.Automation.CommandCompletion.MapStringInputToParsedInput(line, line.Length);
-                        var candidates =
-                            System.Management.Automation.CommandCompletion.CompleteInput(
-                                ret.Item1, ret.Item2, ret.Item3, null,
-                                System.Management.Automation.PowerShell.Create()
-                            ).CompletionMatches;
-
-                        var result = candidates.Where(item =>
-                                item.ResultType == System.Management.Automation.CompletionResultType.Command ||
-                                item.ResultType == System.Management.Automation.CompletionResultType.ParameterName ||
-                                item.ResultType == System.Management.Automation.CompletionResultType.ParameterValue ||
-                                item.ResultType == System.Management.Automation.CompletionResultType.Property ||
-                                item.ResultType == System.Management.Automation.CompletionResultType.Type ||
-                                item.ResultType == System.Management.Automation.CompletionResultType.Keyword
-                            ).ToList();
-
-                        foreach (var item in result)
+                        switch (item.ResultType)
                         {
-                            switch (item.ResultType)
-                            {
-                                case System.Management.Automation.CompletionResultType.Type:
-                                case System.Management.Automation.CompletionResultType.Keyword:
-                                    completionData.Add(new KeywordCompletionData(item.CompletionText, IconsDescription.LanguageConstruct, item.ToolTip));
-                                    break;
-                                case System.Management.Automation.CompletionResultType.Command:
-                                    completionData.Add(new KeywordCompletionData(item.CompletionText, IconsDescription.Cmdlet, item.ToolTip));
-                                    break;
-                                case System.Management.Automation.CompletionResultType.ParameterName:
-                                    completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty, item.ToolTip));
-                                    break;
-                                case System.Management.Automation.CompletionResultType.ParameterValue:
-                                    completionData.Add(new ParameterValueCompletionData(item.CompletionText, item.ToolTip));
-                                    break;
-                                case System.Management.Automation.CompletionResultType.Property:
-                                    completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty, item.ToolTip, false));
-                                    break;
-                            }
+                            case System.Management.Automation.CompletionResultType.Type:
+                            case System.Management.Automation.CompletionResultType.Keyword:
+                                completionData.Add(new KeywordCompletionData(item.CompletionText, IconsDescription.LanguageConstruct, item.ToolTip));
+                                break;
+                            case System.Management.Automation.CompletionResultType.Command:
+                                completionData.Add(new KeywordCompletionData(item.CompletionText, IconsDescription.Cmdlet, item.ToolTip));
+                                break;
+                            case System.Management.Automation.CompletionResultType.ParameterName:
+                                completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty, item.ToolTip));
+                                break;
+                            case System.Management.Automation.CompletionResultType.ParameterValue:
+                                completionData.Add(new ParameterValueCompletionData(item.CompletionText, item.ToolTip));
+                                break;
+                            case System.Management.Automation.CompletionResultType.Property:
+                                completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty, item.ToolTip, false));
+                                break;
                         }
                     }
-
-                    if (completionData.Count == 0)
-                        _foundNoCompletions = true;
-
-                    completionData = completionData.OrderBy(item => item.Text).ToList();
                 }
+
+                if (completionData.Count == 0)
+                    _foundNoCompletions = true;
+
+                completionData = completionData.OrderBy(item => item.Text).ToList();
 
                 return new CompletionResult(completionData);
             });

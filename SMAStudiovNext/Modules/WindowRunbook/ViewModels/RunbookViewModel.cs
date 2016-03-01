@@ -85,6 +85,13 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             callback(true);
         }
 
+        protected override void OnDeactivate(bool close)
+        {
+            base.OnDeactivate(close);
+
+            Content = string.Empty; // Forces a download again when the runbook is opened
+        }
+
         /// <summary>
         /// Called when the view is loaded, takes care of loading the content from SMA/Azure and 
         /// hooks into some event handlers in the texteditor in order to get code completion to work
@@ -108,7 +115,12 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 if (_runbook.DraftRunbookVersionID.HasValue)
                 {
                     GetContent(RunbookType.Draft, false);
-                    _view.TextEditor.LanguageContext.ParseAsync(Content).ConfigureAwait(true);
+                    _view.TextEditor.LanguageContext.Parse(Content);
+
+                    Execute.OnUIThread(() =>
+                    {
+                        _view.TextEditor.TextArea.TextView.Redraw();
+                    });
                 }
 
                 if (_runbook.PublishedRunbookVersionID.HasValue)
@@ -116,10 +128,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                     GetContent(RunbookType.Published, true);
                 }
 
-                Execute.OnUIThreadAsync(() =>
+                Execute.OnUIThreadAsync(async () =>
                 {
-                    //_view.TextEditor.InitializeColorizer(_completionProvider.Context);
-                    _view.PublishedTextEditor.LanguageContext.ParseAsync(_view.PublishedTextEditor.Text).ConfigureAwait(true);
+                    await _view.PublishedTextEditor.LanguageContext.ParseAsync(_view.PublishedTextEditor.Text);
+                    _view.TextEditor.TextArea.TextView.Redraw();
 
                     var diff = new GitSharp.Diff(_view.TextEditor.Text, _view.PublishedTextEditor.Text);
                     DiffSectionA = diff.Sections;
@@ -360,6 +372,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
                                 contentToReturn = publishedContent;
                                 _publishedContent = publishedContent;
+
+                               // _view.PublishedTextEditor.TextArea.TextView.Redraw();
                             });
 
                             stop = DateTime.Now;
@@ -964,7 +978,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                             _view.TextEditor.Text = value;
                             _content = value;
 
-                            _view.TextEditor.InvalidateVisual();
+                            //_view.TextEditor.InvalidateVisual();
                         }
                     });
                 }
