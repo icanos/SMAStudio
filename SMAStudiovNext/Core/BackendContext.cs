@@ -55,6 +55,7 @@ namespace SMAStudiovNext.Core
             Variables = new ObservableCollection<ResourceContainer>();
             Tags = new ObservableCollection<ResourceContainer>();
             Modules = new ObservableCollection<ResourceContainer>();
+            Connections = new ObservableCollection<ResourceContainer>();
 
             IsReady = false;
         }
@@ -66,6 +67,7 @@ namespace SMAStudiovNext.Core
             Schedules.Clear();
             Variables.Clear();
             Modules.Clear();
+            Connections.Clear();
 
             _statusManager.SetText("Loading data from " + _backendConnection.Name + "...");
             _backendService.Load();
@@ -115,7 +117,15 @@ namespace SMAStudiovNext.Core
                 Schedules.Add(new ResourceContainer(schedule.Name, schedule, IconsDescription.Schedule));
             });
         }
-        
+
+        public void AddToConnections(ConnectionModelProxy connection)
+        {
+            Execute.OnUIThread(() =>
+            {
+                Connections.Add(new ResourceContainer(connection.Name, connection, IconsDescription.Connection));
+            });
+        }
+
         public void ParseTags()
         {
             var unmatchedTag = new Tag("(untagged)");
@@ -218,6 +228,11 @@ namespace SMAStudiovNext.Core
         /// Contains all modules found in the backend
         /// </summary>
         public ObservableCollection<ResourceContainer> Modules { get; set; }
+
+        /// <summary>
+        /// Contains all connections found in the backend
+        /// </summary>
+        public ObservableCollection<ResourceContainer> Connections { get; set; }
 
         public IBackendService Service
         {

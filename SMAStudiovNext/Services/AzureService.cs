@@ -435,6 +435,41 @@ namespace SMAStudiovNext.Services
             return jobs;
         }
 
+        public IList<ConnectionTypeModelProxy> GetConnectionTypes()
+        {
+            var result = new List<ConnectionTypeModelProxy>();
+            var connectionTypesContent = SendRequest("connectionTypes");
+
+            if (connectionTypesContent.Length == 0)
+                return null;
+
+            dynamic connectionTypesRaw = JObject.Parse(connectionTypesContent);
+
+            foreach (var entry in connectionTypesRaw.value)
+            {
+                var item = new ConnectionType();
+                item.Name = entry.name;
+                item.CreationTime = entry.properties.creationTime;
+                item.LastModifiedTime = entry.properties.lastModifiedTime;
+                item.ConnectionFields = new List<ConnectionField>();
+
+                foreach (var def in entry.properties.fieldDefinitions)
+                {
+                    var field = new ConnectionField();
+                    field.Name = def.Name;
+                    field.IsEncrypted = def.Value.isEncrypted;
+                    field.IsOptional = def.Value.isOptional;
+                    field.Type = def.Value.type;
+
+                    item.ConnectionFields.Add(field);
+                }
+
+                result.Add(new ConnectionTypeModelProxy(item, this.Context));
+            }
+
+            return result;
+        }
+
         public void Load()
         {
             if (SettingsService.CurrentSettings == null)
@@ -524,6 +559,35 @@ namespace SMAStudiovNext.Services
 
                 Task.Run(() =>
                 {
+                    var connectionsContent = SendRequest("connections");
+
+                    if (connectionsContent.Length > 0)
+                    {
+                        dynamic connectionsRaw = JObject.Parse(connectionsContent);
+                        var connectionTypes = GetConnectionTypes();
+
+                        foreach (var entry in connectionsRaw.value)
+                        {
+                            var connection = new Connection();
+                            connection.Name = entry.name;
+                            connection.Description = entry.properties.description;
+                            connection.CreationTime = entry.properties.creationTime;
+                            connection.LastModifiedTime = entry.properties.lastModifiedTime;
+
+                            var connectionType = connectionTypes.FirstOrDefault(type => type.Name.Equals(entry.properties.connectionType.name));
+                            if (connectionType != null)
+                                connection.ConnectionType = (ConnectionType)connectionType.Model;
+
+                            // NOTE: Do we need to enumerate the parameters here? Don't think we do since they are no use
+                            // to us until we want to edit a connection
+
+                            _backendContext.AddToConnections(new ConnectionModelProxy(connection, Context));
+                        }
+                    }
+                });
+
+                Task.Run(() =>
+                {
                     var modulesContent = SendRequest("modules");
 
                     if (modulesContent.Length > 0)
@@ -592,7 +656,7 @@ namespace SMAStudiovNext.Services
             // Connections
             var connections = new ResourceContainer("Connections", new Folder("Connections"), IconsDescription.Folder);
             connections.Context = _backendContext;
-            //credentials.Items = _backendContext.Credentials;
+            connections.Items = _backendContext.Connections;
             resource.Items.Add(connections);
 
             // Credentials

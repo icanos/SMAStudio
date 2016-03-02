@@ -23,6 +23,12 @@ namespace SMAStudiovNext.Services
         ResourceContainer GetStructure();
 
         /// <summary>
+        /// Returns a list of available connection types
+        /// </summary>
+        /// <returns></returns>
+        IList<ConnectionTypeModelProxy> GetConnectionTypes();
+
+        /// <summary>
         /// Save the instance of the provided object
         /// </summary>
         Task<OperationResult> Save(IViewModel instance);

@@ -133,6 +133,11 @@ namespace SMAStudiovNext.Services
             return resource;
         }
 
+        public IList<ConnectionTypeModelProxy> GetConnectionTypes()
+        {
+            return null;
+        }
+
         /// <summary>
         /// Save changes to a runbook, credential, schedule or variable.
         /// </summary>

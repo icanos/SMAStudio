@@ -40,6 +40,8 @@ namespace SMAStudiovNext.Core
 
         void AddToModules(ModuleModelProxy module);
 
+        void AddToConnections(ConnectionModelProxy connection);
+
         void ParseTags();
         
         void SignalCompleted();
@@ -64,6 +66,8 @@ namespace SMAStudiovNext.Core
         ObservableCollection<ResourceContainer> Tags { get; set; }
 
         ObservableCollection<ResourceContainer> Modules { get; set; }
+
+        ObservableCollection<ResourceContainer> Connections { get; set; }
 
         Guid ID { get; }
 

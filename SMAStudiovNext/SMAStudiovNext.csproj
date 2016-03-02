@@ -214,6 +214,8 @@
     <Compile Include="Core\CertificateManager.cs" />
     <Compile Include="Core\Documentation\DocumentationComment.cs" />
     <Compile Include="Core\Documentation\DocumentationManager.cs" />
+    <Compile Include="Models\ConnectionModelProxy.cs" />
+    <Compile Include="Models\ConnectionTypeModelProxy.cs" />
     <Compile Include="Models\ModuleModelProxy.cs" />
     <Compile Include="Models\OperationResult.cs" />
     <Compile Include="Modules\DialogDocumentation\ViewModels\DocumentationViewModel.cs" />
@@ -227,6 +229,10 @@
     <Compile Include="Modules\Shell\ViewModels\SettingsEditorThemeViewModel.cs" />
     <Compile Include="Modules\Shell\Views\SettingsEditorThemeView.xaml.cs">
       <DependentUpon>SettingsEditorThemeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\WindowConnection\ViewModels\ConnectionViewModel.cs" />
+    <Compile Include="Modules\WindowConnection\Views\ConnectionView.xaml.cs">
+      <DependentUpon>ConnectionView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\WindowModule\ViewModels\ModuleViewModel.cs" />
     <Compile Include="Modules\WindowModule\Views\ModuleView.xaml.cs">
@@ -363,6 +369,10 @@
     <Compile Include="Services\SettingsService.cs" />
     <Compile Include="Modules\DialogAddNewItem\Windows\UIAddNewItemDialog.xaml.cs" />
     <Compile Include="Language\Snippets\CodeSnippet.cs" />
+    <Compile Include="Vendor\Azure\Connection.cs" />
+    <Compile Include="Vendor\Azure\ConnectionField.cs" />
+    <Compile Include="Vendor\Azure\ConnectionFieldValue.cs" />
+    <Compile Include="Vendor\Azure\ConnectionType.cs" />
     <Compile Include="Vendor\Azure\Credential.cs" />
     <Compile Include="Vendor\Azure\Job.cs" />
     <Compile Include="Vendor\Azure\Module.cs" />
@@ -437,6 +447,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Modules\Shell\Views\SettingsEditorThemeView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Modules\WindowConnection\Views\ConnectionView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -586,6 +600,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icons\ListConnections.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\Connection.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

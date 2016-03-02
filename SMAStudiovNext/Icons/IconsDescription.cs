@@ -32,5 +32,6 @@ namespace SMAStudiovNext.Icons
         public const string Pause = "/SMAStudiovNext;component/Icons/Pause.png";
         public const string Resume = "/SMAStudiovNext;component/Icons/Resume.png";
         public const string Cloud = "/SMAStudiovNext;component/Icons/Cloud.png";
+        public const string Connection = "/SMAStudiovNext;component/Icons/Connection.png";
     }
 }
