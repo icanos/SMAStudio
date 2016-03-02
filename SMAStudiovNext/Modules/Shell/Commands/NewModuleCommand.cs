@@ -1,4 +1,9 @@
-﻿using System;
+﻿using Caliburn.Micro;
+using Gemini.Framework.Services;
+using SMAStudiovNext.Models;
+using SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels;
+using SMAStudiovNext.Modules.WindowModule.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,7 +23,12 @@ namespace SMAStudiovNext.Modules.Shell.Commands
 
         public void Execute(object parameter)
         {
-            
+            var shell = IoC.Get<IShell>();
+
+            var context = IoC.Get<EnvironmentExplorerViewModel>().GetCurrentContext();
+            var viewModel = new ModuleViewModel(new ModuleModelProxy(new SMA.Module(), context));
+
+            shell.OpenDocument(viewModel);
         }
     }
 }

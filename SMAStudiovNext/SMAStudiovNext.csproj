@@ -227,6 +227,10 @@
     <Compile Include="Modules\Shell\Views\SettingsEditorThemeView.xaml.cs">
       <DependentUpon>SettingsEditorThemeView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Modules\WindowModule\ViewModels\ModuleViewModel.cs" />
+    <Compile Include="Modules\WindowModule\Views\ModuleView.xaml.cs">
+      <DependentUpon>ModuleView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Themes\IThemeManager.cs" />
     <Compile Include="Themes\StylePart.cs" />
     <Compile Include="Themes\Theme.cs" />
@@ -452,6 +456,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Modules\PartPropertyGrid\Views\PropertyGridView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\WindowModule\Views\ModuleView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

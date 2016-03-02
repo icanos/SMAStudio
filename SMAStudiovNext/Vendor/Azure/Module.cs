@@ -10,6 +10,10 @@ namespace SMAStudiovNext.Vendor.Azure
     {
         public string ModuleName { get; set; }
 
+        public string ModuleUrl { get; set; }
+
+        public string ModuleVersion { get; set; }
+
         public DateTime CreationTime { get; set; }
 
         public DateTime LastModifiedTime { get; set; }

@@ -30,5 +30,33 @@ namespace SMAStudiovNext.Models
                 property.SetValue(instance, value);
             }
         }
+
+        public string ModuleUrl
+        {
+            get
+            {
+                var property = GetProperty("ModuleUrl");
+                return (string)property.GetValue(instance);
+            }
+            set
+            {
+                var property = GetProperty("ModuleUrl");
+                property.SetValue(instance, value);
+            }
+        }
+
+        public string ModuleVersion
+        {
+            get
+            {
+                var property = GetProperty("ModuleVersion");
+                return (string)property.GetValue(instance);
+            }
+            set
+            {
+                var property = GetProperty("ModuleVersion");
+                property.SetValue(instance, value);
+            }
+        }
     }
 }

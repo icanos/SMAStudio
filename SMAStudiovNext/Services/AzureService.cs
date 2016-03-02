@@ -110,6 +110,11 @@ namespace SMAStudiovNext.Services
                 var schedule = model as ScheduleModelProxy;
                 SendRequest("schedules/" + schedule.Name, "DELETE");
             }
+            else if (model is ModuleModelProxy)
+            {
+                var module = model as ModuleModelProxy;
+                SendRequest("modules/" + module.ModuleName, "DELETE");
+            }
 
             return true;
         }
@@ -647,6 +652,10 @@ namespace SMAStudiovNext.Services
             {
                 SaveAzureSchedule(instance);
             }
+            else if (instance.Model is ModuleModelProxy)
+            {
+                SaveAzureModule(instance);
+            }
             else
                 throw new NotImplementedException();
 
@@ -761,6 +770,23 @@ namespace SMAStudiovNext.Services
                 SendRequest("credentials/" + credential.Name.ToUrlSafeString(), "PATCH", JsonConvert.SerializeObject(dict), "application/json");
             }
 
+            viewModel.UnsavedChanges = false;
+        }
+
+        private void SaveAzureModule(IViewModel viewModel)
+        {
+            var module = viewModel.Model as ModuleModelProxy;
+
+            var dict = new Dictionary<string, object>();
+            var properties = new Dictionary<string, object>();
+            var contentLink = new Dictionary<string, object>();
+            contentLink.Add("uri", module.ModuleUrl);
+            contentLink.Add("version", module.ModuleVersion);
+            properties.Add("contentLink", contentLink);
+            dict.Add("properties", properties);
+            
+            SendRequest("modules/" + module.ModuleName.ToUrlSafeString(), "PUT", JsonConvert.SerializeObject(dict), "application/json");
+            
             viewModel.UnsavedChanges = false;
         }
 

@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="SMAStudiovNext.Modules.WindowModule.Views.ModuleView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SMAStudiovNext.Modules.WindowModule.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="50" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Label Content="Name" Grid.Column="0" Grid.Row="0" Margin="5,0,5,0" HorizontalAlignment="Right" />
+        <TextBox Grid.Column="1" Grid.Row="0" Margin="5,5,5,5" Text="{Binding Path=ModuleName, UpdateSourceTrigger=PropertyChanged}" Tag="ModuleName" />
+        
+        <Label Content="Module URL" Grid.Column="0" Grid.Row="0" Margin="5,0,5,0" HorizontalAlignment="Right" />
+        <TextBox Grid.Column="1" Grid.Row="0" Margin="5,5,5,5" Text="{Binding Path=ModuleUrl, UpdateSourceTrigger=PropertyChanged}" Tag="ModuleUrl" />
+
+        <TextBlock Grid.Column="1" Grid.Row="1">Specifies the public location of an existing .psm1 file containing a single PowerShell module, to be added to Azure Automation.
+<LineBreak />This location can be any public URL. If using Azure Storage, make sure the blob is public, or use a SAS link to the Azure Storage blob.</TextBlock>
+        
+        <Label Content="Version" Grid.Column="0" Grid.Row="2" Margin="5,0,5,0" HorizontalAlignment="Right" />
+        <TextBox Grid.Column="1" Grid.Row="2" Margin="5,5,5,5" Text="{Binding Path=ModuleVersion, UpdateSourceTrigger=PropertyChanged}" />
+    </Grid>
+</UserControl>
