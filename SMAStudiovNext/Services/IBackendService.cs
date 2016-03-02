@@ -29,6 +29,13 @@ namespace SMAStudiovNext.Services
         IList<ConnectionTypeModelProxy> GetConnectionTypes();
 
         /// <summary>
+        /// Enumerates all properties of a connection object
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        ConnectionModelProxy GetConnectionDetails(ConnectionModelProxy connection);
+
+        /// <summary>
         /// Save the instance of the provided object
         /// </summary>
         Task<OperationResult> Save(IViewModel instance);

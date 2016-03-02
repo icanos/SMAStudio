@@ -15,6 +15,7 @@
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -27,7 +28,7 @@
         <Label Content="Connection Type" Grid.Column="0" Grid.Row="2" Margin="5,0,5,0" HorizontalAlignment="Right" />
         <ComboBox Grid.Column="1" Grid.Row="2" Margin="5,5,5,5" ItemsSource="{Binding Path=ConnectionTypes}" SelectedItem="{Binding Path=ConnectionType}" />
 
-        <ItemsControl Grid.Row="3" Grid.ColumnSpan="2" ItemsSource="{Binding Path=Parameters}">
+        <ItemsControl Grid.Row="4" Grid.ColumnSpan="2" ItemsSource="{Binding Path=Parameters}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Grid>
@@ -35,11 +36,15 @@
                             <ColumnDefinition Width="200" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Label Content="{Binding Path=Name}" Grid.Column="0" Grid.Row="0" Margin="5,0,5,0" HorizontalAlignment="Right" />
+                        <Label Content="{Binding Path=DisplayName}" Grid.Column="0" Grid.Row="0" Margin="5,0,5,0" HorizontalAlignment="Right" />
                         <TextBox Grid.Column="1" Grid.Row="0" Margin="5,5,5,5" Text="{Binding Path=Value, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
+
+        <TextBlock Grid.Row="3" Grid.Column="1">
+            Encrypted values will not show up and will not change if you leave the fields empty.
+        </TextBlock>
     </Grid>
 </UserControl>

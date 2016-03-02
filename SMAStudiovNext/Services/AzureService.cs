@@ -98,22 +98,27 @@ namespace SMAStudiovNext.Services
             else if (model is VariableModelProxy)
             {
                 var variable = model as VariableModelProxy;
-                SendRequest("variables/" + variable.Name, "DELETE");
+                SendRequest("variables/" + variable.Name.ToUrlSafeString(), "DELETE");
             }
             else if (model is CredentialModelProxy)
             {
                 var credential = model as CredentialModelProxy;
-                SendRequest("credentials/" + credential.Name, "DELETE");
+                SendRequest("credentials/" + credential.Name.ToUrlSafeString(), "DELETE");
             }
             else if (model is ScheduleModelProxy)
             {
                 var schedule = model as ScheduleModelProxy;
-                SendRequest("schedules/" + schedule.Name, "DELETE");
+                SendRequest("schedules/" + schedule.Name.ToUrlSafeString(), "DELETE");
             }
             else if (model is ModuleModelProxy)
             {
                 var module = model as ModuleModelProxy;
-                SendRequest("modules/" + module.ModuleName, "DELETE");
+                SendRequest("modules/" + module.ModuleName.ToUrlSafeString(), "DELETE");
+            }
+            else if (model is ConnectionModelProxy)
+            {
+                var connection = model as ConnectionModelProxy;
+                SendRequest("connections/" + connection.Name.ToUrlSafeString(), "DELETE");
             }
 
             return true;
@@ -470,6 +475,37 @@ namespace SMAStudiovNext.Services
             return result;
         }
 
+        public ConnectionModelProxy GetConnectionDetails(ConnectionModelProxy connection)
+        {
+            var connectionContent = SendRequest("connections/" + connection.Name);
+
+            if (connectionContent.Length == 0)
+                return null;
+
+            dynamic connectionRaw = JObject.Parse(connectionContent);
+
+            var connectionType = (ConnectionType)connection.ConnectionType;
+
+            foreach (var entry in connectionRaw.properties.fieldDefinitionValues)
+            {
+                var field = connectionType.ConnectionFields.FirstOrDefault(item => item.Name.Equals(entry.Name, StringComparison.InvariantCultureIgnoreCase));
+
+                var fieldValue = new ConnectionFieldValue();
+                fieldValue.Connection = (Connection)connection.Model;
+                fieldValue.ConnectionFieldName = field.Name;
+                fieldValue.ConnectionName = fieldValue.Connection.Name;
+                fieldValue.ConnectionTypeName = connectionType.Name;
+                fieldValue.IsEncrypted = field.IsEncrypted;
+                fieldValue.IsOptional = field.IsOptional;
+                fieldValue.Value = entry.Value;
+                fieldValue.Type = field.Type;
+
+                (connection.ConnectionFieldValues as List<ConnectionFieldValue>).Add(fieldValue);
+            }
+
+            return connection;
+        }
+
         public void Load()
         {
             if (SettingsService.CurrentSettings == null)
@@ -574,7 +610,8 @@ namespace SMAStudiovNext.Services
                             connection.CreationTime = entry.properties.creationTime;
                             connection.LastModifiedTime = entry.properties.lastModifiedTime;
 
-                            var connectionType = connectionTypes.FirstOrDefault(type => type.Name.Equals(entry.properties.connectionType.name));
+                            var connectionTypeName = entry.properties.connectionType.name.ToString();
+                            var connectionType = connectionTypes.FirstOrDefault(type => type.Name.Equals(connectionTypeName, StringComparison.InvariantCultureIgnoreCase));
                             if (connectionType != null)
                                 connection.ConnectionType = (ConnectionType)connectionType.Model;
 
@@ -720,6 +757,10 @@ namespace SMAStudiovNext.Services
             {
                 SaveAzureModule(instance);
             }
+            else if (instance.Model is ConnectionModelProxy)
+            {
+                SaveAzureConnection(instance);
+            }
             else
                 throw new NotImplementedException();
 
@@ -851,6 +892,34 @@ namespace SMAStudiovNext.Services
             
             SendRequest("modules/" + module.ModuleName.ToUrlSafeString(), "PUT", JsonConvert.SerializeObject(dict), "application/json");
             
+            viewModel.UnsavedChanges = false;
+        }
+
+        private void SaveAzureConnection(IViewModel viewModel)
+        {
+            var connection = viewModel.Model as ConnectionModelProxy;
+
+            var dict = new Dictionary<string, object>();
+            var properties = new Dictionary<string, object>();
+            properties.Add("description", connection.Description);
+
+            var connectionType = new Dictionary<string, object>();
+            connectionType.Add("name", (connection.ConnectionType as ConnectionType).Name);
+            properties.Add("connectionType", connectionType);
+
+            var fieldDefinitionValues = new Dictionary<string, object>();
+            
+            foreach (var field in (connection.ConnectionFieldValues as List<ConnectionFieldValue>))
+            {
+                fieldDefinitionValues.Add(field.ConnectionFieldName, field.Value);
+            }
+
+            properties.Add("fieldDefinitionValues", fieldDefinitionValues);
+            dict.Add("name", connection.Name);
+            dict.Add("properties", properties);
+
+            SendRequest("connections/" + connection.Name.ToUrlSafeString(), "PUT", JsonConvert.SerializeObject(dict), "application/json");
+
             viewModel.UnsavedChanges = false;
         }
 

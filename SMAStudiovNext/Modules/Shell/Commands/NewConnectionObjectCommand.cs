@@ -3,6 +3,7 @@ using Gemini.Framework.Services;
 using SMAStudiovNext.Models;
 using SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels;
 using SMAStudiovNext.Modules.WindowConnection.ViewModels;
+using SMAStudiovNext.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,12 @@ namespace SMAStudiovNext.Modules.Shell.Commands
             var shell = IoC.Get<IShell>();
 
             var context = IoC.Get<EnvironmentExplorerViewModel>().GetCurrentContext();
-            var viewModel = new ConnectionViewModel(new ConnectionTypeModelProxy(new SMA.ConnectionType(), context));
+            var viewModel = default(ConnectionViewModel);
+
+            if (context.Service is AzureService)
+                viewModel = new ConnectionViewModel(new ConnectionModelProxy(new Vendor.Azure.Connection(), context));
+            else
+                viewModel = new ConnectionViewModel(new ConnectionModelProxy(new SMA.Connection(), context));
 
             shell.OpenDocument(viewModel);
         }

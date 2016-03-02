@@ -9,20 +9,22 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace SMAStudiovNext.Modules.WindowConnection.ViewModels
 {
     public class ConnectionViewModel : Document, IViewModel, ICommandHandler<SaveCommandDefinition>
     {
-        private readonly ConnectionTypeModelProxy model;
+        private readonly ConnectionModelProxy model;
 
-        public ConnectionViewModel(ConnectionTypeModelProxy connection)
+        public ConnectionViewModel(ConnectionModelProxy connection)
         {
             model = connection;
 
-            if (String.IsNullOrEmpty(connection.Name))
+            if (connection != null && String.IsNullOrEmpty(connection.Name))
             {
                 UnsavedChanges = true;
             }
@@ -33,18 +35,89 @@ namespace SMAStudiovNext.Modules.WindowConnection.ViewModels
 
             Task.Run(() =>
             {
+                // We need to read the info from our backend again since we don't
+                // get any property values when enumerating all connections
+                if (connection.ConnectionType != null)
+                    connection = connection.Context.Service.GetConnectionDetails(connection);
+
                 var result = Owner.GetConnectionTypes();
+
+                var connectionTypeNameProp = default(PropertyInfo);
+                if (connection.ConnectionType != null)
+                    connectionTypeNameProp = connection.ConnectionType.GetType().GetProperty("Name");
+                var connectionTypeName = string.Empty;
+                if (connectionTypeNameProp != null)
+                    connectionTypeName = connectionTypeNameProp.GetValue(connection.ConnectionType).ToString();
 
                 Execute.OnUIThread(() =>
                 {
                     foreach (var type in result)
+                    {
                         ConnectionTypes.Add(type);
+
+                        if (type.Name.Equals(connectionTypeName, StringComparison.InvariantCultureIgnoreCase))
+                            ConnectionType = type;
+                    }
+
+                    if (Owner is AzureService && connection.ConnectionType != null)
+                    {
+                        var fields = (connection.ConnectionFieldValues as List<Vendor.Azure.ConnectionFieldValue>);
+                        if (fields.Count > 0)
+                        {
+                            Parameters.Clear();
+
+                            foreach (var field in fields)
+                            {
+                                var paramName = field.ConnectionFieldName;
+
+                                if (field.IsEncrypted)
+                                    paramName = field.ConnectionFieldName + " (encrypted)";
+
+                                if (!field.IsOptional)
+                                    paramName += "*";
+
+                                Parameters.Add(new ConnectionViewParameter
+                                {
+                                    DisplayName = paramName,
+                                    Name = field.ConnectionFieldName,
+                                    Value = field.Value
+                                });
+                            }
+                        }
+                    }
+                    else if (Owner is SmaService && connection.ConnectionType != null)
+                        throw new NotSupportedException();
                 });
             });
         }
 
+        public override void CanClose(Action<bool> callback)
+        {
+            if (UnsavedChanges)
+            {
+                var result = MessageBox.Show("There are unsaved changes in the connection object, changes will be lost. Do you want to continue?", "Unsaved changes", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result != MessageBoxResult.Yes)
+                {
+                    callback(false);
+                    return;
+                }
+            }
+
+            callback(true);
+        }
+
         #region Properties
-        public string Description { get; set; }
+        private string _description;
+        public string Description
+        {
+            get { return _description; }
+            set
+            {
+                _description = value;
+                UnsavedChanges = true;
+            }
+        }
 
         public ObservableCollection<ConnectionTypeModelProxy> ConnectionTypes { get; set; }
 
@@ -54,7 +127,13 @@ namespace SMAStudiovNext.Modules.WindowConnection.ViewModels
             get { return _connectionType; }
             set
             {
-                _connectionType = value;
+                var connectionTypeToSet = ConnectionTypes.FirstOrDefault(item => item.Name.Equals(value.Name));
+
+                if (connectionTypeToSet != null)
+                    _connectionType = connectionTypeToSet;
+                else
+                    _connectionType = value;
+
                 Parameters.Clear();
 
                 // Determine if SMA or Azure
@@ -64,8 +143,17 @@ namespace SMAStudiovNext.Modules.WindowConnection.ViewModels
                     var connectionFields = (IList<Vendor.Azure.ConnectionField>)_connectionType.ConnectionFields;
                     foreach (var param in connectionFields)
                     {
+                        var paramName = param.Name;
+
+                        if (param.IsEncrypted)
+                            paramName = param.Name + " (encrypted)";
+
+                        if (!param.IsOptional)
+                            paramName += "*";
+
                         Parameters.Add(new ConnectionViewParameter
                         {
+                            DisplayName = paramName,
                             Name = param.Name
                         });
                     }
@@ -75,6 +163,8 @@ namespace SMAStudiovNext.Modules.WindowConnection.ViewModels
                     // SMA
                     throw new NotImplementedException();
                 }
+
+                UnsavedChanges = true;
             }
         }
 
@@ -108,6 +198,7 @@ namespace SMAStudiovNext.Modules.WindowConnection.ViewModels
             set
             {
                 model.Name = value;
+                UnsavedChanges = true;
                 NotifyOfPropertyChange(() => DisplayName);
             }
         }
@@ -160,9 +251,20 @@ namespace SMAStudiovNext.Modules.WindowConnection.ViewModels
             {
                 //model.Value = JsonConverter.ToJson(value);
                 model.ViewModel = this;
+                model.Description = Description;
+                model.ConnectionType = ConnectionType.Model;
+
+                foreach (var param in Parameters)
+                {
+                    (model.ConnectionFieldValues as List<Vendor.Azure.ConnectionFieldValue>).Add(new Vendor.Azure.ConnectionFieldValue
+                    {
+                        ConnectionFieldName = param.Name,
+                        Value = param.Value
+                    });
+                }
 
                 Owner.Save(this);
-                //Owner.Context.AddToVariables(model);
+                Owner.Context.AddToConnections(model);
 
                 // Update the UI to notify that the changes has been saved
                 UnsavedChanges = false;
@@ -172,9 +274,11 @@ namespace SMAStudiovNext.Modules.WindowConnection.ViewModels
 
         public class ConnectionViewParameter
         {
+            public string DisplayName { get; set; }
+
             public string Name { get; set; }
 
-            public object Value { get; set; }
+            public string Value { get; set; }
         }
     }
 }

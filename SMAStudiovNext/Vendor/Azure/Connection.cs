@@ -10,7 +10,7 @@ namespace SMAStudiovNext.Vendor.Azure
     {
         public Connection()
         {
-
+            ConnectionFieldValues = new List<ConnectionFieldValue>();
         }
 
         public string Name { get; set; }
@@ -22,5 +22,7 @@ namespace SMAStudiovNext.Vendor.Azure
         public DateTime LastModifiedTime { get; set; }
 
         public ConnectionType ConnectionType { get; set; }
+
+        public IList<ConnectionFieldValue> ConnectionFieldValues { get; set; }
     }
 }

@@ -8,6 +8,7 @@ using SMAStudiovNext.Modules.ExecutionResult.ViewModels;
 using SMAStudiovNext.Modules.Runbook.ViewModels;
 using SMAStudiovNext.Modules.Schedule.ViewModels;
 using SMAStudiovNext.Modules.Variable.ViewModels;
+using SMAStudiovNext.Modules.WindowConnection.ViewModels;
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -31,7 +32,7 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.Commands
             if (viewItem.Tag == null)
                 return false;
 
-            if (viewItem.Tag is RunbookModelProxy || viewItem.Tag is VariableModelProxy || viewItem.Tag is ScheduleModelProxy || viewItem.Tag is CredentialModelProxy)
+            if (viewItem.Tag is RunbookModelProxy || viewItem.Tag is VariableModelProxy || viewItem.Tag is ScheduleModelProxy || viewItem.Tag is CredentialModelProxy || viewItem.Tag is ConnectionModelProxy)
                 return true;
 
             return false;
@@ -63,6 +64,8 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.Commands
                         shell.OpenDocument(viewModel.GetViewModel<CredentialViewModel>());
                     else if (viewItem.Tag is ScheduleModelProxy)
                         shell.OpenDocument(viewModel.GetViewModel<ScheduleViewModel>());
+                    else if (viewItem.Tag is ConnectionModelProxy)
+                        shell.OpenDocument(viewModel.GetViewModel<ConnectionViewModel>());
 
                     shell.StatusBar.Items[0].Message = "";
 

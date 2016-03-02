@@ -87,6 +87,20 @@ namespace SMAStudiovNext.Models
             }
         }
 
+        public object ConnectionFieldValues
+        {
+            get
+            {
+                var property = GetProperty("ConnectionFieldValues");
+                return (object)property.GetValue(instance);
+            }
+            set
+            {
+                var property = GetProperty("ConnectionFieldValues");
+                property.SetValue(instance, value);
+            }
+        }
+
         public override string ToString()
         {
             return Name;

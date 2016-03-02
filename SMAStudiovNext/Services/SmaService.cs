@@ -138,6 +138,11 @@ namespace SMAStudiovNext.Services
             return null;
         }
 
+        public ConnectionModelProxy GetConnectionDetails(ConnectionModelProxy connection)
+        {
+            return connection;
+        }
+
         /// <summary>
         /// Save changes to a runbook, credential, schedule or variable.
         /// </summary>
