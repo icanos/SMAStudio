@@ -31,6 +31,7 @@ namespace SMAStudiovNext.Core
             _container.RegisterType<ICommand, NewScheduleCommand>("NewScheduleCommand");
             _container.RegisterType<ICommand, NewRunbookCommand>("NewRunbookCommand");
             _container.RegisterType<ICommand, NewModuleCommand>("NewModuleCommand");
+            _container.RegisterType<ICommand, NewConnectionObjectCommand>("NewConnectionObjectCommand");
             _container.RegisterType<ICommand, GoToDefinitionCommand>("GoToDefinitionCommand");
             _container.RegisterType<ICommand, GenerateCertificateCommand>("GenerateCertificateCommand");
             _container.RegisterType<ICommand, NewConnectionCommand>("NewConnectionCommand");

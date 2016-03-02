@@ -24,7 +24,11 @@ namespace SMAStudiovNext.Modules.WindowModule.ViewModels
             UnsavedChanges = true;
             Owner = module.Context.Service;
 
-            ModuleName = module.ModuleName;
+            if (module.ModuleName != null)
+                ModuleName = module.ModuleName;
+            else
+                ModuleName = string.Empty;
+
             ModuleVersion = "1.0.0.0";
         }
 

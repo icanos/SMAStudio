@@ -222,6 +222,7 @@
     </Compile>
     <Compile Include="Modules\PartEnvironmentExplorer\Commands\DocumentationCommand.cs" />
     <Compile Include="Modules\Shell\Commands\AboutCommandHandler.cs" />
+    <Compile Include="Modules\Shell\Commands\NewConnectionObjectCommand.cs" />
     <Compile Include="Modules\Shell\Commands\NewModuleCommand.cs" />
     <Compile Include="Modules\Shell\ViewModels\SettingsEditorThemeViewModel.cs" />
     <Compile Include="Modules\Shell\Views\SettingsEditorThemeView.xaml.cs">

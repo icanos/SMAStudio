@@ -36,6 +36,7 @@
                             <ContextMenu>
                                 <MenuItem Header="Add">
                                     <MenuItem Header="New Credential..." Command="{Binding NewCredentialCommand}" />
+                                    <MenuItem Header="New Connection..." Command="{Binding NewConnectionObjectCommand}" />
                                     <MenuItem Header="New Runbook..." Command="{Binding NewRunbookCommand}" />
                                     <MenuItem Header="New Schedule..." Command="{Binding NewScheduleCommand}" />
                                     <MenuItem Header="New Variable..." Command="{Binding NewVariableCommand}" />

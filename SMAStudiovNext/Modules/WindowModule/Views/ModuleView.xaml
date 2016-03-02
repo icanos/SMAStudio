@@ -13,6 +13,7 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
             <RowDefinition Height="50" />
             <RowDefinition Height="30" />
             <RowDefinition Height="*" />
@@ -21,13 +22,13 @@
         <Label Content="Name" Grid.Column="0" Grid.Row="0" Margin="5,0,5,0" HorizontalAlignment="Right" />
         <TextBox Grid.Column="1" Grid.Row="0" Margin="5,5,5,5" Text="{Binding Path=ModuleName, UpdateSourceTrigger=PropertyChanged}" Tag="ModuleName" />
         
-        <Label Content="Module URL" Grid.Column="0" Grid.Row="0" Margin="5,0,5,0" HorizontalAlignment="Right" />
-        <TextBox Grid.Column="1" Grid.Row="0" Margin="5,5,5,5" Text="{Binding Path=ModuleUrl, UpdateSourceTrigger=PropertyChanged}" Tag="ModuleUrl" />
+        <Label Content="Module URL" Grid.Column="0" Grid.Row="1" Margin="5,0,5,0" HorizontalAlignment="Right" />
+        <TextBox Grid.Column="1" Grid.Row="1" Margin="5,5,5,5" Text="{Binding Path=ModuleUrl, UpdateSourceTrigger=PropertyChanged}" Tag="ModuleUrl" />
 
-        <TextBlock Grid.Column="1" Grid.Row="1">Specifies the public location of an existing .psm1 file containing a single PowerShell module, to be added to Azure Automation.
+        <TextBlock Grid.Column="1" Grid.Row="2">Specifies the public location of an existing .zip file containing a single PowerShell module, to be added to Azure Automation.
 <LineBreak />This location can be any public URL. If using Azure Storage, make sure the blob is public, or use a SAS link to the Azure Storage blob.</TextBlock>
         
-        <Label Content="Version" Grid.Column="0" Grid.Row="2" Margin="5,0,5,0" HorizontalAlignment="Right" />
-        <TextBox Grid.Column="1" Grid.Row="2" Margin="5,5,5,5" Text="{Binding Path=ModuleVersion, UpdateSourceTrigger=PropertyChanged}" />
+        <Label Content="Version" Grid.Column="0" Grid.Row="3" Margin="5,0,5,0" HorizontalAlignment="Right" />
+        <TextBox Grid.Column="1" Grid.Row="3" Margin="5,5,5,5" Text="{Binding Path=ModuleVersion, UpdateSourceTrigger=PropertyChanged}" />
     </Grid>
 </UserControl>
