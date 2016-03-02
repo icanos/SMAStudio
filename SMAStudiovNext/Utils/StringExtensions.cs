@@ -10,7 +10,8 @@ namespace SMAStudiovNext.Core
     {
         public static string ToUrlSafeString(this string str)
         {
-            return str.Replace(" ", "%20");
+            // TODO: Maybe use real URL encoder instead? ;-)
+            return str.Replace(" ", "%20").Replace(".", "%2E").Replace("-", "%2D");
         }
     }
 }

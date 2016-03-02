@@ -103,9 +103,12 @@ namespace SMAStudiovNext.Modules.WindowModule.ViewModels
         {
             await Task.Run(delegate ()
             {
-                Owner.Save(this);
                 model.ViewModel = this;
+                model.ModuleName = ModuleName;
+                model.ModuleUrl = ModuleUrl;
+                model.ModuleVersion = ModuleVersion;
 
+                Owner.Save(this);
                 Owner.Context.AddToModules(model);
 
                 // Update the UI to notify that the changes has been saved

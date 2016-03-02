@@ -884,10 +884,12 @@ namespace SMAStudiovNext.Services
 
             var dict = new Dictionary<string, object>();
             var properties = new Dictionary<string, object>();
+
             var contentLink = new Dictionary<string, object>();
             contentLink.Add("uri", module.ModuleUrl);
             contentLink.Add("version", module.ModuleVersion);
             properties.Add("contentLink", contentLink);
+
             dict.Add("properties", properties);
             
             SendRequest("modules/" + module.ModuleName.ToUrlSafeString(), "PUT", JsonConvert.SerializeObject(dict), "application/json");
