@@ -240,7 +240,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         private void OnTextEntered(object sender, TextCompositionEventArgs e)
         {
             //_completionTimer.Change(200, 0);
-            ShowCompletionWindow(sender).ConfigureAwait(true);
+            //ShowCompletionWindow(sender).ConfigureAwait(false);
         }
 
         private void GetCompletionOffset(out int offset)
@@ -424,11 +424,6 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             Task.Run(async () =>
             {
                 await context.ParseAsync(contentToParse);
-
-                Execute.OnUIThread(() =>
-                {
-                    _view.TextEditor.InvalidateVisual();
-                });
             });
         }
 

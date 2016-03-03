@@ -81,7 +81,7 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
 
         private void InitializeColorizer()
         {
-            _highlightingColorizer = new SyntaxHighlightning.HighlightingColorizer(_languageContext);
+            //_highlightingColorizer = new SyntaxHighlightning.HighlightingColorizer(_languageContext);
 
             var assembly = Assembly.GetExecutingAssembly();
             var resourceName = "SMAStudiovNext.Modules.WindowRunbook.SyntaxHighlightning.Powershell.xshd";
@@ -95,10 +95,10 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
             stream.Close();
         }
 
-        protected override IVisualLineTransformer CreateColorizer(IHighlightingDefinition highlightingDefinition)
+        /*protected override IVisualLineTransformer CreateColorizer(IHighlightingDefinition highlightingDefinition)
         {
             return _highlightingColorizer;
-        }
+        }*/
 
         public LanguageContext LanguageContext
         {

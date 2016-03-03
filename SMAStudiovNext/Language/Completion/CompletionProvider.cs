@@ -212,6 +212,9 @@ namespace SMAStudiovNext.Language.Completion
 
                 if (includeNativePowershell)
                 {
+                    if (completionData == null)
+                        completionData = new List<ICompletionData>();
+
                     // Get built in PS completion
                     var ret = System.Management.Automation.CommandCompletion.MapStringInputToParsedInput(line, line.Length);
                     var candidates =

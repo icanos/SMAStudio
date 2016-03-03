@@ -1,18 +1,22 @@
 ﻿<?xml version="1.0"?>
 <SyntaxDefinition name="PowerShell" extensions=".ps1;.psm1;.psd1" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
-  <Color name="Comment" foreground="#75715E" exampleText="// comment" />
-  <Color name="String" foreground="#E6DB74" exampleText="string text = &quot;Hello, World!&quot;"/>
-  <Color name="Char" foreground="#AE81FF" exampleText="char linefeed = '\n';"/>
+  <Color name="Comment" foreground="#999988" exampleText="// comment" />
+  <Color name="String" foreground="#dd1144" exampleText="string text = &quot;Hello, World!&quot;"/>
+  <Color name="Char" foreground="#dd1144" exampleText="char linefeed = '\n';"/>
   <Color name="Punctuation" exampleText="a(b.c);" />
-  <Color name="NumberLiteral" foreground="#AE81FF" exampleText="3.1415f"/>
-  <Color name="Keywords" fontWeight="bold" foreground="#F92672" exampleText="if (a)"/>
-  <Color name="Variable" foreground="#66D9EF" exampleText="$param = 1" />
-  <Color name="ExceptionKeywords" fontWeight="bold" foreground="#A6E22E" />
-  <Color name="GotoKeywords" foreground="#F92672" />
+  <Color name="NumberLiteral" foreground="#2b9999" exampleText="3.1415f"/>
+  <Color name="Keywords" foreground="#000000" exampleText="if (a)"/>
+  <Color name="KeywordsBold" foreground="#000000" exampleText="if (a)"/>
+  <Color name="Parameter" foreground="#000000" />
+  <Color name="Name" foreground="#000000" />
+  <Color name="Variable" foreground="#268887" exampleText="$param = 1" />
+  <Color name="ExceptionKeywords" fontWeight="bold" foreground="#990201" />
+  <Color name="GotoKeywords" foreground="#990201" />
   <Color name="ReferenceTypes" foreground="Red" />
-  <Color name="Command" fontWeight="bold" foreground="#A6E22E" />
-  <Color name="Operators" foreground="#FF8515EA" exampleText="-eq"/>
-
+  <Color name="Command" fontWeight="bold" foreground="#990201" />
+  <Color name="Operators" foreground="#000000" background="#272720" exampleText="-eq" />
+  <Color name="Type" foreground="#000000" fontWeight="bold" />
+  
   <RuleSet ignoreCase="true">
     <Span color="Comment">
       <Begin>\#</Begin>
@@ -31,144 +35,64 @@
         <Span begin="\\" end="."/>
       </RuleSet>
     </Span>
-
-    <Span color="Char">
-      <Begin>'</Begin>
-      <End>'</End>
+    
+    <Span color="Keywords">
+      <Begin fontWeight="bold">
+        (workflow|function)
+      </Begin>
       <RuleSet>
-        <!-- span for escape sequences -->
-        <Span begin="\\" end="."/>
+        <Rule>
+          (([\w]+)-([\w]+))
+        </Rule>
       </RuleSet>
     </Span>
 
-    <Span color="String" multiline="true">
-      <Begin color="String">@"</Begin>
-      <End>"@</End>
-      <RuleSet>
-        <!-- span for escape sequences -->
-        <Span begin='""' end=""/>
-      </RuleSet>
-    </Span>
-
-    <Keywords color="Keywords">
-      <Word>while</Word>
-      <Word>param</Word>
-      <Word>end</Word>
-      <Word>define</Word>
-      <Word>else</Word>
-      <Word>from</Word>
-      <Word>foreach</Word>
-      <Word>var</Word>
-      <Word>dynamicparam</Word>
-      <Word>filter</Word>
-      <Word>dp</Word>
-      <Word>until</Word>
-      <Word>for</Word>
-      <Word>exit</Word>
-      <Word>switch</Word>
-      <Word>process</Word>
+    <!--<Span color="Parameter">
+      <Begin>-</Begin>
+      <End> </End>
+    </Span>-->
+    
+    <Keywords color="KeywordsBold">
       <Word>begin</Word>
+      <Word>break</Word>
+      <Word>catch</Word>
+      <Word>continue</Word>
+      <Word>data</Word>
+      <Word>do</Word>
+      <Word>dynamicparam</Word>
+      <Word>else</Word>
       <Word>elseif</Word>
+      <Word>end</Word>
+      <Word>exit</Word>
+      <Word>filter</Word>
+      <Word>finally</Word>
+      <Word>for</Word>
+      <Word>foreach</Word>
+      <Word>from</Word>
+      <Word>function</Word>
       <Word>if</Word>
       <Word>in</Word>
-      <Word>data</Word>
-      <Word>class</Word>
-      <Word>using</Word>
-      <Word>function</Word>
-      <Word>workflow</Word>
       <Word>inlinescript</Word>
-      <Word>parameter</Word>
-    </Keywords>
-
-    <Keywords color="ExceptionKeywords">
-      <Word>catch</Word>
-      <Word>finally</Word>
+      <Word>hidden</Word>
+      <Word>parallel</Word>
+      <Word>param</Word>
+      <Word>process</Word>
+      <Word>return</Word>
+      <Word>sequence</Word>
+      <Word>switch</Word>
       <Word>throw</Word>
       <Word>trap</Word>
+      <Word>util</Word>
       <Word>try</Word>
+      <Word>while</Word>
     </Keywords>
 
-    <Keywords color="GotoKeywords">
-      <Word>break</Word>
-      <Word>continue</Word>
-      <Word>return</Word>
-    </Keywords>
-
-    <Keywords color="ReferenceTypes">
-      <Word>class</Word>
-    </Keywords>
-
-    <Keywords color="Operators">
-      <Word>-not</Word>
-      <Word>-band</Word>
-      <Word>-bor</Word>
-      <Word>-replace</Word>
-      <Word>-ireplace</Word>
-      <Word>-creplace</Word>
-      <Word>-and</Word>
-      <Word>-or</Word>
-      <Word>-is</Word>
-      <Word>-isnot</Word>
-      <Word>-as</Word>
-      <Word>-lt</Word>
-      <Word>-le</Word>
-      <Word>-gt</Word>
-      <Word>-ge</Word>
-      <Word>-eq</Word>
-      <Word>-ne</Word>
-      <Word>-contains</Word>
-      <Word>-notcontains</Word>
-      <Word>-like</Word>
-      <Word>-notlike</Word>
-      <Word>-match</Word>
-      <Word>-notmatch</Word>
-    </Keywords>
-
-    <Rule color="Variable">
-      \$[\d\w_]+
+    <Rule color="KeywordsBold">
+      (([\w]+)-([\w])+)
     </Rule>
 
-    <Rule color="Command">
-      ([\w]-[\w])+
-    </Rule>
-
-    <Rule color="Command">
-      ([\w]-[\w]-[\w])+
-    </Rule>
-
-    <Rule color="Command">
-      ([\w]-[\w]-[\w]-[\w])+
-    </Rule>
-
-    <!-- Data type definitions -->
-    <Keywords color="Command">
-      <Word>string</Word>
-      <Word>int</Word>
-      <Word>boolean</Word>
-      <Word>DateTime</Word>
-      <Word>string[]</Word>
-      <Word>object</Word>
-    </Keywords>
-
-    <!-- Namespaces (.NET) -->
-    <Rule color="Keywords">
-      \b
-      [A-Za-z.]+  # namespace string
-      (?=\s*\]\:\:) # followed by ]::
-    </Rule>
-
-    <!-- Digits -->
-    <Rule color="NumberLiteral">
-      \b0[xX][0-9a-fA-F]+  # hex number
-      |
-      (	\b\d+(\.[0-9]+)?   #number with optional floating point
-      |	\.[0-9]+           #or just starting with floating point
-      )
-      ([eE][+-]?[0-9]+)? # optional exponent
-    </Rule>
-
-    <Rule color="Punctuation">
-      [?,.;()\[\]{}+\-/%*&lt;&gt;^+~!|&amp;]+
+    <Rule color="KeywordsBold">
+      (([\w]+)-([\w])+-([\w])+)
     </Rule>
   </RuleSet>
 </SyntaxDefinition>

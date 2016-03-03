@@ -308,12 +308,24 @@ namespace SMAStudiovNext.Services
                 }
                 finally
                 {
-                    response.Dispose();
+                    if (response != null)
+                        response.Dispose();
                 }
             }
             finally
             {
-                request.Dispose();
+                if (request != null)
+                    request.Dispose();
+            }
+
+            if (result.StartsWith("<Error") && retryAutomatically)
+            {
+                // Error!
+                result = await SendRawRequestAsync(url, requestMethod, requestBody, contentType, false);
+            }
+            else if (result.StartsWith("<Error"))
+            {
+                throw new WebException(result);
             }
 
             return result;
@@ -630,7 +642,12 @@ namespace SMAStudiovNext.Services
                 var resultHash = cryptoProvider.ComputeHash(rbBytes);
                 var resultHashB64 = Convert.ToBase64String(resultHash);
 
-                await SendRequestAsync("runbooks/" + runbook.RunbookName.ToUrlSafeString(), HttpMethod.Put, JsonConvert.SerializeObject(json), "application/json").ConfigureAwait(false);
+                var runbookData = await SendRequestAsync("runbooks/" + runbook.RunbookName.ToUrlSafeString(), HttpMethod.Put, JsonConvert.SerializeObject(json), "application/json").ConfigureAwait(false);
+
+                if (runbookData.Length > 0)
+                {
+                    runbook.RunbookID = Guid.NewGuid();
+                }
             }
 
             // Update the runbook

@@ -25,6 +25,8 @@ namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlightning
         private Brush _foregroundBrush;
         private string _foreground;
 
+        private Dictionary<int, List<LanguageSegment>> _lineCache = new Dictionary<int, List<LanguageSegment>>();
+
         public HighlightingColorizer(LanguageContext languageContext)
         {
             _languageContext = languageContext;
@@ -48,12 +50,21 @@ namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlightning
             if (lineStr == string.Empty)
                 return;
 
+            if (lineStr.EndsWith(" "))
+                _lineCache.Remove(line.LineNumber);
+
             var currentContext = _languageContext.PredictContext(line.LineNumber, lineStr);
             var result = default(List<LanguageSegment>);
 
             if (currentContext != ExpressionType.MultilineComment)
             {
-                result = _languageContext.GetLine(lineStr, line.Offset, line.EndOffset);
+                if (_lineCache.ContainsKey(line.LineNumber))
+                {
+                    result = _lineCache[line.LineNumber];
+                    result[result.Count - 1].Stop += 1;
+                }
+                else
+                    result = _languageContext.GetLine(lineStr, line.Offset, line.EndOffset);
             }
             else
             {
@@ -63,6 +74,11 @@ namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlightning
 
             if (result == null || result.Count == 0)
                 return;
+
+            if (_lineCache.ContainsKey(line.LineNumber))
+                _lineCache[line.LineNumber] = result;
+            else
+                _lineCache.Add(line.LineNumber, result);
 
             foreach (var item in result)
             {
