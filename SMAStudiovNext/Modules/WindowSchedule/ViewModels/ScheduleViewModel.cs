@@ -54,7 +54,7 @@ namespace SMAStudiovNext.Modules.Schedule.ViewModels
         {
             await Task.Run(delegate ()
             {
-                Owner.Save(this);
+                Owner.Save(this, command);
 
                 model.ViewModel = this;
 

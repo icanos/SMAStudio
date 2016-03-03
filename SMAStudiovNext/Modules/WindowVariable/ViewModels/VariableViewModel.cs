@@ -152,7 +152,7 @@ namespace SMAStudiovNext.Modules.Variable.ViewModels
                 model.Value = JsonConverter.ToJson(value);
                 model.ViewModel = this;
 
-                Owner.Save(this);
+                Owner.Save(this, command);
                 Owner.Context.AddToVariables(model);
 
                 // Update the UI to notify that the changes has been saved

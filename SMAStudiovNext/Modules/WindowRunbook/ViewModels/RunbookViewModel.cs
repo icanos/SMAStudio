@@ -28,6 +28,7 @@ using System.Windows.Input;
 using System.Linq;
 using SMAStudiovNext.Language.Snippets;
 using ICSharpCode.AvalonEdit.Document;
+using Gemini.Modules.ToolBars.Models;
 
 namespace SMAStudiovNext.Modules.Runbook.ViewModels
 {
@@ -88,8 +89,6 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         protected override void OnDeactivate(bool close)
         {
             base.OnDeactivate(close);
-
-            Content = string.Empty; // Forces a download again when the runbook is opened
         }
 
         /// <summary>
@@ -441,12 +440,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         public IList<ICompletionData> GetParameters(string completionWord)//(KeywordCompletionData completionData)
         {
             var completionEntries = new List<ICompletionData>();
-            var fixedCompletionWord = completionWord.Replace("-", "");
+            var fixedCompletionWord = completionWord != null ? completionWord.Replace("-", "") : null;
             Token[] tokens;
             ParseError[] parseErrors;
 
-            //if (completionData == null)
-            //    completionData = new KeywordCompletionData("");
             string contentToParse = Content;
             if (String.IsNullOrEmpty(Content))
             {
@@ -487,7 +484,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                         AttributeBaseAst attrib = null;
                         attrib = param.Attributes[param.Attributes.Count - 1]; // always the last one
 
-                        if (!param.Name.Extent.Text.Substring(1).StartsWith(fixedCompletionWord, StringComparison.InvariantCultureIgnoreCase))
+                        if (fixedCompletionWord != null && !param.Name.Extent.Text.Substring(1).StartsWith(fixedCompletionWord, StringComparison.InvariantCultureIgnoreCase))
                             continue;
 
                         if (param.Attributes.Count > 1)
@@ -524,8 +521,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                         //parameters.Add(input);
                         completionEntries.Add(input);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        var output = IoC.Get<IOutput>();
+                        output.AppendLine("Error parsing parameters: " + ex);
                     }
                 }
             }
@@ -707,7 +706,6 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                         output.AppendLine("Starting a test of '" + _runbook.RunbookName + "'...");
                     });
 
-                    //AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
                     await Task.Run(() =>
                     {
                         var guid = Owner.TestRunbook(_runbook, parameters);
@@ -828,24 +826,25 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
         private async Task SaveRunbook(Command command)
         {
-            var statusManager = AppContext.Resolve<IStatusManager>();
-            statusManager.SetText("Saving runbook...");
+            /*if (command == null)
+            {
+                var shell = IoC.Get<IShell>();
+                var toolBarItem = shell.ToolBars.Items[0].FirstOrDefault(item => (item as CommandToolBarItem).Text.Equals("Save"));
 
-            var result = await Owner.Save(this);
+                command = (Gemini.Framework.Commands.Command)(toolBarItem as CommandToolBarItem).Command;
+                command.Enabled = false;
+            }*/
 
-            if (result.Status == OperationStatus.Succeeded)
-                statusManager.SetTimeoutText("Successfully saved the runbook.", 5);
-            else if (result.Status == OperationStatus.Failed)
-                statusManager.SetTimeoutText("Error when saving the runbook, please check the output.", 5);
+            var result = await Owner.Save(this, command).ConfigureAwait(false);
 
             _runbook.ViewModel = this;
             _backendContext.AddToRunbooks(_runbook);
 
             // Update the UI to notify that the changes has been saved
-            UnsavedChanges = false;
+            Execute.OnUIThread(() => { UnsavedChanges = false; });
 
-            if (command != null)
-                command.Enabled = true;
+            //if (command != null)
+            //    command.Enabled = true;
         }
         #endregion
 
@@ -971,7 +970,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 {
                     _view.TextEditor.Dispatcher.Invoke(delegate ()
                     {
-                        if (!_view.TextEditor.Text.Equals(value))
+                        if (!_view.TextEditor.Text.Equals(value) && !String.IsNullOrEmpty(value))
                         {
                             if (!String.IsNullOrEmpty(_view.TextEditor.Text))
                                 UnsavedChanges = true;
@@ -981,6 +980,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
                             //_view.TextEditor.InvalidateVisual();
                         }
+                        //else if (String.IsNullOrEmpty(value))
+                            //throw new Exception(); // want to capture the stack trace to figure out why the draft gets emptied on Test
                     });
                 }
                 else
@@ -1002,10 +1003,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             {
                 if (_runbook == null)
                     return;
-
-                //if (_runbook.Tags.Equals(value))
-                //    return;
-
+                
                 _runbook.Tags = value;
                 UnsavedChanges = true;
             }

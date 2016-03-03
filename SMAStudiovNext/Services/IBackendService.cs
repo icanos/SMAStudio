@@ -1,4 +1,5 @@
-﻿using SMAStudiovNext.Core;
+﻿using Gemini.Framework.Commands;
+using SMAStudiovNext.Core;
 using SMAStudiovNext.Language.Completion;
 using SMAStudiovNext.Models;
 using SMAStudiovNext.Modules.Runbook.ViewModels;
@@ -38,7 +39,7 @@ namespace SMAStudiovNext.Services
         /// <summary>
         /// Save the instance of the provided object
         /// </summary>
-        Task<OperationResult> Save(IViewModel instance);
+        Task<OperationResult> Save(IViewModel instance, Command command);
         
         /// <summary>
         /// Publishes as runbook in SMA

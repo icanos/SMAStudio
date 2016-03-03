@@ -36,7 +36,7 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.Commands
             if (item.Tag == null)
                 return false;
 
-            if (item.Tag is RunbookModelProxy || item.Tag is VariableModelProxy || item.Tag is CredentialModelProxy || item.Tag is ScheduleModelProxy)
+            if (item.Tag is RunbookModelProxy || item.Tag is VariableModelProxy || item.Tag is CredentialModelProxy || item.Tag is ScheduleModelProxy || item.Tag is ModuleModelProxy || item.Tag is ConnectionModelProxy)
                 return true;
 
             return false;

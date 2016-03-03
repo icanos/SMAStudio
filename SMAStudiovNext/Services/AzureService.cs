@@ -21,6 +21,7 @@ using System.Security.Cryptography;
 using SMAStudiovNext.Language.Completion;
 using System.Threading;
 using System.Xml.Linq;
+using Gemini.Framework.Commands;
 
 namespace SMAStudiovNext.Services
 {
@@ -173,6 +174,8 @@ namespace SMAStudiovNext.Services
                 requestStream.Flush();
                 requestStream.Close();
             }
+            else
+                request.ContentLength = 0;
 
             var response = (HttpWebResponse)request.GetResponse();
 
@@ -733,7 +736,7 @@ namespace SMAStudiovNext.Services
             SendRequest("jobs/" + jobId + "/resume", "POST", "", "0");
         }
 
-        public async Task<OperationResult> Save(IViewModel instance)
+        public async Task<OperationResult> Save(IViewModel instance, Command command)
         {
             var operationResult = default(OperationResult);
 
@@ -769,16 +772,42 @@ namespace SMAStudiovNext.Services
             shell.OpenDocument((IDocument)instance);
 
             // Wait for the operation to complete
-            if (operationResult.Status == OperationStatus.InProgress && !String.IsNullOrEmpty(operationResult.RequestUrl) && operationResult.RequestUrl.StartsWith("https://"))
+            if (operationResult != null && operationResult.Status == OperationStatus.InProgress && !String.IsNullOrEmpty(operationResult.RequestUrl) && operationResult.RequestUrl.StartsWith("https://"))
             {
-                do
+                await Task.Run(async () =>
                 {
-                    operationResult = await GetOperationResultAsync(operationResult.RequestUrl);
+                    var maxRetries = 10;
+                    var counter = 0;
+                    var statusManager = IoC.Get<IStatusManager>();
 
-                    Thread.Sleep(1000);
-                }
-                while (operationResult.Status == OperationStatus.InProgress);
+                    do
+                    {
+                        operationResult = await GetOperationResultAsync(operationResult.RequestUrl);
+
+                        //Thread.Sleep(500);
+                        counter++;
+
+                        if (counter > maxRetries)
+                            break;
+                    }
+                    while (operationResult.Status == OperationStatus.InProgress);
+
+                    if (counter > 10)
+                    {
+                        var output = IoC.Get<IOutput>();
+                        output.AppendLine("Saving task is running long, saving continues in background while you continue with your work.");
+                    }
+
+                    if (operationResult.Status == OperationStatus.Succeeded)
+                        statusManager.SetTimeoutText("Successfully saved the runbook.", 5);
+                    else if (operationResult.Status == OperationStatus.Failed)
+                        statusManager.SetTimeoutText("Error when saving the runbook, please check the output.", 5);
+
+                }).ConfigureAwait(false);
             }
+
+            if (command != null)
+                Execute.OnUIThread(() => { command.Enabled = true; });
 
             return operationResult;
         }
@@ -1015,7 +1044,7 @@ namespace SMAStudiovNext.Services
 
         public void StopExecution(Guid jobId)
         {
-            SendRequest("jobs/" + jobId + "/stop", "POST", "", "0");
+            SendRequest("jobs/" + jobId + "/stop", "POST", "0");
         }
 
         public Guid? TestRunbook(RunbookModelProxy runbookProxy, List<SMA.NameValuePair> parameters)

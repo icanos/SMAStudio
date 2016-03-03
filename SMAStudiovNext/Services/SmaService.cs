@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework;
+using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
 using Gemini.Modules.Output;
 using SMAStudiovNext.Core;
@@ -147,7 +148,7 @@ namespace SMAStudiovNext.Services
         /// Save changes to a runbook, credential, schedule or variable.
         /// </summary>
         /// <param name="instance"></param>
-        public async Task<OperationResult> Save(IViewModel instance)
+        public async Task<OperationResult> Save(IViewModel instance, Command command)
         {
             Logger.DebugFormat("Save({0})", instance);
             var context = GetConnection();
@@ -197,6 +198,9 @@ namespace SMAStudiovNext.Services
                 Logger.Error("Error when saving the object.", ex);
                 XmlExceptionHandler.Show(xml);
             }
+
+            if (command != null)
+                Execute.OnUIThread(() => { command.Enabled = true; });
 
             return new OperationResult
             {

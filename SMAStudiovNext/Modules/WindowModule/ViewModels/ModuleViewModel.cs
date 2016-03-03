@@ -108,7 +108,7 @@ namespace SMAStudiovNext.Modules.WindowModule.ViewModels
                 model.ModuleUrl = ModuleUrl;
                 model.ModuleVersion = ModuleVersion;
 
-                Owner.Save(this);
+                Owner.Save(this, command);
                 Owner.Context.AddToModules(model);
 
                 // Update the UI to notify that the changes has been saved

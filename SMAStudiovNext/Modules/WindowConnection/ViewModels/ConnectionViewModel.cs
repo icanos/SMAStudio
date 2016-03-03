@@ -263,7 +263,7 @@ namespace SMAStudiovNext.Modules.WindowConnection.ViewModels
                     });
                 }
 
-                Owner.Save(this);
+                Owner.Save(this, command);
                 Owner.Context.AddToConnections(model);
 
                 // Update the UI to notify that the changes has been saved
