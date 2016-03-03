@@ -23,5 +23,7 @@ namespace SMAStudiovNext.Vendor.Azure
         public short? ErrorCount { get; set; }
 
         public short? WarningCount { get; set; }
+
+        public string JobException { get; set; }
     }
 }

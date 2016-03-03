@@ -78,12 +78,19 @@ namespace SMAStudiovNext.Services
         /// <summary>
         /// Retrieve information about a specific job from the backend service
         /// </summary>
+        /// <param name="jobId"></param>
+        /// <returns></returns>
+        Task<JobModelProxy> GetJobInformationAsync(Guid jobId);
+
+        /// <summary>
+        /// Retrieve details about a specific job from the backend service
+        /// </summary>
         /// <param name="jobId">Guid to retrieve information about</param>
         /// <returns>Proxy object or null</returns>
         JobModelProxy GetJobDetails(RunbookModelProxy runbooks);
 
         /// <summary>
-        /// Retrieve information about a specific job from the backend service
+        /// Retrieve details about a specific job from the backend service
         /// </summary>
         /// <param name="jobId"></param>
         /// <returns></returns>

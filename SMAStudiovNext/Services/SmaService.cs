@@ -579,6 +579,17 @@ namespace SMAStudiovNext.Services
             return connection;
         }
 
+        public async Task<JobModelProxy> GetJobInformationAsync(Guid jobId)
+        {
+            return await Task.Run(() =>
+            {
+                var context = GetConnection();
+                var model = context.Jobs.Where(j => j.JobID.Equals(jobId)).Select(j => new JobModelProxy(j, Context)).FirstOrDefault();
+
+                return model;
+            });
+        }
+
         /// <summary>
         /// Retrieve information about a specific job from SMA
         /// </summary>

@@ -48,6 +48,20 @@ namespace SMAStudiovNext.Models
             }
         }
 
+        public string JobException
+        {
+            get
+            {
+                var property = GetProperty("JobException");
+                return (string)property.GetValue(instance);
+            }
+            set
+            {
+                var property = GetProperty("JobException");
+                property.SetValue(instance, value);
+            }
+        }
+
         public DateTime? StartTime
         {
             get

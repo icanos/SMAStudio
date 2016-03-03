@@ -98,9 +98,9 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
         {
             var job = default(JobModelProxy);
 
-            //AsyncExecution.Run(ThreadPriority.Normal, () =>
             Task.Run(() =>
             {
+                //AsyncExecution.Run(ThreadPriority.Normal, () =>
                 // Wait for the job ID to be set by our backend service
                 while (_jobId == Guid.Empty)
                 {
@@ -117,7 +117,7 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
 
                 if (job != null)
                 {
-                    Execute.OnUIThreadAsync(() =>
+                    Execute.OnUIThread(() =>
                     {
                         foreach (var entry in job.Result)
                             Result.Add(entry);
@@ -136,18 +136,20 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
                         _propertyInfo.LastModifiedTime = job.LastModifiedTime;
                         _propertyInfo.ErrorCount = job.ErrorCount;
                         _propertyInfo.WarningCount = job.WarningCount;
+                        _propertyInfo.Exception = job.JobException;
 
                         _inspectorTool.SelectedObject = _propertyInfo;
                     });
                 }
 
+                bool hasDisplayedException = false;
                 while (!_completedExecutionStatus.Contains(job.JobStatus))
                 {
                     job = _backendService.GetJobDetails(_runbookViewModel.Runbook);
 
                     if (job != null)
                     {
-                        Execute.OnUIThreadAsync(() =>
+                        Execute.OnUIThread(() =>
                         {
                             JobStatus = job.JobStatus;
                             NotifyOfPropertyChange(() => DisplayName);
@@ -157,6 +159,17 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
                             _propertyInfo.ErrorCount = job.ErrorCount;
                             _propertyInfo.WarningCount = job.WarningCount;
                             _propertyInfo.JobStatus = job.JobStatus;
+                            _propertyInfo.Exception = job.JobException;
+
+                            if (!String.IsNullOrEmpty(job.JobException) && !hasDisplayedException)
+                            {
+                                var output = IoC.Get<IOutput>();
+                                output.AppendLine("Error when executing runbook:");
+                                output.AppendLine(job.JobException);
+                                output.AppendLine(" ");
+
+                                hasDisplayedException = true;
+                            }
 
                             _inspectorTool.SelectedObject = null;
                             _inspectorTool.SelectedObject = _propertyInfo;
@@ -171,10 +184,13 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
 
                 // The job is completed
                 _runbookViewModel.Runbook.JobID = Guid.Empty;
+            });
 
+            if (job != null)
+            {
                 var output = IoC.Get<IOutput>();
                 output.AppendLine("Job executed with status: " + job.JobStatus);
-            });
+            }
         }
 
         void ICommandHandler<PauseCommandDefinition>.Update(Command command)
@@ -306,6 +322,10 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
         [Category("Job")]
         [DisplayName("Warnings")]
         public short? WarningCount { get; set; }
+
+        [Category("Job")]
+        [DisplayName("Exception")]
+        public string Exception { get; set; }
 
         public override string ToString()
         {

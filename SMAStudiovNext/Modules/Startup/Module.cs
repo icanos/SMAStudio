@@ -4,6 +4,7 @@ using Gemini.Modules.ErrorList;
 using Gemini.Modules.Output;
 using SMAStudiovNext.Agents;
 using SMAStudiovNext.Core;
+using SMAStudiovNext.Core.Tracing;
 using SMAStudiovNext.Icons;
 using SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels;
 using SMAStudiovNext.Services;
@@ -48,6 +49,10 @@ namespace SMAStudiovNext.Modules.Startup
             AppContext.Start();
             GlobalExceptionHandler.Configure();
             CertificateManager.Configure();
+
+            // Enable tracing
+            TracingAdapter.SetWriter(new TracingInAppWriter());
+            TracingAdapter.IsEnabled = true;
 
             var themeManager = AppContext.Resolve<IThemeManager>();
             themeManager.LoadThemes();
