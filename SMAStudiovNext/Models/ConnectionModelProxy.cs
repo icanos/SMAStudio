@@ -17,6 +17,20 @@ namespace SMAStudiovNext.Models
             Context = backendContext;
         }
 
+        public Guid ConnectionID
+        {
+            get
+            {
+                var property = GetProperty("ConnectionID");
+                return (Guid)property.GetValue(instance);
+            }
+            set
+            {
+                var property = GetProperty("ConnectionID");
+                property.SetValue(instance, value);
+            }
+        }
+
         public string Name
         {
             get

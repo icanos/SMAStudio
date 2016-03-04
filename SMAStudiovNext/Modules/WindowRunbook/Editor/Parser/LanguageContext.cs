@@ -260,7 +260,7 @@ namespace SMAStudio.Modules.Runbook.Editor.Parser
             {
                 var context = _segments[i];
 
-                if (context.Type != ExpressionType.Keyword)
+                if (context.Type != ExpressionType.LanguageConstruct)
                     continue;
 
                 if (!context.Value.Equals("inlinescript", StringComparison.InvariantCultureIgnoreCase))

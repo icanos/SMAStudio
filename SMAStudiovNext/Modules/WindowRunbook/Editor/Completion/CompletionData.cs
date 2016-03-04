@@ -109,7 +109,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
             {
                 var ch = text[i];
 
-                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '(' || ch == ':')
+                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '(' || ch == ':' || ch == '.' || ch == '!')
                 {
                     startOffset = i + 1;
                     break;

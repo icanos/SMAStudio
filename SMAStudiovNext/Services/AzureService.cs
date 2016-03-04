@@ -166,42 +166,7 @@ namespace SMAStudiovNext.Services
             // And lastly, open the document (or put focus on it if its open)
             var shell = IoC.Get<IShell>();
             shell.OpenDocument((IDocument)instance);
-
-            // Wait for the operation to complete
-            /*if (operationResult != null && operationResult.Status == OperationStatus.InProgress && !String.IsNullOrEmpty(operationResult.RequestUrl) && operationResult.RequestUrl.StartsWith("https://"))
-            {
-                await Task.Run(async () =>
-                {
-                    var maxRetries = 10;
-                    var counter = 0;
-                    var statusManager = IoC.Get<IStatusManager>();
-
-                    do
-                    {
-                        operationResult = await GetOperationResultAsync(operationResult.RequestUrl);
-
-                        //Thread.Sleep(500);
-                        counter++;
-
-                        if (counter > maxRetries)
-                            break;
-                    }
-                    while (operationResult.Status == OperationStatus.InProgress);
-
-                    if (counter > 10)
-                    {
-                        var output = IoC.Get<IOutput>();
-                        output.AppendLine("Saving task is running long, saving continues in background while you continue with your work.");
-                    }
-
-                    if (operationResult.Status == OperationStatus.Succeeded)
-                        statusManager.SetTimeoutText("Successfully saved the runbook.", 5);
-                    else if (operationResult.Status == OperationStatus.Failed)
-                        statusManager.SetTimeoutText("Error when saving the runbook, please check the output.", 5);
-
-                }).ConfigureAwait(false);
-            }*/
-
+            
             if (command != null)
                 Execute.OnUIThread(() => { command.Enabled = true; });
 
@@ -342,7 +307,6 @@ namespace SMAStudiovNext.Services
             if (SettingsService.CurrentSettings == null)
                 return;
 
-            //AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
             Task.Run(() =>
             {
                 // Load all runbooks
@@ -392,7 +356,6 @@ namespace SMAStudiovNext.Services
                             variable.IsEncrypted = entry.properties.isEncrypted;
                             variable.Value = (entry.properties.value != null ? entry.properties.value : "");
 
-                            //_backendContext.Variables.Add(new ResourceContainer(variable.Name, new VariableModelProxy(variable, Context), IconsDescription.Variable));
                             _backendContext.AddToVariables(new VariableModelProxy(variable, Context));
                         }
 
@@ -400,7 +363,6 @@ namespace SMAStudiovNext.Services
                     }
                 });
 
-                //AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
                 Task.Run(() =>
                 {
                     // Load all credentials
@@ -474,7 +436,6 @@ namespace SMAStudiovNext.Services
                     }
                 });
 
-                //AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
                 Task.Run(() =>
                 {
                     // Load all schedules

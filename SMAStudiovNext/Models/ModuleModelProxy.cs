@@ -17,6 +17,20 @@ namespace SMAStudiovNext.Models
             Context = backendContext;
         }
 
+        public Guid ModuleID
+        {
+            get
+            {
+                var property = GetProperty("ModuleID");
+                return (Guid)property.GetValue(instance);
+            }
+            set
+            {
+                var property = GetProperty("ModuleID");
+                property.SetValue(instance, value);
+            }
+        }
+
         public string ModuleName
         {
             get

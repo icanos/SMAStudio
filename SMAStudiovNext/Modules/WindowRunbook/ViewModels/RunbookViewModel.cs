@@ -314,7 +314,6 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             var caretOffset = 0;
             var line = default(DocumentLine);
 
-            //AsyncExecution.ExecuteOnUIThread(() =>
             Execute.OnUIThread(() =>
             {
                 line = _view.TextEditor.Document.GetLineByOffset(_view.TextEditor.CaretOffset);

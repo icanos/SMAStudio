@@ -28,8 +28,6 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
         private PowershellFoldingStrategy _foldingStrategy;
         private LanguageContext _languageContext;
 
-        //private SyntaxHighlightning.HighlightingColorizer _highlightingColorizer = null;
-
         public RunbookEditor()
         {
             _languageContext = new LanguageContext();
@@ -81,8 +79,6 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
 
         private void InitializeColorizer()
         {
-            //_highlightingColorizer = new SyntaxHighlightning.HighlightingColorizer(_languageContext);
-
             var assembly = Assembly.GetExecutingAssembly();
             var resourceName = "SMAStudiovNext.Modules.WindowRunbook.SyntaxHighlightning.Powershell.xshd";
 
@@ -94,12 +90,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
             reader.Close();
             stream.Close();
         }
-
-        /*protected override IVisualLineTransformer CreateColorizer(IHighlightingDefinition highlightingDefinition)
-        {
-            return _highlightingColorizer;
-        }*/
-
+        
         public LanguageContext LanguageContext
         {
             get { return _languageContext; }

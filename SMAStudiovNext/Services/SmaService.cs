@@ -36,7 +36,6 @@ namespace SMAStudiovNext.Services
 
             _viewModelsCache = new Dictionary<object, object>();
             _runbookRunningCache = new Dictionary<Guid, bool>();
-            //_backendContext = AppContext.Resolve<IBackendContext>();
         }
 
         /// <summary>
@@ -64,6 +63,10 @@ namespace SMAStudiovNext.Services
                         foreach (var runbook in runbooks)
                             _backendContext.AddToRunbooks(new RunbookModelProxy(runbook, Context));
 
+                        var connections = context.Connections.OrderBy(r => r.Name).ToList();
+                        foreach (var connection in connections)
+                            _backendContext.AddToConnections(new ConnectionModelProxy(connection, Context));
+
                         var credentials = context.Credentials.OrderBy(c => c.Name).ToList();
                         foreach (var credential in credentials)
                             _backendContext.AddToCredentials(new CredentialModelProxy(credential, Context));
@@ -71,6 +74,10 @@ namespace SMAStudiovNext.Services
                         var variables = context.Variables.OrderBy(v => v.Name).ToList();
                         foreach (var variable in variables)
                             _backendContext.AddToVariables(new VariableModelProxy(variable, Context));
+
+                        var modules = context.Modules.OrderBy(m => m.ModuleName).ToList();
+                        foreach (var module in modules)
+                            _backendContext.AddToModules(new ModuleModelProxy(module, Context));
 
                         var schedules = context.Schedules.OrderBy(s => s.Name).ToList();
                         foreach (var schedule in schedules)
@@ -85,8 +92,10 @@ namespace SMAStudiovNext.Services
                             output.AppendLine(" ");
                             output.AppendLine("Statistics:");
                             output.AppendLine("Found Runbooks: " + _backendContext.Runbooks.Count);
+                            output.AppendLine("Found Connections: " + _backendContext.Connections.Count);
                             output.AppendLine("Found Credentials: " + _backendContext.Credentials.Count);
                             output.AppendLine("Found Variables: " + _backendContext.Variables.Count);
+                            output.AppendLine("Found Modules: " + _backendContext.Modules.Count);
                             output.AppendLine("Found Schedules: " + _backendContext.Schedules.Count);
                             output.AppendLine(" ");
 
@@ -112,11 +121,22 @@ namespace SMAStudiovNext.Services
             runbooks.IsExpanded = true;
             resource.Items.Add(runbooks);
 
+            // Connections
+            var connections = new ResourceContainer("Connections", new Folder("Connections"), IconsDescription.Folder);
+            connections.Context = _backendContext;
+            connections.Items = _backendContext.Connections;
+            resource.Items.Add(connections);
+
             // Credentials
             var credentials = new ResourceContainer("Credentials", new Folder("Credentials"), IconsDescription.Folder);
             credentials.Context = _backendContext;
             credentials.Items = _backendContext.Credentials;
             resource.Items.Add(credentials);
+
+            var modules = new ResourceContainer("Modules", new Folder("Modules"), IconsDescription.Folder);
+            modules.Context = _backendContext;
+            modules.Items = _backendContext.Modules;
+            resource.Items.Add(modules);
 
             // Schedules
             var schedules = new ResourceContainer("Schedules", new Folder("Schedules"), IconsDescription.Folder);
@@ -135,12 +155,44 @@ namespace SMAStudiovNext.Services
 
         public IList<ConnectionTypeModelProxy> GetConnectionTypes()
         {
-            return null;
+            try
+            {
+                var context = GetConnection();
+                var connectionTypes = context.ConnectionTypes.OrderBy(item => item.Name).ToList();
+                var result = new List<ConnectionTypeModelProxy>();
+
+                foreach (var connectionType in connectionTypes)
+                    result.Add(new ConnectionTypeModelProxy(connectionType, _backendContext));
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Unable to retrieve connection types. Please refer to the output for more information.", ex);
+            }
         }
 
         public ConnectionModelProxy GetConnectionDetails(ConnectionModelProxy connection)
         {
-            return connection;
+            try
+            {
+                var context = GetConnection();
+                var conn = context.Connections.FirstOrDefault(item => item.ConnectionID.Equals(connection.ConnectionID));
+
+                if (conn == null)
+                    return null;
+
+                foreach (var entry in conn.ConnectionFieldValues)
+                {
+                    (connection.ConnectionFieldValues as List<ConnectionFieldValue>).Add(entry);
+                }
+
+                return connection;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Unable to retrieve connection details. Please refer to the output for more information.", ex);
+            }
         }
 
         /// <summary>
@@ -178,6 +230,20 @@ namespace SMAStudiovNext.Services
                     if (proxy.GetSubType().Equals(typeof(SMA.Schedule)))
                         SaveSmaSchedule(context, instance);
                 }
+                else if (instance.Model is ConnectionModelProxy)
+                {
+                    var proxy = (ConnectionModelProxy)instance.Model;
+
+                    if (proxy.GetSubType().Equals(typeof(SMA.Connection)))
+                        SaveSmaConnection(context, instance);
+                }
+                else if (instance.Model is ModuleModelProxy)
+                {
+                    var proxy = (ModuleModelProxy)instance.Model;
+
+                    if (proxy.GetSubType().Equals(typeof(SMA.Module)))
+                        SaveSmaModule(context, instance);
+                }
                 else
                     throw new NotImplementedException();
 
@@ -207,6 +273,66 @@ namespace SMAStudiovNext.Services
                 Status = OperationStatus.Succeeded,
                 HttpStatusCode = HttpStatusCode.OK
             };
+        }
+
+        private void SaveSmaConnection(OrchestratorApi context, IViewModel instance)
+        {
+            Logger.DebugFormat("SaveSmaConnection(...)");
+
+            var connection = (SMA.Connection)((ConnectionModelProxy)instance.Model).Model;
+
+            if (connection.ConnectionID == Guid.Empty)
+            {
+                context.AddToConnections(connection);
+            }
+            else
+            {
+                var foundConnection = context.Connections.Where(s => s.ConnectionID == connection.ConnectionID).FirstOrDefault();
+
+                if (foundConnection == null)
+                {
+                    // The connection doesn't exist
+                    // NOTE: This suggests that the connection may have been created in another
+                    // environment and then reconnected to another SMA instance. How should this be handled?
+                    context.AddToConnections(connection);
+                }
+
+                foundConnection.Name = connection.Name;
+
+                context.UpdateObject(foundConnection);
+            }
+
+            context.SaveChanges();
+        }
+
+        private void SaveSmaModule(OrchestratorApi context, IViewModel instance)
+        {
+            Logger.DebugFormat("SaveSmaModule(...)");
+
+            var module = (SMA.Module)((ModuleModelProxy)instance.Model).Model;
+
+            if (module.ModuleID == Guid.Empty)
+            {
+                context.AddToModules(module);
+            }
+            else
+            {
+                var foundModule = context.Modules.Where(s => s.ModuleID == module.ModuleID).FirstOrDefault();
+
+                if (foundModule == null)
+                {
+                    // The module doesn't exist
+                    // NOTE: This suggests that the module may have been created in another
+                    // environment and then reconnected to another SMA instance. How should this be handled?
+                    context.AddToModules(module);
+                }
+
+                foundModule.ModuleName = module.ModuleName;
+
+                context.UpdateObject(foundModule);
+            }
+
+            context.SaveChanges();
         }
 
         private void SaveSmaSchedule(OrchestratorApi context, IViewModel instance)
@@ -449,8 +575,64 @@ namespace SMAStudiovNext.Services
                 return DeleteCredential((Credential)model.Model);
             else if (model is ScheduleModelProxy)
                 return DeleteSchedule((Schedule)model.Model);
+            else if (model is ConnectionModelProxy)
+                return DeleteConnection((Connection)model.Model);
+            else if (model is ModuleModelProxy)
+                return DeleteModule((Module)model.Model);
 
             return false;
+        }
+
+        private bool DeleteConnection(Connection connection)
+        {
+            Logger.DebugFormat("DeleteConnection(...)");
+
+            var context = GetConnection();
+            try
+            {
+                var foundConnection = context.Connections.Where(c => c.ConnectionID == connection.ConnectionID).FirstOrDefault();
+
+                if (foundConnection == null)
+                    return false;
+
+                context.DeleteObject(foundConnection);
+                context.SaveChanges();
+            }
+            catch (DataServiceQueryException ex)
+            {
+                Logger.Error("Error when deleting the connection.", ex);
+                //return false; // Probably already deleted
+
+                throw new ApplicationException("Error when deleting the connection. Please refer to the output for more information.", ex);
+            }
+
+            return true;
+        }
+
+        private bool DeleteModule(Module module)
+        {
+            Logger.DebugFormat("DeleteModule(...)");
+
+            var context = GetConnection();
+            try
+            {
+                var foundModule = context.Modules.Where(c => c.ModuleID == module.ModuleID).FirstOrDefault();
+
+                if (foundModule == null)
+                    return false;
+
+                context.DeleteObject(foundModule);
+                context.SaveChanges();
+            }
+            catch (DataServiceQueryException ex)
+            {
+                Logger.Error("Error when deleting the module.", ex);
+                //return false; // Probably already deleted
+
+                throw new ApplicationException("Error when deleting the module. Please refer to the output for more information.", ex);
+            }
+
+            return true;
         }
 
         private bool DeleteRunbook(Runbook runbook)
