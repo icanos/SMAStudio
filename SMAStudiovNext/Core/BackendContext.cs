@@ -2,14 +2,10 @@
 using SMAStudiovNext.Icons;
 using SMAStudiovNext.Models;
 using SMAStudiovNext.Services;
-using SMAStudiovNext.SMA;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SMAStudiovNext.Core
@@ -70,12 +66,12 @@ namespace SMAStudiovNext.Core
             Connections.Clear();
 
             _statusManager.SetText("Loading data from " + _backendConnection.Name + "...");
-            _backendService.Load();
+            Service.Load();
         }
 
         public ResourceContainer GetStructure()
         {
-            return _backendService.GetStructure();
+            return Service.GetStructure();
         }
 
         public void AddToRunbooks(RunbookModelProxy runbook)
@@ -186,12 +182,12 @@ namespace SMAStudiovNext.Core
 
         public string GetContent(string url)
         {
-            return _backendService.GetContent(url);
+            return Service.GetContent(url);
         }
 
         public async Task<string> GetContentAsync(string url)
         {
-            return await _backendService.GetContentAsync(url);
+            return await Service.GetContentAsync(url);
         }
         
         public void SignalCompleted()

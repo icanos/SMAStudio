@@ -17,7 +17,6 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Xml.Linq;
 
 namespace SMAStudiovNext.Services
@@ -188,15 +187,16 @@ namespace SMAStudiovNext.Services
             }
             catch (DataServiceQueryException ex)
             {
-                var xml = default(string);
+                /*var xml = default(string);
 
                 if (ex.InnerException != null)
                     xml = ex.InnerException.Message;
                 else
                     xml = ex.Message;
 
-                Logger.Error("Error when saving the object.", ex);
-                XmlExceptionHandler.Show(xml);
+                Logger.Error("Error when saving the object.", ex);*/
+                //XmlExceptionHandler.Show(xml);
+                throw new ApplicationException("Error when saving the object. Please refer to the output for more information", ex);
             }
 
             if (command != null)
@@ -349,7 +349,8 @@ namespace SMAStudiovNext.Services
                 catch (Exception e)
                 {
                     Logger.Error("Unable to verify the saved runbook.", e);
-                    throw new PersistenceException("Sorry, we were unable to save your runbook. Please refer to the log for more information.");
+                    //throw new PersistenceException("Sorry, we were unable to save your runbook. Please refer to the log for more information.");
+                    throw new ApplicationException("Error when saving the runbook. Please refer to the output for more information.", e);
                 }
 
                 if (ed != null && ed.EditLink != null)
@@ -363,7 +364,8 @@ namespace SMAStudiovNext.Services
                     catch (Exception e)
                     {
                         Logger.Error("Unable to save the runbook.", e);
-                        throw new PersistenceException("There was an error when saving the runbook. Please try again later.");
+                        throw new ApplicationException("Error when saving the runbook. Please refer to the output for more information.", e);
+                        //throw new PersistenceException("There was an error when saving the runbook. Please try again later.");
                     }
                     finally
                     {
@@ -375,7 +377,8 @@ namespace SMAStudiovNext.Services
 
                 if (savedRunbook == null)
                 {
-                    throw new PersistenceException("Unable to retrieve the saved runbook, something went wrong when trying to save the object. Please try again.");
+                    //throw new PersistenceException("Unable to retrieve the saved runbook, something went wrong when trying to save the object. Please try again.");
+                    throw new ApplicationException("Error when saving the object.");
                 }
 
                 instance.Model = savedRunbook;
@@ -429,7 +432,8 @@ namespace SMAStudiovNext.Services
             catch (Exception e)
             {
                 Logger.Error("Error when saving the runbook.", e);
-                throw new PersistenceException("Unable to save the changes, error: " + e.Message);
+                //throw new PersistenceException("Unable to save the changes, error: " + e.Message);
+                throw new ApplicationException("Error when saving the runbook. Please refer to the output for more information.", e);
             }
         }
 
@@ -467,7 +471,9 @@ namespace SMAStudiovNext.Services
             catch (DataServiceClientException ex)
             {
                 Logger.Error("Error when deleting the runbook.", ex);
-                return false;
+                //return false;
+
+                throw new ApplicationException("Error when deleting the runbook. Please refer to the output for more information.", ex);
             }
 
             return true;
@@ -491,7 +497,9 @@ namespace SMAStudiovNext.Services
             catch (DataServiceQueryException ex)
             {
                 Logger.Error("Error when deleting the variable.", ex);
-                return false; // Probably already deleted
+                //return false; // Probably already deleted
+
+                throw new ApplicationException("Error when deleting the variable. Please refer to the output for more information.", ex);
             }
 
             return true;
@@ -515,7 +523,9 @@ namespace SMAStudiovNext.Services
             catch (DataServiceQueryException ex)
             {
                 Logger.Error("Error when deleting the credential.", ex);
-                return false; // Probably already deleted
+                //return false; // Probably already deleted
+
+                throw new ApplicationException("Error when deleting the credential. Please refer to the output for more information.", ex);
             }
 
             return true;
@@ -539,7 +549,9 @@ namespace SMAStudiovNext.Services
             catch (DataServiceQueryException ex)
             {
                 Logger.Error("Error when deleting the schedule.", ex);
-                return false;
+                //return false;
+
+                throw new ApplicationException("Error when deleting the schedule. Please refer to the output for more information.", ex);
             }
 
             return true;
@@ -570,10 +582,11 @@ namespace SMAStudiovNext.Services
             {
                 Logger.Error("Unable to establish a connection to SMA.", ex);
 
-                if (!silent)
-                    MessageBox.Show("A connection could not be established to the Service Management Automation webservice, please verify connectivity. Error: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                //if (!silent)
+                //    MessageBox.Show("A connection could not be established to the Service Management Automation webservice, please verify connectivity. Error: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 
-                return null;
+                //return null;
+                throw new ApplicationException("A connection could not be established to the SMA service. Please verify connectivity.", ex);
             }
 
             return connection;
@@ -651,11 +664,12 @@ namespace SMAStudiovNext.Services
             {
                 Logger.Error("Error when communicating with the SMA webservice.", e);
 
-                var output = IoC.Get<IOutput>();
-                output.AppendLine("Unable to load data about job '" + jobId + "' from SMA. Error: " + e.Message);
+                //var output = IoC.Get<IOutput>();
+                //output.AppendLine("Unable to load data about job '" + jobId + "' from SMA. Error: " + e.Message);
 
-                MessageBox.Show("Error when retrieving job. Please refer to the output window.", "Error", MessageBoxButton.OK);
-                return null;
+                //MessageBox.Show("Error when retrieving job. Please refer to the output window.", "Error", MessageBoxButton.OK);
+                //return null;
+                throw new ApplicationException("Error when retrieving job information. Please refer to the output for more information.", e);
             }
 
             // Retrieve the content
@@ -744,7 +758,7 @@ namespace SMAStudiovNext.Services
 
                 if (!runbook.DraftRunbookVersionID.HasValue || runbook.DraftRunbookVersionID == Guid.Empty)
                 {
-                    MessageBox.Show("The runbook's already checked in.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                    //MessageBox.Show("The runbook's already checked in.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
                     return true;
                 }
 
@@ -757,7 +771,7 @@ namespace SMAStudiovNext.Services
                 }
                 catch (DataServiceQueryException ex)
                 {
-                    var xml = default(string);
+                    /*var xml = default(string);
 
                     if (ex.InnerException != null)
                         xml = ex.InnerException.Message;
@@ -767,7 +781,8 @@ namespace SMAStudiovNext.Services
                     Logger.Error("Error when publishing the runbook.", ex);
                     XmlExceptionHandler.Show(xml);
 
-                    return false;
+                    return false;*/
+                    throw new ApplicationException("Error when publishing the runbook. Please refer to the output for more information.", ex);
                 }
 
                 runbook.PublishedRunbookVersionID = publishedGuid;
@@ -804,7 +819,7 @@ namespace SMAStudiovNext.Services
                     }
                     catch (DataServiceQueryException ex)
                     {
-                        var xml = default(string);
+                        /*var xml = default(string);
 
                         if (ex.InnerException != null)
                             xml = ex.InnerException.Message;
@@ -814,13 +829,14 @@ namespace SMAStudiovNext.Services
                         Logger.Error("Error when checking out the runbook.", ex);
                         XmlExceptionHandler.Show(xml);
 
-                        return false;
+                        return false;*/
+                        throw new ApplicationException("Error when drafting the variable. Please refer to the output for more information.", ex);
                     }
                 }
                 else
                 {
                     //Core.Log.ErrorFormat("The runbook was already checked out.");
-                    MessageBox.Show("The runbook's already checked out.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                    //MessageBox.Show("The runbook's already checked out.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
                     return false;
                 }
 
@@ -854,8 +870,8 @@ namespace SMAStudiovNext.Services
                 context.SetSaveStream(entity, baseStream, true, "application/octet-stream", string.Empty);
                 context.SaveChanges();
                 */
-                var output = IoC.Get<IOutput>();
-                output.AppendLine("TODO: Implement assigning content to draft view.");
+                //var output = IoC.Get<IOutput>();
+                //output.AppendLine("TODO: Implement assigning content to draft view.");
 
                 return true;
             });
@@ -909,7 +925,7 @@ namespace SMAStudiovNext.Services
             }
             catch (DataServiceQueryException ex)
             {
-                var xml = default(string);
+                /*var xml = default(string);
 
                 if (ex.InnerException != null)
                     xml = ex.InnerException.Message;
@@ -917,10 +933,9 @@ namespace SMAStudiovNext.Services
                     xml = ex.Message;
 
                 Logger.Error("Error when testing the runbook.", ex);
-                XmlExceptionHandler.Show(xml);
+                XmlExceptionHandler.Show(xml);*/
+                throw new ApplicationException("Error when testing the runbook. Please refer to the output for more information.", ex);
             }
-
-            return null;
         }
 
         public IList<JobModelProxy> GetJobs(Guid runbookVersionId)
@@ -966,7 +981,7 @@ namespace SMAStudiovNext.Services
             }
             catch (DataServiceQueryException ex)
             {
-                var xml = default(string);
+                /*var xml = default(string);
 
                 if (ex.InnerException != null)
                     xml = ex.InnerException.Message;
@@ -974,7 +989,8 @@ namespace SMAStudiovNext.Services
                     xml = ex.Message;
 
                 Logger.Error("Error when trying to pause the runbook.", ex);
-                XmlExceptionHandler.Show(xml);
+                XmlExceptionHandler.Show(xml);*/
+                throw new ApplicationException("Error when pausing the runbook. Please refer to the output for more information.", ex);
             }
         }
 
@@ -998,7 +1014,7 @@ namespace SMAStudiovNext.Services
             }
             catch (DataServiceQueryException ex)
             {
-                var xml = default(string);
+                /*var xml = default(string);
 
                 if (ex.InnerException != null)
                     xml = ex.InnerException.Message;
@@ -1006,7 +1022,8 @@ namespace SMAStudiovNext.Services
                     xml = ex.Message;
 
                 Logger.Error("Error when trying to resume the runbook.", ex);
-                XmlExceptionHandler.Show(xml);
+                XmlExceptionHandler.Show(xml);*/
+                throw new ApplicationException("Error when resuming the variable. Please refer to the output for more information.", ex);
             }
         }
 
@@ -1030,7 +1047,7 @@ namespace SMAStudiovNext.Services
             }
             catch (DataServiceQueryException ex)
             {
-                var xml = default(string);
+                /*var xml = default(string);
 
                 if (ex.InnerException != null)
                     xml = ex.InnerException.Message;
@@ -1038,7 +1055,8 @@ namespace SMAStudiovNext.Services
                     xml = ex.Message;
 
                 Logger.Error("Error when trying to stop the runbook.", ex);
-                XmlExceptionHandler.Show(xml);
+                XmlExceptionHandler.Show(xml);*/
+                throw new ApplicationException("Error when stoping the runbook. Please refer to the output for more information.", ex);
             }
         }
 
@@ -1059,7 +1077,7 @@ namespace SMAStudiovNext.Services
             }
             catch (DataServiceQueryException ex)
             {
-                var xml = default(string);
+                /*var xml = default(string);
 
                 if (ex.InnerException != null)
                     xml = ex.InnerException.Message;
@@ -1067,10 +1085,9 @@ namespace SMAStudiovNext.Services
                     xml = ex.Message;
 
                 Logger.Error("Error when trying to start the runbook.", ex);
-                XmlExceptionHandler.Show(xml);
+                XmlExceptionHandler.Show(xml);*/
+                throw new ApplicationException("Error when starting the runbook. Please refer to the output for more information.", ex);
             }
-
-            return null;
         }
 
         public string GetContent(string url)

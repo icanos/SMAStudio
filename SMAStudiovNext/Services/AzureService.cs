@@ -65,7 +65,7 @@ namespace SMAStudiovNext.Services
             {
                 if (String.IsNullOrEmpty(_connectionData.AzureCertificateThumbprint))
                 {
-                    throw new CertificateException("Azure Service is enabled but no certificate has been chosen or generated. Please correct this by editing your Azure connection.");
+                    throw new ApplicationException("Azure Service is enabled but no certificate has been chosen or generated. Please correct this by editing your Azure connection.");
                 }
 
                 _certificate = CertificateManager.FindCertificate(_connectionData.AzureCertificateThumbprint);
@@ -301,7 +301,7 @@ namespace SMAStudiovNext.Services
                         else
                         {
                             var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                            throw new WebException(content);
+                            throw new ApplicationException(content);
                         }
                     }
 
@@ -331,7 +331,7 @@ namespace SMAStudiovNext.Services
             }
             else if (result.StartsWith("<Error"))
             {
-                throw new WebException(result);
+                throw new ApplicationException(result);
             }
 
             return result;
@@ -701,12 +701,12 @@ namespace SMAStudiovNext.Services
             }
             catch (WebException ex)
             {
-                if (ex.Status == WebExceptionStatus.ProtocolError && (ex.Response as HttpWebResponse).StatusCode == HttpStatusCode.BadRequest)
-                    MessageBox.Show("A job is already running, please wait for that to complete and then try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                else
-                    MessageBox.Show("An unknown error occurred when trying to start the runbook: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                //if (ex.Status == WebExceptionStatus.ProtocolError && (ex.Response as HttpWebResponse).StatusCode == HttpStatusCode.BadRequest)
+                //    MessageBox.Show("A job is already running, please wait for that to complete and then try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                //else
+                //    MessageBox.Show("An unknown error occurred when trying to start the runbook: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 
-                return null;
+                throw new ApplicationException("An error occurred when starting the runbook, please refer to the output.", ex);
             }
 
             return jobGuid;
@@ -738,12 +738,13 @@ namespace SMAStudiovNext.Services
             }
             catch (WebException ex)
             {
-                if (ex.Status == WebExceptionStatus.ProtocolError && (ex.Response as HttpWebResponse).StatusCode == HttpStatusCode.BadRequest)
+                /*if (ex.Status == WebExceptionStatus.ProtocolError && (ex.Response as HttpWebResponse).StatusCode == HttpStatusCode.BadRequest)
                     MessageBox.Show("A job is already running, please wait for that to complete and then try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 else
-                    MessageBox.Show("An unknown error occurred when trying to test the runbook: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("An unknown error occurred when trying to test the runbook: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);*/
 
-                return null;
+                //return null;
+                throw new ApplicationException("An error occurred when testing the runbook, please refer to the output.", ex);
             }
 
             return jobGuid;
