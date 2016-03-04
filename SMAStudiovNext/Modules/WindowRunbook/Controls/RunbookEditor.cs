@@ -28,7 +28,7 @@ namespace SMAStudiovNext.Modules.Runbook.Controls
         private PowershellFoldingStrategy _foldingStrategy;
         private LanguageContext _languageContext;
 
-        private SyntaxHighlightning.HighlightingColorizer _highlightingColorizer = null;
+        //private SyntaxHighlightning.HighlightingColorizer _highlightingColorizer = null;
 
         public RunbookEditor()
         {

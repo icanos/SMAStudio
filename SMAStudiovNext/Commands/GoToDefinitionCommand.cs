@@ -11,11 +11,9 @@ namespace SMAStudiovNext.Commands
 {
     public class GoToDefinitionCommand : ICommand
     {
-        private readonly IBackendContext _backendContext;
-
         public GoToDefinitionCommand()
         {
-            _backendContext = AppContext.Resolve<IBackendContext>();
+            
         }
 
         private EventHandler _internalCanExecuteChanged;
@@ -45,7 +43,7 @@ namespace SMAStudiovNext.Commands
                 return false;
             
             // Check if we have placed the cursor in a keyword and if the word that the cursor is placed upon is a runbook or not
-            if (context.Type != Language.ExpressionType.Keyword || (context.Type == Language.ExpressionType.Keyword && _backendContext.Runbooks.Count(r => ((RunbookModelProxy)r.Tag).RunbookName.Equals(context.Value, StringComparison.InvariantCultureIgnoreCase)) == 0))
+            if (context.Type != Language.ExpressionType.Keyword || (context.Type == Language.ExpressionType.Keyword && runbookViewModel.Context.Runbooks.Count(r => ((RunbookModelProxy)r.Tag).RunbookName.Equals(context.Value, StringComparison.InvariantCultureIgnoreCase)) == 0))
                 return false;
 
             return true;
@@ -62,7 +60,7 @@ namespace SMAStudiovNext.Commands
             if (context == null)
                 return;
 
-            var runbook = _backendContext.Runbooks.FirstOrDefault(r => ((RunbookModelProxy)r.Tag).RunbookName.Equals(context.Value, StringComparison.InvariantCultureIgnoreCase));
+            var runbook = runbookViewModel.Context.Runbooks.FirstOrDefault(r => ((RunbookModelProxy)r.Tag).RunbookName.Equals(context.Value, StringComparison.InvariantCultureIgnoreCase));
 
             if (runbook == null)
                 return;

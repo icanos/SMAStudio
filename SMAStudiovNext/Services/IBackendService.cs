@@ -136,6 +136,13 @@ namespace SMAStudiovNext.Services
         string GetContent(string url);
 
         /// <summary>
+        /// Download content for a specific URL
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        Task<string> GetContentAsync(string url);
+
+        /// <summary>
         /// Returns the URL which the web service responds to
         /// </summary>
         /// <returns></returns>

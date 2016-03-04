@@ -188,6 +188,11 @@ namespace SMAStudiovNext.Core
         {
             return _backendService.GetContent(url);
         }
+
+        public async Task<string> GetContentAsync(string url)
+        {
+            return await _backendService.GetContentAsync(url);
+        }
         
         public void SignalCompleted()
         {

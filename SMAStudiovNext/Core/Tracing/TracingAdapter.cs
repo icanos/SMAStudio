@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Caliburn.Micro;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -38,11 +39,17 @@ namespace SMAStudiovNext.Core.Tracing
         {
             if (IsEnabled)
             {
-                _writer.Write(String.Format("{0}: {1} {2}", invocationId, instance, method));
-                foreach (var param in parameters)
+                Execute.OnUIThread(() =>
                 {
-                    _writer.Write("\t" + param.Key + " = " + param.Value);
-                }
+                    lock (_lock)
+                    {
+                        _writer.Write(String.Format("{0}: {1} {2}", invocationId, instance, method));
+                        foreach (var param in parameters)
+                        {
+                            _writer.Write("\t" + param.Key + " = " + param.Value);
+                        }
+                    }
+                });
             }
         }
 
@@ -50,8 +57,14 @@ namespace SMAStudiovNext.Core.Tracing
         {
             if (IsEnabled)
             {
-                _writer.Write(String.Format("{0}: Result = {1}", invocationId, result));
-                _writer.Write("-----------------------------------------------------");
+                Execute.OnUIThread(() =>
+                {
+                    lock (_lock)
+                    {
+                        _writer.Write(String.Format("{0}: Result = {1}", invocationId, result));
+                        _writer.Write("-----------------------------------------------------");
+                    }
+                });
             }
         }
     }

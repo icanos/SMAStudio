@@ -27,7 +27,7 @@ namespace SMAStudiovNext.Models
             T obj = default(T);
 
             obj = (T)Activator.CreateInstance(type, this);
-            ((IViewModel)obj).Owner = Context.Service;
+            //((IViewModel)obj).Owner = Context.Service;
 
             viewModel = obj;
 

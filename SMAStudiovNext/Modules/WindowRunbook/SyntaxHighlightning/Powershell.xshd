@@ -2,20 +2,19 @@
 <SyntaxDefinition name="PowerShell" extensions=".ps1;.psm1;.psd1" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
   <Color name="Comment" foreground="#999988" exampleText="// comment" />
   <Color name="String" foreground="#dd1144" exampleText="string text = &quot;Hello, World!&quot;"/>
-  <Color name="Char" foreground="#dd1144" exampleText="char linefeed = '\n';"/>
-  <Color name="Punctuation" exampleText="a(b.c);" />
-  <Color name="NumberLiteral" foreground="#2b9999" exampleText="3.1415f"/>
-  <Color name="Keywords" foreground="#000000" exampleText="if (a)"/>
-  <Color name="KeywordsBold" foreground="#000000" exampleText="if (a)"/>
-  <Color name="Parameter" foreground="#000000" />
-  <Color name="Name" foreground="#000000" />
-  <Color name="Variable" foreground="#268887" exampleText="$param = 1" />
-  <Color name="ExceptionKeywords" fontWeight="bold" foreground="#990201" />
-  <Color name="GotoKeywords" foreground="#990201" />
-  <Color name="ReferenceTypes" foreground="Red" />
-  <Color name="Command" fontWeight="bold" foreground="#990201" />
-  <Color name="Operators" foreground="#000000" background="#272720" exampleText="-eq" />
-  <Color name="Type" foreground="#000000" fontWeight="bold" />
+  <Color name="UnquotedString" foreground="#000000"/>
+  <Color name="Keywords" foreground="#000000" fontWeight="bold" />
+  <Color name="Cmdlet" foreground="#000000" exampleText="if (a)"/>
+  <Color name="Variable" foreground="#268887" />
+  <Color name="Parameter" foreground="#990201" />
+  <Color name="NumberLiteral" foreground="#2b9999" />
+  <Color name="Operator" foreground="#333333" />
+
+  <RuleSet name="InStringExpression">
+    <Rule color="Variable">
+      \$[\d\w_]+
+    </Rule>
+  </RuleSet>
   
   <RuleSet ignoreCase="true">
     <Span color="Comment">
@@ -31,28 +30,31 @@
       <Begin>"</Begin>
       <End>"</End>
       <RuleSet>
-        <!-- span for escape sequences -->
-        <Span begin="\\" end="."/>
-      </RuleSet>
-    </Span>
-    
-    <Span color="Keywords">
-      <Begin fontWeight="bold">
-        (workflow|function)
-      </Begin>
-      <RuleSet>
-        <Rule>
-          (([\w]+)-([\w]+))
-        </Rule>
+        <Span color="UnquotedString">
+          <Begin>\$\(</Begin>
+          <End>\)</End>
+          <RuleSet>
+            <Import ruleSet="InStringExpression" />
+          </RuleSet>
+        </Span>
+
+        <Import ruleSet="InStringExpression" />
       </RuleSet>
     </Span>
 
-    <!--<Span color="Parameter">
-      <Begin>-</Begin>
-      <End> </End>
-    </Span>-->
+    <Span color="String">
+      <Begin>'</Begin>
+      <End>'</End>
+    </Span>
     
-    <Keywords color="KeywordsBold">
+    <Span>
+      <Begin color="Keywords">
+        (workflow|function)\b
+      </Begin>
+      <End color="UnquotedString">(([\w]+)-([\w]+))</End>
+    </Span>
+
+    <Keywords color="Keywords">
       <Word>begin</Word>
       <Word>break</Word>
       <Word>catch</Word>
@@ -76,23 +78,85 @@
       <Word>hidden</Word>
       <Word>parallel</Word>
       <Word>param</Word>
+      <Word>parameter</Word>
       <Word>process</Word>
       <Word>return</Word>
       <Word>sequence</Word>
       <Word>switch</Word>
       <Word>throw</Word>
       <Word>trap</Word>
-      <Word>util</Word>
+      <Word>until</Word>
       <Word>try</Word>
       <Word>while</Word>
     </Keywords>
 
-    <Rule color="KeywordsBold">
-      (([\w]+)-([\w])+)
+    <Keywords color="Operator">
+      <Word>-not</Word>
+      <Word>-band</Word>
+      <Word>-bor</Word>
+      <Word>-replace</Word>
+      <Word>-ireplace</Word>
+      <Word>-creplace</Word>
+      <Word>-and</Word>
+      <Word>-or</Word>
+      <Word>-is</Word>
+      <Word>-isnot</Word>
+      <Word>-as</Word>
+      <Word>-lt</Word>
+      <Word>-le</Word>
+      <Word>-gt</Word>
+      <Word>-ge</Word>
+      <Word>-eq</Word>
+      <Word>-ne</Word>
+      <Word>-contains</Word>
+      <Word>-notcontains</Word>
+      <Word>-like</Word>
+      <Word>-notlike</Word>
+      <Word>-match</Word>
+      <Word>-notmatch</Word>
+    </Keywords>
+
+    <!-- Namespaces (.NET) -->
+    <Rule color="Keywords">
+      \b
+      [A-Za-z.]+  # namespace string
+      (?=\s*\]\:\:) # followed by ]::
     </Rule>
 
-    <Rule color="KeywordsBold">
-      (([\w]+)-([\w])+-([\w])+)
+    <Span>
+      <Begin>\[</Begin>
+      <End>\]</End>
+      <RuleSet>
+        <Rule color="Keywords">
+          (\w+)
+        </Rule>
+      </RuleSet>
+    </Span>
+
+    <Rule color="Variable">
+      \$[\d\w_]+
+    </Rule>
+
+    <Rule color="Keywords">
+      (([\w]+)-([\w]+))
+    </Rule>
+
+    <Rule color="Keywords">
+      (([\w]+)-([\w]+)-([\w])+)
+    </Rule>
+
+    <Rule color="Parameter">
+      ( -\w+)
+    </Rule>
+
+    <!-- Digits -->
+    <Rule color="NumberLiteral">
+      \b0[xX][0-9a-fA-F]+  # hex number
+      |
+      (	\b\d+(\.[0-9]+)?   #number with optional floating point
+      |	\.[0-9]+           #or just starting with floating point
+      )
+      ([eE][+-]?[0-9]+)? # optional exponent
     </Rule>
   </RuleSet>
 </SyntaxDefinition>

@@ -132,9 +132,7 @@ namespace SMAStudio.Language
 
         public LanguageSegment GetCurrentContext(int position)
         {
-            var context = new List<LanguageSegment>();
-
-            return _segments.Where(s => s.Start <= position).LastOrDefault();
+            return _segments.LastOrDefault(s => s.Start <= position);
         }
 
         /// <summary>

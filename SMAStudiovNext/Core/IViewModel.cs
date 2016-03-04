@@ -12,6 +12,6 @@ namespace SMAStudiovNext.Core
 
         bool UnsavedChanges { get; set; }
 
-        IBackendService Owner { set; }
+        //IBackendService Owner { set; }
     }
 }

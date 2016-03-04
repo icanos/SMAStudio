@@ -825,7 +825,7 @@ namespace SMAStudiovNext.Services
                 }
 
                 // Download the content of the published runbook
-                var request = (HttpWebRequest)WebRequest.Create(_connectionData.SmaConnectionUrl + "/Runbooks(guid'" + runbook.RunbookID + "')/PublishedRunbookVersion/$value");
+                /*var request = (HttpWebRequest)WebRequest.Create(_connectionData.SmaConnectionUrl + "/Runbooks(guid'" + runbook.RunbookID + "')/PublishedRunbookVersion/$value");
                 if (_connectionData.SmaImpersonatedLogin)
                     request.Credentials = CredentialCache.DefaultCredentials;
                 else
@@ -838,7 +838,8 @@ namespace SMAStudiovNext.Services
 
                 reader.Close();
 
-                runbookViewModel.Content = content;
+                // TODO: Implement this!
+                //runbookViewModel.Content = content;
 
                 MemoryStream ms = new MemoryStream();
                 byte[] bytes = Encoding.UTF8.GetBytes(runbookViewModel.Content);
@@ -852,7 +853,10 @@ namespace SMAStudiovNext.Services
 
                 context.SetSaveStream(entity, baseStream, true, "application/octet-stream", string.Empty);
                 context.SaveChanges();
-                
+                */
+                var output = IoC.Get<IOutput>();
+                output.AppendLine("TODO: Implement assigning content to draft view.");
+
                 return true;
             });
         }
@@ -1082,6 +1086,28 @@ namespace SMAStudiovNext.Services
                 request.Credentials = new NetworkCredential(_connectionData.SmaUsername, _connectionData.GetPassword(), _connectionData.SmaDomain);
 
             var response = (HttpWebResponse)request.GetResponse();
+            var reader = (TextReader)new StreamReader(response.GetResponseStream());
+
+            content = reader.ReadToEnd();
+
+            reader.Close();
+
+            return content;
+        }
+
+        public async Task<string> GetContentAsync(string url)
+        {
+            Logger.DebugFormat("GetContentAsync(url = {0})", url);
+
+            var content = string.Empty;
+
+            var request = (HttpWebRequest)HttpWebRequest.Create(url);
+            if (_connectionData.SmaImpersonatedLogin)
+                request.Credentials = CredentialCache.DefaultCredentials;
+            else
+                request.Credentials = new NetworkCredential(_connectionData.SmaUsername, _connectionData.GetPassword(), _connectionData.SmaDomain);
+
+            var response = await request.GetResponseAsync();
             var reader = (TextReader)new StreamReader(response.GetResponseStream());
 
             content = reader.ReadToEnd();

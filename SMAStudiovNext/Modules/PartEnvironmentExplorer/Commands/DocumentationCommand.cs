@@ -36,12 +36,12 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.Commands
             if (item.Tag is BackendContext)
                 return true;
 
-            return false;
+            return true;
         }
 
         public void Execute(object parameter)
         {
-            var dialog = new DocumentationWindow(((parameter as ResourceContainer).Tag as IBackendContext));
+            var dialog = new DocumentationWindow(((parameter as ResourceContainer).Context as IBackendContext));
             dialog.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
 
             dialog.ShowDialog();

@@ -16,6 +16,7 @@ using SMAStudiovNext.Utils;
 using SMAStudiovNext.Vendor.Azure;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -291,6 +292,11 @@ namespace SMAStudiovNext.Services
                         {
                             // Retry the request
                             result = await SendRawRequestAsync(url, requestMethod, requestBody, contentType, false);
+                        }
+                        else if (statusCode == HttpStatusCode.NotFound)
+                        {
+                            // Ignore (i think!)
+                            Debug.WriteLine(statusCode + ": " + url);
                         }
                         else
                         {
@@ -746,6 +752,11 @@ namespace SMAStudiovNext.Services
         public string GetContent(string url)
         {
             return SendRawRequest(url, HttpMethod.Get);
+        }
+
+        public async Task<string> GetContentAsync(string url)
+        {
+            return await SendRawRequestAsync(url, HttpMethod.Get);
         }
 
         public string GetBackendUrl(RunbookType runbookType, RunbookModelProxy runbook)

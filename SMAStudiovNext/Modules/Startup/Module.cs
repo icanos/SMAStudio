@@ -18,6 +18,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace SMAStudiovNext.Modules.Startup
@@ -50,9 +51,12 @@ namespace SMAStudiovNext.Modules.Startup
             GlobalExceptionHandler.Configure();
             CertificateManager.Configure();
 
+            // Force software rendering!
+            RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
+
             // Enable tracing
             TracingAdapter.SetWriter(new TracingInAppWriter());
-            TracingAdapter.IsEnabled = false;
+            TracingAdapter.IsEnabled = true;
 
             var themeManager = AppContext.Resolve<IThemeManager>();
             themeManager.LoadThemes();

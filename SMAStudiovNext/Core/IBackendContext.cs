@@ -53,6 +53,8 @@ namespace SMAStudiovNext.Core
         /// <returns></returns>
         string GetContent(string url);
 
+        Task<string> GetContentAsync(string url);
+
         ResourceContainer GetStructure();
 
         ObservableCollection<ResourceContainer> Runbooks { get; set; }

@@ -84,7 +84,7 @@ namespace SMAStudiovNext.Agents
                             }
 
                             var viewModel = (runbook.Tag as RunbookModelProxy).GetViewModel<RunbookViewModel>();
-                            viewModel.Content = objectContent;
+                            //viewModel.Content = objectContent;
 
                             Execute.OnUIThread(() =>
                             {
