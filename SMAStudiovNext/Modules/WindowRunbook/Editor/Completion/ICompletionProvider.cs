@@ -1,11 +1,8 @@
-﻿using SMAStudio.Language;
-using System;
+﻿using SMAStudio.Modules.Runbook.Editor.Parser;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace SMAStudiovNext.Language.Completion
+namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
 {
     public interface ICompletionProvider
     {

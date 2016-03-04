@@ -1,6 +1,5 @@
 ﻿using Microsoft.Practices.Unity;
 using SMAStudiovNext.Commands;
-using SMAStudiovNext.Language.Completion;
 using SMAStudiovNext.Language.Snippets;
 using SMAStudiovNext.Modules.EnvironmentExplorer.Commands;
 using SMAStudiovNext.Modules.Shell.Commands;

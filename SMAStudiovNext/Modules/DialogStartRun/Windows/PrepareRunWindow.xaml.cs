@@ -1,5 +1,5 @@
 ﻿using ICSharpCode.AvalonEdit.CodeCompletion;
-using SMAStudiovNext.Language.Completion;
+using SMAStudiovNext.Modules.Runbook.Editor.Completion;
 using SMAStudiovNext.Modules.Runbook.ViewModels;
 using System;
 using System.Collections.ObjectModel;

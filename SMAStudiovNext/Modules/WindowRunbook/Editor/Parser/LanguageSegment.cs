@@ -1,7 +1,6 @@
-﻿using SMAStudiovNext.Language.Completion;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace SMAStudiovNext.Language
+namespace SMAStudio.Modules.Runbook.Editor.Parser
 {
     public enum ExpressionType
     {

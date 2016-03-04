@@ -2,7 +2,7 @@
 using Gemini.Framework;
 using Gemini.Framework.Services;
 using ICSharpCode.AvalonEdit.CodeCompletion;
-using SMAStudio.Language;
+using SMAStudio.Modules.Runbook.Editor.Parser;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Icons;
 using SMAStudiovNext.Language.Snippets;
@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SMAStudiovNext.Language.Completion
+namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
 {
     public class CompletionProvider : ICompletionProvider
     {

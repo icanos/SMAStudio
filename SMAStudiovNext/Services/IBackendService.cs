@@ -1,7 +1,7 @@
 ﻿using Gemini.Framework.Commands;
 using SMAStudiovNext.Core;
-using SMAStudiovNext.Language.Completion;
 using SMAStudiovNext.Models;
+using SMAStudiovNext.Modules.Runbook.Editor.Completion;
 using SMAStudiovNext.Modules.Runbook.ViewModels;
 using SMAStudiovNext.SMA;
 using System;

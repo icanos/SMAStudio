@@ -179,7 +179,7 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
                         });
                     }
 
-                    Thread.Sleep(2 * 1000);
+                    Thread.Sleep(5 * 1000);
                 }
 
                 // The job is completed

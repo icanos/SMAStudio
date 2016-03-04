@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace SMAStudiovNext.Language
+namespace SMAStudio.Modules.Runbook.Editor.Parser
 {
     /// <summary>
     /// Is responsible for parsing Powershell code and mapping the code into

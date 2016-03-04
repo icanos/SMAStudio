@@ -9,12 +9,12 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml;
 using ICSharpCode.AvalonEdit.Rendering;
-using SMAStudio.Language;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Themes;
 using System.Threading.Tasks;
+using SMAStudio.Modules.Runbook.Editor.Parser;
 
-namespace SMAStudiovNext.Modules.Runbook.Controls
+namespace SMAStudiovNext.Modules.Runbook.Editor
 {
     /// <summary>
     /// This is our custom implementation of the AvalonEdit editor

@@ -1,13 +1,13 @@
 ﻿using SMAStudiovNext.Language;
-using SMAStudiovNext.Language.Completion;
 using System.Collections.Generic;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using SMAStudiovNext.Models;
+using SMAStudiovNext.Modules.Runbook.Editor.Completion;
 
-namespace SMAStudio.Language
+namespace SMAStudio.Modules.Runbook.Editor.Parser
 {
     public class LanguageContext
     {

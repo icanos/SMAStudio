@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ICSharpCode.AvalonEdit.Document;
-using SMAStudio.Language;
 using System.Windows.Media;
 using SMAStudiovNext.Language;
 using SMAStudiovNext.Themes;
 using SMAStudiovNext.Core;
 using System.Windows;
-using SMAStudiovNext.Modules.Runbook.Controls;
+using SMAStudiovNext.Modules.Runbook.Editor;
+using SMAStudio.Modules.Runbook.Editor.Parser;
 
 namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlightning
 {

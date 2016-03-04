@@ -1,6 +1,5 @@
 ﻿using Novacode;
-using SMAStudio.Language;
-using SMAStudiovNext.Language.Completion;
+using SMAStudio.Modules.Runbook.Editor.Parser;
 using SMAStudiovNext.Models;
 using SMAStudiovNext.Modules.Runbook.ViewModels;
 using System;

@@ -265,10 +265,10 @@
     <Compile Include="Core\StatusManager.cs" />
     <Compile Include="Utils\StringExtensions.cs" />
     <Compile Include="Exceptions\XmlExceptionHandler.cs" />
-    <Compile Include="Language\Completion\CompletionProvider.cs" />
-    <Compile Include="Language\Completion\CompletionResult.cs" />
-    <Compile Include="Language\Completion\CompletionData.cs" />
-    <Compile Include="Language\Completion\ICompletionProvider.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Completion\CompletionProvider.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Completion\CompletionResult.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Completion\CompletionData.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Completion\ICompletionProvider.cs" />
     <Compile Include="Models\CredentialModelProxy.cs" />
     <Compile Include="Models\JobModelProxy.cs" />
     <Compile Include="Models\ModelProxyBase.cs" />
@@ -309,11 +309,11 @@
       <DependentUpon>PropertyGridView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\WindowRunbook\Resources\Converters.cs" />
-    <Compile Include="Language\Completion\ICompletionEntry.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Completion\ICompletionEntry.cs" />
     <Compile Include="Commands\PublishCommandDefinition.cs" />
     <Compile Include="Modules\WindowRunbook\Resources\PowershellFoldingStrategy.cs" />
-    <Compile Include="Language\Snippets\ISnippetsCollection.cs" />
-    <Compile Include="Language\Snippets\SnippetsCollection.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Snippets\ISnippetsCollection.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Snippets\SnippetsCollection.cs" />
     <Compile Include="Modules\WindowRunbook\SyntaxHighlightning\HighlightingColorizer.cs" />
     <Compile Include="Modules\WindowSchedule\ViewModels\ScheduleViewModel.cs" />
     <Compile Include="Modules\WindowSchedule\Views\ScheduleView.xaml.cs">
@@ -337,7 +337,7 @@
     <Compile Include="Commands\RunCommandDefinition.cs" />
     <Compile Include="Commands\StopCommandDefinition.cs" />
     <Compile Include="Commands\TestCommandDefinition.cs" />
-    <Compile Include="Modules\WindowRunbook\Controls\RunbookEditor.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\RunbookEditor.cs" />
     <Compile Include="Modules\WindowRunbook\ToolBarDefinitions.cs" />
     <Compile Include="Modules\WindowRunbook\Views\IRunbookView.cs" />
     <Compile Include="Modules\WindowRunbook\Views\RunbookView.xaml.cs">
@@ -361,9 +361,9 @@
     <Compile Include="Modules\WindowVariable\Views\VariableView.xaml.cs">
       <DependentUpon>VariableView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Language\Parser\LanguageContext.cs" />
-    <Compile Include="Language\Parser\LanguageParser.cs" />
-    <Compile Include="Language\Parser\LanguageSegment.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Parser\LanguageContext.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Parser\LanguageParser.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Parser\LanguageSegment.cs" />
     <Compile Include="Service References\SMA\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -375,7 +375,7 @@
     <Compile Include="Services\SmaService.cs" />
     <Compile Include="Services\SettingsService.cs" />
     <Compile Include="Modules\DialogAddNewItem\Windows\UIAddNewItemDialog.xaml.cs" />
-    <Compile Include="Language\Snippets\CodeSnippet.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Snippets\CodeSnippet.cs" />
     <Compile Include="Vendor\Azure\Connection.cs" />
     <Compile Include="Vendor\Azure\ConnectionField.cs" />
     <Compile Include="Vendor\Azure\ConnectionFieldValue.cs" />
@@ -408,7 +408,6 @@
     <Compile Include="Modules\PartEnvironmentExplorer\Views\EnvironmentExplorerView.xaml.cs">
       <DependentUpon>EnvironmentExplorerView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\WindowRunbook\ViewModels\RunbookViewModel_Old.cs" />
     <Compile Include="Modules\Startup\Module.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
