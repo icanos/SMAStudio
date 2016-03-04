@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace SMAStudiovNext.Core.Exceptions
 {
+    [Serializable]
     public class CertificateException : Exception
     {
         public CertificateException(string message)

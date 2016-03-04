@@ -27,7 +27,7 @@ namespace SMAStudiovNext.Modules.DialogDocumentation.Windows
             InitializeComponent();
             DataContext = new DocumentationViewModel(backendContext);
 
-            (DataContext as DocumentationViewModel).OnFinished += delegate ()
+            (DataContext as DocumentationViewModel).OnFinished += delegate (object sender, EventArgs e)
             {
                 Close();
             };

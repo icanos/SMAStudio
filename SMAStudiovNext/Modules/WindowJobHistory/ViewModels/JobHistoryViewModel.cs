@@ -32,11 +32,18 @@ namespace SMAStudiovNext.Modules.JobHistory.ViewModels
                 IList<JobModelProxy> draftJobs = null;
                 IList<JobModelProxy> publishedJobs = null;
 
-                if (_runbook.DraftRunbookVersionID.HasValue)
-                    draftJobs = Owner.GetJobs(_runbook.DraftRunbookVersionID.Value);
-                
-                if (_runbook.PublishedRunbookVersionID.HasValue)
-                    publishedJobs = Owner.GetJobs(_runbook.PublishedRunbookVersionID.Value);
+                try
+                {
+                    if (_runbook.DraftRunbookVersionID.HasValue)
+                        draftJobs = Owner.GetJobs(_runbook.DraftRunbookVersionID.Value);
+
+                    if (_runbook.PublishedRunbookVersionID.HasValue)
+                        publishedJobs = Owner.GetJobs(_runbook.PublishedRunbookVersionID.Value);
+                }
+                catch (ApplicationException ex)
+                {
+                    GlobalExceptionHandler.Show(ex);
+                }
 
                 Execute.OnUIThread(() =>
                 {

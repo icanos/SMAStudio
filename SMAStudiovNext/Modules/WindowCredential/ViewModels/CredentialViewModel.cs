@@ -154,13 +154,17 @@ namespace SMAStudiovNext.Modules.Credential.ViewModels
         {
             await Task.Run(delegate ()
             {
-                Owner.Save(this, command);
-
                 model.ViewModel = this;
 
-                //var backendContext = AppContext.Resolve<IBackendContext>();
-                //backendContext.AddToCredentials(model);
-                Owner.Context.AddToCredentials(model);
+                try
+                {
+                    Owner.Save(this, command);
+                    Owner.Context.AddToCredentials(model);
+                }
+                catch (ApplicationException ex)
+                {
+                    GlobalExceptionHandler.Show(ex);
+                }
 
                 // Update the UI to notify that the changes has been saved
                 UnsavedChanges = false;

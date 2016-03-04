@@ -54,13 +54,17 @@ namespace SMAStudiovNext.Modules.Schedule.ViewModels
         {
             await Task.Run(delegate ()
             {
-                Owner.Save(this, command);
-
                 model.ViewModel = this;
 
-                //var backendContext = AppContext.Resolve<IBackendContext>();
-                //backendContext.AddToSchedules(model);
-                Owner.Context.AddToSchedules(model);
+                try
+                {
+                    Owner.Save(this, command);
+                    Owner.Context.AddToSchedules(model);
+                }
+                catch (ApplicationException ex)
+                {
+                    GlobalExceptionHandler.Show(ex);
+                }
 
                 // Update the UI to notify that the changes has been saved
                 UnsavedChanges = false;

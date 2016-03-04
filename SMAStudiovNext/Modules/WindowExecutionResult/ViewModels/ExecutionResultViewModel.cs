@@ -100,90 +100,100 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
 
             Task.Run(() =>
             {
-                //AsyncExecution.Run(ThreadPriority.Normal, () =>
-                // Wait for the job ID to be set by our backend service
-                while (_jobId == Guid.Empty)
+                try
                 {
-                    if (_runbookViewModel.Runbook.JobID != null)
-                        _jobId = _runbookViewModel.Runbook.JobID;
-
-                    Thread.Sleep(1 * 1000);
-                }
-
-                if (_runbookViewModel.Runbook.JobID != Guid.Empty)
-                    job = _backendService.GetJobDetails(_runbookViewModel.Runbook);
-                else if (_jobId != Guid.Empty)
-                    job = _backendService.GetJobDetails(_jobId);
-
-                if (job != null)
-                {
-                    Execute.OnUIThread(() =>
+                    //AsyncExecution.Run(ThreadPriority.Normal, () =>
+                    // Wait for the job ID to be set by our backend service
+                    while (_jobId == Guid.Empty)
                     {
-                        foreach (var entry in job.Result)
-                            Result.Add(entry);
+                        if (_runbookViewModel.Runbook.JobID != null)
+                            _jobId = _runbookViewModel.Runbook.JobID;
 
-                        JobStatus = job.JobStatus;
-                        NotifyOfPropertyChange(() => DisplayName);
+                        Thread.Sleep(1 * 1000);
+                    }
 
-                        _propertyInfo = new ExecutionResultPropertyInfo();
-                        _propertyInfo.JobID = (_jobId == null) ? Guid.Empty : (Guid)_jobId;
-                        _propertyInfo.RunbookID = (_runbookViewModel != null) ? ((RunbookModelProxy)_runbookViewModel.Model).RunbookID : Guid.Empty;
-                        _propertyInfo.RunbookName = (_runbookViewModel != null) ? ((RunbookModelProxy)_runbookViewModel.Model).RunbookName : "Unknown";
-                        _propertyInfo.JobStatus = job.JobStatus;
-                        _propertyInfo.StartTime = job.StartTime;
-                        _propertyInfo.EndTime = job.EndTime;
-                        _propertyInfo.CreationTime = job.CreationTime;
-                        _propertyInfo.LastModifiedTime = job.LastModifiedTime;
-                        _propertyInfo.ErrorCount = job.ErrorCount;
-                        _propertyInfo.WarningCount = job.WarningCount;
-                        _propertyInfo.Exception = job.JobException;
-
-                        _inspectorTool.SelectedObject = _propertyInfo;
-                    });
-                }
-
-                bool hasDisplayedException = false;
-                while (!_completedExecutionStatus.Contains(job.JobStatus))
-                {
-                    job = _backendService.GetJobDetails(_runbookViewModel.Runbook);
+                    if (_runbookViewModel.Runbook.JobID != Guid.Empty)
+                        job = _backendService.GetJobDetails(_runbookViewModel.Runbook);
+                    else if (_jobId != Guid.Empty)
+                        job = _backendService.GetJobDetails(_jobId);
 
                     if (job != null)
                     {
                         Execute.OnUIThread(() =>
                         {
+                            foreach (var entry in job.Result)
+                                Result.Add(entry);
+
                             JobStatus = job.JobStatus;
                             NotifyOfPropertyChange(() => DisplayName);
 
+                            _propertyInfo = new ExecutionResultPropertyInfo();
+                            _propertyInfo.JobID = (_jobId == null) ? Guid.Empty : (Guid)_jobId;
+                            _propertyInfo.RunbookID = (_runbookViewModel != null) ? ((RunbookModelProxy)_runbookViewModel.Model).RunbookID : Guid.Empty;
+                            _propertyInfo.RunbookName = (_runbookViewModel != null) ? ((RunbookModelProxy)_runbookViewModel.Model).RunbookName : "Unknown";
+                            _propertyInfo.JobStatus = job.JobStatus;
                             _propertyInfo.StartTime = job.StartTime;
                             _propertyInfo.EndTime = job.EndTime;
+                            _propertyInfo.CreationTime = job.CreationTime;
+                            _propertyInfo.LastModifiedTime = job.LastModifiedTime;
                             _propertyInfo.ErrorCount = job.ErrorCount;
                             _propertyInfo.WarningCount = job.WarningCount;
-                            _propertyInfo.JobStatus = job.JobStatus;
                             _propertyInfo.Exception = job.JobException;
 
-                            if (!String.IsNullOrEmpty(job.JobException) && !hasDisplayedException)
-                            {
-                                var output = IoC.Get<IOutput>();
-                                output.AppendLine("Error when executing runbook:");
-                                output.AppendLine(job.JobException);
-                                output.AppendLine(" ");
-
-                                hasDisplayedException = true;
-                            }
-
-                            _inspectorTool.SelectedObject = null;
                             _inspectorTool.SelectedObject = _propertyInfo;
-
-                            foreach (var entry in job.Result)
-                                Result.Add(entry);
                         });
                     }
 
-                    Thread.Sleep(5 * 1000);
-                }
+                    bool hasDisplayedException = false;
+                    while (!_completedExecutionStatus.Contains(job.JobStatus))
+                    {
+                        job = _backendService.GetJobDetails(_runbookViewModel.Runbook);
 
-                // The job is completed
-                _runbookViewModel.Runbook.JobID = Guid.Empty;
+                        if (job != null)
+                        {
+                            Execute.OnUIThread(() =>
+                            {
+                                JobStatus = job.JobStatus;
+                                NotifyOfPropertyChange(() => DisplayName);
+
+                                _propertyInfo.StartTime = job.StartTime;
+                                _propertyInfo.EndTime = job.EndTime;
+                                _propertyInfo.ErrorCount = job.ErrorCount;
+                                _propertyInfo.WarningCount = job.WarningCount;
+                                _propertyInfo.JobStatus = job.JobStatus;
+                                _propertyInfo.Exception = job.JobException;
+
+                                if (!String.IsNullOrEmpty(job.JobException) && !hasDisplayedException)
+                                {
+                                    var output = IoC.Get<IOutput>();
+                                    output.AppendLine("Error when executing runbook:");
+                                    output.AppendLine(job.JobException);
+                                    output.AppendLine(" ");
+
+                                    hasDisplayedException = true;
+                                }
+
+                                _inspectorTool.SelectedObject = null;
+                                _inspectorTool.SelectedObject = _propertyInfo;
+
+                                foreach (var entry in job.Result)
+                                    Result.Add(entry);
+                            });
+                        }
+
+                        Thread.Sleep(5 * 1000);
+                    }
+
+                    // The job is completed
+                    _runbookViewModel.Runbook.JobID = Guid.Empty;
+                }
+                catch (ApplicationException ex)
+                {
+                    GlobalExceptionHandler.Show(ex);
+                    _runbookViewModel.Runbook.JobID = Guid.Empty;
+
+                    job.JobStatus = "Failed";
+                }
             });
 
             if (job != null)
@@ -220,17 +230,19 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
 
         Task ICommandHandler<PauseCommandDefinition>.Run(Command command)
         {
-            /*var _backendService = AppContext.Resolve<IBackendService>();
-
-            if (command.Text.Equals("Pause"))
-                _backendService.PauseExecution(_jobId);
-            else
-                _backendService.ResumeExecution(_jobId);*/
             var backendService = (_runbookViewModel.Model as RunbookModelProxy).Context.Service;
-            if (command.Text.Equals("Pause"))
-                backendService.PauseExecution(_jobId);
-            else
-                backendService.ResumeExecution(_jobId);
+
+            try
+            {
+                if (command.Text.Equals("Pause"))
+                    backendService.PauseExecution(_jobId);
+                else
+                    backendService.ResumeExecution(_jobId);
+            }
+            catch (ApplicationException ex)
+            {
+                GlobalExceptionHandler.Show(ex);
+            }
 
             return TaskUtility.Completed;
         }
@@ -249,7 +261,15 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
             //var _backendService = AppContext.Resolve<IBackendService>();
             //_backendService.StopExecution(_jobId);
             var backendService = (_runbookViewModel.Model as RunbookModelProxy).Context.Service;
-            backendService.StopExecution(_jobId);
+
+            try
+            {
+                backendService.StopExecution(_jobId);
+            }
+            catch (ApplicationException ex)
+            {
+                GlobalExceptionHandler.Show(ex);
+            }
 
             return TaskUtility.Completed;
         }

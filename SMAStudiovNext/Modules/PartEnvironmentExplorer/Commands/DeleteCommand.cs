@@ -59,9 +59,15 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.Commands
             if (MessageBox.Show("Are you sure you want to delete the object? This cannot be reverted.", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 var item = (ModelProxyBase)(parameter as ResourceContainer).Tag;
-                
-                if (backendService.Delete(item))
-                    environmentExplorer.Delete(parameter as ResourceContainer);
+
+                try {
+                    if (backendService.Delete(item))
+                        environmentExplorer.Delete(parameter as ResourceContainer);
+                }
+                catch (ApplicationException ex)
+                {
+                    GlobalExceptionHandler.Show(ex);
+                }
             }
         }
 

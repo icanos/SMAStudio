@@ -152,8 +152,14 @@ namespace SMAStudiovNext.Modules.Variable.ViewModels
                 model.Value = JsonConverter.ToJson(value);
                 model.ViewModel = this;
 
-                Owner.Save(this, command);
-                Owner.Context.AddToVariables(model);
+                try {
+                    Owner.Save(this, command);
+                    Owner.Context.AddToVariables(model);
+                }
+                catch (ApplicationException ex)
+                {
+                    GlobalExceptionHandler.Show(ex);
+                }
 
                 // Update the UI to notify that the changes has been saved
                 UnsavedChanges = false;

@@ -119,15 +119,22 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
             if (forceDownload || String.IsNullOrEmpty(currentContent))
             {
-                content = await _backendContext.GetContentAsync(_backendContext.Service.GetBackendUrl(runbookType, _runbook));
-
-                Execute.OnUIThread(() =>
+                try
                 {
-                    lock (_lock)
+                    content = await _backendContext.GetContentAsync(_backendContext.Service.GetBackendUrl(runbookType, _runbook));
+
+                    Execute.OnUIThread(() =>
                     {
-                        editor.Text = content;
-                    }
-                });
+                        lock (_lock)
+                        {
+                            editor.Text = content;
+                        }
+                    });
+                }
+                catch (ApplicationException ex)
+                {
+                    GlobalExceptionHandler.Show(ex);
+                }
             }
             else
             {
@@ -513,28 +520,42 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                     await Save(null).ConfigureAwait(false);
             }
 
-            var checkInResult = await _backendContext.Service.CheckIn(_runbook).ConfigureAwait(false);
-
-            if (checkInResult)
+            try
             {
-                CommandManager.InvalidateRequerySuggested();
-                output.AppendLine("The runbook has been published.");
+                var checkInResult = await _backendContext.Service.CheckIn(_runbook).ConfigureAwait(false);
 
-                Execute.OnUIThread(() =>
+                if (checkInResult)
                 {
-                    _view.PublishedTextEditor.Text = _view.TextEditor.Text;
-                    _view.TextEditor.Text = string.Empty;
-                });
+                    CommandManager.InvalidateRequerySuggested();
+                    output.AppendLine("The runbook has been published.");
 
-                _runbook.DraftRunbookVersionID = Guid.Empty;
+                    Execute.OnUIThread(() =>
+                    {
+                        _view.PublishedTextEditor.Text = _view.TextEditor.Text;
+                        _view.TextEditor.Text = string.Empty;
+                    });
+
+                    _runbook.DraftRunbookVersionID = Guid.Empty;
+                }
+                else
+                    output.AppendLine("Unable to check in the runbook.");
             }
-            else
-                output.AppendLine("Unable to check in the runbook.");
+            catch (ApplicationException ex)
+            {
+                GlobalExceptionHandler.Show(ex);
+            }
         }
 
         public async Task CheckOut()
         {
-            await _backendContext.Service.CheckOut(this).ConfigureAwait(false);
+            try
+            {
+                await _backendContext.Service.CheckOut(this).ConfigureAwait(false);
+            }
+            catch (ApplicationException ex)
+            {
+                GlobalExceptionHandler.Show(ex);
+            }
         }
 
         private async Task Save(Command command)
@@ -542,10 +563,17 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             // Update the UI to notify that the changes has been saved
             Execute.OnUIThread(() => { UnsavedChanges = false; });
 
-            var result = await _backendContext.Service.Save(this, command).ConfigureAwait(false);
+            try
+            {
+                var result = await _backendContext.Service.Save(this, command).ConfigureAwait(false);
 
-            _runbook.ViewModel = this;
-            _backendContext.AddToRunbooks(_runbook);
+                _runbook.ViewModel = this;
+                _backendContext.AddToRunbooks(_runbook);
+            }
+            catch (ApplicationException ex)
+            {
+                GlobalExceptionHandler.Show(ex);
+            }
 
             if (command != null)
                 command.Enabled = true;
@@ -642,11 +670,18 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             if (UnsavedChanges)
                 await Save(command);
 
-            var runningJob = await _backendContext.Service.CheckRunningJobs(_runbook, isDraft).ConfigureAwait(false);
-            if (runningJob)
+            try
             {
-                MessageBox.Show("There is currently a running job, please wait for it to finish.", "Running Jobs", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
+                var runningJob = await _backendContext.Service.CheckRunningJobs(_runbook, isDraft).ConfigureAwait(false);
+                if (runningJob)
+                {
+                    MessageBox.Show("There is currently a running job, please wait for it to finish.", "Running Jobs", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+            }
+            catch (ApplicationException ex)
+            {
+                GlobalExceptionHandler.Show(ex);
             }
 
             // Convert to NameValuePair
@@ -676,10 +711,17 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 {
                     var guid = default(Guid?);
 
-                    if (isDraft)
-                        guid = _backendContext.Service.TestRunbook(_runbook, parameters);
-                    else
-                        guid = _backendContext.Service.StartRunbook(_runbook, parameters);
+                    try
+                    {
+                        if (isDraft)
+                            guid = _backendContext.Service.TestRunbook(_runbook, parameters);
+                        else
+                            guid = _backendContext.Service.StartRunbook(_runbook, parameters);
+                    }
+                    catch (ApplicationException ex)
+                    {
+                        GlobalExceptionHandler.Show(ex);
+                    }
 
                     if (guid.HasValue)
                         _runbook.JobID = guid.Value;

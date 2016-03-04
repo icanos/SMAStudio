@@ -16,7 +16,7 @@ using System.Windows;
 
 namespace SMAStudiovNext.Modules.WindowConnection.ViewModels
 {
-    public class ConnectionViewModel : Document, IViewModel, ICommandHandler<SaveCommandDefinition>
+    public sealed class ConnectionViewModel : Document, IViewModel, ICommandHandler<SaveCommandDefinition>
     {
         private readonly ConnectionModelProxy model;
 
@@ -37,57 +37,89 @@ namespace SMAStudiovNext.Modules.WindowConnection.ViewModels
             {
                 // We need to read the info from our backend again since we don't
                 // get any property values when enumerating all connections
-                if (connection.ConnectionType != null)
-                    connection = connection.Context.Service.GetConnectionDetails(connection);
-
-                var result = Owner.GetConnectionTypes();
-
-                var connectionTypeNameProp = default(PropertyInfo);
-                if (connection.ConnectionType != null)
-                    connectionTypeNameProp = connection.ConnectionType.GetType().GetProperty("Name");
-                var connectionTypeName = string.Empty;
-                if (connectionTypeNameProp != null)
-                    connectionTypeName = connectionTypeNameProp.GetValue(connection.ConnectionType).ToString();
-
-                Execute.OnUIThread(() =>
+                try
                 {
-                    foreach (var type in result)
-                    {
-                        ConnectionTypes.Add(type);
+                    if (connection.ConnectionType != null)
+                        connection = connection.Context.Service.GetConnectionDetails(connection);
 
-                        if (type.Name.Equals(connectionTypeName, StringComparison.InvariantCultureIgnoreCase))
-                            ConnectionType = type;
-                    }
+                    var result = Owner.GetConnectionTypes();
 
-                    if (Owner is AzureService && connection.ConnectionType != null)
+                    var connectionTypeNameProp = default(PropertyInfo);
+                    if (connection.ConnectionType != null)
+                        connectionTypeNameProp = connection.ConnectionType.GetType().GetProperty("Name");
+                    var connectionTypeName = string.Empty;
+                    if (connectionTypeNameProp != null)
+                        connectionTypeName = connectionTypeNameProp.GetValue(connection.ConnectionType).ToString();
+
+                    Execute.OnUIThread(() =>
                     {
-                        var fields = (connection.ConnectionFieldValues as List<Vendor.Azure.ConnectionFieldValue>);
-                        if (fields.Count > 0)
+                        foreach (var type in result)
                         {
-                            Parameters.Clear();
+                            ConnectionTypes.Add(type);
 
-                            foreach (var field in fields)
+                            if (type.Name.Equals(connectionTypeName, StringComparison.InvariantCultureIgnoreCase))
+                                ConnectionType = type;
+                        }
+
+                        if (Owner is AzureService && connection.ConnectionType != null)
+                        {
+                            var fields = (connection.ConnectionFieldValues as List<Vendor.Azure.ConnectionFieldValue>);
+                            if (fields.Count > 0)
                             {
-                                var paramName = field.ConnectionFieldName;
+                                Parameters.Clear();
 
-                                if (field.IsEncrypted)
-                                    paramName = field.ConnectionFieldName + " (encrypted)";
-
-                                if (!field.IsOptional)
-                                    paramName += "*";
-
-                                Parameters.Add(new ConnectionViewParameter
+                                foreach (var field in fields)
                                 {
-                                    DisplayName = paramName,
-                                    Name = field.ConnectionFieldName,
-                                    Value = field.Value
-                                });
+                                    var paramName = field.ConnectionFieldName;
+
+                                    if (field.IsEncrypted)
+                                        paramName = field.ConnectionFieldName + " (encrypted)";
+
+                                    if (!field.IsOptional)
+                                        paramName += "*";
+
+                                    Parameters.Add(new ConnectionViewParameter
+                                    {
+                                        DisplayName = paramName,
+                                        Name = field.ConnectionFieldName,
+                                        Value = field.Value
+                                    });
+                                }
                             }
                         }
-                    }
-                    else if (Owner is SmaService && connection.ConnectionType != null)
-                        throw new NotSupportedException();
-                });
+                        else if (Owner is SmaService && connection.ConnectionType != null)
+                        {
+                            var fields = (connection.ConnectionFieldValues as List<SMA.ConnectionFieldValue>);
+                            if (fields.Count > 0)
+                            {
+                                Parameters.Clear();
+
+                                foreach (var field in fields)
+                                {
+                                    var paramName = field.ConnectionFieldName;
+
+                                    if (field.IsEncrypted)
+                                        paramName = field.ConnectionFieldName + " (encrypted)";
+
+                                    if (field.IsOptional != null && field.IsOptional.HasValue && !field.IsOptional.Value)
+                                        paramName += "*";
+
+                                    Parameters.Add(new ConnectionViewParameter
+                                    {
+                                        DisplayName = paramName,
+                                        Name = field.ConnectionFieldName,
+                                        Value = field.Value
+                                    });
+                                }
+                            }
+                        }
+                    });
+
+                }
+                catch (ApplicationException ex)
+                {
+                    GlobalExceptionHandler.Show(ex);
+                }
             });
         }
 
@@ -161,7 +193,23 @@ namespace SMAStudiovNext.Modules.WindowConnection.ViewModels
                 else
                 {
                     // SMA
-                    throw new NotImplementedException();
+                    var connectionFields = (IList<SMA.ConnectionField>)_connectionType.ConnectionFields;
+                    foreach (var param in connectionFields)
+                    {
+                        var paramName = param.Name;
+
+                        if (param.IsEncrypted)
+                            paramName = param.Name + " (encrypted)";
+
+                        if (!param.IsOptional)
+                            paramName += "*";
+
+                        Parameters.Add(new ConnectionViewParameter
+                        {
+                            DisplayName = paramName,
+                            Name = param.Name
+                        });
+                    }
                 }
 
                 UnsavedChanges = true;
@@ -263,8 +311,15 @@ namespace SMAStudiovNext.Modules.WindowConnection.ViewModels
                     });
                 }
 
-                Owner.Save(this, command);
-                Owner.Context.AddToConnections(model);
+                try
+                {
+                    Owner.Save(this, command);
+                    Owner.Context.AddToConnections(model);
+                }
+                catch (ApplicationException ex)
+                {
+                    GlobalExceptionHandler.Show(ex);
+                }
 
                 // Update the UI to notify that the changes has been saved
                 UnsavedChanges = false;

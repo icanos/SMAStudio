@@ -13,7 +13,7 @@ using System.Windows;
 
 namespace SMAStudiovNext.Modules.WindowModule.ViewModels
 {
-    public class ModuleViewModel : Document, IViewModel, ICommandHandler<SaveCommandDefinition>
+    public sealed class ModuleViewModel : Document, IViewModel, ICommandHandler<SaveCommandDefinition>
     {
         private readonly ModuleModelProxy model;
 
@@ -108,8 +108,15 @@ namespace SMAStudiovNext.Modules.WindowModule.ViewModels
                 model.ModuleUrl = ModuleUrl;
                 model.ModuleVersion = ModuleVersion;
 
-                Owner.Save(this, command);
-                Owner.Context.AddToModules(model);
+                try
+                {
+                    Owner.Save(this, command);
+                    Owner.Context.AddToModules(model);
+                }
+                catch (ApplicationException ex)
+                {
+                    GlobalExceptionHandler.Show(ex);
+                }
 
                 // Update the UI to notify that the changes has been saved
                 UnsavedChanges = false;

@@ -1,12 +1,13 @@
 ﻿using Caliburn.Micro;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Core.Documentation;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 
 namespace SMAStudiovNext.Modules.DialogDocumentation.ViewModels
 {
-    public delegate void NoArgumentDelegate();
+    public delegate void NoArgumentDelegate(object sender, EventArgs e);
 
     public class DocumentationViewModel : PropertyChangedBase
     {
@@ -54,7 +55,7 @@ namespace SMAStudiovNext.Modules.DialogDocumentation.ViewModels
                         MessageBox.Show("The documentation has been successfully generated.", "Documentation completed", MessageBoxButton.OK);
 
                         if (OnFinished != null)
-                            OnFinished();
+                            OnFinished(this, new EventArgs());
                     });
                 });
             }

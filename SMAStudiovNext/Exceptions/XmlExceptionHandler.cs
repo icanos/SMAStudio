@@ -37,5 +37,22 @@ namespace SMAStudiovNext.Core
                 output.AppendLine(xml);
             }
         }
+
+        public static bool IsXml(string content)
+        {
+            try
+            {
+                var document = new XmlDocument();
+                document.LoadXml(content);
+
+                document = null;
+
+                return true;
+            }
+            catch (XmlException)
+            {
+                return false;
+            }
+        }
     }
 }

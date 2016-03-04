@@ -255,6 +255,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
             _icon = icon;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public KeywordCompletionData(string name, string icon, string description)
             : this(name)
         {
