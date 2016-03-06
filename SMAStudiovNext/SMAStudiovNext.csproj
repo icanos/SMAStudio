@@ -61,6 +61,14 @@
       <HintPath>..\packages\Caliburn.Micro.2.0.2\lib\net45\Caliburn.Micro.Platform.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="ConsoleControl.WPF, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bb812711dbc508e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\ConsoleControl.WPF.1.1.0.0\lib\net40\ConsoleControl.WPF.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ConsoleControlAPI, Version=1.1.0.0, Culture=neutral, PublicKeyToken=7c86b8a36b9c33e2, processorArchitecture=MSIL">
+      <HintPath>..\packages\ConsoleControl.WPF.1.1.0.0\lib\net40\ConsoleControlAPI.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="DocX, Version=1.0.0.19, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\DocX.1.0.0.19\lib\net40\DocX.dll</HintPath>
       <Private>True</Private>
@@ -238,6 +246,9 @@
     <Compile Include="Modules\WindowConnection\ViewModels\ConnectionViewModel.cs" />
     <Compile Include="Modules\WindowConnection\Views\ConnectionView.xaml.cs">
       <DependentUpon>ConnectionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\WindowConsole\Views\ConsoleView.xaml.cs">
+      <DependentUpon>ConsoleView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\WindowModule\ViewModels\ModuleViewModel.cs" />
     <Compile Include="Modules\WindowModule\Views\ModuleView.xaml.cs">
@@ -460,6 +471,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Modules\WindowConsole\Views\ConsoleView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Modules\WindowCredential\Views\CredentialView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -565,6 +580,7 @@
   <ItemGroup>
     <Folder Include="Modules\DialogStartRun\ViewModels\" />
     <Folder Include="Modules\PartPropertyGrid\Commands\" />
+    <Folder Include="Modules\WindowConsole\ViewModels\" />
     <Folder Include="Modules\WindowExecutionResult\Command\" />
   </ItemGroup>
   <ItemGroup>
@@ -609,6 +625,11 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icons\Connection.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="LICENSE.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
