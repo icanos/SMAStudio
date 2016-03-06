@@ -695,16 +695,10 @@ namespace SMAStudiovNext.Services
             // Try to start the runbook job
             try
             {
-                SendRequest("runbooks/" + runbookProxy.RunbookName.ToUrlSafeString() + "/draft/testJob", HttpMethod.Put, json, "application/json");
+                var result = SendRequest("runbooks/" + runbookProxy.RunbookName.ToUrlSafeString() + "/draft/testJob", HttpMethod.Put, json, "application/json");
             }
             catch (WebException ex)
             {
-                /*if (ex.Status == WebExceptionStatus.ProtocolError && (ex.Response as HttpWebResponse).StatusCode == HttpStatusCode.BadRequest)
-                    MessageBox.Show("A job is already running, please wait for that to complete and then try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                else
-                    MessageBox.Show("An unknown error occurred when trying to test the runbook: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);*/
-
-                //return null;
                 throw new ApplicationException("An error occurred when testing the runbook, please refer to the output.", ex);
             }
 
@@ -745,22 +739,54 @@ namespace SMAStudiovNext.Services
 
         public void PauseExecution(Guid jobId)
         {
-            SendRequest("jobs/" + jobId + "/suspend", HttpMethod.Post, "", "0");
+            Task.Run(async () =>
+            {
+                await SendRequestAsync("jobs/" + jobId + "/suspend", HttpMethod.Post, "", "0").ConfigureAwait(false);
+            });
         }
 
         public void ResumeExecution(Guid jobId)
         {
-            SendRequest("jobs/" + jobId + "/resume", HttpMethod.Post, "", "0");
+            Task.Run(async () =>
+            {
+                await SendRequestAsync("jobs/" + jobId + "/resume", HttpMethod.Post, "", "0").ConfigureAwait(false);
+            });
         }
 
         public void StopExecution(Guid jobId)
         {
-            SendRequest("jobs/" + jobId + "/stop", HttpMethod.Post, "0");
+            Task.Run(async () =>
+            {
+                await SendRequestAsync("jobs/" + jobId + "/stop", HttpMethod.Post, "", "0").ConfigureAwait(false);
+            });
         }
 
-        public Task<bool> CheckRunningJobs(RunbookModelProxy runbook, bool checkDraft)
+        public async Task<bool> CheckRunningJobs(RunbookModelProxy runbook, bool checkDraft)
         {
-            return Task.Run(() => { if (runbook.JobID != Guid.Empty) { return true; } else { return false; } });
+            var result = string.Empty;
+            var completedStatus = new List<string> { "Completed", "Failed" };
+
+            if (checkDraft)
+            {
+                result = await SendRequestAsync("runbooks/" + runbook.RunbookName.ToUrlSafeString() + "/draft/testJob", HttpMethod.Get).ConfigureAwait(false);
+            }
+            else if (runbook.JobID != Guid.Empty)
+            {
+                result = await SendRequestAsync("jobs/" + runbook.JobID, HttpMethod.Get).ConfigureAwait(false);
+            }
+
+            if (result.Length > 0)
+            {
+                dynamic jobRaw = JObject.Parse(result);
+                var status = jobRaw.status.ToString();
+
+                if (completedStatus.Contains(status))
+                    return false;
+            }
+            else
+                return false;
+
+            return true;
         }
 
         public async Task<JobModelProxy> GetJobInformationAsync(Guid jobId)

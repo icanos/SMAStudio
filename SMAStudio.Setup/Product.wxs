@@ -21,8 +21,37 @@
 
 	<Fragment>
 		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-			<Component Id="ProductComponent">
+			<Component Id="ProductComponent" DiskId="1" Guid="{B65CDCEE-7130-4759-A8E8-16D84717CCF3}">
         <File Source="$(var.SMAStudiovNext.TargetPath)" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Caliburn.Micro.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Caliburn.Micro.Platform.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\DocX.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Gemini.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Gemini.Modules.CodeEditor.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Gemini.Modules.ErrorList.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Gemini.Modules.Output.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\ICSharpCode.AvalonEdit.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\MahApps.Metro.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Microsoft.Data.Edm.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Microsoft.Data.OData.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Microsoft.Data.Services.Client.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Microsoft.Practices.ServiceLocation.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Microsoft.Practices.Unity.Configuration.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Microsoft.Practices.Unity.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Microsoft.Practices.Unity.RegistrationByConvention.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Mono.Security.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Newtonsoft.Json.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\SMAStudiovNext.exe.config" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\System.Spatial.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\System.Windows.Interactivity.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\VisioAutomation.VDX.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Xceed.Wpf.AvalonDock.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Xceed.Wpf.AvalonDock.Themes.Aero.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Xceed.Wpf.AvalonDock.Themes.Metro.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Xceed.Wpf.AvalonDock.Themes.VS2010.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Xceed.Wpf.AvalonDock.Themes.VS2013.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Xceed.Wpf.DataGrid.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\Xceed.Wpf.Toolkit.dll" />
 			</Component>
 		</ComponentGroup>
 	</Fragment>

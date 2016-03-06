@@ -5,9 +5,9 @@ using Gemini.Framework.Services;
 using Gemini.Modules.Output;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
+using Newtonsoft.Json.Linq;
 using SMAStudio.Modules.Runbook.Editor.Parser;
 using SMAStudiovNext.Core;
-using SMAStudiovNext.Language;
 using SMAStudiovNext.Language.Snippets;
 using SMAStudiovNext.Models;
 using SMAStudiovNext.Modules.ExecutionResult.ViewModels;
@@ -18,17 +18,16 @@ using SMAStudiovNext.Modules.Runbook.Editor.Completion;
 using SMAStudiovNext.Modules.Runbook.Views;
 using SMAStudiovNext.Modules.Shell.Commands;
 using SMAStudiovNext.Modules.StartRunDialog.Windows;
-using SMAStudiovNext.Services;
 using SMAStudiovNext.SMA;
 using SMAStudiovNext.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation.Language;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Xml;
 
 namespace SMAStudiovNext.Modules.Runbook.ViewModels
 {
@@ -49,6 +48,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         private IRunbookView _view;
         private bool _inTestRun = false;
         private bool _inRun = false;
+        private bool _initialContentLoading = false;
         /// <summary>
         /// This variable is used mainly when creating a new runbook and
         /// a snippet is added to the runbook (default content). This may be
@@ -99,9 +99,9 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         public string GetContent(RunbookType runbookType, bool forceDownload = false)
         {
             if (runbookType == RunbookType.Draft)
-                return AsyncHelper.RunSync<string>(() => GetContentInternal(_view.TextEditor, runbookType, forceDownload));
+                return AsyncHelper.RunSync<string>(() => GetContentInternal(_view.TextEditor, RunbookType.Draft, forceDownload));
             else
-                return AsyncHelper.RunSync<string>(() => GetContentInternal(_view.PublishedTextEditor, runbookType, forceDownload));
+                return AsyncHelper.RunSync<string>(() => GetContentInternal(_view.PublishedTextEditor, RunbookType.Published, forceDownload));
         }
 
         /// <summary>
@@ -113,26 +113,44 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         {
             var content = string.Empty;
             var currentContent = string.Empty;
+            var output = IoC.Get<IOutput>();
 
             // Get current content
-            Execute.OnUIThread(() => { currentContent = editor.Text; });
+            Execute.OnUIThread(() => { currentContent = editor.Text; output.AppendLine("Loading " + runbookType + " content for " + _runbook.RunbookName); });
 
-            if (forceDownload || String.IsNullOrEmpty(currentContent))
+            if (forceDownload || String.IsNullOrEmpty(currentContent.Trim()))
             {
                 try
                 {
                     content = await _backendContext.GetContentAsync(_backendContext.Service.GetBackendUrl(runbookType, _runbook));
 
-                    Execute.OnUIThread(() =>
+                    // Make sure that it's not XML that we receive. If that is the case, display a notification in the output window
+                    if (content.StartsWith("<string xmlns=\""))
                     {
-                        lock (_lock)
+                        // It's XML
+                        var xml = new XmlDocument();
+                        xml.LoadXml(content);
+
+                        var json = xml.InnerText;
+                        dynamic jsonData = JObject.Parse(json);
+
+                        //MessageBox.Show(jsonData.message.ToString(), "Information");
+                        output.AppendLine(jsonData.message.ToString());
+                    }
+                    else
+                    {
+                        Execute.OnUIThread(() =>
                         {
-                            editor.Text = content;
-                        }
-                    });
+                            lock (_lock)
+                            {
+                                editor.Text = content;
+                            }
+                        });
+                    }
                 }
                 catch (ApplicationException ex)
                 {
+                    Logger.Error("Exception when loading data!", ex);
                     GlobalExceptionHandler.Show(ex);
                 }
             }
@@ -147,6 +165,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 });
             }
 
+            _initialContentLoading = true;
+
             return content;
         }
         
@@ -156,15 +176,20 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         /// <param name="view"></param>
         protected override void OnViewLoaded(object view)
         {
+            Logger.DebugFormat("OnViewLoaded(...)");
+
             _view = (IRunbookView)view;
             _completionProvider = new CompletionProvider(_backendContext, _view.TextEditor.LanguageContext);
 
             if (_runbook.RunbookID != Guid.Empty)
             {
-                Task.Run(() =>
+                Task.Run(async () =>
                 {
-                    GetContent(RunbookType.Draft);
-                    GetContent(RunbookType.Published);
+                    if (_runbook.DraftRunbookVersionID.HasValue)
+                        await GetContentInternal(_view.TextEditor, RunbookType.Draft, true).ConfigureAwait(false);
+
+                    if (_runbook.PublishedRunbookVersionID.HasValue)
+                        await GetContentInternal(_view.PublishedTextEditor, RunbookType.Published, true).ConfigureAwait(false);
 
                     var draftContent = string.Empty;// _view.TextEditor.Text;
                     var publishedContent = string.Empty;// _view.PublishedTextEditor.Text;
@@ -191,7 +216,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
             _view.TextEditor.TextChanged += delegate (object sender, EventArgs e)
             {
-                UnsavedChanges = true;
+                if (_initialContentLoading)
+                    UnsavedChanges = true;
             };
 
             _view.TextEditor.TextArea.TextEntering += delegate (object sender, TextCompositionEventArgs e)
@@ -630,6 +656,9 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
         async Task ICommandHandler<TestCommandDefinition>.Run(Command command)
         {
+            if (!_runbook.DraftRunbookVersionID.HasValue)
+                return;
+
             _inTestRun = true;
             command.Enabled = false;
 
@@ -649,6 +678,9 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
         async Task ICommandHandler<RunCommandDefinition>.Run(Command command)
         {
+            if (!_runbook.PublishedRunbookVersionID.HasValue)
+                return;
+
             _inRun = true;
             command.Enabled = false;
 
@@ -818,9 +850,15 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             get { return _backendContext; }
         }
 
+        private bool _unsavedChanges = false;
         public bool UnsavedChanges
         {
-            get; set;
+            get { return _unsavedChanges; }
+            set
+            {
+                _unsavedChanges = value;
+                NotifyOfPropertyChange(() => DisplayName);
+            }
         }
 
         public override string DisplayName

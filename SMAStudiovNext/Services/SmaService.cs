@@ -1297,7 +1297,7 @@ namespace SMAStudiovNext.Services
         public async Task<string> GetContentAsync(string url)
         {
             Logger.DebugFormat("GetContentAsync(url = {0})", url);
-
+            
             var content = string.Empty;
 
             var request = (HttpWebRequest)HttpWebRequest.Create(url);
@@ -1306,12 +1306,21 @@ namespace SMAStudiovNext.Services
             else
                 request.Credentials = new NetworkCredential(_connectionData.SmaUsername, _connectionData.GetPassword(), _connectionData.SmaDomain);
 
-            var response = await request.GetResponseAsync();
-            var reader = (TextReader)new StreamReader(response.GetResponseStream());
+            var response = await request.GetResponseAsync().ConfigureAwait(false);
+            if (response.Headers["Content-Length"] != null)
+            {
+                var contentLength = int.Parse(response.Headers["Content-Length"]);
 
-            content = reader.ReadToEnd();
+                if (contentLength == 0)
+                    return string.Empty;
+            }
+            else
+                return string.Empty;
 
-            reader.Close();
+            using (var reader = (TextReader)new StreamReader(response.GetResponseStream()))
+            {
+                content = reader.ReadToEnd();
+            }
 
             return content;
         }

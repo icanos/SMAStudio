@@ -14,6 +14,13 @@
     <Rule color="Variable">
       \$[\d\w_]+
     </Rule>
+
+    <!-- Namespaces (.NET) -->
+    <Rule color="Keywords">
+      \b
+      [A-Za-z.]+  # namespace string
+      (?=\s*\]\:\:) # followed by ]::
+    </Rule>
   </RuleSet>
   
   <RuleSet ignoreCase="true">

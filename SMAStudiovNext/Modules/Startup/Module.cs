@@ -56,7 +56,7 @@ namespace SMAStudiovNext.Modules.Startup
 
             // Enable tracing
             TracingAdapter.SetWriter(new TracingInAppWriter());
-            TracingAdapter.IsEnabled = true;
+            TracingAdapter.IsEnabled = false;
 
             var themeManager = AppContext.Resolve<IThemeManager>();
             themeManager.LoadThemes();
