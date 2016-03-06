@@ -737,28 +737,19 @@ namespace SMAStudiovNext.Services
 
         #region Jobs
 
-        public void PauseExecution(Guid jobId)
+        public async Task PauseExecution(Guid jobId)
         {
-            Task.Run(async () =>
-            {
-                await SendRequestAsync("jobs/" + jobId + "/suspend", HttpMethod.Post, "", "0").ConfigureAwait(false);
-            });
+            await SendRequestAsync("jobs/" + jobId + "/suspend", HttpMethod.Post, "", "0").ConfigureAwait(false);
         }
 
-        public void ResumeExecution(Guid jobId)
+        public async Task ResumeExecution(Guid jobId)
         {
-            Task.Run(async () =>
-            {
-                await SendRequestAsync("jobs/" + jobId + "/resume", HttpMethod.Post, "", "0").ConfigureAwait(false);
-            });
+            await SendRequestAsync("jobs/" + jobId + "/resume", HttpMethod.Post, "", "0").ConfigureAwait(false);
         }
 
-        public void StopExecution(Guid jobId)
+        public async Task StopExecution(Guid jobId)
         {
-            Task.Run(async () =>
-            {
-                await SendRequestAsync("jobs/" + jobId + "/stop", HttpMethod.Post, "", "0").ConfigureAwait(false);
-            });
+            await SendRequestAsync("jobs/" + jobId + "/stop", HttpMethod.Post, "", "0").ConfigureAwait(false);
         }
 
         public async Task<bool> CheckRunningJobs(RunbookModelProxy runbook, bool checkDraft)

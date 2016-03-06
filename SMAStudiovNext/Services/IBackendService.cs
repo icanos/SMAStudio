@@ -107,19 +107,19 @@ namespace SMAStudiovNext.Services
         /// Pauses execution of a runbook
         /// </summary>
         /// <param name="jobId">ID to pause</param>
-        void PauseExecution(Guid jobId);
+        Task PauseExecution(Guid jobId);
 
         /// <summary>
         /// Resumes execution of a runbook
         /// </summary>
         /// <param name="jobId">ID of the job to resume</param>
-        void ResumeExecution(Guid jobId);
+        Task ResumeExecution(Guid jobId);
 
         /// <summary>
         /// Stops execution of a runbook
         /// </summary>
         /// <param name="jobId">ID of the job to stop</param>
-        void StopExecution(Guid jobId);
+        Task StopExecution(Guid jobId);
 
         /// <summary>
         /// Delete a object from the backend service

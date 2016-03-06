@@ -2,6 +2,7 @@
 using Gemini.Framework;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
+using Gemini.Framework.Threading;
 using Gemini.Modules.Output;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Icons;
@@ -1147,7 +1148,7 @@ namespace SMAStudiovNext.Services
         /// Pauses execution of a runbook in SMA
         /// </summary>
         /// <param name="jobId">ID of the job to pause</param>
-        public void PauseExecution(Guid jobId)
+        public Task PauseExecution(Guid jobId)
         {
             Logger.DebugFormat("PauseExecution(jobId = {0})", jobId);
 
@@ -1155,7 +1156,7 @@ namespace SMAStudiovNext.Services
             var job = context.Jobs.Where(j => j.JobID == jobId).FirstOrDefault();
 
             if (job == null)
-                return;
+                return TaskUtility.Completed;
 
             try
             {
@@ -1174,13 +1175,15 @@ namespace SMAStudiovNext.Services
                 XmlExceptionHandler.Show(xml);*/
                 throw new ApplicationException("Error when pausing the runbook. Please refer to the output for more information.", ex);
             }
+
+            return TaskUtility.Completed;
         }
 
         /// <summary>
         /// Resumes execution of a runbook
         /// </summary>
         /// <param name="jobId">ID of the job to resume</param>
-        public void ResumeExecution(Guid jobId)
+        public Task ResumeExecution(Guid jobId)
         {
             Logger.DebugFormat("ResumeExecution(jobId = {0})", jobId);
 
@@ -1188,7 +1191,7 @@ namespace SMAStudiovNext.Services
             var job = context.Jobs.Where(j => j.JobID == jobId).FirstOrDefault();
 
             if (job == null)
-                return;
+                return TaskUtility.Completed;
 
             try
             {
@@ -1207,13 +1210,15 @@ namespace SMAStudiovNext.Services
                 XmlExceptionHandler.Show(xml);*/
                 throw new ApplicationException("Error when resuming the variable. Please refer to the output for more information.", ex);
             }
+
+            return TaskUtility.Completed;
         }
 
         /// <summary>
         /// Stops execution of a runbook
         /// </summary>
         /// <param name="jobId">ID of the job to stop</param>
-        public void StopExecution(Guid jobId)
+        public Task StopExecution(Guid jobId)
         {
             Logger.DebugFormat("StopExecution(jobId = {0})", jobId);
 
@@ -1221,7 +1226,7 @@ namespace SMAStudiovNext.Services
             var job = context.Jobs.Where(j => j.JobID == jobId).FirstOrDefault();
 
             if (job == null)
-                return;
+                return TaskUtility.Completed;
 
             try
             {
@@ -1240,6 +1245,8 @@ namespace SMAStudiovNext.Services
                 XmlExceptionHandler.Show(xml);*/
                 throw new ApplicationException("Error when stoping the runbook. Please refer to the output for more information.", ex);
             }
+
+            return TaskUtility.Completed;
         }
 
         public Guid? StartRunbook(RunbookModelProxy runbookProxy, List<NameValuePair> parameters)
