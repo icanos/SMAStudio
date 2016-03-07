@@ -61,14 +61,6 @@
       <HintPath>..\packages\Caliburn.Micro.2.0.2\lib\net45\Caliburn.Micro.Platform.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="ConsoleControl.WPF, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bb812711dbc508e1, processorArchitecture=MSIL">
-      <HintPath>..\packages\ConsoleControl.WPF.1.1.0.0\lib\net40\ConsoleControl.WPF.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="ConsoleControlAPI, Version=1.1.0.0, Culture=neutral, PublicKeyToken=7c86b8a36b9c33e2, processorArchitecture=MSIL">
-      <HintPath>..\packages\ConsoleControl.WPF.1.1.0.0\lib\net40\ConsoleControlAPI.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="DocX, Version=1.0.0.19, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\DocX.1.0.0.19\lib\net40\DocX.dll</HintPath>
       <Private>True</Private>
@@ -146,6 +138,10 @@
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Spatial, Version=5.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Spatial.5.7.0\lib\net40\System.Spatial.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Tpl.Dataflow.4.5.24\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -247,9 +243,11 @@
     <Compile Include="Modules\WindowConnection\Views\ConnectionView.xaml.cs">
       <DependentUpon>ConnectionView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Modules\WindowConsole\ViewModels\ConsoleViewModel.cs" />
     <Compile Include="Modules\WindowConsole\Views\ConsoleView.xaml.cs">
       <DependentUpon>ConsoleView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Modules\WindowConsole\Views\IConsoleView.cs" />
     <Compile Include="Modules\WindowModule\ViewModels\ModuleViewModel.cs" />
     <Compile Include="Modules\WindowModule\Views\ModuleView.xaml.cs">
       <DependentUpon>ModuleView.xaml</DependentUpon>
@@ -580,7 +578,6 @@
   <ItemGroup>
     <Folder Include="Modules\DialogStartRun\ViewModels\" />
     <Folder Include="Modules\PartPropertyGrid\Commands\" />
-    <Folder Include="Modules\WindowConsole\ViewModels\" />
     <Folder Include="Modules\WindowExecutionResult\Command\" />
   </ItemGroup>
   <ItemGroup>

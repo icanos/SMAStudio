@@ -1148,12 +1148,12 @@ namespace SMAStudiovNext.Services
         /// Pauses execution of a runbook in SMA
         /// </summary>
         /// <param name="jobId">ID of the job to pause</param>
-        public Task PauseExecution(Guid jobId)
+        public Task PauseExecution(RunbookModelProxy runbook, bool isDraft = false)
         {
-            Logger.DebugFormat("PauseExecution(jobId = {0})", jobId);
+            Logger.DebugFormat("PauseExecution(jobId = {0})", runbook.JobID);
 
             var context = GetConnection();
-            var job = context.Jobs.Where(j => j.JobID == jobId).FirstOrDefault();
+            var job = context.Jobs.Where(j => j.JobID == runbook.JobID).FirstOrDefault();
 
             if (job == null)
                 return TaskUtility.Completed;
@@ -1164,15 +1164,6 @@ namespace SMAStudiovNext.Services
             }
             catch (DataServiceQueryException ex)
             {
-                /*var xml = default(string);
-
-                if (ex.InnerException != null)
-                    xml = ex.InnerException.Message;
-                else
-                    xml = ex.Message;
-
-                Logger.Error("Error when trying to pause the runbook.", ex);
-                XmlExceptionHandler.Show(xml);*/
                 throw new ApplicationException("Error when pausing the runbook. Please refer to the output for more information.", ex);
             }
 
@@ -1183,12 +1174,12 @@ namespace SMAStudiovNext.Services
         /// Resumes execution of a runbook
         /// </summary>
         /// <param name="jobId">ID of the job to resume</param>
-        public Task ResumeExecution(Guid jobId)
+        public Task ResumeExecution(RunbookModelProxy runbook, bool isDraft = false)
         {
-            Logger.DebugFormat("ResumeExecution(jobId = {0})", jobId);
+            Logger.DebugFormat("ResumeExecution(jobId = {0})", runbook.JobID);
 
             var context = GetConnection();
-            var job = context.Jobs.Where(j => j.JobID == jobId).FirstOrDefault();
+            var job = context.Jobs.Where(j => j.JobID == runbook.JobID).FirstOrDefault();
 
             if (job == null)
                 return TaskUtility.Completed;
@@ -1199,15 +1190,6 @@ namespace SMAStudiovNext.Services
             }
             catch (DataServiceQueryException ex)
             {
-                /*var xml = default(string);
-
-                if (ex.InnerException != null)
-                    xml = ex.InnerException.Message;
-                else
-                    xml = ex.Message;
-
-                Logger.Error("Error when trying to resume the runbook.", ex);
-                XmlExceptionHandler.Show(xml);*/
                 throw new ApplicationException("Error when resuming the variable. Please refer to the output for more information.", ex);
             }
 
@@ -1218,12 +1200,12 @@ namespace SMAStudiovNext.Services
         /// Stops execution of a runbook
         /// </summary>
         /// <param name="jobId">ID of the job to stop</param>
-        public Task StopExecution(Guid jobId)
+        public Task StopExecution(RunbookModelProxy runbook, bool isDraft = false)
         {
-            Logger.DebugFormat("StopExecution(jobId = {0})", jobId);
+            Logger.DebugFormat("StopExecution(jobId = {0})", runbook.JobID);
 
             var context = GetConnection();
-            var job = context.Jobs.Where(j => j.JobID == jobId).FirstOrDefault();
+            var job = context.Jobs.Where(j => j.JobID == runbook.JobID).FirstOrDefault();
 
             if (job == null)
                 return TaskUtility.Completed;
@@ -1234,15 +1216,6 @@ namespace SMAStudiovNext.Services
             }
             catch (DataServiceQueryException ex)
             {
-                /*var xml = default(string);
-
-                if (ex.InnerException != null)
-                    xml = ex.InnerException.Message;
-                else
-                    xml = ex.Message;
-
-                Logger.Error("Error when trying to stop the runbook.", ex);
-                XmlExceptionHandler.Show(xml);*/
                 throw new ApplicationException("Error when stoping the runbook. Please refer to the output for more information.", ex);
             }
 

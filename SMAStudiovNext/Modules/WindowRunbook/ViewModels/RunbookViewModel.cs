@@ -728,7 +728,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             }
 
             // Open the execution result window
-            var executionViewModel = new ExecutionResultViewModel(this);
+            var executionViewModel = new ExecutionResultViewModel(this, isDraft);
             var shell = IoC.Get<IShell>();
             shell.OpenDocument(executionViewModel);
 

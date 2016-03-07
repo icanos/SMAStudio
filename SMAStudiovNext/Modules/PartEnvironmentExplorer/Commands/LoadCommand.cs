@@ -77,7 +77,7 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.Commands
                 // This command has been called from our Job History view
                 var jobProxy = (JobModelProxy)parameter;
                 
-                shell.OpenDocument(new ExecutionResultViewModel(jobProxy.BoundRunbookViewModel, jobProxy.JobID));
+                shell.OpenDocument(new ExecutionResultViewModel(jobProxy.BoundRunbookViewModel, jobProxy.JobID, false));
             }
         }
     }

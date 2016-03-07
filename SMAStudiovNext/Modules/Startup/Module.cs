@@ -7,6 +7,7 @@ using SMAStudiovNext.Core;
 using SMAStudiovNext.Core.Tracing;
 using SMAStudiovNext.Icons;
 using SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels;
+using SMAStudiovNext.Modules.WindowConsole.ViewModels;
 using SMAStudiovNext.Services;
 using SMAStudiovNext.Themes;
 using System;
@@ -128,6 +129,14 @@ namespace SMAStudiovNext.Modules.Startup
             _output.AppendLine("Started Automation Studio");
 
             Shell.StatusBar.Items[0].Message = "";
+        }
+
+        public override void PostInitialize()
+        {
+            base.PostInitialize();
+
+            var consoleView = new ConsoleViewModel();
+            Shell.OpenDocument(consoleView);
         }
 
         public void StartConnection(BackendConnection connection)

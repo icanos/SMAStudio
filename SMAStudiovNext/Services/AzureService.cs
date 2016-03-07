@@ -49,6 +49,8 @@ namespace SMAStudiovNext.Services
         private readonly HttpClient _httpClient;
         private readonly WebRequestHandler _webRequestHandler;
 
+        private readonly List<string> _completionStatusList = new List<string> { "Completed", "Failed", "Stopped" };
+
         private X509Certificate2 _certificate = null;
 
         public IBackendContext Context
@@ -737,25 +739,33 @@ namespace SMAStudiovNext.Services
 
         #region Jobs
 
-        public async Task PauseExecution(Guid jobId)
+        public async Task PauseExecution(RunbookModelProxy runbook, bool isDraft = false)
         {
-            await SendRequestAsync("jobs/" + jobId + "/suspend", HttpMethod.Post, "", "0").ConfigureAwait(false);
+            if (isDraft)
+                await SendRequestAsync("runbooks/" + runbook.RunbookName.ToUrlSafeString() + "/draft/testJob/suspend", HttpMethod.Post, "", "0").ConfigureAwait(false);
+            else
+                await SendRequestAsync("jobs/" + runbook.JobID + "/suspend", HttpMethod.Post, "", "0").ConfigureAwait(false);
         }
 
-        public async Task ResumeExecution(Guid jobId)
+        public async Task ResumeExecution(RunbookModelProxy runbook, bool isDraft = false)
         {
-            await SendRequestAsync("jobs/" + jobId + "/resume", HttpMethod.Post, "", "0").ConfigureAwait(false);
+            if (isDraft)
+                await SendRequestAsync("runbooks/" + runbook.RunbookName.ToUrlSafeString() + "/draft/testJob/resume", HttpMethod.Post, "", "0").ConfigureAwait(false);
+            else
+                await SendRequestAsync("jobs/" + runbook.JobID + "/resume", HttpMethod.Post, "", "0").ConfigureAwait(false);
         }
 
-        public async Task StopExecution(Guid jobId)
+        public async Task StopExecution(RunbookModelProxy runbook, bool isDraft = false)
         {
-            await SendRequestAsync("jobs/" + jobId + "/stop", HttpMethod.Post, "", "0").ConfigureAwait(false);
+            if (isDraft)
+                await SendRequestAsync("runbooks/" + runbook.RunbookName.ToUrlSafeString() + "/draft/testJob/stop", HttpMethod.Post, "", "0").ConfigureAwait(false);
+            else
+                await SendRequestAsync("jobs/" + runbook.JobID + "/stop", HttpMethod.Post, "", "0").ConfigureAwait(false);
         }
 
         public async Task<bool> CheckRunningJobs(RunbookModelProxy runbook, bool checkDraft)
         {
             var result = string.Empty;
-            var completedStatus = new List<string> { "Completed", "Failed" };
 
             if (checkDraft)
             {
@@ -771,7 +781,7 @@ namespace SMAStudiovNext.Services
                 dynamic jobRaw = JObject.Parse(result);
                 var status = jobRaw.status.ToString();
 
-                if (completedStatus.Contains(status))
+                if (_completionStatusList.Contains(status))
                     return false;
             }
             else

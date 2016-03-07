@@ -33,10 +33,12 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
         private ExecutionResultPropertyInfo _propertyInfo;
         private string _displayName = string.Empty;
         private bool _shouldClosePropertyGridOnDeactivate = false;
+        private bool _isTestRun = false;
 
-        public ExecutionResultViewModel()
+        public ExecutionResultViewModel(bool isTestRun)
         {
             Result = new ObservableCollection<JobOutput>();
+            _isTestRun = isTestRun;
 
             // Display the property info tool if not visible yet
             var shell = IoC.Get<IShell>();
@@ -54,8 +56,8 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
             _inspectorTool = (IPropertyGrid)propertyTool;
         }
 
-        public ExecutionResultViewModel(RunbookViewModel runbookViewModel)
-            : this()
+        public ExecutionResultViewModel(RunbookViewModel runbookViewModel, bool isTestRun)
+            : this(isTestRun)
         {
             _runbookViewModel = runbookViewModel;
             _jobId = ((RunbookModelProxy)_runbookViewModel.Model).JobID;
@@ -65,8 +67,8 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
             SubscribeToJob();
         }
 
-        public ExecutionResultViewModel(RunbookViewModel runbookViewModel, Guid jobId)
-            : this()
+        public ExecutionResultViewModel(RunbookViewModel runbookViewModel, Guid jobId, bool isTestRun)
+            : this(isTestRun)
         {
             _runbookViewModel = runbookViewModel;
             _jobId = jobId;
@@ -235,9 +237,9 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
             try
             {
                 if (command.Text.Equals("Pause"))
-                    backendService.PauseExecution(_jobId);
+                    backendService.PauseExecution(_runbookViewModel.Model as RunbookModelProxy, _isTestRun);
                 else
-                    backendService.ResumeExecution(_jobId);
+                    backendService.ResumeExecution(_runbookViewModel.Model as RunbookModelProxy, _isTestRun);
             }
             catch (ApplicationException ex)
             {
@@ -264,7 +266,7 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
 
             try
             {
-                backendService.StopExecution(_jobId);
+                backendService.StopExecution(_runbookViewModel.Model as RunbookModelProxy, _isTestRun);
             }
             catch (ApplicationException ex)
             {

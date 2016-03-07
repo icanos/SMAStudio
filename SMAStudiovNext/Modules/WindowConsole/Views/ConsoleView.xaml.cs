@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PoshCode.Controls;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,17 +13,26 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace SMAStudiovNext.Modules.WindowConsole.Views
 {
     /// <summary>
     /// Interaction logic for VariableView.xaml
     /// </summary>
-    public partial class ConsoleView : UserControl
+    public partial class ConsoleView : UserControl, IConsoleView
     {
         public ConsoleView()
         {
             InitializeComponent();
+        }
+        
+        public UserControl Control
+        {
+            get
+            {
+                return this;
+            }
         }
     }
 }
