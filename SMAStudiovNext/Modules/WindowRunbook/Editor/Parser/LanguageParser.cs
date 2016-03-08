@@ -77,14 +77,19 @@ namespace SMAStudio.Modules.Runbook.Editor.Parser
                 var ch = tmpContent[i];
                 var nextCh = tmpContent.Length > i + 1 ? tmpContent[i + 1] : '\0';
 
-                if (expr == ExpressionType.String || expr == ExpressionType.QuotedString || expr == ExpressionType.SingleQuotedString || expr == ExpressionType.Comment || expr == ExpressionType.MultilineComment)
+                if (expr == ExpressionType.String
+                    || expr == ExpressionType.QuotedString 
+                    || expr == ExpressionType.SingleQuotedString 
+                    || expr == ExpressionType.Comment 
+                    || expr == ExpressionType.MultilineComment
+                    || expr == ExpressionType.MultilineString)
                 {
                     if (ch == '\n')// && _expr != ExpressionType.MultilineComment)
                     {
                         chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
                         lineNumber++;
 
-                        if (expr != ExpressionType.MultilineComment)
+                        if (expr != ExpressionType.MultilineComment && expr != ExpressionType.MultilineString)
                             expr = ExpressionType.None;
 
                         continue;
@@ -96,6 +101,17 @@ namespace SMAStudio.Modules.Runbook.Editor.Parser
                             // End the multi line comment
                             chunk.Append(ch);
                             chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
+                            expr = ExpressionType.None;
+                            continue;
+                        }
+                    }
+                    else if (ch == '@' && expr == ExpressionType.MultilineString)
+                    {
+                        if (tmpContent[i - 1] == '"')
+                        {
+                            chunk.Append(ch);
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
+
                             expr = ExpressionType.None;
                             continue;
                         }
@@ -209,6 +225,8 @@ namespace SMAStudio.Modules.Runbook.Editor.Parser
                             expr = ExpressionType.Function;
                         else if (_language.Contains(chunk.ToString()))
                             expr = ExpressionType.LanguageConstruct;
+                        else if (expr == ExpressionType.Variable && (chunk.ToString().Equals("$true", StringComparison.InvariantCultureIgnoreCase) || chunk.ToString().Equals("$false", StringComparison.InvariantCultureIgnoreCase)))
+                            expr = ExpressionType.Boolean;
 
                         chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
 
@@ -264,7 +282,15 @@ namespace SMAStudio.Modules.Runbook.Editor.Parser
                         break;
                     case '"':
                         // Start/end of a quoted string
-                        if (expr == ExpressionType.String)
+                        //if (chunk.Length > 0 && chunk[chunk.Length - 1].Equals('@'))
+                        if (expr == ExpressionType.MultilineStringStart)
+                        {
+                            chunk.Append(ch);
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
+
+                            expr = ExpressionType.MultilineString;
+                        }
+                        else if (expr == ExpressionType.String)
                         {
                             expr = ExpressionType.QuotedString;
                             chunk.Append(ch);
@@ -276,11 +302,32 @@ namespace SMAStudio.Modules.Runbook.Editor.Parser
                             chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
                             expr = ExpressionType.None;
                         }
+                        else if (expr == ExpressionType.MultilineString)
+                        {
+                            expr = ExpressionType.MultilineStringEnd;
+                            chunk.Append(ch);
+                        }
                         else
                         {
                             expr = ExpressionType.QuotedString;
                             chunk.Append(ch);
                         }
+                        break;
+                    case '@':
+                        if (expr == ExpressionType.MultilineString)
+                        {
+                            chunk.Append(ch);
+                            chunk = CreateSegment(expr, chunk, startPos, lineNumber, ref result);
+                            expr = ExpressionType.None;
+                        }
+                        else if (expr == ExpressionType.None)
+                        {
+                            expr = ExpressionType.MultilineStringStart;
+                            chunk.Append(ch);
+                        }
+                        else
+                            chunk.Append(ch);
+
                         break;
                     case '(':
                         // Expression start, eg. (Get-Content -Path "C:\\Test\\Test.txt")

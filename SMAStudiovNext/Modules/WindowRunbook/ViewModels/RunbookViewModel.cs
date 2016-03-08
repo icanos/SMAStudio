@@ -66,6 +66,22 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             //Owner = runbook.Context.Service;
         }
 
+        public override void CanClose(Action<bool> callback)
+        {
+            if (UnsavedChanges)
+            {
+                var result = MessageBox.Show("There are unsaved changes in the runbook, changes will be lost. Do you want to continue?", "Unsaved changes", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result != MessageBoxResult.Yes)
+                {
+                    callback(false);
+                    return;
+                }
+            }
+
+            callback(true);
+        }
+
         /// <summary>
         /// Add a snippet to the draft content of the runbook
         /// </summary>
@@ -235,6 +251,17 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
             _view.TextEditor.TextArea.TextEntered += delegate (object sender, TextCompositionEventArgs e)
             {
+                var content = _view.TextEditor.Text;
+
+                if (e.Text.Equals(" "))
+                {
+                    Task.Run(() =>
+                    {
+                        lock (_lock)
+                            _completionProvider.Context.Parse(content);
+                    });
+                }
+
                 ShowCompletionWindow(sender).ConfigureAwait(false);
             };
 

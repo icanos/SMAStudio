@@ -8,6 +8,9 @@ namespace SMAStudio.Modules.Runbook.Editor.Parser
         Command,
         Parameter,
         String,
+        MultilineString,
+        MultilineStringStart,
+        MultilineStringEnd,
         QuotedString,
         SingleQuotedString,
         Integer,
@@ -31,14 +34,14 @@ namespace SMAStudio.Modules.Runbook.Editor.Parser
         MultilineCommentEnd,
         LanguageConstruct,
         Property,
-        Argument
+        Argument,
+        Boolean
     }
 
     public class LanguageSegment
     {
         public LanguageSegment()
         {
-            Segments = new List<LanguageSegment>();
         }
 
         public int Start { get; set; }
@@ -50,8 +53,6 @@ namespace SMAStudio.Modules.Runbook.Editor.Parser
         public ExpressionType Type { get; set; }
 
         public string Value { get; set; }
-
-        public List<LanguageSegment> Segments { get; set; }
     
         public override string ToString()
         {

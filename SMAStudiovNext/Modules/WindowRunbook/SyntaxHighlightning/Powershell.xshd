@@ -49,6 +49,22 @@
       </RuleSet>
     </Span>
 
+    <Span color="String" multiline="true">
+      <Begin color="String">@"</Begin>
+      <End>"@</End>
+      <RuleSet>
+        <Span color="UnquotedString">
+          <Begin>\$\(</Begin>
+          <End>\)</End>
+          <RuleSet>
+            <Import ruleSet="InStringExpression" />
+          </RuleSet>
+        </Span>
+
+        <Import ruleSet="InStringExpression" />
+      </RuleSet>
+    </Span>
+
     <Span color="String">
       <Begin>'</Begin>
       <End>'</End>

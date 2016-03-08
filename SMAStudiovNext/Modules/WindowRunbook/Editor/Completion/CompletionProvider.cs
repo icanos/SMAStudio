@@ -88,7 +88,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
             var contextTree = _languageContext.GetContext(lineNumber, position);
             var context = contextTree.FirstOrDefault();
 
-            if (context != null && (context.Type == ExpressionType.QuotedString || context.Type == ExpressionType.SingleQuotedString || context.Type == ExpressionType.Comment || context.Type == ExpressionType.MultilineComment))
+            if (context != null && (context.Type == ExpressionType.QuotedString || context.Type == ExpressionType.SingleQuotedString || context.Type == ExpressionType.Comment || context.Type == ExpressionType.MultilineComment || context.Type == ExpressionType.MultilineString))
                 return new CompletionResult(null);
 
             _cachedLineNumber = lineNumber;
@@ -159,7 +159,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
                             {
                                 if (context != null && context.Value.Equals("$using:", StringComparison.InvariantCultureIgnoreCase))
                                 {
-                                    completionData.AddRange(_languageContext.GetVariables(true));
+                                    completionData.AddRange(_languageContext.GetVariables(position, true));
                                 }
                                 else
                                     completionData.AddRange(_languageContext.GetVariables());
@@ -169,7 +169,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
                             if (_languageContext.IsInSubContext(position))
                             {
                                 // Inside an inline script, add $Using: to each variable
-                                completionData.AddRange(_languageContext.GetVariables(true));
+                                completionData.AddRange(_languageContext.GetVariables(position, true));
                             }
                             else
                                 completionData.AddRange(_languageContext.GetVariables());

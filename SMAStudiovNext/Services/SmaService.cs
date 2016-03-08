@@ -58,52 +58,52 @@ namespace SMAStudiovNext.Services
                 if (context != null)
                 {
                     //AsyncExecution.Run(System.Threading.ThreadPriority.Normal, delegate ()
-                    Task.Run(() =>
-                    {
-                        var runbooks = context.Runbooks.OrderBy(r => r.RunbookName).ToList();
-                        foreach (var runbook in runbooks)
-                            _backendContext.AddToRunbooks(new RunbookModelProxy(runbook, Context));
+                    //Task.Run(() =>
+                   // {
+                    var runbooks = context.Runbooks.OrderBy(r => r.RunbookName).ToList();
+                    foreach (var runbook in runbooks)
+                        _backendContext.AddToRunbooks(new RunbookModelProxy(runbook, Context));
 
-                        var connections = context.Connections.OrderBy(r => r.Name).ToList();
-                        foreach (var connection in connections)
-                            _backendContext.AddToConnections(new ConnectionModelProxy(connection, Context));
+                    var connections = context.Connections.OrderBy(r => r.Name).ToList();
+                    foreach (var connection in connections)
+                        _backendContext.AddToConnections(new ConnectionModelProxy(connection, Context));
 
-                        var credentials = context.Credentials.OrderBy(c => c.Name).ToList();
-                        foreach (var credential in credentials)
-                            _backendContext.AddToCredentials(new CredentialModelProxy(credential, Context));
+                    var credentials = context.Credentials.OrderBy(c => c.Name).ToList();
+                    foreach (var credential in credentials)
+                        _backendContext.AddToCredentials(new CredentialModelProxy(credential, Context));
 
-                        var variables = context.Variables.OrderBy(v => v.Name).ToList();
-                        foreach (var variable in variables)
-                            _backendContext.AddToVariables(new VariableModelProxy(variable, Context));
+                    var variables = context.Variables.OrderBy(v => v.Name).ToList();
+                    foreach (var variable in variables)
+                        _backendContext.AddToVariables(new VariableModelProxy(variable, Context));
 
-                        var modules = context.Modules.OrderBy(m => m.ModuleName).ToList();
-                        foreach (var module in modules)
-                            _backendContext.AddToModules(new ModuleModelProxy(module, Context));
+                    var modules = context.Modules.OrderBy(m => m.ModuleName).ToList();
+                    foreach (var module in modules)
+                        _backendContext.AddToModules(new ModuleModelProxy(module, Context));
 
-                        var schedules = context.Schedules.OrderBy(s => s.Name).ToList();
-                        foreach (var schedule in schedules)
-                            _backendContext.AddToSchedules(new ScheduleModelProxy(schedule, Context));
+                    var schedules = context.Schedules.OrderBy(s => s.Name).ToList();
+                    foreach (var schedule in schedules)
+                        _backendContext.AddToSchedules(new ScheduleModelProxy(schedule, Context));
                     
-                        _backendContext.ParseTags();
+                    _backendContext.ParseTags();
 
-                        //AsyncExecution.ExecuteOnUIThread(delegate ()
-                        Execute.OnUIThread(() =>
-                        {
-                            var output = IoC.Get<IOutput>();
-                            output.AppendLine(" ");
-                            output.AppendLine("Statistics:");
-                            output.AppendLine("Found Runbooks: " + _backendContext.Runbooks.Count);
-                            output.AppendLine("Found Connections: " + _backendContext.Connections.Count);
-                            output.AppendLine("Found Credentials: " + _backendContext.Credentials.Count);
-                            output.AppendLine("Found Variables: " + _backendContext.Variables.Count);
-                            output.AppendLine("Found Modules: " + _backendContext.Modules.Count);
-                            output.AppendLine("Found Schedules: " + _backendContext.Schedules.Count);
-                            output.AppendLine(" ");
+                    //AsyncExecution.ExecuteOnUIThread(delegate ()
+                    Execute.OnUIThread(() =>
+                    {
+                        var output = IoC.Get<IOutput>();
+                        output.AppendLine(" ");
+                        output.AppendLine("Statistics:");
+                        output.AppendLine("Found Runbooks: " + _backendContext.Runbooks.Count);
+                        output.AppendLine("Found Connections: " + _backendContext.Connections.Count);
+                        output.AppendLine("Found Credentials: " + _backendContext.Credentials.Count);
+                        output.AppendLine("Found Variables: " + _backendContext.Variables.Count);
+                        output.AppendLine("Found Modules: " + _backendContext.Modules.Count);
+                        output.AppendLine("Found Schedules: " + _backendContext.Schedules.Count);
+                        output.AppendLine(" ");
 
-                            _backendContext.SignalCompleted();
-                            _backendContext.IsReady = true;
-                        });
+                        _backendContext.SignalCompleted();
+                        _backendContext.IsReady = true;
                     });
+                    //});
                 }
             }
         }

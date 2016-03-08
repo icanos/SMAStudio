@@ -32,6 +32,8 @@ namespace SMAStudiovNext.Modules.Startup
 
         private readonly IList<IAgent> _agents;
         private readonly IList<IBackendContext> _backendContexts;
+
+        private readonly object _lock = new object();
         
         [ImportingConstructor]
         public Module()
@@ -135,8 +137,8 @@ namespace SMAStudiovNext.Modules.Startup
         {
             base.PostInitialize();
 
-            var consoleView = new ConsoleViewModel();
-            Shell.OpenDocument(consoleView);
+            //var consoleView = new ConsoleViewModel();
+            //Shell.OpenDocument(consoleView);
         }
 
         public void StartConnection(BackendConnection connection)
@@ -150,7 +152,10 @@ namespace SMAStudiovNext.Modules.Startup
             var environment = IoC.Get<EnvironmentExplorerViewModel>();
             Execute.OnUIThread(() =>
             {
-                environment.Items.Add(backend.GetStructure());
+                lock (_lock)
+                {
+                    environment.Items.Add(backend.GetStructure());
+                }
             });
         }
 

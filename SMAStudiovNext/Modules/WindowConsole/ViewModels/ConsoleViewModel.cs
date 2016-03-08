@@ -14,6 +14,8 @@ namespace SMAStudiovNext.Modules.WindowConsole.ViewModels
 {
     public class ConsoleViewModel : Document
     {
+        private IConsoleView _consoleView;
+
         public ConsoleViewModel()
         {
 
@@ -28,7 +30,16 @@ namespace SMAStudiovNext.Modules.WindowConsole.ViewModels
         {
             base.OnViewLoaded(view);
 
-            var consoleView = (IConsoleView)view;
+            _consoleView = (IConsoleView)view;
+            //_consoleView.Control.StartProcess("powershell.exe", "-noprofile -executionPolicy remotesigned");
+            //_consoleView.Control.StartProcess("cmd", "powershell.exe");
+        }
+
+        protected override void OnDeactivate(bool close)
+        {
+            base.OnDeactivate(close);
+
+            //_consoleView.Control.StopProcess();
         }
 
         public override string DisplayName

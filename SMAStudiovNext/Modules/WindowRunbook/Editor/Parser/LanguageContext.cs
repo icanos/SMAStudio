@@ -201,17 +201,22 @@ namespace SMAStudio.Modules.Runbook.Editor.Parser
         /// Returns a list of variables from the script
         /// </summary>
         /// <returns></returns>
-        public List<VariableCompletionData> GetVariables(bool applyUsing = false)
+        public List<VariableCompletionData> GetVariables(int position = 0, bool applyUsing = false)
         {
             var list = new List<string>();
             var variables = _segments.Where(s => s.Type == ExpressionType.Variable).Distinct();
             var result = new List<VariableCompletionData>();
-
-            //foreach (var variable in variables)
+            var contextVariables = GetSubContextAssignments(position);
+            
             for (int i = 0; i < _segments.Count; i++)
             {
                 var variable = _segments[i];
 
+                // We don't want to parse variables that are defined after the cursor position
+                if (variable.Start > position)
+                    break;
+
+                // We only want variables in this function
                 if (variable.Type != ExpressionType.Variable)
                     continue;
 
@@ -220,10 +225,25 @@ namespace SMAStudio.Modules.Runbook.Editor.Parser
 
                 var varName = variable.Value;
 
-                if (varName.StartsWith("$Using:") && !applyUsing)
-                    varName = varName.Replace("$Using:", "$");
-                else if (applyUsing && !varName.StartsWith("$Using:"))
-                    varName = varName.Replace("$", "$Using:");
+                // Check if the variable is found within the same context as we,
+                // we don't want to add $Using: to the variable name.
+                var inSameContext = contextVariables.FirstOrDefault(item => item.Value.Equals(varName, StringComparison.InvariantCultureIgnoreCase));
+                if (inSameContext == null && applyUsing)
+                {
+                    // We are not in same context, apply $Using: to the variable name
+                    if (!varName.StartsWith("$Using:"))
+                        varName = varName.Replace("$", "$Using:");
+                }
+                /*
+                if ((variable.Stop < position 
+                    || contextVariables.FirstOrDefault(item => item.Value.Equals(varName, StringComparison.InvariantCultureIgnoreCase)) == null)
+                    && (!varName.Equals("$true") || !varName.Equals("$false")))
+                {
+                    if (varName.StartsWith("$Using:") && !applyUsing)
+                        varName = varName.Replace("$Using:", "$");
+                    else if (applyUsing && !varName.StartsWith("$Using:"))
+                        varName = varName.Replace("$", "$Using:");
+                }*/
 
                 if (list.Contains(varName))
                     continue;
@@ -244,6 +264,42 @@ namespace SMAStudio.Modules.Runbook.Editor.Parser
                 list.Add(varName);
             }
 
+            return result;
+        }
+
+        public IList<LanguageSegment> GetSubContextAssignments(int position)
+        {
+            var result = new List<LanguageSegment>();
+
+            // A sub context is a context where you are required to "call" for variables
+            // from the outer scope, eg. InlineScript.
+            var segments = _segments.Where(item => item.Start < position).ToList();
+            var inlineScriptIndex = segments.FindLastIndex(item => item.Type == ExpressionType.LanguageConstruct && item.Value.Equals("inlinescript", StringComparison.InvariantCultureIgnoreCase));
+            var openingBraces = 0;
+
+            if (inlineScriptIndex > -1 && (inlineScriptIndex + 1) < segments.Count)
+            {
+                for (int i = inlineScriptIndex + 1; i < segments.Count; i++)
+                {
+                    if (segments[i].Type == ExpressionType.BlockStart)
+                        openingBraces++;
+                    else if (segments[i].Type == ExpressionType.BlockEnd)
+                        openingBraces--;
+
+                    if (openingBraces == 0)
+                        break;
+
+                    if (segments[i].Type == ExpressionType.Variable
+                            && segments.Count > (i + 1)
+                            && segments[i + 1].Type == ExpressionType.Operator
+                            && segments[i + 1].Value.Equals("=")) // Assignment
+                    {
+                        //if (_segments[a].Start > context.Stop)
+                        result.Add(segments[i]);
+                    }
+                }
+            }
+            
             return result;
         }
 

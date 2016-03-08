@@ -309,8 +309,8 @@ namespace SMAStudiovNext.Services
             if (SettingsService.CurrentSettings == null)
                 return;
 
-            Task.Run(() =>
-            {
+            //Task.Run(() =>
+           // {
                 // Load all runbooks
                 var runbooksContent = SendRequest("runbooks", HttpMethod.Get);
 
@@ -467,7 +467,7 @@ namespace SMAStudiovNext.Services
                         schedulesRaw = null;
                     }
                 });
-            });
+            //});
         }
 
         public ResourceContainer GetStructure()

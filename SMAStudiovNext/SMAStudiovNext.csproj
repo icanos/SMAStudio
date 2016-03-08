@@ -39,6 +39,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -243,6 +244,9 @@
     <Compile Include="Modules\WindowConnection\Views\ConnectionView.xaml.cs">
       <DependentUpon>ConnectionView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Modules\WindowConsole\Host\CustomHost.cs" />
+    <Compile Include="Modules\WindowConsole\Host\CustomHostRawUserInterface.cs" />
+    <Compile Include="Modules\WindowConsole\Host\CustomHostUserInterface.cs" />
     <Compile Include="Modules\WindowConsole\ViewModels\ConsoleViewModel.cs" />
     <Compile Include="Modules\WindowConsole\Views\ConsoleView.xaml.cs">
       <DependentUpon>ConsoleView.xaml</DependentUpon>

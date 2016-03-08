@@ -8,11 +8,22 @@
 
 		<Feature Id="ProductFeature" Title="Automation Studio" Level="1">
 			<ComponentGroupRef Id="ProductComponents" />
+      <ComponentRef Id="ProgramMenuDir"/>
 		</Feature>
 	</Product>
 
 	<Fragment>
 		<Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="DesktopFolder" Name="Desktop" />
+
+      <Directory Id="ProgramMenuFolder" Name="Programs">
+        <Directory Id="ApplicationProgramsFolder" Name="Automation Studio">
+          <Component Id="ProgramMenuDir" Guid="{B65CDCEE-7130-4759-A8E8-16D84717CCF4}">
+            <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+            <RegistryValue Root="HKCU" Key="Software\Microsoft\Automation Studio" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+          </Component>
+        </Directory>
+      </Directory>
 			<Directory Id="ProgramFilesFolder">
 				<Directory Id="INSTALLFOLDER" Name="Automation Studio" />
 			</Directory>
@@ -22,7 +33,18 @@
 	<Fragment>
 		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
 			<Component Id="ProductComponent" DiskId="1" Guid="{B65CDCEE-7130-4759-A8E8-16D84717CCF3}">
-        <File Source="$(var.SMAStudiovNext.TargetPath)" />
+        <File Source="$(var.SMAStudiovNext.TargetPath)">
+          <Shortcut Id="desktopShortcut" Advertise="yes" Directory="DesktopFolder"
+                              Name="Automation Studio" WorkingDirectory="INSTALLFOLDER"
+                              Icon="SMAStudiovNext.exe" IconIndex="0">
+            <Icon Id="SMAStudiovNext.exe" SourceFile="$(var.SMAStudiovNext.TargetPath)" />
+          </Shortcut>
+          <Shortcut Id="startMenuShotcut" Directory="ApplicationProgramsFolder"
+                    Name="Automation Studio" WorkingDirectory="INSTALLFOLDER"
+                    Icon="SMAStudiovNext2.exe" IconIndex="0" Advertise="yes">
+            <Icon Id="SMAStudiovNext2.exe" SourceFile="$(var.SMAStudiovNext.TargetPath)" />
+          </Shortcut>
+        </File>
         <File Source="$(var.SMAStudiovNext.TargetDir)\Caliburn.Micro.dll" />
         <File Source="$(var.SMAStudiovNext.TargetDir)\Caliburn.Micro.Platform.dll" />
         <File Source="$(var.SMAStudiovNext.TargetDir)\DocX.dll" />
@@ -43,6 +65,7 @@
         <File Source="$(var.SMAStudiovNext.TargetDir)\Newtonsoft.Json.dll" />
         <File Source="$(var.SMAStudiovNext.TargetDir)\SMAStudiovNext.exe.config" />
         <File Source="$(var.SMAStudiovNext.TargetDir)\System.Spatial.dll" />
+        <File Source="$(var.SMAStudiovNext.TargetDir)\System.Threading.Tasks.Dataflow.dll" />
         <File Source="$(var.SMAStudiovNext.TargetDir)\System.Windows.Interactivity.dll" />
         <File Source="$(var.SMAStudiovNext.TargetDir)\VisioAutomation.VDX.dll" />
         <File Source="$(var.SMAStudiovNext.TargetDir)\Xceed.Wpf.AvalonDock.dll" />
