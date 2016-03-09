@@ -11,11 +11,10 @@ using SMAStudiovNext.Themes;
 using SMAStudiovNext.Core;
 using System.Windows;
 using SMAStudiovNext.Modules.Runbook.Editor;
-using SMAStudio.Modules.Runbook.Editor.Parser;
 
 namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlightning
 {
-    public class HighlightingColorizer : DocumentColorizingTransformer
+    /*public class HighlightingColorizer : DocumentColorizingTransformer
     {
         private readonly LanguageParser _parser;
         private readonly LanguageContext _languageContext;
@@ -117,5 +116,5 @@ namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlightning
             else if (style.Italic)
                 element.TextRunProperties.SetTypeface(new Typeface(typeface.FontFamily, FontStyles.Italic, FontWeights.Normal, typeface.Stretch));
         }
-    }
+    }*/
 }

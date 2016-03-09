@@ -1,6 +1,5 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework.Services;
-using SMAStudio.Modules.Runbook.Editor.Parser;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Models;
 using SMAStudiovNext.Modules.Runbook.ViewModels;
@@ -44,10 +43,13 @@ namespace SMAStudiovNext.Commands
                 return false;
             
             // Check if we have placed the cursor in a keyword and if the word that the cursor is placed upon is a runbook or not
-            if (context.Type != ExpressionType.Keyword || (context.Type == ExpressionType.Keyword && runbookViewModel.Context.Runbooks.Count(r => ((RunbookModelProxy)r.Tag).RunbookName.Equals(context.Value, StringComparison.InvariantCultureIgnoreCase)) == 0))
-                return false;
+            if (context.Kind == System.Management.Automation.Language.TokenKind.Generic && context.TokenFlags == System.Management.Automation.Language.TokenFlags.CommandName)
+            {
+                if (runbookViewModel.Context.Runbooks.Count(item => ((RunbookModelProxy)item.Tag).RunbookName.Equals(context.Extent.Text, StringComparison.InvariantCultureIgnoreCase)) > 0)
+                    return true;
+            }
 
-            return true;
+            return false;
         }
 
         public void Execute(object parameter)
@@ -61,7 +63,7 @@ namespace SMAStudiovNext.Commands
             if (context == null)
                 return;
 
-            var runbook = runbookViewModel.Context.Runbooks.FirstOrDefault(r => ((RunbookModelProxy)r.Tag).RunbookName.Equals(context.Value, StringComparison.InvariantCultureIgnoreCase));
+            var runbook = runbookViewModel.Context.Runbooks.FirstOrDefault(r => ((RunbookModelProxy)r.Tag).RunbookName.Equals(context.Extent.Text, StringComparison.InvariantCultureIgnoreCase));
 
             if (runbook == null)
                 return;

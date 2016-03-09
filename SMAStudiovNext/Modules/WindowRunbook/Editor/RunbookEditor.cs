@@ -12,7 +12,7 @@ using ICSharpCode.AvalonEdit.Rendering;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Themes;
 using System.Threading.Tasks;
-using SMAStudio.Modules.Runbook.Editor.Parser;
+using SMAStudiovNext.Modules.Runbook.Editor.Parser;
 
 namespace SMAStudiovNext.Modules.Runbook.Editor
 {

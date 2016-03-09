@@ -6,7 +6,6 @@ using Gemini.Modules.Output;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
 using Newtonsoft.Json.Linq;
-using SMAStudio.Modules.Runbook.Editor.Parser;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Language.Snippets;
 using SMAStudiovNext.Models;
@@ -15,6 +14,7 @@ using SMAStudiovNext.Modules.JobHistory.ViewModels;
 using SMAStudiovNext.Modules.Runbook.Commands;
 using SMAStudiovNext.Modules.Runbook.Editor;
 using SMAStudiovNext.Modules.Runbook.Editor.Completion;
+using SMAStudiovNext.Modules.Runbook.Editor.Parser;
 using SMAStudiovNext.Modules.Runbook.Views;
 using SMAStudiovNext.Modules.Shell.Commands;
 using SMAStudiovNext.Modules.StartRunDialog.Windows;
@@ -42,6 +42,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         private readonly IStatusManager _statusManager;
         private readonly object _lock = new object();
 
+        private IList<ICompletionData> _parameters = null;
         private ICompletionProvider _completionProvider;
         private CompletionWindow _completionWindow = null;
         private RunbookModelProxy _runbook;
@@ -114,10 +115,14 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         /// <returns>Content of the runbook</returns>
         public string GetContent(RunbookType runbookType, bool forceDownload = false)
         {
-            if (runbookType == RunbookType.Draft)
-                return AsyncHelper.RunSync<string>(() => GetContentInternal(_view.TextEditor, RunbookType.Draft, forceDownload));
-            else
-                return AsyncHelper.RunSync<string>(() => GetContentInternal(_view.PublishedTextEditor, RunbookType.Published, forceDownload));
+            var editor = default(RunbookEditor);
+
+            if (_view != null)
+            {
+                editor = (runbookType == RunbookType.Draft) ? _view.TextEditor : _view.PublishedTextEditor;
+            }
+
+            return AsyncHelper.RunSync<string>(() => GetContentInternal(editor, runbookType, forceDownload));
         }
 
         /// <summary>
@@ -132,7 +137,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             var output = IoC.Get<IOutput>();
 
             // Get current content
-            Execute.OnUIThread(() => { currentContent = editor.Text; output.AppendLine("Loading " + runbookType + " content for " + _runbook.RunbookName); });
+            Execute.OnUIThread(() => { if (editor != null) { currentContent = editor.Text; } output.AppendLine("Loading " + runbookType + " content for " + _runbook.RunbookName); });
 
             if (forceDownload || String.IsNullOrEmpty(currentContent.Trim()))
             {
@@ -155,14 +160,23 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                     }
                     else
                     {
-                        Execute.OnUIThread(() =>
+                        if (editor != null)
                         {
-                            lock (_lock)
+                            Execute.OnUIThread(() =>
                             {
-                                editor.Text = content;
-                            }
-                        });
+                                lock (_lock)
+                                {
+                                    editor.Text = content;
+                                }
+                            });
+                        }
                     }
+
+                    Execute.OnUIThread(() => { output.AppendLine("Content loaded."); });
+
+                    // Only parse draft, we don't handle published since these are read only
+                    if (runbookType == RunbookType.Draft && _completionProvider != null)
+                        _completionProvider.Context.Parse(content);
                 }
                 catch (ApplicationException ex)
                 {
@@ -172,13 +186,16 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             }
             else
             {
-                Execute.OnUIThread(() =>
+                if (editor != null)
                 {
-                    lock (_lock)
+                    Execute.OnUIThread(() =>
                     {
-                        content = editor.Text;
-                    }
-                });
+                        lock (_lock)
+                        {
+                            content = editor.Text;
+                        }
+                    });
+                }
             }
 
             _initialContentLoading = true;
@@ -256,10 +273,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 if (e.Text.Equals(" "))
                 {
                     Task.Run(() =>
-                    {
-                        lock (_lock)
-                            _completionProvider.Context.Parse(content);
-                    });
+                {
+                    lock (_lock)
+                        _completionProvider.Context.Parse(content);
+                });
                 }
 
                 ShowCompletionWindow(sender).ConfigureAwait(false);
@@ -322,16 +339,17 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             shell.OpenDocument(new JobHistoryViewModel(this));
         }
 
-        public LanguageSegment GetCurrentContext()
+        public Token GetCurrentContext()
         {
             int caretOffset = 0;
+            var line = default(DocumentLine);
 
             if (_view == null)
                 return null;
 
-            Execute.OnUIThread(() => { caretOffset = _view.TextEditor.CaretOffset; });
+            Execute.OnUIThread(() => { caretOffset = _view.TextEditor.CaretOffset; line = _view.TextEditor.Document.GetLineByOffset(caretOffset); });
 
-            return _completionProvider.Context.GetCurrentContext(caretOffset);
+            return _completionProvider.Context.GetContext(line.LineNumber, caretOffset);
         }
 
         public void ParseContent()
@@ -388,7 +406,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
             if (word == string.Empty)
                 return;
-
+            
             await ShowCompletion(completionWord: word, controlSpace: false);
         }
 
@@ -402,7 +420,14 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 var line = _view.TextEditor.Document.GetLineByOffset(offset);
                 var lineStr = _view.TextEditor.Document.GetText(line);
                 var completionChar = controlSpace ? (char?)null : _view.TextEditor.Document.GetCharAt(offset - 1);
-                var results = await _completionProvider.GetCompletionData(completionWord, lineStr, line.LineNumber, offset, completionChar).ConfigureAwait(true);
+                var results = await _completionProvider.GetCompletionData(
+                        completionWord, 
+                        _view.TextEditor.Text, 
+                        lineStr, 
+                        line, 
+                        offset, 
+                        completionChar
+                    ).ConfigureAwait(true);
 
                 if (results.CompletionData == null)
                     return;
@@ -413,7 +438,9 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                     {
                         _completionWindow = new CompletionWindow(_view.TextEditor.TextArea)
                         {
-                            CloseWhenCaretAtBeginning = controlSpace
+                            CloseWhenCaretAtBeginning = controlSpace,
+                            CloseAutomatically = true,
+                            Width = 300
                         };
 
                         if (completionChar != null && char.IsLetterOrDigit(completionChar.Value))
@@ -443,6 +470,9 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         /// <returns></returns>
         public IList<ICompletionData> GetParameters(string completionWord)
         {
+            if (_parameters != null) // check if parameters is cached
+                return _parameters;
+
             var completionEntries = new List<ICompletionData>();
             var fixedCompletionWord = completionWord != null ? completionWord.Replace("-", "") : null;
             Token[] tokens;
@@ -451,13 +481,14 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             string contentToParse = Content;
             if (String.IsNullOrEmpty(Content))
             {
-                GetContent(RunbookType.Draft, true);
-                contentToParse = Content;
+                contentToParse = GetContent(RunbookType.Draft, true);
 
                 if (String.IsNullOrEmpty(Content))
                 {
-                    GetContent(RunbookType.Published, true);
-                    contentToParse = _view.PublishedTextEditor.Text;
+                    contentToParse = GetContent(RunbookType.Published, true);
+
+                    if (_view != null)
+                        contentToParse = _view.PublishedTextEditor.Text;
                 }
             }
 
@@ -483,7 +514,9 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                     {
                         bool isMandatory = false;
                         AttributeBaseAst attrib = null;
-                        attrib = param.Attributes[param.Attributes.Count - 1]; // always the last one
+
+                        if (param.Attributes.Count > 1)
+                            attrib = param.Attributes[param.Attributes.Count - 1]; // always the last one
 
                         if (fixedCompletionWord != null && !param.Name.Extent.Text.Substring(1).StartsWith(fixedCompletionWord, StringComparison.InvariantCultureIgnoreCase))
                             continue;
@@ -514,8 +547,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                             RawName = param.Name.Extent.Text.Substring(1),
                             DisplayText = "-" + ConvertToNiceName(param.Name.Extent.Text) + (isMandatory ? " (required)" : ""),
                             Name = "-" + param.Name.Extent.Text.Substring(1),                  // Remove the $
-                            IsArray = (attrib.TypeName.IsArray ? true : false),
-                            Type = attrib.TypeName.Name,
+                            IsArray = (attrib != null && attrib.TypeName.IsArray ? true : false),
+                            Type = attrib != null ? attrib.TypeName.Name : "",
                             IsRequired = isMandatory
                         };
                         
@@ -528,7 +561,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                     }
                 }
             }
-            
+
+            if (_parameters == null)
+                _parameters = completionEntries;
+
             return completionEntries;
         }
 

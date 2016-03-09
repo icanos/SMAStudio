@@ -1,399 +1,347 @@
-﻿using SMAStudiovNext.Language;
-using System.Collections.Generic;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using SMAStudiovNext.Models;
+﻿using SMAStudiovNext.Models;
 using SMAStudiovNext.Modules.Runbook.Editor.Completion;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Management.Automation.Language;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace SMAStudio.Modules.Runbook.Editor.Parser
+namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
 {
     public class LanguageContext
     {
-        private object _syncLock = new object();
+        private readonly object _lock = new object();
 
-        /// <summary>
-        /// Holds a reference to the currently active expression
-        /// </summary>
-        private ExpressionType _currentExpression = ExpressionType.None;
-
-        /// <summary>
-        /// Determines whether or not we're in a multi line expression or not
-        /// </summary>
-        private bool _inMultilineExpression = false;
-
-        /// <summary>
-        /// Holds the parsed output of our content
-        /// </summary>
-        private List<LanguageSegment> _segments = null;
-
-        /// <summary>
-        /// Language Parser
-        /// </summary>
-        private readonly LanguageParser _parser;
-
-        private readonly IList<string> _multilineExpressionEndings = new List<string> { "#>", "\"@" };
-
-        private int cachedStartOffset = 0;
-        private int cachedStopOffset = 0;
-        private List<LanguageSegment> cachedSegments = null;
-        //private bool _isInMultilineExpression = false;
-        //private ExpressionType _multilineExpressionType = ExpressionType.None;
+        private Token[] _tokens;
+        private ParseError[] _parseErrors;
+        private ScriptBlockAst _scriptBlock;
 
         public LanguageContext()
         {
-            _parser = new LanguageParser();
+
         }
 
+        /// <summary>
+        /// Parse the runbook content
+        /// </summary>
+        /// <param name="content"></param>
         public void Parse(string content)
         {
-            _segments = _parser.Parse(content);
-        }
-
-        public async Task ParseAsync(string content)
-        {
-            await Task.Run(() => {
-                _segments = _parser.Parse(content);
-            });
-        }
-
-        public ExpressionType PredictContext(int lineNumber, string lineContent)
-        {
-            if (_segments == null)
-                return ExpressionType.None;
-
-            /*if (lineContent.StartsWith("<#"))
-            {
-                _isInMultilineExpression = true;
-                _multilineExpressionType = ExpressionType.MultilineComment;
-            }
-            else if (lineContent.EndsWith("#>"))
-            {
-                _isInMultilineExpression = false;
-                _multilineExpressionType = ExpressionType.None;
-            }*/
-
-            var line = _segments.LastOrDefault(item => item.LineNumber == lineNumber);
-            if (line == null)// && !_isInMultilineExpression)
-                return ExpressionType.None;
-            //else if (line == null && _isInMultilineExpression)
-            //    return _multilineExpressionType;
-
-            _currentExpression = line.Type;
-
-            if (_currentExpression == ExpressionType.MultilineComment)
-                _inMultilineExpression = true;
-
-            if (_inMultilineExpression)
-            {
-                if (_multilineExpressionEndings.Contains(lineContent))
-                {
-                    var expr = _currentExpression;
-                    _currentExpression = ExpressionType.None;
-                    _inMultilineExpression = false;
-
-                    return expr;
-                }
-
-                return _currentExpression;
-            }
-            
-            return ExpressionType.None;
+            _scriptBlock = System.Management.Automation.Language.Parser.ParseInput(content, out _tokens, out _parseErrors);
         }
         
-        public List<LanguageSegment> GetLine(string content, int startOffset, int endOffset)
-        {
-            if (_segments == null || content == null)
-                return null;
-
-            if (cachedSegments != null && cachedSegments.Count > 0 && cachedStartOffset == startOffset && !content.EndsWith(" "))
-            {
-                // If we've just added a character that is not a space, we can safely just
-                // return our cached information but append one character to the stop offset.
-                cachedSegments[cachedSegments.Count - 1].Stop += 1;
-
-                return cachedSegments;
-            }
-            
-            var segments = _parser.Parse(content);
-
-            cachedStartOffset = startOffset;
-            cachedStopOffset = endOffset;
-            cachedSegments = segments;
-
-            return segments;
-        }
-
-        private bool TestRange(int numberToCheck, int bottom, int top)
-        {
-            return (numberToCheck >= bottom && numberToCheck <= top);
-        }
-
-        public LanguageSegment GetCurrentContext(int position)
-        {
-            return _segments.LastOrDefault(s => s.Start <= position);
-        }
-
         /// <summary>
-        /// Retrieve the current context of a position in the document
-        /// </summary>
-        /// <param name="position">Position to find context of</param>
-        public List<LanguageSegment> GetContext(int lineNumber, int position)
-        {
-            var context = new List<LanguageSegment>();
-
-            List<LanguageSegment> parts = null;
-            //lock (_segments)
-           // {
-            parts = _segments.Where(s => s.LineNumber == lineNumber && s.Start <= position).ToList();
-            //}
-
-            parts.Reverse();
-
-            // Remvoe blocks that is opened and closed before we reach our context position
-            /*var inBlockToSkip = false;
-            var blockedType = ExpressionType.None;
-            foreach (var part in parts)
-            {
-                if (part.Type == ExpressionType.ExpressionEnd || part.Type == ExpressionType.BlockEnd || part.Type == ExpressionType.TypeEnd)
-                {
-                    inBlockToSkip = true;
-                    blockedType = part.Type;
-                }
-                else if ((part.Type == ExpressionType.ExpressionStart && blockedType == ExpressionType.ExpressionEnd) ||
-                    (part.Type == ExpressionType.BlockStart && blockedType == ExpressionType.BlockEnd) ||
-                    (part.Type == ExpressionType.TypeStart && blockedType == ExpressionType.TypeEnd))
-                {
-                    inBlockToSkip = false;
-                    continue;
-                }
-
-                if (inBlockToSkip)
-                    continue;
-
-                if (part.Type == ExpressionType.Type && _parser.IgnoreBlockMarks)
-                    continue;
-
-                context.Add(part);
-            }
-            */
-            return parts;
-        }
-
-        /// <summary>
-        /// Get context name of the position provided
-        /// </summary>
-        /// <param name="contextualPosition">Position to get context from</param>
-        /// <returns>Name of the context</returns>
-        public ExpressionType GetContextName(int lineNumber, int contextualPosition)
-        {
-            lock (_syncLock)
-            {
-                var context = _segments.Where(s => s.LineNumber == lineNumber && s.Start <= contextualPosition).LastOrDefault();
-
-                //return context[context.Count - 1].Type;
-                return (context == null) ? ExpressionType.None : context.Type;
-            }
-        }
-
-        /// <summary>
-        /// Returns a list of variables from the script
-        /// </summary>
-        /// <returns></returns>
-        public List<VariableCompletionData> GetVariables(int position = 0, bool applyUsing = false)
-        {
-            var list = new List<string>();
-            var variables = _segments.Where(s => s.Type == ExpressionType.Variable).Distinct();
-            var result = new List<VariableCompletionData>();
-            var contextVariables = GetSubContextAssignments(position);
-            
-            for (int i = 0; i < _segments.Count; i++)
-            {
-                var variable = _segments[i];
-
-                // We don't want to parse variables that are defined after the cursor position
-                if (variable.Start > position)
-                    break;
-
-                // We only want variables in this function
-                if (variable.Type != ExpressionType.Variable)
-                    continue;
-
-                if (!variable.Value.StartsWith("$") || variable.Value.Equals("$"))
-                    continue;
-
-                var varName = variable.Value;
-
-                // Check if the variable is found within the same context as we,
-                // we don't want to add $Using: to the variable name.
-                var inSameContext = contextVariables.FirstOrDefault(item => item.Value.Equals(varName, StringComparison.InvariantCultureIgnoreCase));
-                if (inSameContext == null && applyUsing)
-                {
-                    // We are not in same context, apply $Using: to the variable name
-                    if (!varName.StartsWith("$Using:"))
-                        varName = varName.Replace("$", "$Using:");
-                }
-                /*
-                if ((variable.Stop < position 
-                    || contextVariables.FirstOrDefault(item => item.Value.Equals(varName, StringComparison.InvariantCultureIgnoreCase)) == null)
-                    && (!varName.Equals("$true") || !varName.Equals("$false")))
-                {
-                    if (varName.StartsWith("$Using:") && !applyUsing)
-                        varName = varName.Replace("$Using:", "$");
-                    else if (applyUsing && !varName.StartsWith("$Using:"))
-                        varName = varName.Replace("$", "$Using:");
-                }*/
-
-                if (list.Contains(varName))
-                    continue;
-
-                variable.Value = varName;
-
-                if (i > 0)
-                {
-                    var type = _segments[i - 1];
-                    if (type.Type == ExpressionType.Type)
-                        result.Add(new VariableCompletionData(varName, type.Value));
-                    else
-                        result.Add(new VariableCompletionData(varName, ""));
-                }
-                else
-                    result.Add(new VariableCompletionData(varName, ""));
-
-                list.Add(varName);
-            }
-
-            return result;
-        }
-
-        public IList<LanguageSegment> GetSubContextAssignments(int position)
-        {
-            var result = new List<LanguageSegment>();
-
-            // A sub context is a context where you are required to "call" for variables
-            // from the outer scope, eg. InlineScript.
-            var segments = _segments.Where(item => item.Start < position).ToList();
-            var inlineScriptIndex = segments.FindLastIndex(item => item.Type == ExpressionType.LanguageConstruct && item.Value.Equals("inlinescript", StringComparison.InvariantCultureIgnoreCase));
-            var openingBraces = 0;
-
-            if (inlineScriptIndex > -1 && (inlineScriptIndex + 1) < segments.Count)
-            {
-                for (int i = inlineScriptIndex + 1; i < segments.Count; i++)
-                {
-                    if (segments[i].Type == ExpressionType.BlockStart)
-                        openingBraces++;
-                    else if (segments[i].Type == ExpressionType.BlockEnd)
-                        openingBraces--;
-
-                    if (openingBraces == 0)
-                        break;
-
-                    if (segments[i].Type == ExpressionType.Variable
-                            && segments.Count > (i + 1)
-                            && segments[i + 1].Type == ExpressionType.Operator
-                            && segments[i + 1].Value.Equals("=")) // Assignment
-                    {
-                        //if (_segments[a].Start > context.Stop)
-                        result.Add(segments[i]);
-                    }
-                }
-            }
-            
-            return result;
-        }
-
-        /// <summary>
-        /// Try to determine if we're in a sub context (InlineScript) or not
+        /// Retrieve a list of variables that are being assigned in the script
         /// </summary>
         /// <param name="position"></param>
         /// <returns></returns>
-        public bool IsInSubContext(int position)
+        private IList<Token> GetAssigningVariables(int position)
         {
-            // A sub context is a context where you are required to "call" for variables
-            // from the outer scope, eg. InlineScript.
-            for (int i = 0; i < _segments.Count; i++)
+            var result = new List<Token>();
+            var currentContext = GetSubContext(position);
+
+            for (int i = 0; i < _tokens.Length - 1; i++)
             {
-                var context = _segments[i];
+                var token = _tokens[i];
+                var nextToken = _tokens[i + 1];
 
-                if (context.Type != ExpressionType.LanguageConstruct)
-                    continue;
+                if (token.Extent.StartOffset > position)
+                    break;
 
-                if (!context.Value.Equals("inlinescript", StringComparison.InvariantCultureIgnoreCase))
-                    continue;
-
-                if (_segments.Count > (i + 1))
+                if (token.Kind == TokenKind.Variable 
+                    && (nextToken.TokenFlags == TokenFlags.AssignmentOperator && nextToken.Kind == TokenKind.Equals
+                        || nextToken.TokenFlags == TokenFlags.Keyword && nextToken.Kind == TokenKind.In
+                    ))
                 {
-                    var exprStart = _segments[i + 1];
-                    var openingBraces = 0;
-                    for (int a = i + 2; a < _segments.Count; a++)
+                    var variableContext = GetSubContext(token.Extent.EndOffset);
+                    
+                    if (currentContext != null && variableContext != null
+                        && currentContext.StartOffset != variableContext.StartOffset
+                        && currentContext.EndOffset != variableContext.EndOffset)
                     {
-                        if (_segments[a].Type == ExpressionType.BlockStart)
-                        {
-                            openingBraces++;
-                        }
-                        else if (_segments[a].Type == ExpressionType.BlockEnd && openingBraces > 0)
-                            openingBraces--;
-                        else if (_segments[a].Type == ExpressionType.BlockEnd)
-                        {
-                            // This is our block match!
-                            var exprEnd = _segments[a];
-
-                            if (exprEnd != null)
-                            {
-                                if (exprStart.Start <= position && position < exprEnd.Stop)
-                                {
-                                    return true;
-                                }
-                            }
-
-                            break;
-                        }
+                        continue;
                     }
+                    else if (currentContext == null && variableContext != null)
+                        continue;
+
+                    result.Add(token);
                 }
             }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Get a list of completion data objects of variables
+        /// </summary>
+        /// <param name="position">Position to get variables up until</param>
+        /// <param name="applyUsing">If $Using: should be applied to variables</param>
+        /// <returns>List of completion data</returns>
+        public List<VariableCompletionData> GetVariables(int position, bool applyUsing = false)
+        {
+            var variables = new List<VariableCompletionData>();
+            var takenVariables = new List<string>();
+            var segments = default(IList<Token>);
+
+            //lock (_lock)
+            //    segments = _tokens.Where(item => item.Extent.StartOffset <= position && item.Kind == TokenKind.Variable).ToList();
+            segments = GetAssigningVariables(position);
+
+            for (int i = 0; i < segments.Count; i++)
+            {
+                var token = segments[i];
+
+                var variableName = token.Extent.Text;
+                variableName = ApplyUsingStatement(token, position, applyUsing);
+
+                if (takenVariables.Contains(variableName))
+                    continue;
+
+                var segmentBefore = default(Token);
+
+                if ((i - 1) > 0)
+                    segmentBefore = segments[i - 1];
+
+                if (segmentBefore != null && segmentBefore.Kind == TokenKind.Type)
+                    variables.Add(new VariableCompletionData(variableName, segmentBefore.Extent.Text));
+                else
+                    variables.Add(new VariableCompletionData(variableName, ""));
+
+                takenVariables.Add(variableName);
+            }
+
+            return variables;
+        }
+
+        /// <summary>
+        /// Determine if we're in a inlinescript or not
+        /// </summary>
+        /// <param name="position">Position to check</param>
+        /// <returns>True or false</returns>
+        public bool IsInSubContext(int position)
+        {
+            var tokenBlock = GetSubContext(position);
+
+            if (tokenBlock == null)
+                return false;
+
+            if (position >= tokenBlock.StartOffset && position <= tokenBlock.EndOffset)
+                return true;
 
             return false;
         }
 
         /// <summary>
-        /// Returns the text of the contextual position
+        /// Get the start end end offset of the InlineScript
         /// </summary>
-        /// <param name="contextualPosition"></param>
-        /// <returns></returns>
-        public string GetText(int contextualPosition)
+        /// <param name="position">Position to check</param>
+        /// <returns>Start/end offset of the block</returns>
+        public TokenBlock GetSubContext(int position)
         {
-            var segment = _segments.Where(s => s.Start <= contextualPosition).LastOrDefault();
+            var segments = default(List<Token>);
 
-            if (segment != null)
-                return segment.Value;
+            lock (_lock)
+                segments = _tokens.Where(item => item.Extent.StartOffset <= position).ToList();
 
-            return string.Empty;
+            if (segments.Count == 0)
+                return null;
+
+            var inInlineScript = false;
+            var openingBrace = default(Token);
+            var closingBrace = default(Token);
+            var openedBraces = 0;
+
+            for (int i = 0; i < segments.Count; i++)
+            {
+                var token = segments[i];
+
+                if (token.Kind == TokenKind.InlineScript)
+                {
+                    openingBrace = null;
+                    closingBrace = null;
+                    inInlineScript = true;
+                }
+                else if (inInlineScript)
+                {
+                    if (token.Kind == TokenKind.LCurly)
+                    {
+                        if (openingBrace == null)
+                            openingBrace = token;
+
+                        openedBraces++;
+                    }
+                    else if (token.Kind == TokenKind.RCurly)
+                    {
+                        openedBraces--;
+
+                        if (openedBraces == 0)
+                        {
+                            closingBrace = token;
+                            inInlineScript = false;
+                        }
+                    }
+                }
+            }
+
+            if (openingBrace != null && position >= openingBrace.Extent.StartOffset)
+            {
+                bool isInContext = false;
+
+                if (closingBrace != null)
+                {
+                    if (position <= closingBrace.Extent.EndOffset)
+                        isInContext = true;
+                }
+                else
+                    isInContext = true;
+
+                if (!isInContext)
+                {
+                    return null;
+                }
+            }
+            else
+                return null;
+
+            return new TokenBlock
+            {
+                StartOffset = (openingBrace == null) ? 0 : openingBrace.Extent.StartOffset,
+                EndOffset = (closingBrace == null) ? position : closingBrace.Extent.EndOffset
+            };
         }
 
+        /// <summary>
+        /// Get a list of all runbook references found in this runbook
+        /// </summary>
+        /// <param name="runbookList">List of existing runbooks</param>
+        /// <returns>List of referenced runbooks</returns>
         public List<RunbookModelProxy> GetReferences(IList<RunbookModelProxy> runbookList)
         {
-            /*var references = _segments.Where(item => 
-                item.Type == ExpressionType.Keyword && runbookList.FirstOrDefault(r => 
-                    r.RunbookName.Equals(item.Value, StringComparison.InvariantCultureIgnoreCase)) != null)
-                .Select(item)
-                .ToList();*/
             var references = runbookList.Where(item =>
-                _segments.FirstOrDefault(s => 
-                    s.Value.Equals(item.RunbookName, StringComparison.InvariantCultureIgnoreCase) 
-                    && s.Type == ExpressionType.Keyword) != null)
+                _tokens.FirstOrDefault(s =>
+                    s.Extent.Text.Equals(item.RunbookName, StringComparison.InvariantCultureIgnoreCase)
+                    && (s.Kind == TokenKind.Generic || s.Kind == TokenKind.Identifier)
+                    && s.TokenFlags == TokenFlags.CommandName) != null)
                 .ToList();
 
             return references;
         }
 
         /// <summary>
-        /// Clears the cached segments
+        /// Get the current token at the given position and line
+        /// </summary>
+        /// <param name="lineNumber">Line number to check</param>
+        /// <param name="position">Position to check</param>
+        /// <returns></returns>
+        public Token GetContext(int lineNumber, int position)
+        {
+            var tokenList = _tokens.Where(item =>  item.Extent.StartLineNumber == lineNumber 
+                && position >= item.Extent.StartOffset 
+                && position <= item.Extent.EndOffset).ToList();
+            
+            var currentStart = int.MinValue;
+            var currentStop = int.MaxValue;
+            var currentToken = default(Token);
+
+            foreach (var token in tokenList)
+            {
+                if (token.Extent.StartOffset > currentStart && token.Extent.EndOffset < currentStop)
+                {
+                    currentStart = token.Extent.StartOffset;
+                    currentStop = token.Extent.EndOffset;
+                    currentToken = token;
+                }
+            }
+
+            return currentToken;
+        }
+
+        /// <summary>
+        /// Checks if the current position and line is within a string or comment
+        /// </summary>
+        /// <param name="lineNumber">Line to chcek</param>
+        /// <param name="position">Position to check</param>
+        /// <returns>True if it's within a string or false if not</returns>
+        public bool IsWithinStringOrComment(int lineNumber, int position)
+        {
+            var context = GetContext(lineNumber, position);
+
+            if (context == null)
+                return false;
+
+            switch (context.Kind)
+            {
+                case TokenKind.StringExpandable:
+                case TokenKind.HereStringExpandable:
+                case TokenKind.Comment:
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Find the keyword from a given position (traverse backwards until a keyword is found)
+        /// </summary>
+        /// <param name="lineNumber">Line number to check</param>
+        /// <param name="position">Position in the line</param>
+        /// <returns>Token if found, null if not</returns>
+        public Token GetKeywordFromPosition(int lineNumber, int position)
+        {
+            var tokens = _tokens.Where(item => (
+                    item.Extent.StartLineNumber == lineNumber 
+                    || item.Extent.EndLineNumber == lineNumber
+                ) 
+                && item.Extent.EndOffset < position).ToList();
+
+            var keyword = tokens.LastOrDefault(item => (item.Kind == TokenKind.Generic || item.Kind == TokenKind.Identifier) && item.TokenFlags == TokenFlags.CommandName);
+
+            return keyword;
+        }
+
+        /// <summary>
+        /// Clears the cache
         /// </summary>
         public void ClearCache()
         {
-            if (_segments != null)
-                _segments.Clear();
+            _tokens = null;
+            _parseErrors = null;
+        }
+
+        public Token[] Tokens
+        {
+            get { return _tokens; }
+        }
+
+        public ScriptBlockAst ScriptBlock
+        {
+            get { return _scriptBlock; }
+        }
+
+        /// <summary>
+        /// Apply '$Using:' to variables defined outside current InlineScript scope
+        /// </summary>
+        /// <param name="variable"></param>
+        /// <param name="position"></param>
+        /// <param name="applyUsing"></param>
+        /// <returns></returns>
+        private string ApplyUsingStatement(Token variable, int position, bool applyUsing)
+        {
+            var tokenBlock = GetSubContext(position);
+
+            if (tokenBlock == null)
+                return variable.Text;
+
+            if (variable.Extent.StartOffset >= tokenBlock.StartOffset && variable.Extent.EndOffset <= tokenBlock.EndOffset)
+                return variable.Text;
+
+            if (!variable.Text.StartsWith("$using:", StringComparison.InvariantCultureIgnoreCase) && applyUsing)
+                return variable.Text.Replace("$", "$Using:");
+            else if (variable.Text.StartsWith("$using:", StringComparison.InvariantCultureIgnoreCase) && !applyUsing)
+                return variable.Text.Replace("$Using:", "$").Replace("$using:", "$").Replace("$USING:", "$");
+
+            return variable.Text;
         }
     }
 }

@@ -1,12 +1,9 @@
 ﻿using Caliburn.Micro;
-using Gemini.Framework;
 using Gemini.Framework.Services;
 using Gemini.Modules.ErrorList;
 using Gemini.Modules.Output;
-using SMAStudiovNext.Models;
 using SMAStudiovNext.Modules.Runbook.ViewModels;
 using System.Collections.Generic;
-using System.Management.Automation.Language;
 using System.Threading;
 
 namespace SMAStudiovNext.Agents
@@ -55,64 +52,13 @@ namespace SMAStudiovNext.Agents
         /// </summary>
         private void StartInternal()
         {
-            Token[] tokens;
-            ParseError[] parseErrors;
-
             while (_isRunning)
             {
                 if (_shell.ActiveItem != null && (_shell.ActiveItem is RunbookViewModel))
                 {
                     var content = ((RunbookViewModel)_shell.ActiveItem).Content;
 
-                    // Run the script through the PS parsers
-                    var scriptBlock = System.Management.Automation.Language.Parser.ParseInput(content, out tokens, out parseErrors);
-
-                    if (_errorList != null)
-                        ParseRunbookForErrors(parseErrors);
-
-                    if (tokens != null && tokens.Length > 0)
-                    {
-                        if (_shell.ActiveItem is RunbookViewModel)
-                        {
-                            (_shell.ActiveItem as RunbookViewModel).ParseContent();
-                        }
-                    }
-                }
-
-                var contexts = ((Modules.Startup.Module)IoC.Get<IModule>()).GetContexts();
-                var runbookHash = 0;
-                var lastRunbookHash = 0;
-
-                //_completionProvider.Runbooks.Clear();
-
-                for (var i = 0; i < contexts.Count; i++)
-                {
-                    var context = contexts[i];
-
-                    if (context.Runbooks != null)
-                    {
-                        lock (_syncLock)
-                        {
-                            var runbooks = context.Runbooks;
-
-                            foreach (var runbook in runbooks)
-                                runbookHash += ((RunbookModelProxy)runbook.Tag).RunbookName.Length;
-
-                            if (runbookHash.Equals(lastRunbookHash))
-                            {
-                                Thread.Sleep(5 * 1000);
-                                continue;
-                            }
-                        }
-
-                        // TODO: Restore this somehow!
-                        //foreach (var runbook in runbooks)
-                        //{
-                        //    _completionProvider.Runbooks.Add(new KeywordCompletionData(((RunbookModelProxy)runbook.Tag).RunbookName, IconsDescription.Runbook));
-                        //}
-                    }
-
-                    lastRunbookHash = runbookHash;
+                    // TODO: Rewrite this to squiggly line errors in the editor and add the errors to the error list
                 }
 
                 Thread.Sleep(2 * 1000);
@@ -122,7 +68,7 @@ namespace SMAStudiovNext.Agents
         /// <summary>
         /// Handles notifying the user that there is somekind of parse error in the runbook.
         /// </summary>
-        private void ParseRunbookForErrors(ParseError[] parseErrors)
+        /*private void ParseRunbookForErrors(ParseError[] parseErrors)
         {
             bool hasNewErrors = true;
             var hashCode = 0;
@@ -160,7 +106,7 @@ namespace SMAStudiovNext.Agents
                 _errorList.AddItem(
                     ErrorListItemType.Error,
                     error.Message,
-                    runbookViewModel.DisplayName,
+                    runbookViewModel.Runbook.RunbookName,
                     error.Extent.StartLineNumber,
                     error.Extent.StartColumnNumber
                 );
@@ -183,7 +129,7 @@ namespace SMAStudiovNext.Agents
 
             foreach (var error in errors)
             {
-                if (error.Path.Equals(runbookViewModel.DisplayName))
+                if (error.Path.Equals(runbookViewModel.Runbook.RunbookName))
                     toRemove.Add(error);
             }
 
@@ -193,7 +139,7 @@ namespace SMAStudiovNext.Agents
             {
                 _errorStates[runbookViewModel.ContentId] = 0;
             }
-        }
+        }*/
 
         /// <summary>
         /// Called when the agent should stop

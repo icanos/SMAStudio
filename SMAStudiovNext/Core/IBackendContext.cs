@@ -46,6 +46,8 @@ namespace SMAStudiovNext.Core
         
         void SignalCompleted();
 
+        bool IsRunbook(string name);
+
         /// <summary>
         /// Download content from a url
         /// </summary>

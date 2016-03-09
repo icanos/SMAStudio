@@ -26,6 +26,8 @@ namespace SMAStudiovNext.Core
         private readonly ContextType _backendType;
         private readonly IStatusManager _statusManager;
 
+        private readonly IList<string> _runbookNameCache;
+
         public event OnContextUpdatedDelegate OnLoaded;
 
         public BackendContext(ContextType backendType, BackendConnection connectionData)
@@ -33,6 +35,7 @@ namespace SMAStudiovNext.Core
             _backendType = backendType;
             _backendConnection = connectionData;
             _statusManager = AppContext.Resolve<IStatusManager>();
+            _runbookNameCache = new List<string>();
             
             if (backendType == ContextType.SMA)
             {
@@ -67,6 +70,9 @@ namespace SMAStudiovNext.Core
 
             _statusManager.SetText("Loading data from " + _backendConnection.Name + "...");
             Service.Load();
+
+            foreach (var rb in Runbooks)
+                _runbookNameCache.Add((rb.Tag as RunbookModelProxy).RunbookName);
         }
 
         public ResourceContainer GetStructure()
@@ -79,6 +85,9 @@ namespace SMAStudiovNext.Core
             Execute.OnUIThread(() =>
             {
                 Runbooks.Add(new ResourceContainer(runbook.RunbookName, runbook, IconsDescription.Runbook));
+
+                if (!_runbookNameCache.Contains(runbook.RunbookName))
+                    _runbookNameCache.Add(runbook.RunbookName);
             });
         }
 
@@ -196,14 +205,30 @@ namespace SMAStudiovNext.Core
                 OnLoaded(this, new ContextUpdatedEventArgs(this));
         }
 
+        public bool IsRunbook(string name)
+        {
+            return _runbookNameCache.Contains(name);
+        }
+
         public ContextType ContextType { get { return _backendType; } }
 
         public Guid ID { get { return _backendConnection.Id; } }
-        
+
         /// <summary>
         /// Contains all runbooks found in the backend
         /// </summary>
-        public ObservableCollection<ResourceContainer> Runbooks { get; set; }
+        private ObservableCollection<ResourceContainer> _runbooks;
+        public ObservableCollection<ResourceContainer> Runbooks
+        {
+            get
+            {
+                return _runbooks;
+            }
+            set
+            {
+                _runbooks = value;
+            }
+        }
 
         /// <summary>
         /// Contains all variables found in the backend

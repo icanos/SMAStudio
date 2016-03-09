@@ -256,6 +256,8 @@
     <Compile Include="Modules\WindowModule\Views\ModuleView.xaml.cs">
       <DependentUpon>ModuleView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Modules\WindowRunbook\Editor\Parser\LanguageContext.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Parser\TokenBlock.cs" />
     <Compile Include="Modules\WindowRunbook\ViewModels\RunbookViewModel.cs" />
     <Compile Include="Themes\IThemeManager.cs" />
     <Compile Include="Themes\StylePart.cs" />
@@ -374,9 +376,6 @@
     <Compile Include="Modules\WindowVariable\Views\VariableView.xaml.cs">
       <DependentUpon>VariableView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\WindowRunbook\Editor\Parser\LanguageContext.cs" />
-    <Compile Include="Modules\WindowRunbook\Editor\Parser\LanguageParser.cs" />
-    <Compile Include="Modules\WindowRunbook\Editor\Parser\LanguageSegment.cs" />
     <Compile Include="Service References\SMA\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

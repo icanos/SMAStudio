@@ -1,5 +1,4 @@
-﻿using SMAStudio.Modules.Runbook.Editor.Parser;
-using SMAStudiovNext.Language;
+﻿using SMAStudiovNext.Language;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,12 +29,12 @@ namespace SMAStudiovNext.Themes
 
         public List<StylePart> Colors { get; set; }
 
-        public StylePart GetStyle(ExpressionType exprType)
+        /*public StylePart GetStyle(ExpressionType exprType)
         {
             var style = Colors.FirstOrDefault(item => item.Expression == exprType);
 
             return style;
-        }
+        }*/
 
         public SolidColorBrush GetBrush(StylePart style)
         {
