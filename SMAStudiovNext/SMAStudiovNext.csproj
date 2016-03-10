@@ -55,11 +55,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Caliburn.Micro, Version=2.0.2.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
-      <HintPath>..\packages\Caliburn.Micro.Core.2.0.2\lib\net45\Caliburn.Micro.dll</HintPath>
+      <HintPath>..\packages\Caliburn.Micro.Core.3.0.0\lib\net45\Caliburn.Micro.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Caliburn.Micro.Platform, Version=2.0.2.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
-      <HintPath>..\packages\Caliburn.Micro.2.0.2\lib\net45\Caliburn.Micro.Platform.dll</HintPath>
+      <HintPath>..\packages\Caliburn.Micro.3.0.0\lib\net45\Caliburn.Micro.Platform.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Caliburn.Micro.Platform.Core, Version=2.0.2.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
+      <HintPath>..\packages\Caliburn.Micro.3.0.0\lib\net45\Caliburn.Micro.Platform.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DocX, Version=1.0.0.19, Culture=neutral, processorArchitecture=MSIL">
@@ -146,7 +150,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\MahApps.Metro.1.2.4.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
+      <HintPath>..\packages\Caliburn.Micro.3.0.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Xml" />
@@ -256,8 +260,14 @@
     <Compile Include="Modules\WindowModule\Views\ModuleView.xaml.cs">
       <DependentUpon>ModuleView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Modules\WindowRunbook\Editor\Completion\Glyph.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Parser\ExpressionType.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Parser\LanguageContext.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Parser\ParseErrorEventArgs.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Parser\TokenBlock.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\TextMarker.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\TextMarkerService.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\ToolTipRequestEventArgs.cs" />
     <Compile Include="Modules\WindowRunbook\ViewModels\RunbookViewModel.cs" />
     <Compile Include="Themes\IThemeManager.cs" />
     <Compile Include="Themes\StylePart.cs" />
@@ -268,6 +278,7 @@
     <Compile Include="Exceptions\GlobalExceptionHandler.cs" />
     <Compile Include="Core\IBackendContext.cs" />
     <Compile Include="Core\IEnvironmentExplorerItem.cs" />
+    <Compile Include="Utils\GlyphExtensions.cs" />
     <Compile Include="Utils\InverseBoolConverter.cs" />
     <Compile Include="Core\IStatusManager.cs" />
     <Compile Include="Core\JobOutput.cs" />
@@ -527,6 +538,10 @@
     <Page Include="Modules\DialogAddNewItem\Windows\UIAddNewItemDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Glyphs.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>

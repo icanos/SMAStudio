@@ -2,6 +2,7 @@
 using Gemini.Framework;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
+using Gemini.Modules.ErrorList;
 using Gemini.Modules.Output;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
@@ -22,11 +23,13 @@ using SMAStudiovNext.SMA;
 using SMAStudiovNext.Utils;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Management.Automation.Language;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Xml;
 
 namespace SMAStudiovNext.Modules.Runbook.ViewModels
@@ -145,6 +148,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 {
                     content = await _backendContext.GetContentAsync(_backendContext.Service.GetBackendUrl(runbookType, _runbook));
 
+                    // Only parse draft, we don't handle published since these are read only
+                    if (runbookType == RunbookType.Draft && _completionProvider != null)
+                        _completionProvider.Context.Parse(content);
+
                     // Make sure that it's not XML that we receive. If that is the case, display a notification in the output window
                     if (content.StartsWith("<string xmlns=\""))
                     {
@@ -173,10 +180,6 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                     }
 
                     Execute.OnUIThread(() => { output.AppendLine("Content loaded."); });
-
-                    // Only parse draft, we don't handle published since these are read only
-                    if (runbookType == RunbookType.Draft && _completionProvider != null)
-                        _completionProvider.Context.Parse(content);
                 }
                 catch (ApplicationException ex)
                 {
@@ -214,6 +217,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             _view = (IRunbookView)view;
             _completionProvider = new CompletionProvider(_backendContext, _view.TextEditor.LanguageContext);
 
+            // Attach the parse error event handler
+            _view.TextEditor.LanguageContext.OnParseError += OnDraftParseError;
+            _view.TextEditor.LanguageContext.OnClearParseErrors += OnClearDraftParseErrors;
+
             if (_runbook.RunbookID != Guid.Empty)
             {
                 Task.Run(async () =>
@@ -250,7 +257,9 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             _view.TextEditor.TextChanged += delegate (object sender, EventArgs e)
             {
                 if (_initialContentLoading)
+                {
                     UnsavedChanges = true;
+                }
             };
 
             _view.TextEditor.TextArea.TextEntering += delegate (object sender, TextCompositionEventArgs e)
@@ -270,17 +279,19 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             {
                 var content = _view.TextEditor.Text;
 
-                if (e.Text.Equals(" "))
+                //if (e.Text.Equals(" "))
                 {
                     Task.Run(() =>
-                {
-                    lock (_lock)
-                        _completionProvider.Context.Parse(content);
-                });
+                    {
+                        lock (_lock)
+                            _completionProvider.Context.Parse(content);
+                    });
                 }
 
                 ShowCompletionWindow(sender).ConfigureAwait(false);
             };
+
+            
 
             #region Command Bindings
             // Open auto complete
@@ -306,6 +317,48 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             #endregion
 
             _statusManager.SetTimeoutText("Tips! Use Ctrl+H to view job history.", 10);
+        }
+
+        private void OnClearDraftParseErrors(object sender, EventArgs e)
+        {
+            Execute.OnUIThread(() =>
+            {
+                _view.TextMarkerService.RemoveAll(x => true);
+
+                var errorList = IoC.Get<IErrorList>();
+
+                // Remove the errors
+                errorList.Items.Clear();
+            });
+        }
+        
+        private void OnDraftParseError(object sender, ParseErrorEventArgs e)
+        {
+            Execute.OnUIThread(() =>
+            {
+                _view.TextMarkerService.RemoveAll(x => true);
+
+                var errorList = IoC.Get<IErrorList>();
+
+                // Remove the errors
+                errorList.Items.Clear();
+
+                foreach (var error in e.Errors)
+                {
+                    var marker = _view.TextMarkerService.TryCreate(error.Extent.StartOffset, error.Extent.EndOffset - error.Extent.StartOffset);
+                    if (marker != null)
+                    {
+                        marker.MarkerColor = Colors.Red;
+                        marker.ToolTip = error.Message;
+                    }
+
+                    // Add the errors to our Error List as well
+                    errorList.AddItem(ErrorListItemType.Error, error.Message, _runbook.RunbookName, error.Extent.StartLineNumber, error.Extent.StartColumnNumber, () =>
+                    {
+                        _view.TextEditor.CaretOffset = error.Extent.StartOffset;
+                    });
+                }
+            });
         }
 
         /// <summary>
@@ -398,7 +451,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             {
                 var ch = content[i];
 
-                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
+                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '(')
                     break;
 
                 word = content[i] + word;
@@ -638,7 +691,15 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         {
             try
             {
-                await _backendContext.Service.CheckOut(this).ConfigureAwait(false);
+                var result = await _backendContext.Service.CheckOut(this).ConfigureAwait(false);
+
+                if (result)
+                {
+                    Execute.OnUIThread(() =>
+                    {
+                        _view.TextEditor.Text = _view.PublishedTextEditor.Text;
+                    });
+                }
             }
             catch (ApplicationException ex)
             {
@@ -719,8 +780,13 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
         async Task ICommandHandler<TestCommandDefinition>.Run(Command command)
         {
-            if (!_runbook.DraftRunbookVersionID.HasValue)
+            if (!_runbook.DraftRunbookVersionID.HasValue || String.IsNullOrEmpty(Content))
+            {
+                if (String.IsNullOrEmpty(Content))
+                    MessageBox.Show("The runbook is empty, please create a workflow before trying to run.", "Empty runbook", MessageBoxButton.OK, MessageBoxImage.Information);
+
                 return;
+            }
 
             _inTestRun = true;
             command.Enabled = false;
@@ -741,8 +807,13 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
         async Task ICommandHandler<RunCommandDefinition>.Run(Command command)
         {
-            if (!_runbook.PublishedRunbookVersionID.HasValue)
+            if (!_runbook.PublishedRunbookVersionID.HasValue || String.IsNullOrEmpty(_view.PublishedTextEditor.Text))
+            {
+                if (String.IsNullOrEmpty(Content))
+                    MessageBox.Show("The published runbook is empty, please create a workflow before trying to run.", "Empty runbook", MessageBoxButton.OK, MessageBoxImage.Information);
+
                 return;
+            }
 
             _inRun = true;
             command.Enabled = false;
@@ -766,7 +837,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
             try
             {
-                var runningJob = await _backendContext.Service.CheckRunningJobs(_runbook, isDraft).ConfigureAwait(false);
+                var runningJob = await _backendContext.Service.CheckRunningJobs(_runbook, isDraft).ConfigureAwait(true);
                 if (runningJob)
                 {
                     MessageBox.Show("There is currently a running job, please wait for it to finish.", "Running Jobs", MessageBoxButton.OK, MessageBoxImage.Information);

@@ -8,7 +8,9 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary>
                     <gemini:AppBootstrapper x:Key="bootstrapper" />
+                    <!--<ResourceDictionary Source="Resources/Icons.xaml" />-->
                 </ResourceDictionary>
+                <ResourceDictionary Source="Resources/Glyphs.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

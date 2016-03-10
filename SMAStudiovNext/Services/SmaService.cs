@@ -1024,6 +1024,20 @@ namespace SMAStudiovNext.Services
                 }
 
                 // Download the content of the published runbook
+                var publishedContent = GetContent(GetBackendUrl(RunbookType.Published, (RunbookModelProxy)runbook.Model));
+
+                MemoryStream ms = new MemoryStream();
+                byte[] bytes = Encoding.UTF8.GetBytes(publishedContent);
+                ms.Write(bytes, 0, bytes.Length);
+                ms.Seek(0, SeekOrigin.Begin);
+
+                Stream baseStream = (Stream)ms;
+                RunbookVersion entity = (from rv in context.RunbookVersions
+                                         where (Guid?)rv.RunbookVersionID == runbook.DraftRunbookVersionID
+                                         select rv).FirstOrDefault<RunbookVersion>();
+
+                context.SetSaveStream(entity, baseStream, true, "application/octet-stream", string.Empty);
+                context.SaveChanges();
                 /*var request = (HttpWebRequest)WebRequest.Create(_connectionData.SmaConnectionUrl + "/Runbooks(guid'" + runbook.RunbookID + "')/PublishedRunbookVersion/$value");
                 if (_connectionData.SmaImpersonatedLogin)
                     request.Credentials = CredentialCache.DefaultCredentials;
@@ -1040,18 +1054,7 @@ namespace SMAStudiovNext.Services
                 // TODO: Implement this!
                 //runbookViewModel.Content = content;
 
-                MemoryStream ms = new MemoryStream();
-                byte[] bytes = Encoding.UTF8.GetBytes(runbookViewModel.Content);
-                ms.Write(bytes, 0, bytes.Length);
-                ms.Seek(0, SeekOrigin.Begin);
-
-                Stream baseStream = (Stream)ms;
-                RunbookVersion entity = (from rv in context.RunbookVersions
-                                         where (Guid?)rv.RunbookVersionID == runbook.DraftRunbookVersionID
-                                         select rv).FirstOrDefault<RunbookVersion>();
-
-                context.SetSaveStream(entity, baseStream, true, "application/octet-stream", string.Empty);
-                context.SaveChanges();
+                
                 */
                 //var output = IoC.Get<IOutput>();
                 //output.AppendLine("TODO: Implement assigning content to draft view.");

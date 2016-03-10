@@ -7,8 +7,9 @@
   <Color name="Cmdlet" foreground="#000000" exampleText="if (a)"/>
   <Color name="Variable" foreground="#268887" />
   <Color name="Parameter" foreground="#990201" />
-  <Color name="NumberLiteral" foreground="#2b9999" />
+  <Color name="NumberLiteral" foreground="#268788" />
   <Color name="Operator" foreground="#333333" />
+  <Color name="Punctuation" foreground="#333333" />
 
   <RuleSet name="InStringExpression">
     <Rule color="Variable">
@@ -156,20 +157,28 @@
       </RuleSet>
     </Span>
 
-    <Rule color="Variable">
-      \$[\d\w_]+
+    <Rule color="Parameter">
+      \.[a-zA-Z0-9]+
     </Rule>
-
+    
     <Rule color="Keywords">
       (([\w]+)-([\w]+))
     </Rule>
 
     <Rule color="Keywords">
-      (([\w]+)-([\w]+)-([\w])+)
+      (([\w]+)-([\w]+)-([\w]+))
+    </Rule>
+    
+    <Rule color="Keywords">
+      (([\w]+)-([\w]+)-([\w]+)-([\w]+))
     </Rule>
 
     <Rule color="Parameter">
       ( -\w+)
+    </Rule>
+
+    <Rule color="Variable">
+      \$[\d\w_]+
     </Rule>
 
     <!-- Digits -->
@@ -181,5 +190,10 @@
       )
       ([eE][+-]?[0-9]+)? # optional exponent
     </Rule>
+
+    <Rule color="Punctuation">
+      [?,.;()\[\]{}+\-/%*&lt;&gt;^+~!|&amp;]+
+    </Rule>
+
   </RuleSet>
 </SyntaxDefinition>

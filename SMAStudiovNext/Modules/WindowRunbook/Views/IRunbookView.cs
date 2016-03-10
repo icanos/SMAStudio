@@ -7,5 +7,7 @@ namespace SMAStudiovNext.Modules.Runbook.Views
         RunbookEditor TextEditor { get; }
 
         RunbookEditor PublishedTextEditor { get; }
+
+        TextMarkerService TextMarkerService { get; }
     }
 }

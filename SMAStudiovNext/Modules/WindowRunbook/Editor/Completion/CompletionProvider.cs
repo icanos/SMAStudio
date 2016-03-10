@@ -1,11 +1,9 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework;
-using Gemini.Framework.Services;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Icons;
-using SMAStudiovNext.Language.Snippets;
 using SMAStudiovNext.Models;
 using SMAStudiovNext.Modules.Runbook.Editor.Parser;
 using SMAStudiovNext.Modules.Runbook.ViewModels;
@@ -13,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
-using System.Management.Automation.Language;
 using System.Management.Automation.Runspaces;
 using System.Threading.Tasks;
 
@@ -141,14 +138,19 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
                     else
                         includeNativePowershell = true;
                 }
-                else
+                else // if (!triggerChar.HasValue || !char.IsNumber(triggerChar.Value))
                 {
-                    // Everything
-                    completionData.AddRange(_keywords.Where(item => item.StartsWith(completionWord, StringComparison.InvariantCultureIgnoreCase)).Select(item => new KeywordCompletionData(item, IconsDescription.LanguageConstruct)));
-                    completionData.AddRange(_backendContext.Runbooks.Where(item => (item.Tag as RunbookModelProxy).RunbookName.Contains(completionWord)).Select(item => new KeywordCompletionData((item.Tag as RunbookModelProxy).RunbookName, IconsDescription.Runbook)));
-                    completionData.AddRange(_smaCmdlets.Where(item => item.StartsWith(completionWord, StringComparison.InvariantCultureIgnoreCase)).Select(item => new KeywordCompletionData(item, IconsDescription.Cmdlet)));
+                    double intCheck = 0;
 
-                    includeNativePowershell = true;
+                    // Everything
+                    if (!double.TryParse(completionWord, out intCheck))
+                    {
+                        completionData.AddRange(_keywords.Where(item => item.StartsWith(completionWord, StringComparison.InvariantCultureIgnoreCase)).Select(item => new KeywordCompletionData(item, Glyph.Keyword)));
+                        completionData.AddRange(_backendContext.Runbooks.Where(item => (item.Tag as RunbookModelProxy).RunbookName.Contains(completionWord)).Select(item => new KeywordCompletionData((item.Tag as RunbookModelProxy).RunbookName, Glyph.ClassPublic)));
+                        completionData.AddRange(_smaCmdlets.Where(item => item.StartsWith(completionWord, StringComparison.InvariantCultureIgnoreCase)).Select(item => new KeywordCompletionData(item, Glyph.MethodPublic)));
+
+                        includeNativePowershell = true;
+                    }
                 }
 
                 if (includeNativePowershell)
@@ -197,10 +199,10 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
                 {
                     case CompletionResultType.Type:
                     case CompletionResultType.Keyword:
-                        completionData.Add(new KeywordCompletionData(item.CompletionText, IconsDescription.LanguageConstruct, item.ToolTip));
+                        completionData.Add(new KeywordCompletionData(item.CompletionText, Glyph.Keyword, item.ToolTip));
                         break;
                     case CompletionResultType.Command:
-                        completionData.Add(new KeywordCompletionData(item.CompletionText, IconsDescription.Cmdlet, item.ToolTip));
+                        completionData.Add(new KeywordCompletionData(item.CompletionText, Glyph.MethodPublic, item.ToolTip));
                         break;
                     case CompletionResultType.ParameterName:
                         completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty, item.ToolTip));

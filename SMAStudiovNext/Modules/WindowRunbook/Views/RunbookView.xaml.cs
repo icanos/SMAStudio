@@ -1,5 +1,4 @@
 ﻿using SMAStudiovNext.Modules.Runbook.Editor;
-using SMAStudiovNext.Modules.Runbook.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,6 +11,8 @@ namespace SMAStudiovNext.Modules.Runbook.Views
     /// </summary>
     public partial class RunbookView : UserControl, IRunbookView
     {
+        private readonly TextMarkerService _textMarkerService;
+
         public RunbookEditor TextEditor
         {
             get { return CodeEditor; }
@@ -22,10 +23,19 @@ namespace SMAStudiovNext.Modules.Runbook.Views
             get { return PublishedCodeEditor; }
         }
 
+        public TextMarkerService TextMarkerService
+        {
+            get { return _textMarkerService; }
+        }
+
         public RunbookView()
         {
             InitializeComponent();
             //Loaded += (sender, e) => MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+
+            _textMarkerService = new TextMarkerService(TextEditor);
+            TextEditor.TextArea.TextView.BackgroundRenderers.Add(_textMarkerService);
+            TextEditor.TextArea.TextView.LineTransformers.Add(_textMarkerService);
 
             TextEditor.MouseRightButtonDown += OnMouseRightButtonDown;
         }

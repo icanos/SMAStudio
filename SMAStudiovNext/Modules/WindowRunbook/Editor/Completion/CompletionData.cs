@@ -8,6 +8,7 @@ using SMAStudiovNext.Language.Snippets;
 using System.Windows.Media.Imaging;
 using SMAStudiovNext.Icons;
 using System.Collections.Generic;
+using SMAStudiovNext.Utils;
 
 namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
 {
@@ -23,6 +24,13 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
         public CompletionDataBase(string name)
         {
             Name = name;
+        }
+
+        private Glyph? _glyph;
+        public Glyph? Glyph
+        {
+            get { return _glyph; }
+            set { _glyph = value; Image = _glyph.Value.ToImageSource(); }
         }
 
         public string DisplayText
@@ -44,10 +52,8 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
         #region ICompletionData
         public virtual ImageSource Image
         {
-            get
-            {
-                return null;
-            }
+            get;
+            protected set;
         }
 
         public string Text
@@ -121,18 +127,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
             var segment = new TextSegment();
             segment.StartOffset = startOffset;
             segment.EndOffset = caretOffset;
-
-            /*if (CodeCompletionContext != null && (this is KeywordCompletionData))
-            {
-                Console.WriteLine(this.ToString());
-                CodeCompletionContext.CurrentKeyword = (ICompletionEntry)this;
-
-                Task.Run(delegate ()
-                {
-                    CodeCompletionContext.GetParameters();
-                });
-            }*/
-
+            
             textArea.Document.Replace(segment, Name);
         }
     }
@@ -143,10 +138,11 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
     {
         public VariableCompletionData()
         {
-
+            Glyph = Completion.Glyph.FieldPublic;
         }
 
         public VariableCompletionData(string name, string typeName)
+            : this()
         {
             Name = name;
             Type = typeName;
@@ -155,14 +151,6 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
                 DisplayText = Name + " : " + Type;
             else
                 DisplayText = Name;
-        }
-
-        public override ImageSource Image
-        {
-            get
-            {
-                return new BitmapImage(new Uri(IconsDescription.Variable, UriKind.RelativeOrAbsolute));
-            }
         }
 
         public string Type
@@ -179,10 +167,11 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
 
         public SnippetCompletionData()
         {
-
+            Glyph = Completion.Glyph.Snippet;
         }
 
         public SnippetCompletionData(CodeSnippet snippet)
+            : this()
         {
             _snippet = snippet;
             Name = _snippet.Name;
@@ -232,66 +221,28 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
     #region KeywordCompletionData
     public class KeywordCompletionData : CompletionDataBase, ICompletionEntry
     {
-        private readonly string _icon;
-
         public KeywordCompletionData(string name)
             : base(name)
         {
             Parameters = new List<ICompletionEntry>();
             DisplayText = name;
+
+            if (!Glyph.HasValue)
+                Glyph = Completion.Glyph.Keyword;
         }
-
-        /*public KeywordCompletionData(string name)
+        
+        public KeywordCompletionData(string name, Glyph glyph)
             : this(name)
         {
-            //CodeCompletionContext = completionContext;
-        }*/
-
-        public KeywordCompletionData(string name, string icon)
-            : this(name)
-        {
-            //CodeCompletionContext = completionContext;
-
-            _icon = icon;
+            Glyph = glyph;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public KeywordCompletionData(string name, string icon, string description)
+        public KeywordCompletionData(string name, Glyph glyph, string description)
             : this(name)
         {
             Description = description;
-            _icon = icon;
-        }
-
-        /*public KeywordCompletionData(string name, string module, ICodeCompletionContext completionContext)
-            : this(name)
-        {
-            Module = module;
-            CodeCompletionContext = completionContext;
-        }*/
-
-        /*public KeywordCompletionData(string name, string module, string icon)
-            : this(name)
-        {
-            Module = module;
-            _icon = icon;
-        }
-
-        public KeywordCompletionData(string name, string module, ICodeCompletionContext completionContext, string icon)
-            : this(name)
-        {
-            Module = module;
-            CodeCompletionContext = completionContext;
-
-            _icon = icon;
-        }*/
-
-        public override ImageSource Image
-        {
-            get
-            {
-                return new BitmapImage(new Uri(_icon, UriKind.RelativeOrAbsolute));
-            }
+            Glyph = glyph;
         }
 
         public string Module { get; set; }
@@ -305,18 +256,14 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
     {
         public ParameterCompletionData()
         {
-
+            Glyph = Completion.Glyph.PropertyPublic;
         }
 
         public ParameterCompletionData(string name)
+            : this()
         {
             Name = name;
-
-            //if (!Name.StartsWith("-"))
-            //    Name = "-" + name;
-            //if (Name.StartsWith("-"))
-            //    Name = Name.Substring(1);
-
+            
             if (!String.IsNullOrEmpty(Type))
                 DisplayText = Name + " : " + Type;
             else
@@ -327,6 +274,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
         }
 
         public ParameterCompletionData(string name, string typeName)
+            : this()
         {
             Name = name;
 
@@ -345,6 +293,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
         }
 
         public ParameterCompletionData(string name, string typeName, bool includeDash = true)
+            : this()
         {
             Name = name;
 
@@ -363,6 +312,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
         }
 
         public ParameterCompletionData(string name, string typeName, string description, bool includeDash = true)
+            : this()
         {
             Name = name;
 
@@ -403,23 +353,13 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
 
     public class ParameterValueCompletionData : CompletionDataBase, ICompletionEntry
     {
-        private string _icon;
-
         public ParameterValueCompletionData(string value, string description)
         {
             Name = value;
             DisplayText = value;
             Description = description;
 
-            _icon = IconsDescription.Flag;
-        }
-
-        public override ImageSource Image
-        {
-            get
-            {
-                return new BitmapImage(new Uri(_icon, UriKind.RelativeOrAbsolute));
-            }
+            Glyph = Completion.Glyph.ConstantPublic;
         }
     }
     #endregion

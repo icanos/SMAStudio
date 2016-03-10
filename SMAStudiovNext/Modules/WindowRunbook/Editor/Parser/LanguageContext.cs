@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
 {
+    public delegate void OnParseErrorDelegate(object sender, ParseErrorEventArgs e);
+    public delegate void OnClearParseErrorsDelegate(object sender, EventArgs e);
+
     public class LanguageContext
     {
         private readonly object _lock = new object();
@@ -17,10 +20,15 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
         private ParseError[] _parseErrors;
         private ScriptBlockAst _scriptBlock;
 
+        private bool _hasHadParseErrors = false;
+
         public LanguageContext()
         {
 
         }
+
+        public event OnParseErrorDelegate OnParseError;
+        public event OnClearParseErrorsDelegate OnClearParseErrors;
 
         /// <summary>
         /// Parse the runbook content
@@ -29,6 +37,19 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
         public void Parse(string content)
         {
             _scriptBlock = System.Management.Automation.Language.Parser.ParseInput(content, out _tokens, out _parseErrors);
+
+            if (_parseErrors != null && _parseErrors.Length > 0)
+            {
+                _hasHadParseErrors = true;
+
+                if (OnParseError != null)
+                    OnParseError(this, new ParseErrorEventArgs(_parseErrors));
+            }
+            else
+            {
+                if (OnClearParseErrors != null)
+                    OnClearParseErrors(this, new EventArgs());
+            }
         }
         
         /// <summary>

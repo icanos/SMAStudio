@@ -56,8 +56,9 @@ namespace SMAStudiovNext.Agents
             {
                 if (_shell.ActiveItem != null && (_shell.ActiveItem is RunbookViewModel))
                 {
-                    var content = ((RunbookViewModel)_shell.ActiveItem).Content;
+                    var runbook = (_shell.ActiveItem as RunbookViewModel);
 
+                    runbook.ParseContent();
                     // TODO: Rewrite this to squiggly line errors in the editor and add the errors to the error list
                 }
 

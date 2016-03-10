@@ -568,12 +568,14 @@ namespace SMAStudiovNext.Services
                 });
             }
 
+            var publishedContent = runbook.PublishedContent;
+
             // Check out the runbok
             await SendRequestAsync("runbooks/" + runbook.Runbook.RunbookName.ToUrlSafeString() + "/draft/content", HttpMethod.Put, "").ConfigureAwait(false);
 
             // Notify SMA Studio that we have a draft and download the content
-            runbook.Runbook.DraftRunbookVersionID = Guid.NewGuid();
-            runbook.GetContent(RunbookType.Draft, true);
+            //runbook.Runbook.DraftRunbookVersionID = Guid.NewGuid();
+            //runbook.GetContent(RunbookType.Draft, true);
 
             if (TracingAdapter.IsEnabled)
             {
