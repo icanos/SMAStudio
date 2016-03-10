@@ -36,13 +36,20 @@ namespace SMAStudiovNext.Themes
                 {
                     using (var fileReader = new StreamReader(file))
                     {
-                        var serializer = new XmlSerializer(typeof(Theme));
-                        var theme = (Theme)serializer.Deserialize(fileReader);
+                        try
+                        {
+                            var serializer = new XmlSerializer(typeof(Theme));
+                            var theme = (Theme)serializer.Deserialize(fileReader);
 
-                        _themes.Add(theme);
+                            _themes.Add(theme);
 
-                        if (file.EndsWith(currentTheme + ".theme"))
-                            _currentTheme = theme;
+                            if (file.EndsWith(currentTheme + ".theme"))
+                                _currentTheme = theme;
+                        }
+                        catch (Exception)
+                        {
+                            // Ignore theme parse errors
+                        }
                     }
                 }
             }
