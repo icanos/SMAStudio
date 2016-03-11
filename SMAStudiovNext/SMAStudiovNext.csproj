@@ -55,31 +55,19 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Caliburn.Micro, Version=2.0.2.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
-      <HintPath>..\packages\Caliburn.Micro.Core.2.0.2\lib\net45\Caliburn.Micro.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Caliburn.Micro.Core.3.0.0\lib\net45\Caliburn.Micro.dll</HintPath>
     </Reference>
     <Reference Include="Caliburn.Micro.Platform, Version=2.0.2.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
-      <HintPath>..\packages\Caliburn.Micro.2.0.2\lib\net45\Caliburn.Micro.Platform.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Caliburn.Micro.3.0.0\lib\net45\Caliburn.Micro.Platform.dll</HintPath>
+    </Reference>
+    <Reference Include="Caliburn.Micro.Platform.Core, Version=2.0.2.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Caliburn.Micro.3.0.0\lib\net45\Caliburn.Micro.Platform.Core.dll</HintPath>
     </Reference>
     <Reference Include="DocX, Version=1.0.0.19, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\DocX.1.0.0.19\lib\net40\DocX.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Gemini, Version=0.6.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\GeminiWpf.0.6.2\lib\net45\Gemini.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Gemini.Modules.CodeEditor, Version=0.6.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Gemini.Modules.CodeEditor.0.6.2\lib\net45\Gemini.Modules.CodeEditor.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Gemini.Modules.ErrorList, Version=0.6.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Gemini.Modules.ErrorList.0.6.2\lib\net45\Gemini.Modules.ErrorList.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Gemini.Modules.Output, Version=0.6.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Gemini.Modules.Output.0.6.2\lib\net45\Gemini.Modules.Output.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ICSharpCode.AvalonEdit, Version=5.0.3.0, Culture=neutral, PublicKeyToken=9cc39be672370310, processorArchitecture=MSIL">
@@ -87,8 +75,8 @@
       <HintPath>..\packages\AvalonEdit.5.0.2\lib\Net40\ICSharpCode.AvalonEdit.dll</HintPath>
     </Reference>
     <Reference Include="MahApps.Metro, Version=1.2.4.0, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\MahApps.Metro.1.2.4.0\lib\net45\MahApps.Metro.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Data.Edm, Version=5.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Data.Edm.5.7.0\lib\net40\Microsoft.Data.Edm.dll</HintPath>
@@ -162,10 +150,6 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="Xceed.Wpf.AvalonDock, Version=2.6.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-      <HintPath>..\packages\Extended.Wpf.Toolkit.2.6\lib\net40\Xceed.Wpf.AvalonDock.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Xceed.Wpf.AvalonDock.Themes.Aero, Version=2.6.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
       <HintPath>..\packages\Extended.Wpf.Toolkit.2.6\lib\net40\Xceed.Wpf.AvalonDock.Themes.Aero.dll</HintPath>
       <Private>True</Private>
@@ -648,6 +632,28 @@
     <Resource Include="LICENSE.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Libraries\gemini\src\Gemini.Modules.CodeEditor\Gemini.Modules.CodeEditor.csproj">
+      <Project>{1b56487b-cd40-4d94-8a62-c15f7e13d2fc}</Project>
+      <Name>Gemini.Modules.CodeEditor</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Libraries\gemini\src\Gemini.Modules.ErrorList\Gemini.Modules.ErrorList.csproj">
+      <Project>{9f436232-52c4-4c2c-a83f-adfe5b829484}</Project>
+      <Name>Gemini.Modules.ErrorList</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Libraries\gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj">
+      <Project>{b78aacc8-5a16-4951-83ad-b78d1c80a258}</Project>
+      <Name>Gemini.Modules.Output</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Libraries\gemini\src\Gemini\Gemini.csproj">
+      <Project>{13dbfc87-c152-4a86-94b0-d9944beef647}</Project>
+      <Name>Gemini</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Libraries\Xceed.Wpf.AvalonDock\Xceed.Wpf.AvalonDock.csproj">
+      <Project>{db81988f-e0f2-45a0-a1fd-8c37f3d35244}</Project>
+      <Name>Xceed.Wpf.AvalonDock</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
