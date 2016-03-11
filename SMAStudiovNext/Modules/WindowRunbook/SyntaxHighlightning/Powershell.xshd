@@ -2,14 +2,15 @@
 <SyntaxDefinition name="PowerShell" extensions=".ps1;.psm1;.psd1" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
   <Color name="Comment" foreground="#999988" exampleText="// comment" />
   <Color name="String" foreground="#dd1144" exampleText="string text = &quot;Hello, World!&quot;"/>
-  <Color name="UnquotedString" foreground="#000000"/>
-  <Color name="Keywords" foreground="#000000" fontWeight="bold" />
-  <Color name="Cmdlet" foreground="#000000" exampleText="if (a)"/>
+  <Color name="Identifier" foreground="#000000"/>
+  <Color name="Keyword" foreground="#000000" fontWeight="bold" />
+  <Color name="CommandName" foreground="#000000" fontWeight="bold" />
   <Color name="Variable" foreground="#268887" />
   <Color name="Parameter" foreground="#990201" />
-  <Color name="NumberLiteral" foreground="#268788" />
+  <Color name="Number" foreground="#268788" />
   <Color name="Operator" foreground="#333333" />
-  <Color name="Punctuation" foreground="#333333" />
+  <Color name="Member" foreground="#000000" />
+  <Color name="Punctuation" />
 
   <RuleSet name="InStringExpression">
     <Rule color="Variable">
@@ -17,7 +18,7 @@
     </Rule>
 
     <!-- Namespaces (.NET) -->
-    <Rule color="Keywords">
+    <Rule color="Keyword">
       \b
       [A-Za-z.]+  # namespace string
       (?=\s*\]\:\:) # followed by ]::
@@ -38,7 +39,7 @@
       <Begin>"</Begin>
       <End>"</End>
       <RuleSet>
-        <Span color="UnquotedString">
+        <Span color="Identifier">
           <Begin>\$\(</Begin>
           <End>\)</End>
           <RuleSet>
@@ -54,7 +55,7 @@
       <Begin color="String">@"</Begin>
       <End>"@</End>
       <RuleSet>
-        <Span color="UnquotedString">
+        <Span color="Identifier">
           <Begin>\$\(</Begin>
           <End>\)</End>
           <RuleSet>
@@ -72,13 +73,13 @@
     </Span>
     
     <Span>
-      <Begin color="Keywords">
+      <Begin color="Keyword">
         (workflow|function)\b
       </Begin>
-      <End color="UnquotedString">(([\w]+)-([\w]+))</End>
+      <End color="Identifier"> ([a-zA-Z0-9\-_]+)</End>
     </Span>
 
-    <Keywords color="Keywords">
+    <Keywords color="Keyword">
       <Word>begin</Word>
       <Word>break</Word>
       <Word>catch</Word>
@@ -141,7 +142,7 @@
     </Keywords>
 
     <!-- Namespaces (.NET) -->
-    <Rule color="Keywords">
+    <Rule color="Keyword">
       \b
       [A-Za-z.]+  # namespace string
       (?=\s*\]\:\:) # followed by ]::
@@ -151,26 +152,20 @@
       <Begin>\[</Begin>
       <End>\]</End>
       <RuleSet>
-        <Rule color="Keywords">
+        <Rule color="Keyword">
           (\w+)
         </Rule>
       </RuleSet>
     </Span>
 
-    <Rule color="Parameter">
+    <Rule color="Member">
       \.[a-zA-Z0-9]+
     </Rule>
-    
-    <Rule color="Keywords">
-      (([\w]+)-([\w]+))
-    </Rule>
 
-    <Rule color="Keywords">
-      (([\w]+)-([\w]+)-([\w]+))
-    </Rule>
-    
-    <Rule color="Keywords">
-      (([\w]+)-([\w]+)-([\w]+)-([\w]+))
+    <Rule color="CommandName">
+      \b
+      [\d\w_\-]+
+      ([ \r\n\s*])
     </Rule>
 
     <Rule color="Parameter">
@@ -182,7 +177,7 @@
     </Rule>
 
     <!-- Digits -->
-    <Rule color="NumberLiteral">
+    <Rule color="Number">
       \b0[xX][0-9a-fA-F]+  # hex number
       |
       (	\b\d+(\.[0-9]+)?   #number with optional floating point

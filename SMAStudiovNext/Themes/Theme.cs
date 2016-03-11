@@ -34,13 +34,13 @@ namespace SMAStudiovNext.Themes
 
         public List<StylePart> Colors { get; set; }
         
-        public StylePart GetStyle(TokenKind tokenKind, TokenFlags tokenFlags)
+        /*public StylePart GetStyle(TokenKind tokenKind, TokenFlags tokenFlags)
         {
             if (_defaultStyle== null)
             {
                 _defaultStyle = new StylePart
                 {
-                    Color = Foreground,
+                    Foreground = Foreground,
                     Bold = false,
                     Italic = false
                 };
@@ -178,14 +178,14 @@ namespace SMAStudiovNext.Themes
             }
             
             return null;
-        }
+        }*/
 
         public SolidColorBrush GetBrush(StylePart style)
         {
             if (style == null)
                 return Brushes.Black;
 
-            var hexColor = style.Color;
+            var hexColor = style.Foreground;
 
             if (_brushCache.ContainsKey(hexColor))
                 return _brushCache[hexColor];

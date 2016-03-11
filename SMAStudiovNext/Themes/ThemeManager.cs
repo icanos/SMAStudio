@@ -43,7 +43,7 @@ namespace SMAStudiovNext.Themes
 
                             _themes.Add(theme);
 
-                            if (file.EndsWith(currentTheme + ".theme"))
+                            if (file.EndsWith(currentTheme + ".theme", StringComparison.InvariantCultureIgnoreCase))
                                 _currentTheme = theme;
                         }
                         catch (Exception)

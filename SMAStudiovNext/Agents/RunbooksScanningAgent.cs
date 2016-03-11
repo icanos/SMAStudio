@@ -60,9 +60,14 @@ namespace SMAStudiovNext.Agents
 
                     runbook.ParseContent();
                     // TODO: Rewrite this to squiggly line errors in the editor and add the errors to the error list
+
+                    // If we are currently active, speed up the parsing of the code
+                    Thread.Sleep(600);
+                    continue;
                 }
 
-                Thread.Sleep(1 * 1000);
+                // If we're "sleeping", eg. out of focus etc, slow down parsing.
+                Thread.Sleep(2 * 1000);
             }
         }
         

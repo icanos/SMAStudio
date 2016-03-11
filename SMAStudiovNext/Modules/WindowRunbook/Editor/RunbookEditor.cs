@@ -14,6 +14,7 @@ using SMAStudiovNext.Modules.Runbook.Editor.Parser;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using SMAStudiovNext.Modules.Runbook.SyntaxHighlighting;
 
 namespace SMAStudiovNext.Modules.Runbook.Editor
 {
@@ -30,6 +31,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
         private FoldingManager _foldingManager;
         private PowershellFoldingStrategy _foldingStrategy;
         private LanguageContext _languageContext;
+        private ThemedHighlightingColorizer _colorizer;
         private ToolTip _toolTip;
 
         public RunbookEditor()
@@ -154,9 +156,6 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
 
         private void InitializeColorizer()
         {
-            //_colorizer = new SyntaxHighlightning.HighlightingColorizer(_languageContext);
-            //TextArea.TextView.LineTransformers.Add(_colorizer);
-
             var assembly = Assembly.GetExecutingAssembly();
             var resourceName = "SMAStudiovNext.Modules.WindowRunbook.SyntaxHighlightning.Powershell.xshd";
 
@@ -164,6 +163,9 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
             var reader = new XmlTextReader(stream);
 
             SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+            
+            _colorizer = new ThemedHighlightingColorizer(SyntaxHighlighting);
+            TextArea.TextView.LineTransformers.Add(_colorizer);
 
             reader.Close();
             stream.Close();

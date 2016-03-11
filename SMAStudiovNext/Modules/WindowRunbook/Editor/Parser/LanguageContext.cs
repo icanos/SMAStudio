@@ -255,21 +255,20 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
         /// <param name="lineNumber">Line number to check</param>
         /// <param name="position">Position to check</param>
         /// <returns></returns>
-        public Token GetContext(int lineNumber, int position)
+        public List<Token> GetContext(int lineNumber, int position)
         {
             var tokenList = _tokens.Where(item => item.Extent.StartLineNumber == lineNumber 
-                && position >= item.Extent.StartOffset 
-                && position <= item.Extent.EndOffset).ToList();
+                && item.Extent.EndOffset <= position).ToList();
 
             if (tokenList.Count == 0)
             {
                 tokenList = _tokens.Where(item => item.Extent.StartLineNumber <= lineNumber 
                     && item.Extent.EndLineNumber >= lineNumber).ToList();
 
-                return tokenList.FirstOrDefault();
+                return tokenList;
             }
-            
-            var currentStart = int.MinValue;
+
+            /*var currentStart = int.MinValue;
             var currentStop = int.MaxValue;
             var currentToken = default(Token);
 
@@ -283,7 +282,8 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
                 }
             }
 
-            return currentToken;
+            return currentToken;*/
+            return tokenList;
         }
 
         /// <summary>
@@ -299,12 +299,15 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
             if (context == null)
                 return false;
 
-            switch (context.Kind)
+            foreach (var token in context)
             {
-                case TokenKind.StringExpandable:
-                case TokenKind.HereStringExpandable:
-                case TokenKind.Comment:
-                    return true;
+                switch (token.Kind)
+                {
+                    case TokenKind.StringExpandable:
+                    case TokenKind.HereStringExpandable:
+                    case TokenKind.Comment:
+                        return true;
+                }
             }
 
             return false;

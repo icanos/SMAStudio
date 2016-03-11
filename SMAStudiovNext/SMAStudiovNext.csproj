@@ -261,6 +261,7 @@
     <Compile Include="Modules\WindowRunbook\Editor\TextMarker.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\TextMarkerService.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\ToolTipRequestEventArgs.cs" />
+    <Compile Include="Modules\WindowRunbook\SyntaxHighlightning\ThemedHighlightingColorizer.cs" />
     <Compile Include="Modules\WindowRunbook\ViewModels\RunbookViewModel.cs" />
     <Compile Include="Themes\IThemeManager.cs" />
     <Compile Include="Themes\StylePart.cs" />

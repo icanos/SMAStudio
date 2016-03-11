@@ -10,7 +10,7 @@ using System.Management.Automation.Language;
 
 namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlightning
 {
-    public class HighlightingColorizer : DocumentColorizingTransformer
+    /*public class HighlightingColorizer : DocumentColorizingTransformer
     {
         private readonly LanguageContext _languageContext;
         private readonly IThemeManager _themeManager;
@@ -114,5 +114,5 @@ namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlightning
             else if (style.Italic)
                 element.TextRunProperties.SetTypeface(new Typeface(typeface.FontFamily, FontStyles.Italic, FontWeights.Normal, typeface.Stretch));
         }
-    }
+    }*/
 }

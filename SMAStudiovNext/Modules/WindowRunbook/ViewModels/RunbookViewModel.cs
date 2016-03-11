@@ -402,7 +402,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
             Execute.OnUIThread(() => { caretOffset = _view.TextEditor.CaretOffset; line = _view.TextEditor.Document.GetLineByOffset(caretOffset); });
 
-            return _completionProvider.Context.GetContext(line.LineNumber, caretOffset);
+            return _completionProvider.Context.GetContext(line.LineNumber, caretOffset).LastOrDefault();
         }
 
         public void ParseContent()

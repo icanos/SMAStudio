@@ -61,9 +61,6 @@ namespace SMAStudiovNext.Modules.Startup
             TracingAdapter.SetWriter(new TracingInAppWriter());
             TracingAdapter.IsEnabled = false;
 
-            var themeManager = AppContext.Resolve<IThemeManager>();
-            themeManager.LoadThemes();
-
             MainWindow.Title = "Automation Studio";
 
             Shell.ShowFloatingWindowsInTaskbar = true;
@@ -91,6 +88,10 @@ namespace SMAStudiovNext.Modules.Startup
             // Load settings from the settings.xml file
             var settingsService = AppContext.Resolve<ISettingsService>();
             settingsService.Load();
+
+            // Load themes after the settings has been initialized
+            var themeManager = AppContext.Resolve<IThemeManager>();
+            themeManager.LoadThemes();
 
             Shell.AttemptingDeactivation += (sender, e) =>
             {

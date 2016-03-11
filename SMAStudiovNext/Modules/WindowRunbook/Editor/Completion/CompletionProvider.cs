@@ -112,7 +112,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
 
                 completionData = new List<ICompletionData>();
 
-                if (completionWord.StartsWith("$"))
+                if (completionWord.StartsWith("$") && !completionWord.Contains(".") && (!triggerChar.HasValue || (triggerChar.HasValue && !triggerChar.Equals('.'))))
                 {
                     // Variable
                     completionData.AddRange(GetVariableCompletion(completionWord, position));
@@ -140,6 +140,10 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
                     }
                     else
                         includeNativePowershell = true;
+                }
+                else if (triggerChar.HasValue && triggerChar.Equals('.'))
+                {
+                    includeNativePowershell = true;
                 }
                 else // if (!triggerChar.HasValue || !char.IsNumber(triggerChar.Value))
                 {
