@@ -70,7 +70,7 @@ namespace SMAStudiovNext.Modules.Startup
             
             try
             {
-                if (!File.Exists(Path.Combine(AppHelper.ApplicationPath, "ApplicationState.bin")))
+                if (!File.Exists(Path.Combine(AppHelper.CachePath, "ApplicationState.bin")))
                 {
                     var envExplorer = Shell.Tools.FirstOrDefault(x => x.ContentId == "SMAStudio.EnvironmentExplorer");
 

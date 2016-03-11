@@ -234,8 +234,13 @@
     <Compile Include="Modules\Shell\Commands\NewConnectionObjectCommand.cs" />
     <Compile Include="Modules\Shell\Commands\NewModuleCommand.cs" />
     <Compile Include="Modules\Shell\ViewModels\SettingsEditorThemeViewModel.cs" />
+    <Compile Include="Modules\Shell\ViewModels\ShellViewModel.cs" />
+    <Compile Include="Modules\Shell\Views\LayoutUtility.cs" />
     <Compile Include="Modules\Shell\Views\SettingsEditorThemeView.xaml.cs">
       <DependentUpon>SettingsEditorThemeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\Shell\Views\ShellView.xaml.cs">
+      <DependentUpon>ShellView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\WindowConnection\ViewModels\ConnectionViewModel.cs" />
     <Compile Include="Modules\WindowConnection\Views\ConnectionView.xaml.cs">
@@ -472,6 +477,10 @@
     <Page Include="Modules\Shell\Views\SettingsEditorThemeView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Modules\Shell\Views\ShellView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Modules\WindowConnection\Views\ConnectionView.xaml">
       <Generator>MSBuild:Compile</Generator>

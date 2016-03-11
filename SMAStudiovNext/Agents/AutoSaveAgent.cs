@@ -40,68 +40,70 @@ namespace SMAStudiovNext.Agents
 
             var files = Directory.GetFiles(CacheFolder);
 
-            if (files.Length == 0)
-                return;
-
-            _output.AppendLine("Found " + files.Length + " objects to recover.");
-
-            var result = MessageBox.Show("Do you want to restore recovered objects?\r\nIf no, the recovered objects will be forgotten.", "Restore objects?", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-            if (result == MessageBoxResult.Yes)
+            if (files.Length > 0)
             {
-                foreach (var file in files)
+
+                _output.AppendLine("Found " + files.Length + " objects to recover.");
+
+                var result = MessageBox.Show("Do you want to restore recovered objects?\r\nIf no, the recovered objects will be forgotten.", "Restore objects?", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
                 {
-                    var fileInfo = new FileInfo(file);
-                    var contentReader = new StreamReader(file);
-                    var objectContent = contentReader.ReadToEnd();
-                    var nameParts = file.Split('_');
-                    var contextId = nameParts[0];
-
-                    var context = (_application as Modules.Startup.Module).GetContexts().FirstOrDefault(c => c.ID.Equals(contextId));
-
-                    // If context is null, the context might have been deleted and therefore we discard this
-                    if (context == null)
-                        continue;
-
-                    contentReader.Close();
-
-                    //AsyncExecution.Run(ThreadPriority.Normal, delegate ()
-                    Task.Run(() =>
+                    foreach (var file in files)
                     {
-                        try
+                        var fileInfo = new FileInfo(file);
+                        var contentReader = new StreamReader(file);
+                        var objectContent = contentReader.ReadToEnd();
+                        var nameParts = file.Split('_');
+                        var contextId = nameParts[0];
+
+                        var context = (_application as Modules.Startup.Module).GetContexts().FirstOrDefault(c => c.ID.Equals(contextId));
+
+                        // If context is null, the context might have been deleted and therefore we discard this
+                        if (context == null)
+                            continue;
+
+                        contentReader.Close();
+
+                        //AsyncExecution.Run(ThreadPriority.Normal, delegate ()
+                        Task.Run(() =>
                         {
-                            var runbook = context.Runbooks.FirstOrDefault(x => (x.Tag as RunbookModelProxy).RunbookID.ToString().Equals(fileInfo.Name));
-
-                            if (runbook == null)
+                            try
                             {
-                                _output.AppendLine("No runbook was found with ID '" + fileInfo.Name + "'.");
-                                return;
+                                var runbook = context.Runbooks.FirstOrDefault(x => (x.Tag as RunbookModelProxy).RunbookID.ToString().Equals(nameParts[1]));
+
+                                if (runbook == null)
+                                {
+                                    _output.AppendLine("No runbook was found with ID '" + nameParts[1] + "'.");
+                                    return;
+                                }
+
+                                if (!(runbook.Tag as RunbookModelProxy).DraftRunbookVersionID.HasValue && MessageBox.Show((runbook.Tag as RunbookModelProxy).RunbookName + " is currently not in edit, do you want to create a draft of the runbook?", "Published Runbook", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                                {
+                                    return;
+                                }
+
+                                var viewModel = (runbook.Tag as RunbookModelProxy).GetViewModel<RunbookViewModel>();
+                                viewModel.AddSnippet(objectContent);
+                                //viewModel.Content = objectContent;
+
+                                Execute.OnUIThread(() =>
+                                {
+                                    _shell.OpenDocument(viewModel);
+                                });
                             }
-
-                            if (!(runbook.Tag as RunbookModelProxy).DraftRunbookVersionID.HasValue && MessageBox.Show((runbook.Tag as RunbookModelProxy).RunbookName + " is currently not checked out, do you want to check out the runbook?", "Published Runbook", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                            catch (DataServiceQueryException ex)
                             {
-                                return;
+                                _output.AppendLine("Error when retrieving runbook from backend: " + ex.Message);
                             }
-
-                            var viewModel = (runbook.Tag as RunbookModelProxy).GetViewModel<RunbookViewModel>();
-                            //viewModel.Content = objectContent;
-
-                            Execute.OnUIThread(() =>
-                            {
-                                _shell.OpenDocument(viewModel);
-                            });
-                        }
-                        catch (DataServiceQueryException ex)
-                        {
-                            _output.AppendLine("Error when retrieving runbook from backend: " + ex.Message);
-                        }
-                    });
+                        });
+                    }
                 }
-            }
-            else
-            {
-                foreach (var file in files)
-                    File.Delete(file);
+                else
+                {
+                    foreach (var file in files)
+                        File.Delete(file);
+                }
             }
 
             var backgroundThread = new Thread(new ThreadStart(StartInternal));
@@ -146,13 +148,22 @@ namespace SMAStudiovNext.Agents
                     }
                 }
 
-                Thread.Sleep(10 * 1000);
+                Thread.Sleep(5 * 1000);
             }
         }
 
         public void Stop()
         {
             _isRunning = false;
+
+            // Remove cached files if the exit is clean
+            if (Directory.Exists(CacheFolder))
+            {
+                var files = Directory.GetFiles(CacheFolder);
+
+                foreach (var file in files)
+                    File.Delete(file);
+            }
         }
 
         private string CacheFolder

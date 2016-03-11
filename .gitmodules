@@ -1,0 +1,4 @@
+[submodule "Libraries/gemini"]
+	path = Libraries/gemini
+	url = https://github.com/icanos/gemini.git
+	branch = master

@@ -58,8 +58,12 @@ namespace SMAStudiovNext.Agents
                 {
                     var runbook = (_shell.ActiveItem as RunbookViewModel);
 
+                    if (runbook.UnsavedChanges)
+                    {
+                        // We want to cache this runbook to disk in case of a crash in Automation Studio
+                    }
+
                     runbook.ParseContent();
-                    // TODO: Rewrite this to squiggly line errors in the editor and add the errors to the error list
 
                     // If we are currently active, speed up the parsing of the code
                     Thread.Sleep(600);

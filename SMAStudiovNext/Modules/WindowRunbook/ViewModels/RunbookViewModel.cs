@@ -98,6 +98,16 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 return;
             }
 
+            AddSnippetInternal(content);
+        }
+
+        /// <summary>
+        /// Internal snippet adding method, this is because when adding a snippet is called, the view
+        /// may not be completly initialized and therefore unable to add the snippet at that time.
+        /// </summary>
+        /// <param name="content"></param>
+        private void AddSnippetInternal(string content)
+        {
             var codeSnippet = new CodeSnippet();
             codeSnippet.Text = content;
 
@@ -250,8 +260,12 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             }
             else
             {
-                Execute.OnUIThread(() => { _view.TextEditor.Text = _cachedDraftContent; });
-                _cachedDraftContent = string.Empty;
+                // We are now ready to insert any snippets
+                if (!String.IsNullOrEmpty(_cachedDraftContent))
+                {
+                    AddSnippetInternal(_cachedDraftContent);
+                    _cachedDraftContent = string.Empty;
+                }
             }
 
             _view.TextEditor.TextChanged += delegate (object sender, EventArgs e)

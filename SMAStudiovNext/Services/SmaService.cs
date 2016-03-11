@@ -508,7 +508,7 @@ namespace SMAStudiovNext.Services
                     throw new ApplicationException("Error when saving the object.");
                 }
 
-                instance.Model = savedRunbook;
+                instance.Model = new RunbookModelProxy(savedRunbook, _backendContext);
                 runbook = savedRunbook;
             }
 
@@ -519,37 +519,44 @@ namespace SMAStudiovNext.Services
             catch (InvalidOperationException) { /* already attached */ }
 
             // Save the updated runbook
-            if (!runbook.DraftRunbookVersionID.HasValue || runbook.DraftRunbookVersionID == Guid.Empty)
-            {
-                runbook.DraftRunbookVersionID = new Guid?(runbook.Edit(context));
-            }
+            //if (!runbook.DraftRunbookVersionID.HasValue || runbook.DraftRunbookVersionID == Guid.Empty)
+            //{
+            //    runbook.DraftRunbookVersionID = new Guid?(runbook.Edit(context));
+            //}
 
             try
             {
-                var ms = new MemoryStream();
-                var bytes = Encoding.UTF8.GetBytes(instance.Content);
-                ms.Write(bytes, 0, bytes.Length);
-                ms.Seek(0, SeekOrigin.Begin);
-
-                var baseStream = (Stream)ms;
-                var entity = (from rv in context.RunbookVersions
-                              where (Guid?)rv.RunbookVersionID == runbook.DraftRunbookVersionID
-                              select rv).FirstOrDefault<RunbookVersion>();
-
-                try
+                if (runbook.DraftRunbookVersionID.HasValue)
                 {
-                    context.AttachTo("Runbooks", runbook);
-                }
-                catch (InvalidOperationException) { }
+                    var ms = new MemoryStream();
+                    var bytes = Encoding.UTF8.GetBytes(instance.Content);
+                    ms.Write(bytes, 0, bytes.Length);
+                    ms.Seek(0, SeekOrigin.Begin);
 
-                context.SetSaveStream(entity, baseStream, true, "application/octet-stream", string.Empty);
-                context.SaveChanges();
+                    var baseStream = (Stream)ms;
+                    var entity = (from rv in context.RunbookVersions
+                                  where (Guid?)rv.RunbookVersionID == runbook.DraftRunbookVersionID
+                                  select rv).FirstOrDefault<RunbookVersion>();
+
+                    try
+                    {
+                        context.AttachTo("Runbooks", runbook);
+                    }
+                    catch (InvalidOperationException) { }
+
+                    context.SetSaveStream(entity, baseStream, true, "application/octet-stream", string.Empty);
+                    context.SaveChanges();
+                }
 
                 var smaRunbook = context.Runbooks.Where(r => r.RunbookID.Equals(runbook.RunbookID)).FirstOrDefault();
                 smaRunbook.Tags = runbook.Tags;
                 smaRunbook.Description = runbook.Description;
-                smaRunbook.DraftRunbookVersionID = runbook.DraftRunbookVersionID;
-                smaRunbook.PublishedRunbookVersionID = runbook.PublishedRunbookVersionID;
+
+                if (runbook.DraftRunbookVersionID.HasValue)
+                    smaRunbook.DraftRunbookVersionID = runbook.DraftRunbookVersionID;
+
+                if (runbook.PublishedRunbookVersionID.HasValue)
+                    smaRunbook.PublishedRunbookVersionID = runbook.PublishedRunbookVersionID;
 
                 context.UpdateObject(smaRunbook);
                 context.SaveChanges();

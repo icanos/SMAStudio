@@ -71,6 +71,7 @@ namespace SMAStudiovNext.Core
             _statusManager.SetText("Loading data from " + _backendConnection.Name + "...");
             Service.Load();
 
+            _runbookNameCache.Clear();
             foreach (var rb in Runbooks)
                 _runbookNameCache.Add((rb.Tag as RunbookModelProxy).RunbookName);
         }
