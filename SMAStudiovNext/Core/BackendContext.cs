@@ -83,53 +83,76 @@ namespace SMAStudiovNext.Core
 
         public void AddToRunbooks(RunbookModelProxy runbook)
         {
-            Execute.OnUIThread(() =>
-            {
-                Runbooks.Add(new ResourceContainer(runbook.RunbookName, runbook, IconsDescription.Runbook));
+            try {
+                Execute.OnUIThread(() =>
+                {
+                    Runbooks.Add(new ResourceContainer(runbook.RunbookName, runbook, IconsDescription.Runbook));
 
-                if (!_runbookNameCache.Contains(runbook.RunbookName))
-                    _runbookNameCache.Add(runbook.RunbookName);
-            });
+                    if (!_runbookNameCache.Contains(runbook.RunbookName))
+                        _runbookNameCache.Add(runbook.RunbookName);
+                });
+            }
+            catch (TaskCanceledException) { }
         }
 
         public void AddToModules(ModuleModelProxy module)
         {
-            Execute.OnUIThread(() =>
+            try
             {
-                Modules.Add(new ResourceContainer(module.ModuleName, module, IconsDescription.Folder));
-            });
+                Execute.OnUIThread(() =>
+                {
+                    Modules.Add(new ResourceContainer(module.ModuleName, module, IconsDescription.Folder));
+                });
+            }
+            catch (TaskCanceledException) { }
         }
         
         public void AddToCredentials(CredentialModelProxy credential)
         {
-            Execute.OnUIThread(() =>
-            {
-                Credentials.Add(new ResourceContainer(credential.Name, credential, IconsDescription.Credential));
-            });
+            try {
+                Execute.OnUIThread(() =>
+                {
+                    Credentials.Add(new ResourceContainer(credential.Name, credential, IconsDescription.Credential));
+                });
+            }
+            catch (TaskCanceledException) { }
         }
 
         public void AddToVariables(VariableModelProxy variable)
         {
-            Execute.OnUIThread(() =>
-            {
-                Variables.Add(new ResourceContainer(variable.Name, variable, IconsDescription.Variable));
-            });
+            try {
+                Execute.OnUIThread(() =>
+                {
+                    Variables.Add(new ResourceContainer(variable.Name, variable, IconsDescription.Variable));
+                });
+            }
+            catch (TaskCanceledException) { }
         }
 
         public void AddToSchedules(ScheduleModelProxy schedule)
         {
-            Execute.OnUIThread(() =>
-            {
-                Schedules.Add(new ResourceContainer(schedule.Name, schedule, IconsDescription.Schedule));
-            });
+            try {
+                Execute.OnUIThread(() =>
+                {
+                    Schedules.Add(new ResourceContainer(schedule.Name, schedule, IconsDescription.Schedule));
+                });
+            }
+            catch (TaskCanceledException) { }
         }
 
         public void AddToConnections(ConnectionModelProxy connection)
         {
-            Execute.OnUIThread(() =>
+            try
             {
-                Connections.Add(new ResourceContainer(connection.Name, connection, IconsDescription.Connection));
-            });
+                Execute.OnUIThread(() =>
+                {
+                    Connections.Add(new ResourceContainer(connection.Name, connection, IconsDescription.Connection));
+                });
+            }
+            catch (TaskCanceledException)
+            {
+                // Silently continue
+            }
         }
 
         public void ParseTags()
@@ -177,8 +200,11 @@ namespace SMAStudiovNext.Core
 
                         // Need to be executed on the UI thread since 'Tags' is an ObservableCollection.
                         // Only add the runbook to the deepest node in the tree
-                        if ((i + 1) == tags.Length)
-                            Execute.OnUIThread(() => tagResource.Items.Add(runbook));
+                        try {
+                            if ((i + 1) == tags.Length)
+                                Execute.OnUIThread(() => tagResource.Items.Add(runbook));
+                        }
+                        catch (TaskCanceledException) { }
                     }
                     else
                     {
@@ -190,7 +216,10 @@ namespace SMAStudiovNext.Core
                         if ((i + 1) == tags.Length)
                             tagResource.Items.Add(runbook);
 
-                        Execute.OnUIThread(() => currentTags.Add(tagResource));
+                        try {
+                            Execute.OnUIThread(() => currentTags.Add(tagResource));
+                        }
+                        catch (TaskCanceledException) { }
                     }
 
                     tagResource.Items = tagResource.Items.OrderBy(item => item.Title).ToObservableCollection();
@@ -198,14 +227,17 @@ namespace SMAStudiovNext.Core
                 }
             }
 
-            Execute.OnUIThread(() =>
-            {
+            try {
+                Execute.OnUIThread(() =>
+                {
                 // We want unmatched at the bottom
                 Tags = Tags.OrderBy(item => item.Title).ToObservableCollection();
-                Tags.Add(unmatchedTagMenuItem);
+                    Tags.Add(unmatchedTagMenuItem);
 
-                NotifyOfPropertyChange(() => Tags);
-            });
+                    NotifyOfPropertyChange(() => Tags);
+                });
+            }
+            catch (TaskCanceledException) { }
         }
 
         public string GetContent(string url)

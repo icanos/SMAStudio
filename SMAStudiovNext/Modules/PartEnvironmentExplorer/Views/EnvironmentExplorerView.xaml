@@ -17,67 +17,65 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <ToolBar Grid.Row="0" BandIndex="0">
-                    <Button Command="{Binding RefreshCommand}">
+                    <Button Command="{Binding RefreshCommand}" ToolTip="Refresh">
                         <Image Source="/SMAStudiovNext;component/Icons/Refresh.png" />
                     </Button>
                     <Separator />
-                    <Button Command="{Binding NewConnectionCommand}">
+                    <Button Command="{Binding NewConnectionCommand}" ToolTip="Connection Manager">
                         <Image Source="/SMAStudiovNext;component/Icons/ListConnections.png" />
                     </Button>
                 </ToolBar>
-                <ScrollViewer Grid.Row="1" Background="White">
-                    <TreeView x:Name="treeView" BorderThickness="0" Background="Transparent" ItemsSource="{Binding Items}" HorizontalContentAlignment="Stretch">
-                        <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="MouseDoubleClick">
-                                <i:InvokeCommandAction Command="{Binding LoadCommand}" CommandParameter="{Binding ElementName=treeView, Path=SelectedItem}" />
-                            </i:EventTrigger>
-                        </i:Interaction.Triggers>
-                        <TreeView.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="Add">
-                                    <MenuItem Header="New Credential..." Command="{Binding NewCredentialCommand}" />
-                                    <MenuItem Header="New Connection..." Command="{Binding NewConnectionObjectCommand}" />
-                                    <MenuItem Header="New Runbook..." Command="{Binding NewRunbookCommand}" />
-                                    <MenuItem Header="New Schedule..." Command="{Binding NewScheduleCommand}" />
-                                    <MenuItem Header="New Variable..." Command="{Binding NewVariableCommand}" />
-                                    <Separator />
-                                    <MenuItem Header="Add Module" Command="{Binding NewModuleCommand}" />
-                                </MenuItem>
-                                <MenuItem Header="Job History" Command="{Binding HistoryCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
-                                                                                  AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}" />
-                                <MenuItem Header="Auto Documentation" Command="{Binding DocumentationCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
-                                                                                  AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}" />
-                                <!--<MenuItem x:Name="btnCompare" Header="Compare to..." />-->
+                <TreeView Grid.Row="1" x:Name="treeView" BorderThickness="0" Background="{DynamicResource ControlBackground}" Foreground="{DynamicResource ControlForeground}" ItemsSource="{Binding Items}" HorizontalContentAlignment="Stretch">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction Command="{Binding LoadCommand}" CommandParameter="{Binding ElementName=treeView, Path=SelectedItem}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <TreeView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Add">
+                                <MenuItem Header="New Credential..." Command="{Binding NewCredentialCommand}" />
+                                <MenuItem Header="New Connection..." Command="{Binding NewConnectionObjectCommand}" />
+                                <MenuItem Header="New Runbook..." Command="{Binding NewRunbookCommand}" />
+                                <MenuItem Header="New Schedule..." Command="{Binding NewScheduleCommand}" />
+                                <MenuItem Header="New Variable..." Command="{Binding NewVariableCommand}" />
                                 <Separator />
-                                <MenuItem Header="Publish" Command="{Binding PublishCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
+                                <MenuItem Header="Add Module" Command="{Binding NewModuleCommand}" />
+                            </MenuItem>
+                            <MenuItem Header="Job History" Command="{Binding HistoryCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
+                                                                                  AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}" />
+                            <MenuItem Header="Auto Documentation" Command="{Binding DocumentationCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
+                                                                                  AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}" />
+                            <!--<MenuItem x:Name="btnCompare" Header="Compare to..." />-->
+                            <Separator />
+                            <MenuItem Header="Publish" Command="{Binding PublishCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
                                                                                   AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}"/>
-                                <Separator />
-                                <MenuItem Header="Delete" Command="{Binding DeleteCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
+                            <Separator />
+                            <MenuItem Header="Delete" Command="{Binding DeleteCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
                                                                                     AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}" />
-                                <Separator />
-                                <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" />
-                            </ContextMenu>
-                        </TreeView.ContextMenu>
-                        <TreeView.ItemContainerStyle>
-                            <Style TargetType="{x:Type TreeViewItem}">
-                                <Style.Resources>
-                                    <Style TargetType="{x:Type Border}">
-                                        <Setter Property="Grid.ColumnSpan" Value="2" />
-                                    </Style>
-                                </Style.Resources>
-                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                            </Style>
-                        </TreeView.ItemContainerStyle>
-                        <TreeView.ItemTemplate>
-                            <HierarchicalDataTemplate DataType="{x:Type self:ResourceContainer}" ItemsSource="{Binding Items}">
-                                <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
-                                    <Image Source="{Binding Icon}" Width="16" Height="16" SnapsToDevicePixels="True" Margin="0,0,5,0"/>
-                                    <TextBlock Text="{Binding Title}" />
-                                </StackPanel>
-                            </HierarchicalDataTemplate>
-                        </TreeView.ItemTemplate>
-                    </TreeView>
-                </ScrollViewer>
+                            <Separator />
+                            <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" />
+                        </ContextMenu>
+                    </TreeView.ContextMenu>
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <Style.Resources>
+                                <Style TargetType="{x:Type Border}">
+                                    <Setter Property="Grid.ColumnSpan" Value="2" />
+                                </Style>
+                            </Style.Resources>
+                            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate DataType="{x:Type self:ResourceContainer}" ItemsSource="{Binding Items}">
+                            <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
+                                <Image Source="{Binding Icon}" Width="16" Height="16" SnapsToDevicePixels="True" Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding Title}" Foreground="{DynamicResource ControlForeground}" />
+                            </StackPanel>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
             </Grid>
         </gemini:ClippingHwndHost.Content>
     </gemini:ClippingHwndHost>
