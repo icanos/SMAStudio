@@ -1024,7 +1024,7 @@ namespace SMAStudiovNext.Services
                 }
 
                 // Download the content of the published runbook
-                var publishedContent = GetContent(GetBackendUrl(RunbookType.Published, (RunbookModelProxy)runbook.Model));
+                var publishedContent = GetContent(GetBackendUrl(RunbookType.Published, (RunbookModelProxy)runbookViewModel.Model));
 
                 MemoryStream ms = new MemoryStream();
                 byte[] bytes = Encoding.UTF8.GetBytes(publishedContent);
@@ -1038,26 +1038,6 @@ namespace SMAStudiovNext.Services
 
                 context.SetSaveStream(entity, baseStream, true, "application/octet-stream", string.Empty);
                 context.SaveChanges();
-                /*var request = (HttpWebRequest)WebRequest.Create(_connectionData.SmaConnectionUrl + "/Runbooks(guid'" + runbook.RunbookID + "')/PublishedRunbookVersion/$value");
-                if (_connectionData.SmaImpersonatedLogin)
-                    request.Credentials = CredentialCache.DefaultCredentials;
-                else
-                    request.Credentials = new NetworkCredential(_connectionData.SmaUsername, _connectionData.GetPassword(), _connectionData.SmaDomain);
-
-                var response = (HttpWebResponse)request.GetResponse();
-                var reader = new StreamReader(response.GetResponseStream());
-
-                string content = reader.ReadToEnd();
-
-                reader.Close();
-
-                // TODO: Implement this!
-                //runbookViewModel.Content = content;
-
-                
-                */
-                //var output = IoC.Get<IOutput>();
-                //output.AppendLine("TODO: Implement assigning content to draft view.");
 
                 return true;
             });

@@ -257,9 +257,17 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
         /// <returns></returns>
         public Token GetContext(int lineNumber, int position)
         {
-            var tokenList = _tokens.Where(item =>  item.Extent.StartLineNumber == lineNumber 
+            var tokenList = _tokens.Where(item => item.Extent.StartLineNumber == lineNumber 
                 && position >= item.Extent.StartOffset 
                 && position <= item.Extent.EndOffset).ToList();
+
+            if (tokenList.Count == 0)
+            {
+                tokenList = _tokens.Where(item => item.Extent.StartLineNumber <= lineNumber 
+                    && item.Extent.EndLineNumber >= lineNumber).ToList();
+
+                return tokenList.FirstOrDefault();
+            }
             
             var currentStart = int.MinValue;
             var currentStop = int.MaxValue;

@@ -26,9 +26,9 @@ namespace SMAStudiovNext.Modules.StartRunDialog.Windows
             Loaded += PrepareRunWindowLoaded;
         }
 
-        private void PrepareRunWindowLoaded(object sender, RoutedEventArgs e)
+        private async void PrepareRunWindowLoaded(object sender, RoutedEventArgs e)
         {
-            var parameters = _runbookViewModel.GetParameters(null);
+            var parameters = await _runbookViewModel.GetParameters(null).ConfigureAwait(true);
 
             foreach (var param in parameters)
                 Inputs.Add(param);

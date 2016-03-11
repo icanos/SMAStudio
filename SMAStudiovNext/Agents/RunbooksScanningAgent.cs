@@ -62,7 +62,7 @@ namespace SMAStudiovNext.Agents
                     // TODO: Rewrite this to squiggly line errors in the editor and add the errors to the error list
                 }
 
-                Thread.Sleep(2 * 1000);
+                Thread.Sleep(1 * 1000);
             }
         }
         

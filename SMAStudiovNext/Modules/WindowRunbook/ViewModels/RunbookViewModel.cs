@@ -280,13 +280,13 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 var content = _view.TextEditor.Text;
 
                 //if (e.Text.Equals(" "))
-                {
+                /*{
                     Task.Run(() =>
                     {
                         lock (_lock)
                             _completionProvider.Context.Parse(content);
                     });
-                }
+                }*/
 
                 ShowCompletionWindow(sender).ConfigureAwait(false);
             };
@@ -521,7 +521,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         /// </summary>
         /// <param name="completionWord"></param>
         /// <returns></returns>
-        public IList<ICompletionData> GetParameters(string completionWord)
+        public async Task<IList<ICompletionData>> GetParameters(string completionWord)
         {
             if (_parameters != null) // check if parameters is cached
                 return _parameters;
@@ -531,19 +531,25 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             Token[] tokens;
             ParseError[] parseErrors;
 
-            string contentToParse = Content;
-            if (String.IsNullOrEmpty(Content))
+            string contentToParse = string.Empty;
+            if (_runbook.DraftRunbookVersionID.HasValue)
+                contentToParse = await GetContentInternal(null, RunbookType.Draft, false);
+            else
+                contentToParse = await GetContentInternal(null, RunbookType.Published, false);
+            /*if (String.IsNullOrEmpty(Content))
             {
-                contentToParse = GetContent(RunbookType.Draft, true);
+                //contentToParse = GetContent(RunbookType.Draft, true);
+                if (_runbook.DraftRunbookVersionID.HasValue)
+                    contentToParse = await GetContentInternal(null, RunbookType.Draft, true);
 
-                if (String.IsNullOrEmpty(Content))
+                if (String.IsNullOrEmpty(contentToParse))
                 {
                     contentToParse = GetContent(RunbookType.Published, true);
 
                     if (_view != null)
                         contentToParse = _view.PublishedTextEditor.Text;
                 }
-            }
+            }*/
 
             var scriptBlock = System.Management.Automation.Language.Parser.ParseInput(contentToParse, out tokens, out parseErrors);
 
@@ -818,7 +824,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             _inRun = true;
             command.Enabled = false;
 
-            await StartRunAsync(command, false);
+            await StartRunAsync(command, false).ConfigureAwait(true);
 
             command.Enabled = true;
             _inRun = false;
@@ -833,7 +839,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 return;
 
             if (UnsavedChanges)
-                await Save(command);
+                await Save(command).ConfigureAwait(true);
 
             try
             {
@@ -890,7 +896,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
                     if (guid.HasValue)
                         _runbook.JobID = guid.Value;
-                });
+                }).ConfigureAwait(true);
 
                 if (_runbook.JobID == Guid.Empty)
                     Execute.OnUIThread(() => { shell.CloseDocument(executionViewModel); });
@@ -909,13 +915,13 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 var content = string.Empty;
                 Execute.OnUIThread(() =>
                 {
-                    lock (_lock)
-                    {
+                    //lock (_lock)
+                    //{
                         if (_view == null)
                             content = string.Empty;
                         else
                             content = _view.TextEditor.Text;
-                    }
+                    //}
                 });
 
                 return content;

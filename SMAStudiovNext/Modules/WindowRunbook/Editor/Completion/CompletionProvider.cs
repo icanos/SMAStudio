@@ -4,6 +4,7 @@ using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Icons;
+using SMAStudiovNext.Language.Snippets;
 using SMAStudiovNext.Models;
 using SMAStudiovNext.Modules.Runbook.Editor.Parser;
 using SMAStudiovNext.Modules.Runbook.ViewModels;
@@ -104,7 +105,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
             _cachedPosition = position;
             _cachedTriggerChar = triggerChar;
             
-            return await Task.Run(() =>
+            return await Task.Run(async () =>
             {
                 List<ICompletionData> completionData = null;
                 bool includeNativePowershell = false;
@@ -129,7 +130,9 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
                         var runbook = GetRunbook(keyword.Text);
                         if (runbook != null)
                         {
-                            completionData.AddRange(runbook.GetParameters(completionWord));
+                            var parameters = await runbook.GetParameters(completionWord).ConfigureAwait(true);
+
+                            completionData.AddRange(parameters);
                             statusManager.SetTimeoutText("Parameters loaded.", 5);
                         }
                         else
@@ -145,6 +148,9 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
                     // Everything
                     if (!double.TryParse(completionWord, out intCheck))
                     {
+                        var snippetsCollection = AppContext.Resolve<ISnippetsCollection>();
+                        completionData.AddRange(snippetsCollection.Snippets.Where(item => item.Name.StartsWith(completionWord, StringComparison.InvariantCultureIgnoreCase)).Select(item => new SnippetCompletionData(item)));
+
                         completionData.AddRange(_keywords.Where(item => item.StartsWith(completionWord, StringComparison.InvariantCultureIgnoreCase)).Select(item => new KeywordCompletionData(item, Glyph.Keyword)));
                         completionData.AddRange(_backendContext.Runbooks.Where(item => (item.Tag as RunbookModelProxy).RunbookName.Contains(completionWord)).Select(item => new KeywordCompletionData((item.Tag as RunbookModelProxy).RunbookName, Glyph.ClassPublic)));
                         completionData.AddRange(_smaCmdlets.Where(item => item.StartsWith(completionWord, StringComparison.InvariantCultureIgnoreCase)).Select(item => new KeywordCompletionData(item, Glyph.MethodPublic)));
