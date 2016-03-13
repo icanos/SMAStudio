@@ -164,8 +164,8 @@
 
     <Rule color="CommandName">
       \b
-      [\d\w_\-]+
-      ([ \r\n\s*])
+      [^:][\d\w_\-]+
+      ([ \r\n\s]*)
     </Rule>
 
     <Rule color="Parameter">

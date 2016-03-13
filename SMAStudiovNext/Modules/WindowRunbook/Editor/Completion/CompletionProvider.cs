@@ -10,6 +10,7 @@ using SMAStudiovNext.Modules.Runbook.Editor.Parser;
 using SMAStudiovNext.Modules.Runbook.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
@@ -96,17 +97,17 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
             else if (triggerChar != _cachedTriggerChar)
                 _foundNoCompletions = false;
 
-            var context = _languageContext.GetContext(lineNumber, position);
-            
-            if (_languageContext.IsWithinStringOrComment(lineNumber, position))
-                return new CompletionResult(null);
-            
-            _cachedLineNumber = lineNumber;
-            _cachedPosition = position;
-            _cachedTriggerChar = triggerChar;
-            
             return await Task.Run(async () =>
             {
+                var context = _languageContext.GetContext(lineNumber, position);
+            
+                if (_languageContext.IsWithinStringOrComment(lineNumber, position))
+                    return new CompletionResult(null);
+            
+                _cachedLineNumber = lineNumber;
+                _cachedPosition = position;
+                _cachedTriggerChar = triggerChar;
+            
                 List<ICompletionData> completionData = null;
                 bool includeNativePowershell = false;
 
@@ -190,40 +191,48 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
             var completionData = new List<ICompletionData>();
 
             // Get built in PS completion
-            var candidates =
-                CommandCompletion.CompleteInput(
-                    content, caretOffset, null, _powershell).CompletionMatches;
+            try {
+                //Debug.WriteLine("Checking powershell...");
 
-            var result = candidates.Where(item =>
-                    item.ResultType == CompletionResultType.Command ||
-                    item.ResultType == CompletionResultType.ParameterName ||
-                    item.ResultType == CompletionResultType.ParameterValue ||
-                    item.ResultType == CompletionResultType.Property ||
-                    item.ResultType == CompletionResultType.Type ||
-                    item.ResultType == CompletionResultType.Keyword
-                ).ToList();
+                var candidates =
+                    CommandCompletion.CompleteInput(
+                        content, caretOffset, null, PowerShell.Create()).CompletionMatches;
 
-            foreach (var item in result)
-            {
-                switch (item.ResultType)
+                var result = candidates.Where(item =>
+                        item.ResultType == CompletionResultType.Command ||
+                        item.ResultType == CompletionResultType.ParameterName ||
+                        item.ResultType == CompletionResultType.ParameterValue ||
+                        item.ResultType == CompletionResultType.Property ||
+                        item.ResultType == CompletionResultType.Type ||
+                        item.ResultType == CompletionResultType.Keyword
+                    ).ToList();
+
+                foreach (var item in result)
                 {
-                    case CompletionResultType.Type:
-                    case CompletionResultType.Keyword:
-                        completionData.Add(new KeywordCompletionData(item.CompletionText, Glyph.Keyword, item.ToolTip));
-                        break;
-                    case CompletionResultType.Command:
-                        completionData.Add(new KeywordCompletionData(item.CompletionText, Glyph.MethodPublic, item.ToolTip));
-                        break;
-                    case CompletionResultType.ParameterName:
-                        completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty, item.ToolTip));
-                        break;
-                    case CompletionResultType.ParameterValue:
-                        completionData.Add(new ParameterValueCompletionData(item.CompletionText, item.ToolTip));
-                        break;
-                    case CompletionResultType.Property:
-                        completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty, item.ToolTip, false));
-                        break;
+                    switch (item.ResultType)
+                    {
+                        case CompletionResultType.Type:
+                        case CompletionResultType.Keyword:
+                            completionData.Add(new KeywordCompletionData(item.CompletionText, Glyph.Keyword, item.ToolTip));
+                            break;
+                        case CompletionResultType.Command:
+                            completionData.Add(new KeywordCompletionData(item.CompletionText, Glyph.MethodPublic, item.ToolTip));
+                            break;
+                        case CompletionResultType.ParameterName:
+                            completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty, item.ToolTip));
+                            break;
+                        case CompletionResultType.ParameterValue:
+                            completionData.Add(new ParameterValueCompletionData(item.CompletionText, item.ToolTip));
+                            break;
+                        case CompletionResultType.Property:
+                            completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty, item.ToolTip, false));
+                            break;
+                    }
                 }
+            }
+            catch (PSInvalidOperationException ex)
+            {
+                Logger.Debug("Error when trying to code complete.", ex);
             }
 
             return completionData;

@@ -105,9 +105,9 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
             var takenVariables = new List<string>();
             var segments = default(IList<Token>);
 
-            //lock (_lock)
-            //    segments = _tokens.Where(item => item.Extent.StartOffset <= position && item.Kind == TokenKind.Variable).ToList();
-            segments = GetAssigningVariables(position);
+            lock (_lock)
+                segments = _tokens.Where(item => item.Extent.StartOffset <= position && item.Kind == TokenKind.Variable).ToList();
+            //segments = GetAssigningVariables(position);
 
             for (int i = 0; i < segments.Count; i++)
             {
@@ -258,7 +258,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
         public List<Token> GetContext(int lineNumber, int position)
         {
             var tokenList = _tokens.Where(item => item.Extent.StartLineNumber == lineNumber 
-                && item.Extent.EndOffset <= position).ToList();
+                && (item.Extent.EndOffset <= position) || (position >= item.Extent.StartOffset && position <= item.Extent.EndOffset)).ToList();
 
             if (tokenList.Count == 0)
             {

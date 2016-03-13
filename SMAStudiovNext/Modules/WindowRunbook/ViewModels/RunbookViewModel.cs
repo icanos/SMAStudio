@@ -51,8 +51,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         private RunbookModelProxy _runbook;
         private IRunbookView _view;
         private bool _inTestRun = false;
-        private bool _inRun = false;
         private bool _initialContentLoading = false;
+        private DateTime _lastErrorUpdate = DateTime.MinValue;
         /// <summary>
         /// This variable is used mainly when creating a new runbook and
         /// a snippet is added to the runbook (default content). This may be
@@ -348,6 +348,9 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         
         private void OnDraftParseError(object sender, ParseErrorEventArgs e)
         {
+            if ((DateTime.Now - _lastErrorUpdate).Seconds < 3)
+                return;
+
             Execute.OnUIThread(() =>
             {
                 _view.TextMarkerService.RemoveAll(x => true);
@@ -372,6 +375,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                         _view.TextEditor.CaretOffset = error.Extent.StartOffset;
                     });
                 }
+
+                _lastErrorUpdate = DateTime.Now;
             });
         }
 
@@ -835,13 +840,11 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 return;
             }
 
-            _inRun = true;
             command.Enabled = false;
 
             await StartRunAsync(command, false).ConfigureAwait(true);
 
             command.Enabled = true;
-            _inRun = false;
         }
 
         private async Task StartRunAsync(Command command, bool isDraft)
