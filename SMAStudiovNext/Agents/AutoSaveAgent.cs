@@ -122,33 +122,40 @@ namespace SMAStudiovNext.Agents
                     documents = _shell.Documents;
                 }
 
-                foreach (var document in documents)
-                {
-                    if (!_isRunning)
-                        break;
-
-                    if (!(document is RunbookViewModel))
-                        continue;
-
-                    var runbookViewModel = (RunbookViewModel)document;
-
-                    if (!runbookViewModel.UnsavedChanges)
-                        continue;
-
-                    try
+                try {
+                    foreach (var document in documents)
                     {
-                        var textWriter = new StreamWriter(Path.Combine(AppHelper.CachePath, "cache", runbookViewModel.Runbook.Context.ID + "_" + runbookViewModel.Runbook.RunbookID.ToString()), false);
-                        textWriter.Write(runbookViewModel.Content);
-                        textWriter.Flush();
-                        textWriter.Close();
-                    }
-                    catch (IOException)
-                    {
-                        
+                        if (!_isRunning)
+                            break;
+
+                        if (!(document is RunbookViewModel))
+                            continue;
+
+                        var runbookViewModel = (RunbookViewModel)document;
+
+                        if (!runbookViewModel.UnsavedChanges)
+                            continue;
+
+                        try
+                        {
+                            var textWriter = new StreamWriter(Path.Combine(AppHelper.CachePath, "cache", runbookViewModel.Runbook.Context.ID + "_" + runbookViewModel.Runbook.RunbookID.ToString()), false);
+                            textWriter.Write(runbookViewModel.Content);
+                            textWriter.Flush();
+                            textWriter.Close();
+                        }
+                        catch (IOException)
+                        {
+
+                        }
                     }
                 }
+                catch (Exception)
+                {
+                    // We might get an exception here if we're closing the application
+                    // at the same time as this loop is running.
+                }
 
-                Thread.Sleep(5 * 1000);
+                Thread.Sleep(10 * 1000);
             }
         }
 
@@ -162,7 +169,16 @@ namespace SMAStudiovNext.Agents
                 var files = Directory.GetFiles(CacheFolder);
 
                 foreach (var file in files)
-                    File.Delete(file);
+                {
+                    try
+                    {
+                        File.Delete(file);
+                    }
+                    catch (IOException)
+                    {
+
+                    }
+                }
             }
         }
 

@@ -14,7 +14,7 @@
 
   <RuleSet name="InStringExpression">
     <Rule color="Variable">
-      \$[\d\w_]+
+      \$[\d\w_:]+
     </Rule>
 
     <!-- Namespaces (.NET) -->
@@ -74,7 +74,7 @@
     
     <Span>
       <Begin color="Keyword">
-        (workflow|function)\b
+        (workflow|function|import-module)\b
       </Begin>
       <End color="Identifier"> ([a-zA-Z0-9\-_]+)</End>
     </Span>
@@ -160,12 +160,10 @@
 
     <Rule color="Member">
       \.[a-zA-Z0-9]+
-    </Rule>
+    </Rule> 
 
     <Rule color="CommandName">
-      \b
-      [^:][\d\w_\-]+
-      ([ \r\n\s]*)
+      (\w+)-(\w+)([-A-Za-z0-9]+)
     </Rule>
 
     <Rule color="Parameter">
@@ -173,9 +171,9 @@
     </Rule>
 
     <Rule color="Variable">
-      \$[\d\w_]+
+      \$[\d\w_:]+
     </Rule>
-
+    
     <!-- Digits -->
     <Rule color="Number">
       \b0[xX][0-9a-fA-F]+  # hex number

@@ -86,6 +86,9 @@ namespace SMAStudiovNext.Core.Documentation
 
             foreach (var runbook in runbooks)
             {
+                if (!(runbook.Tag as RunbookModelProxy).PublishedRunbookVersionID.HasValue)
+                    continue;
+
                 var runbookProxy = (runbook.Tag as RunbookModelProxy);
                 _statusManager.SetText("Generating visio drawing for " + runbookProxy.RunbookName);
                 var viewModel = (runbook.Tag as RunbookModelProxy).GetViewModel<RunbookViewModel>();
@@ -93,8 +96,8 @@ namespace SMAStudiovNext.Core.Documentation
                 var page = ConfigureVisioPage(viewModel.Runbook.RunbookName, pageWidth, pageHeight);
                 document.Pages.Add(page);
 
-                viewModel.GetContent(RunbookType.Published, true);
-                languageContext.Parse(viewModel.PublishedContent);
+                var publishedContent = viewModel.GetContent(RunbookType.Published, true);
+                languageContext.Parse(publishedContent);
 
                 var references = languageContext.GetReferences(runbooksList);
 
@@ -240,6 +243,9 @@ namespace SMAStudiovNext.Core.Documentation
                 var runbooks = _backendContext.Runbooks;
                 foreach (var runbook in runbooks)
                 {
+                    if (!(runbook.Tag as RunbookModelProxy).PublishedRunbookVersionID.HasValue)
+                        continue;
+                    
                     var runbookProxy = (runbook.Tag as RunbookModelProxy);
                     _statusManager.SetText("Generating documentation for " + runbookProxy.RunbookName);
                     var viewModel = (runbook.Tag as RunbookModelProxy).GetViewModel<RunbookViewModel>();

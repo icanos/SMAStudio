@@ -5,6 +5,7 @@ using Gemini.Modules.Output;
 using SMAStudiovNext.Modules.Runbook.ViewModels;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SMAStudiovNext.Agents
 {
@@ -29,8 +30,8 @@ namespace SMAStudiovNext.Agents
         {
             _errorStates = new Dictionary<string, int>();
 
-            _backgroundThread = new Thread(new ThreadStart(StartInternal));
-            _backgroundThread.Priority = ThreadPriority.BelowNormal;
+            //_backgroundThread = new Thread(new ThreadStart(StartInternal));
+            //_backgroundThread.Priority = ThreadPriority.BelowNormal;
 
             //_completionProvider = AppContext.Resolve<ICompletionProvider>();
             _errorList = IoC.Get<IErrorList>();
@@ -43,14 +44,15 @@ namespace SMAStudiovNext.Agents
         /// </summary>
         public void Start()
         {
-            _backgroundThread.Start();
+            //_backgroundThread.Start();
+            //Task.Run(async () => { await StartInternal(); });
         }
 
         /// <summary>
         /// Runs our background thread where the parsing of the runbook is done. If there is parse errors in our runbook,
         /// tokens will be null and we won't be able to populate our auto complete engine with information about variables etc.
         /// </summary>
-        private void StartInternal()
+        private async Task StartInternal()
         {
             while (_isRunning)
             {
@@ -63,11 +65,12 @@ namespace SMAStudiovNext.Agents
                         // We want to cache this runbook to disk in case of a crash in Automation Studio
                     }
 
-                    runbook.ParseContent();
+                    //if ()
+                    //await runbook.ParseContent().ConfigureAwait(false);
 
                     // If we are currently active, speed up the parsing of the code
-                    Thread.Sleep(600);
-                    continue;
+                    //Thread.Sleep(800);
+                    //continue;
                 }
 
                 // If we're "sleeping", eg. out of focus etc, slow down parsing.
@@ -159,7 +162,7 @@ namespace SMAStudiovNext.Agents
             lock (_syncLock)
             {
                 _isRunning = true;
-                _backgroundThread.Abort();
+                //_backgroundThread.Abort();
             }
         }
     }

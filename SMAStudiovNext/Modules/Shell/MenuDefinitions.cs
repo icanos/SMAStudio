@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Menus;
+using SMAStudiovNext.Commands;
 using SMAStudiovNext.Modules.Shell.Commands;
 using System;
 using System.Collections.Generic;

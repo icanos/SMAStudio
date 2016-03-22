@@ -1,18 +1,24 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework;
+using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
 using Gemini.Modules.Output;
+using SMAStudiovNext.Commands;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Modules.EnvironmentExplorer.Commands;
 using SMAStudiovNext.Modules.EnvironmentExplorer.Views;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Windows.Input;
+using System;
+using System.Threading.Tasks;
+using SMAStudiovNext.Modules.ConnectionManager.Windows;
+using Gemini.Framework.Threading;
 
 namespace SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels
 {
     [Export(typeof(EnvironmentExplorerViewModel))]
-    public class EnvironmentExplorerViewModel : Tool
+    public class EnvironmentExplorerViewModel : Tool, ICommandHandler<NewConnectionCommandDefinition>
     {
         private readonly ObservableCollection<ResourceContainer> _items;
         private readonly ICommand _publishCommand;
@@ -93,7 +99,21 @@ namespace SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels
                 NotifyOfPropertyChange(() => Items);
             });
         }
-        
+
+        void ICommandHandler<NewConnectionCommandDefinition>.Update(Command command)
+        {
+            // Ignore
+        }
+
+        Task ICommandHandler<NewConnectionCommandDefinition>.Run(Command command)
+        {
+            var connManagerWindow = new ConnectionManagerWindow();
+            connManagerWindow.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+            connManagerWindow.ShowDialog();
+
+            return TaskUtility.Completed;
+        }
+
         public ICommand LoadCommand
         {
             get { return AppContext.Resolve<ICommand>("LoadCommand"); }

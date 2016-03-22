@@ -194,6 +194,7 @@
     <Compile Include="Commands\ConnectWithAzureCommandHandler.cs" />
     <Compile Include="Commands\GenerateCertificateCommand.cs" />
     <Compile Include="Commands\GoToDefinitionCommand.cs" />
+    <Compile Include="Commands\NewConnectionCommandDefinition.cs" />
     <Compile Include="Commands\PauseCommandDefinition.cs" />
     <Compile Include="Commands\EditPublishedCommandDefinition.cs" />
     <Compile Include="Commands\RelayCommand.cs" />
@@ -242,7 +243,13 @@
     <Compile Include="Modules\WindowModule\Views\ModuleView.xaml.cs">
       <DependentUpon>ModuleView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Modules\WindowRunbook\Editor\Completion\CommandCompletionHelper.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Completion\CompletionEventArgs.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Completion\CompletionProvider.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Completion\EdgeTrackingMode.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Completion\Glyph.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Completion\CompletionUtils.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\KeystrokeService.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Parser\ExpressionType.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Parser\LanguageContext.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Parser\ParseErrorEventArgs.cs" />
@@ -274,7 +281,6 @@
     <Compile Include="Core\StatusManager.cs" />
     <Compile Include="Utils\StringExtensions.cs" />
     <Compile Include="Exceptions\XmlExceptionHandler.cs" />
-    <Compile Include="Modules\WindowRunbook\Editor\Completion\CompletionProvider.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Completion\CompletionResult.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Completion\CompletionData.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Completion\ICompletionProvider.cs" />
@@ -432,7 +438,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="Modules\WindowRunbook\SyntaxHighlightning\Powershell.xshd" />
+    <EmbeddedResource Include="Modules\WindowRunbook\SyntaxHighlightning\Powershell.xshd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\DataSources\SMAStudiovNext.SMA.OrchestratorApi.datasource" />
     <None Include="Properties\Settings.settings">

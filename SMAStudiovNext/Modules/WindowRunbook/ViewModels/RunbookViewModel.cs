@@ -47,12 +47,13 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
         private IList<ICompletionData> _parameters = null;
         private ICompletionProvider _completionProvider;
-        private CompletionWindow _completionWindow = null;
+        private KeystrokeService _keystrokeService = null;
         private RunbookModelProxy _runbook;
         private IRunbookView _view;
         private bool _inTestRun = false;
         private bool _initialContentLoading = false;
         private DateTime _lastErrorUpdate = DateTime.MinValue;
+
         /// <summary>
         /// This variable is used mainly when creating a new runbook and
         /// a snippet is added to the runbook (default content). This may be
@@ -84,6 +85,16 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             }
 
             callback(true);
+        }
+
+        public override void TryClose(bool? dialogResult = default(bool?))
+        {
+            if (dialogResult.HasValue && dialogResult.Value)
+            {
+                _initialContentLoading = false;
+            }
+
+            base.TryClose(dialogResult);
         }
 
         /// <summary>
@@ -135,7 +146,12 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 editor = (runbookType == RunbookType.Draft) ? _view.TextEditor : _view.PublishedTextEditor;
             }
 
-            return AsyncHelper.RunSync<string>(() => GetContentInternal(editor, runbookType, forceDownload));
+            return AsyncHelper.RunSync<string>(() => GetContentInternalAsync(editor, runbookType, forceDownload));
+        }
+
+        private string GetContentInternal(RunbookEditor editor, RunbookType runbookType, bool forceDownload)
+        {
+            return AsyncHelper.RunSync<string>(() => GetContentInternalAsync(editor, runbookType, forceDownload));
         }
 
         /// <summary>
@@ -143,7 +159,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         /// </summary>
         /// <param name="forceDownload">Set to true to force download of content from backend</param>
         /// <returns>Draft content</returns>
-        private async Task<string> GetContentInternal(RunbookEditor editor, RunbookType runbookType, bool forceDownload)
+        private async Task<string> GetContentInternalAsync(RunbookEditor editor, RunbookType runbookType, bool forceDownload)
         {
             var content = string.Empty;
             var currentContent = string.Empty;
@@ -156,7 +172,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             {
                 try
                 {
-                    content = await _backendContext.GetContentAsync(_backendContext.Service.GetBackendUrl(runbookType, _runbook));
+                    content = await _backendContext.GetContentAsync(_backendContext.Service.GetBackendUrl(runbookType, _runbook)).ConfigureAwait(true);
 
                     // Only parse draft, we don't handle published since these are read only
                     if (runbookType == RunbookType.Draft && _completionProvider != null)
@@ -181,10 +197,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                         {
                             Execute.OnUIThread(() =>
                             {
-                                lock (_lock)
-                                {
-                                    editor.Text = content;
-                                }
+                                //lock (_lock)
+                                //{
+                                editor.Text = content;
+                                //}
                             });
                         }
                     }
@@ -203,10 +219,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 {
                     Execute.OnUIThread(() =>
                     {
-                        lock (_lock)
-                        {
-                            content = editor.Text;
-                        }
+                        //lock (_lock)
+                       // {
+                        content = editor.Text;
+                        //}
                     });
                 }
             }
@@ -226,6 +242,9 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
             _view = (IRunbookView)view;
             _completionProvider = new CompletionProvider(_backendContext, _view.TextEditor.LanguageContext);
+            Task.Run(() => { _completionProvider.Initialize(); });
+
+            _keystrokeService = new KeystrokeService(_view.TextEditor.TextArea, _completionProvider);
 
             // Attach the parse error event handler
             _view.TextEditor.LanguageContext.OnParseError += OnDraftParseError;
@@ -236,10 +255,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 Task.Run(async () =>
                 {
                     if (_runbook.DraftRunbookVersionID.HasValue)
-                        await GetContentInternal(_view.TextEditor, RunbookType.Draft, true).ConfigureAwait(false);
+                        await GetContentInternalAsync(_view.TextEditor, RunbookType.Draft, true).ConfigureAwait(false);
 
                     if (_runbook.PublishedRunbookVersionID.HasValue)
-                        await GetContentInternal(_view.PublishedTextEditor, RunbookType.Published, true).ConfigureAwait(false);
+                        await GetContentInternalAsync(_view.PublishedTextEditor, RunbookType.Published, true).ConfigureAwait(false);
 
                     var draftContent = string.Empty;// _view.TextEditor.Text;
                     var publishedContent = string.Empty;// _view.PublishedTextEditor.Text;
@@ -276,37 +295,6 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 }
             };
 
-            _view.TextEditor.TextArea.TextEntering += delegate (object sender, TextCompositionEventArgs e)
-            {
-                if (e.Text.Length > 0 && _completionWindow != null)
-                {
-                    if (!char.IsLetterOrDigit(e.Text[0]) && e.Text[0] != '-')
-                    {
-                        // Whenever a non-letter is typed while the completion window is open,
-                        // insert the currently selected element.
-                        _completionWindow.CompletionList.RequestInsertion(e);
-                    }
-                }
-            };
-
-            _view.TextEditor.TextArea.TextEntered += delegate (object sender, TextCompositionEventArgs e)
-            {
-                var content = _view.TextEditor.Text;
-
-                //if (e.Text.Equals(" "))
-                /*{
-                    Task.Run(() =>
-                    {
-                        lock (_lock)
-                            _completionProvider.Context.Parse(content);
-                    });
-                }*/
-
-                ShowCompletionWindow(sender).ConfigureAwait(false);
-            };
-
-            
-
             #region Command Bindings
             // Open auto complete
             var ctrlSpace = new RoutedCommand();
@@ -335,6 +323,9 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
         private void OnClearDraftParseErrors(object sender, EventArgs e)
         {
+            if ((DateTime.Now - LastKeyStroke).Seconds < 2)
+                return;
+
             Execute.OnUIThread(() =>
             {
                 _view.TextMarkerService.RemoveAll(x => true);
@@ -348,7 +339,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         
         private void OnDraftParseError(object sender, ParseErrorEventArgs e)
         {
-            if ((DateTime.Now - _lastErrorUpdate).Seconds < 3)
+            if ((DateTime.Now - LastKeyStroke).Seconds < 2)
                 return;
 
             Execute.OnUIThread(() =>
@@ -387,7 +378,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         /// <param name="e"></param>
         private void OnCtrlSpaceCommand(object sender, ExecutedRoutedEventArgs e)
         {
-            ShowCompletion(completionWord: "", controlSpace: true).ConfigureAwait(false);
+            //ShowCompletion(completionWord: "", controlSpace: true);
         }
 
         /// <summary>
@@ -449,7 +440,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             offset = _view.TextEditor.CaretOffset;
         }
 
-        private async Task ShowCompletionWindow(object sender)
+        /*private async Task ShowCompletionWindow(object sender)
         {
             var word = string.Empty;
             var lineStr = string.Empty;
@@ -479,10 +470,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             if (word == string.Empty)
                 return;
             
-            await ShowCompletion(completionWord: word, controlSpace: false);
+            ShowCompletion(completionWord: word, controlSpace: false);
         }
 
-        private async Task ShowCompletion(string completionWord, bool controlSpace)
+        private void ShowCompletion(string completionWord, bool controlSpace)
         {
             if (_completionWindow == null)
             {
@@ -492,14 +483,14 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 var line = _view.TextEditor.Document.GetLineByOffset(offset);
                 var lineStr = _view.TextEditor.Document.GetText(line);
                 var completionChar = controlSpace ? (char?)null : _view.TextEditor.Document.GetCharAt(offset - 1);
-                var results = await _completionProvider.GetCompletionData(
-                        completionWord, 
-                        _view.TextEditor.Text, 
-                        lineStr, 
-                        line, 
-                        offset, 
+                var results = _completionProvider.GetCompletionData(
+                        completionWord,
+                        _view.TextEditor.Text,
+                        lineStr,
+                        line,
+                        offset,
                         completionChar
-                    ).ConfigureAwait(true);
+                    );
 
                 if (results.CompletionData == null)
                     return;
@@ -533,14 +524,14 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                     }
                 });
             }
-        }
+        }*/
 
         /// <summary>
         /// TODO: Async this!
         /// </summary>
         /// <param name="completionWord"></param>
         /// <returns></returns>
-        public async Task<IList<ICompletionData>> GetParameters(string completionWord)
+        public IList<ICompletionData> GetParameters(string completionWord)
         {
             if (_parameters != null) // check if parameters is cached
                 return _parameters;
@@ -549,12 +540,12 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             var fixedCompletionWord = completionWord != null ? completionWord.Replace("-", "") : null;
             Token[] tokens;
             ParseError[] parseErrors;
-
+            
             string contentToParse = string.Empty;
             if (_runbook.DraftRunbookVersionID.HasValue)
-                contentToParse = await GetContentInternal(null, RunbookType.Draft, false);
+                contentToParse = GetContentInternal(null, RunbookType.Draft, false);
             else
-                contentToParse = await GetContentInternal(null, RunbookType.Published, false);
+                contentToParse = GetContentInternal(null, RunbookType.Published, false);
             /*if (String.IsNullOrEmpty(Content))
             {
                 //contentToParse = GetContent(RunbookType.Draft, true);
@@ -780,6 +771,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         async Task ICommandHandler<PublishCommandDefinition>.Run(Command command)
         {
             await CheckIn();
+
+            // Make sure that draft runbook version ID is set to null when published
+            _runbook.DraftRunbookVersionID = null;
+            UnsavedChanges = false;
         }
 
         void ICommandHandler<EditPublishedCommandDefinition>.Update(Command command)
@@ -793,6 +788,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         async Task ICommandHandler<EditPublishedCommandDefinition>.Run(Command command)
         {
             await CheckOut();
+
+            UnsavedChanges = true;
         }
 
         void ICommandHandler<TestCommandDefinition>.Update(Command command)
@@ -925,6 +922,8 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         }
 
         #region Properties
+        public DateTime LastKeyStroke { get; set; }
+
         public string Content
         {
             get
