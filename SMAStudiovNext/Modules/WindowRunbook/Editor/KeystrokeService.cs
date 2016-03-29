@@ -49,7 +49,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
 
             var lineParts = lineText.Substring(0, caretLinePosition).Split('|');
 
-            if (IsCodeCompletionTrigger(ch) || CompletionUtils.IsCommand(lineParts[lineParts.Length - 1]))
+            if (IsCodeCompletionTrigger(ch))// || CompletionUtils.IsCommand(lineParts[lineParts.Length - 1]))
             {
                 TriggerCompletion();
             }
