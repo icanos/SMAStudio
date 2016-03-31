@@ -18,16 +18,16 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using ICSharpCode.AvalonEdit.Document;
-using ICSharpCode.AvalonEdit.Rendering;
 using ICSharpCode.AvalonEdit.Highlighting;
-using SMAStudiovNext.Themes;
+using ICSharpCode.AvalonEdit.Rendering;
 using SMAStudiovNext.Core;
-using System.Linq;
+using SMAStudiovNext.Themes;
 
-namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlighting
+namespace SMAStudiovNext.Modules.WindowRunbook.SyntaxHighlightning
 {
     /// <summary>
     /// A colorizes that interprets a highlighting rule set and colors the document accordingly.

@@ -1,11 +1,7 @@
 ﻿using SMAStudiovNext.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SMAStudiovNext.Utils;
 
-namespace SMAStudiovNext.Modules.EnvironmentExplorer.Views
+namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Views
 {
     public interface IEnvironmentExplorerView
     {

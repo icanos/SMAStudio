@@ -1,13 +1,10 @@
-﻿using SMAStudiovNext.Core;
-using SMAStudiovNext.Modules.DialogDocumentation.Windows;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows.Input;
+using SMAStudiovNext.Core;
+using SMAStudiovNext.Modules.DialogDocumentation.Windows;
+using SMAStudiovNext.Utils;
 
-namespace SMAStudiovNext.Modules.EnvironmentExplorer.Commands
+namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands
 {
     public class DocumentationCommand : ICommand
     {

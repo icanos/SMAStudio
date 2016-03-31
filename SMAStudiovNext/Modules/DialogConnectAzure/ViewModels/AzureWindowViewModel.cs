@@ -1,14 +1,12 @@
-﻿using Caliburn.Micro;
+﻿using System.Collections.ObjectModel;
+using System.Security.Cryptography.X509Certificates;
+using System.Windows.Input;
+using Caliburn.Micro;
 using Gemini.Framework;
-using SMAStudiovNext.Commands;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Services;
-using System.Collections.ObjectModel;
-using System.Security.Cryptography.X509Certificates;
-using System.Windows;
-using System.Windows.Input;
 
-namespace SMAStudiovNext.Modules.Azure.ViewModels
+namespace SMAStudiovNext.Modules.DialogConnectAzure.ViewModels
 {
     public class AzureWindowViewModel : PropertyChangedBase
     {

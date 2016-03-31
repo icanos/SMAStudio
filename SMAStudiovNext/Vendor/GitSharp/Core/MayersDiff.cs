@@ -88,10 +88,11 @@
  * 
  * 
  */
-using GitSharp.Core.Util;
-using System;
 
-namespace GitSharp.Core.Diff
+using System;
+using SMAStudiovNext.Vendor.GitSharp.Util;
+
+namespace SMAStudiovNext.Vendor.GitSharp.Core
 {
     /// <summary>
     /// Diff algorithm, based on "An O(ND) Difference Algorithm and its

@@ -1,15 +1,11 @@
-﻿using Gemini.Framework;
+﻿using System;
+using System.ComponentModel.Composition;
+using Gemini.Framework;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
 using Gemini.Modules.UndoRedo.Commands;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SMAStudiovNext.Modules.PropertyGrid.ViewModels
+namespace SMAStudiovNext.Modules.PartPropertyGrid.ViewModels
 {
     [Export(typeof(IPropertyGrid))]
     public sealed class PropertyGridViewModel : Tool, IPropertyGrid, ICommandRerouter

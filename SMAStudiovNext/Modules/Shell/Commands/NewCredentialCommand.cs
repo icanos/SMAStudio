@@ -1,11 +1,11 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework.Services;
 using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.Credential.ViewModels;
-using SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels;
 using System;
 using System.Windows;
 using System.Windows.Input;
+using SMAStudiovNext.Modules.PartEnvironmentExplorer.ViewModels;
+using SMAStudiovNext.Modules.WindowCredential.ViewModels;
 
 namespace SMAStudiovNext.Modules.Shell.Commands
 {

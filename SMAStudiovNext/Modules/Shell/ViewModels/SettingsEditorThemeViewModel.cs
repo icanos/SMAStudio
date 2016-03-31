@@ -5,6 +5,7 @@ using SMAStudiovNext.Services;
 using SMAStudiovNext.Themes;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
+using SMAStudiovNext.Utils;
 
 namespace SMAStudiovNext.Modules.Shell.ViewModels
 {

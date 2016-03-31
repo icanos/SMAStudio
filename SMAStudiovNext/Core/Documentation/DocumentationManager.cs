@@ -1,11 +1,11 @@
 ﻿using Novacode;
 using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.Runbook.Editor.Parser;
-using SMAStudiovNext.Modules.Runbook.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Parser;
+using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
 using VisioDrawing = VisioAutomation.VDX.Elements.Drawing;
 using VisioFace = VisioAutomation.VDX.Elements.Face;
 using VisioLine = VisioAutomation.VDX.Elements.Line;

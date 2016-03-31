@@ -1,14 +1,15 @@
-﻿using Gemini.Framework;
-using Gemini.Framework.Commands;
-using SMAStudiovNext.Core;
-using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.Shell.Commands;
-using SMAStudiovNext.Services;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using System.Windows;
+using Gemini.Framework;
+using Gemini.Framework.Commands;
+using SMAStudiovNext.Commands;
+using SMAStudiovNext.Core;
+using SMAStudiovNext.Exceptions;
+using SMAStudiovNext.Models;
+using SMAStudiovNext.Services;
 
-namespace SMAStudiovNext.Modules.Credential.ViewModels
+namespace SMAStudiovNext.Modules.WindowCredential.ViewModels
 {
     public sealed class CredentialViewModel : Document, IViewModel, ICommandHandler<SaveCommandDefinition>
     {

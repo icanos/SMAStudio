@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using ICSharpCode.AvalonEdit.Document;
-using SMAStudiovNext.Modules.Runbook.Editor.Parser;
-using SMAStudiovNext.Core;
-using System.Management.Automation.Runspaces;
 using System.Management.Automation;
-using ICSharpCode.AvalonEdit.CodeCompletion;
-using SMAStudiovNext.Models;
 using System.Management.Automation.Language;
-using SMAStudiovNext.Modules.Runbook.ViewModels;
-using SMAStudiovNext.Language.Snippets;
+using System.Management.Automation.Runspaces;
+using System.Threading.Tasks;
+using ICSharpCode.AvalonEdit.CodeCompletion;
+using ICSharpCode.AvalonEdit.Document;
+using SMAStudiovNext.Core;
+using SMAStudiovNext.Models;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Parser;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Snippets;
+using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
 
-namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
+namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Completion
 {
     public delegate void CompletionResultDelegate(object sender, CompletionEventArgs e);
 

@@ -1,13 +1,9 @@
-﻿using ICSharpCode.AvalonEdit.Document;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows;
 using System.Windows.Media;
+using ICSharpCode.AvalonEdit.Document;
 
-namespace SMAStudiovNext.Modules.Runbook.Editor
+namespace SMAStudiovNext.Modules.WindowRunbook.Editor
 {
     public class TextMarker : TextSegment
     {

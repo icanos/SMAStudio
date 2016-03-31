@@ -1,14 +1,15 @@
-﻿using Gemini.Framework;
-using Gemini.Framework.Commands;
-using SMAStudiovNext.Core;
-using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.Shell.Commands;
-using SMAStudiovNext.Services;
-using System;
-using System.Windows;
+﻿using System;
 using System.Threading.Tasks;
+using System.Windows;
+using Gemini.Framework;
+using Gemini.Framework.Commands;
+using SMAStudiovNext.Commands;
+using SMAStudiovNext.Core;
+using SMAStudiovNext.Exceptions;
+using SMAStudiovNext.Models;
+using SMAStudiovNext.Services;
 
-namespace SMAStudiovNext.Modules.Schedule.ViewModels
+namespace SMAStudiovNext.Modules.WindowSchedule.ViewModels
 {
     public sealed class ScheduleViewModel : Document, IViewModel, ICommandHandler<SaveCommandDefinition>
     {

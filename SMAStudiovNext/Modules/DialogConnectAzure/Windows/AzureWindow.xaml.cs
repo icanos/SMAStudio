@@ -1,8 +1,8 @@
-﻿using SMAStudiovNext.Modules.Azure.ViewModels;
-using System;
+﻿using System;
 using System.Windows;
+using SMAStudiovNext.Modules.DialogConnectAzure.ViewModels;
 
-namespace SMAStudiovNext.Modules.Azure.Windows
+namespace SMAStudiovNext.Modules.DialogConnectAzure.Windows
 {
     /// <summary>
     /// Interaction logic for AzureWindow.xaml

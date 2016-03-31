@@ -1,17 +1,16 @@
-﻿using Caliburn.Micro;
-using ICSharpCode.AvalonEdit.CodeCompletion;
-using ICSharpCode.AvalonEdit.Editing;
-using SMAStudiovNext.Core;
-using SMAStudiovNext.Modules.Runbook.Editor.Completion;
-using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
-using System.Linq;
+﻿using System.Linq;
 using System.Management.Automation.Language;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using SMAStudiovNext.Modules.Runbook.Editor.Parser;
+using Caliburn.Micro;
+using ICSharpCode.AvalonEdit.CodeCompletion;
+using ICSharpCode.AvalonEdit.Editing;
+using SMAStudiovNext.Core;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Parser;
 
-namespace SMAStudiovNext.Modules.Runbook.Editor
+namespace SMAStudiovNext.Modules.WindowRunbook.Editor
 {
     public class KeystrokeService
     {

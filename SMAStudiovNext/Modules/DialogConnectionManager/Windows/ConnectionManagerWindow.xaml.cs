@@ -1,14 +1,13 @@
-﻿using SMAStudiovNext.Core;
-using SMAStudiovNext.Services;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Linq;
-using System.Collections.ObjectModel;
+using SMAStudiovNext.Core;
+using SMAStudiovNext.Services;
+using SMAStudiovNext.Utils;
 
-namespace SMAStudiovNext.Modules.ConnectionManager.Windows
+namespace SMAStudiovNext.Modules.DialogConnectionManager.Windows
 {
     /// <summary>
     /// Interaction logic for ConnectionManagerWindow.xaml
@@ -22,23 +21,19 @@ namespace SMAStudiovNext.Modules.ConnectionManager.Windows
             DataContext = this;
             Connections = SettingsService.CurrentSettings.Connections.Where(c => !c.IsAzure).ToObservableCollection();
 
-            Connection = new BackendConnection();
-            Connection.SmaImpersonatedLogin = true;
+            Connection = new BackendConnection {SmaImpersonatedLogin = true};
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void NotifyPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public void SaveButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (!String.IsNullOrEmpty(Connection.CleartextPassword))
+            if (!string.IsNullOrEmpty(Connection.CleartextPassword))
                 Connection.SmaPassword = DataProtection.Protect(Connection.CleartextPassword);
 
             Connection.CleartextPassword = string.Empty;

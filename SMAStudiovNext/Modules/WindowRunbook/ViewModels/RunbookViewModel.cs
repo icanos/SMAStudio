@@ -1,4 +1,13 @@
-﻿using Caliburn.Micro;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Management.Automation.Language;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Xml;
+using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
@@ -7,32 +16,23 @@ using Gemini.Modules.Output;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
 using Newtonsoft.Json.Linq;
+using SMAStudiovNext.Commands;
 using SMAStudiovNext.Core;
-using SMAStudiovNext.Language.Snippets;
+using SMAStudiovNext.Exceptions;
 using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.ExecutionResult.ViewModels;
-using SMAStudiovNext.Modules.JobHistory.ViewModels;
-using SMAStudiovNext.Modules.Runbook.Commands;
-using SMAStudiovNext.Modules.Runbook.Editor;
-using SMAStudiovNext.Modules.Runbook.Editor.Completion;
-using SMAStudiovNext.Modules.Runbook.Editor.Parser;
-using SMAStudiovNext.Modules.Runbook.Views;
-using SMAStudiovNext.Modules.Shell.Commands;
-using SMAStudiovNext.Modules.StartRunDialog.Windows;
+using SMAStudiovNext.Modules.DialogStartRun.Windows;
+using SMAStudiovNext.Modules.WindowExecutionResult.ViewModels;
+using SMAStudiovNext.Modules.WindowJobHistory.ViewModels;
+using SMAStudiovNext.Modules.WindowRunbook.Editor;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Parser;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Snippets;
+using SMAStudiovNext.Modules.WindowRunbook.Views;
 using SMAStudiovNext.SMA;
 using SMAStudiovNext.Utils;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Management.Automation.Language;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Xml;
+using SMAStudiovNext.Vendor.GitSharp;
 
-namespace SMAStudiovNext.Modules.Runbook.ViewModels
+namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 {
     public class RunbookViewModel : Document, IViewModel,
         ICommandHandler<SaveCommandDefinition>,
@@ -269,7 +269,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                         publishedContent = _view.PublishedTextEditor.Text;
                     });
 
-                    var diff = new GitSharp.Diff(draftContent, publishedContent);
+                    var diff = new Diff(draftContent, publishedContent);
                     DiffSectionA = diff.Sections;
                     DiffSectionB = diff.Sections;
 
@@ -1033,9 +1033,9 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             get { return AppContext.Resolve<ICommand>("GoToDefinitionCommand"); }
         }
 
-        public IEnumerable<GitSharp.Diff.Section> DiffSectionA { get; set; }
+        public IEnumerable<Diff.Section> DiffSectionA { get; set; }
 
-        public IEnumerable<GitSharp.Diff.Section> DiffSectionB { get; set; }
+        public IEnumerable<Diff.Section> DiffSectionB { get; set; }
         #endregion
     }
 }

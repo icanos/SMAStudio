@@ -1,9 +1,7 @@
-﻿using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace SMAStudiovNext.Core
+namespace SMAStudiovNext.Utils
 {
     public static class CollectionExtensions
     {

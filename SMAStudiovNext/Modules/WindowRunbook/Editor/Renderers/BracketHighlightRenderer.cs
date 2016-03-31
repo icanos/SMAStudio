@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Rendering;
-using SMAStudiovNext.Modules.Runbook.Editor.Parser;
 using SMAStudiovNext.Modules.WindowRunbook.Editor.Parser;
 
 namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Renderers

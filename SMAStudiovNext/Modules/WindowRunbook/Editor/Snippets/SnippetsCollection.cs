@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SMAStudiovNext.Language.Snippets
+namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Snippets
 {
     public class SnippetsCollection : ISnippetsCollection
     {

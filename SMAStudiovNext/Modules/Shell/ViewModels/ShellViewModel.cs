@@ -14,6 +14,7 @@ using Gemini.Modules.Shell.Views;
 using Gemini.Modules.StatusBar;
 using Gemini.Modules.ToolBars;
 using SMAStudiovNext.Core;
+using SMAStudiovNext.Utils;
 
 //namespace Gemini.Modules.Shell.ViewModels
 namespace SMAStudiovNext.Modules.Shell.ViewModels

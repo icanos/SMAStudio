@@ -1,12 +1,8 @@
-﻿using SMAStudiovNext.Modules.ConnectionManager.Windows;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows.Input;
+using SMAStudiovNext.Modules.DialogConnectionManager.Windows;
 
-namespace SMAStudiovNext.Modules.EnvironmentExplorer.Commands
+namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands
 {
     public class NewConnectionCommand : ICommand
     {

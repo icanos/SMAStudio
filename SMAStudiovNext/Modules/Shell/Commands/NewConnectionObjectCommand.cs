@@ -1,7 +1,6 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework.Services;
 using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels;
 using SMAStudiovNext.Modules.WindowConnection.ViewModels;
 using SMAStudiovNext.Services;
 using System;
@@ -10,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using SMAStudiovNext.Modules.PartEnvironmentExplorer.ViewModels;
 
 namespace SMAStudiovNext.Modules.Shell.Commands
 {

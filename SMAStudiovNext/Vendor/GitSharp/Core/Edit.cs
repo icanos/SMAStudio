@@ -38,7 +38,7 @@
 
 using System;
 
-namespace GitSharp.Core.Diff
+namespace SMAStudiovNext.Vendor.GitSharp.Core
 {
     /// <summary>
     /// A modified region detected between two versions of roughly the same content.

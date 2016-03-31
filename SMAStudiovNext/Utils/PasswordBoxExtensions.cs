@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace SMAStudiovNext.Core
+namespace SMAStudiovNext.Utils
 {
     /// <summary>
     /// Code from http://blog.functionalfun.net/2008/06/wpf-passwordbox-and-data-binding.html

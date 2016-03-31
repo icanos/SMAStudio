@@ -1,18 +1,13 @@
-﻿using Caliburn.Micro;
-using Gemini.Framework.Services;
-using SMAStudiovNext.Core;
-using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels;
-using SMAStudiovNext.Modules.JobHistory.ViewModels;
-using SMAStudiovNext.Modules.Runbook.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows.Input;
+using Caliburn.Micro;
+using Gemini.Framework.Services;
+using SMAStudiovNext.Models;
+using SMAStudiovNext.Modules.WindowJobHistory.ViewModels;
+using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
+using SMAStudiovNext.Utils;
 
-namespace SMAStudiovNext.Modules.EnvironmentExplorer.Commands
+namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands
 {
     public class HistoryCommand : ICommand
     {

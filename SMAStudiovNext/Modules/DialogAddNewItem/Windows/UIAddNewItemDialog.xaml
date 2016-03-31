@@ -1,4 +1,4 @@
-﻿<Window x:Class="SMAStudiovNext.Windows.UIAddNewItemDialog"
+﻿<Window x:Class="SMAStudiovNext.Modules.DialogAddNewItem.Windows.UIAddNewItemDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Add New Item" Height="495" Width="600" ResizeMode="NoResize">

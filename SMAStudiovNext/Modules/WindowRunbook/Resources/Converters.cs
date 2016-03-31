@@ -1,11 +1,11 @@
-﻿using GitSharp;
-using System;
+﻿using System;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Data;
 using System.Windows.Media;
+using SMAStudiovNext.Vendor.GitSharp;
 
-namespace SMAStudiovNext.Modules.Runbook.Resources
+namespace SMAStudiovNext.Modules.WindowRunbook.Resources
 {
     /// <summary>
 	/// Adjust text block sizes to correspond to each other by adding lines

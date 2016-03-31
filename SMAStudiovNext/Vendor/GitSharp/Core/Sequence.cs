@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.Core.Diff
+namespace SMAStudiovNext.Vendor.GitSharp.Core
 {
     /// <summary>
     /// Arbitrary sequence of elements with fast comparison support.

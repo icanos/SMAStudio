@@ -1,5 +1,4 @@
-﻿using SMAStudiovNext.Modules.Runbook.Editor.Parser;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 using System.Xml.Serialization;
 
 namespace SMAStudiovNext.Themes

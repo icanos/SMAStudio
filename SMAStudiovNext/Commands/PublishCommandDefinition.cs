@@ -1,12 +1,8 @@
-﻿using Gemini.Framework.Commands;
+﻿using System;
+using Gemini.Framework.Commands;
 using SMAStudiovNext.Icons;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SMAStudiovNext.Modules.Runbook.Commands
+namespace SMAStudiovNext.Commands
 {
     [CommandDefinition]
     public class PublishCommandDefinition : CommandDefinition

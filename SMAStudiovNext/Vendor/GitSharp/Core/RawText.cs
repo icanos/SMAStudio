@@ -38,9 +38,9 @@
  */
 
 using System.IO;
-using GitSharp.Core.Util;
+using SMAStudiovNext.Vendor.GitSharp.Util;
 
-namespace GitSharp.Core.Diff
+namespace SMAStudiovNext.Vendor.GitSharp.Core
 {
 
 

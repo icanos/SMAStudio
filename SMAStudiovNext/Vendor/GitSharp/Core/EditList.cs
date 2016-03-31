@@ -38,7 +38,7 @@
 
 using System.Collections.Generic;
 
-namespace GitSharp.Core.Diff
+namespace SMAStudiovNext.Vendor.GitSharp.Core
 {
     /// <summary>
     ///   Specialized list of

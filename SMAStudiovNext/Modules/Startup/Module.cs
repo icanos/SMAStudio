@@ -6,7 +6,6 @@ using SMAStudiovNext.Agents;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Core.Tracing;
 using SMAStudiovNext.Icons;
-using SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels;
 using SMAStudiovNext.Modules.WindowConsole.ViewModels;
 using SMAStudiovNext.Services;
 using SMAStudiovNext.Themes;
@@ -21,6 +20,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using SMAStudiovNext.Exceptions;
+using SMAStudiovNext.Modules.PartEnvironmentExplorer.ViewModels;
+using SMAStudiovNext.Utils;
 
 namespace SMAStudiovNext.Modules.Startup
 {

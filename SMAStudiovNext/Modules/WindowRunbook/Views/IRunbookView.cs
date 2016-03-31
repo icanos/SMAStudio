@@ -1,6 +1,6 @@
-﻿using SMAStudiovNext.Modules.Runbook.Editor;
+﻿using SMAStudiovNext.Modules.WindowRunbook.Editor;
 
-namespace SMAStudiovNext.Modules.Runbook.Views
+namespace SMAStudiovNext.Modules.WindowRunbook.Views
 {
     public interface IRunbookView
     {

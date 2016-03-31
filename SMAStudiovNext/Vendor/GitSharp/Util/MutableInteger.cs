@@ -38,7 +38,7 @@
 
 
 
-namespace GitSharp.Core.Util
+namespace SMAStudiovNext.Vendor.GitSharp.Util
 {
     /** A boxed integer that can be modified. */
     public class MutableInteger

@@ -1,14 +1,10 @@
-﻿using Gemini.Framework.Commands;
-using SMAStudiovNext.Icons;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
+using Gemini.Framework.Commands;
+using SMAStudiovNext.Icons;
 
-namespace SMAStudiovNext.Modules.Shell.Commands
+namespace SMAStudiovNext.Commands
 {
     [CommandDefinition]
     public class SaveCommandDefinition : CommandDefinition

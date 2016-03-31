@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace GitSharp.Core.Util.JavaHelper
+namespace SMAStudiovNext.Vendor.GitSharp.Util.JavaHelper
 {
     public static class Charset
     {

@@ -1,10 +1,8 @@
-﻿using ICSharpCode.AvalonEdit.Document;
-using SMAStudiovNext.Modules.Runbook.Editor.Parser;
-using System.Collections.Generic;
-using System.Management.Automation.Language;
-using System.Threading.Tasks;
+﻿using System.Management.Automation.Language;
+using ICSharpCode.AvalonEdit.Document;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Parser;
 
-namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
+namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Completion
 {
     public interface ICompletionProvider
     {

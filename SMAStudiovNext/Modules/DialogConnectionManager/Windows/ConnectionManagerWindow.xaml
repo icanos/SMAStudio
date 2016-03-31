@@ -1,14 +1,14 @@
-﻿<Window x:Class="SMAStudiovNext.Modules.ConnectionManager.Windows.ConnectionManagerWindow"
+﻿<Window x:Class="SMAStudiovNext.Modules.DialogConnectionManager.Windows.ConnectionManagerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SMAStudiovNext.Modules.ConnectionManager.Windows"
         xmlns:core="clr-namespace:SMAStudiovNext.Core"
+        xmlns:utils="clr-namespace:SMAStudiovNext.Utils"
         mc:Ignorable="d"
         Title="Connection Manager" Height="436.127" Width="611.272" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
     <Window.Resources>
-        <core:InverseBoolConverter x:Key="InverseBoolConverter" />
+        <utils:InverseBoolConverter x:Key="InverseBoolConverter" />
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -43,7 +43,7 @@
             <TextBlock Text="Domain" FontWeight="Bold" Margin="0,10,0,0" />
             <TextBox Text="{Binding Path=SmaDomain}" Padding="2,2,2,2" IsEnabled="{Binding Path=SmaImpersonatedLogin, Converter={StaticResource InverseBoolConverter}}" />
             <TextBlock Text="Password" FontWeight="Bold" Margin="0,10,0,0" />
-            <PasswordBox Padding="2,2,2,2" core:PasswordBoxExtensions.BindPassword="true" core:PasswordBoxExtensions.BoundPassword="{Binding Path=CleartextPassword, Mode=OneWayToSource}" IsEnabled="{Binding Path=SmaImpersonatedLogin, Converter={StaticResource InverseBoolConverter}}" />
+            <PasswordBox Padding="2,2,2,2" utils:PasswordBoxExtensions.BindPassword="true" utils:PasswordBoxExtensions.BoundPassword="{Binding Path=CleartextPassword, Mode=OneWayToSource}" IsEnabled="{Binding Path=SmaImpersonatedLogin, Converter={StaticResource InverseBoolConverter}}" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Save" Margin="0,10,10,0" Width="70" HorizontalAlignment="Right" Click="SaveButtonClicked" />
                 <Button Content="Cancel" Margin="0,10,0,0" Width="70" HorizontalAlignment="Right" Click="CancelButtonClicked" />

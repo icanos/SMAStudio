@@ -1,6 +1,6 @@
 ﻿using Gemini.Framework.Commands;
 
-namespace SMAStudiovNext.Modules.Shell.Commands
+namespace SMAStudiovNext.Commands
 {
     [CommandDefinition]
     public class AboutCommandDefinition : CommandDefinition

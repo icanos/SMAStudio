@@ -1,11 +1,11 @@
-﻿using ICSharpCode.AvalonEdit.CodeCompletion;
-using SMAStudiovNext.Modules.Runbook.Editor.Completion;
-using SMAStudiovNext.Modules.Runbook.ViewModels;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.Windows;
+using ICSharpCode.AvalonEdit.CodeCompletion;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
+using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
 
-namespace SMAStudiovNext.Modules.StartRunDialog.Windows
+namespace SMAStudiovNext.Modules.DialogStartRun.Windows
 {
     /// <summary>
     /// Interaction logic for PrepareRunWindow.xaml

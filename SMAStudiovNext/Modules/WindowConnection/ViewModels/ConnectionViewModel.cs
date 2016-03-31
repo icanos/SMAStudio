@@ -13,6 +13,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using SMAStudiovNext.Commands;
+using SMAStudiovNext.Exceptions;
 
 namespace SMAStudiovNext.Modules.WindowConnection.ViewModels
 {

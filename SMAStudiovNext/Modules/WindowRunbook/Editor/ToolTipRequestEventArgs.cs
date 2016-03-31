@@ -15,15 +15,13 @@
 // FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
-using ICSharpCode.AvalonEdit.Document;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 
-namespace SMAStudiovNext.Modules.Runbook.Editor
+using System;
+using System.Linq;
+using System.Windows;
+using ICSharpCode.AvalonEdit.Document;
+
+namespace SMAStudiovNext.Modules.WindowRunbook.Editor
 {
     public sealed class TextMarkerToolTipProvider
     {

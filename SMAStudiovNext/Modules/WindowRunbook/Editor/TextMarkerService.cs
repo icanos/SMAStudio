@@ -16,17 +16,16 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-using ICSharpCode.AvalonEdit.Rendering;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Windows;
 using System.Windows.Media;
 using ICSharpCode.AvalonEdit.Document;
-using SMAStudiovNext.Modules.Runbook.Editor;
-using System.Diagnostics;
-using System.Windows;
+using ICSharpCode.AvalonEdit.Rendering;
 
-namespace SMAStudiovNext.Modules.Runbook.Editor
+namespace SMAStudiovNext.Modules.WindowRunbook.Editor
 {
     public class TextMarkerService : DocumentColorizingTransformer, IBackgroundRenderer, ITextViewConnect
     {

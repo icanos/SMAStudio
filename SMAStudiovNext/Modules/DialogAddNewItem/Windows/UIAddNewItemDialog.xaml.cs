@@ -1,10 +1,10 @@
-﻿using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.AddNewItemDialog.ViewModels;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using SMAStudiovNext.Modules.DialogAddNewItem.Models;
+using SMAStudiovNext.Modules.DialogAddNewItem.ViewModels;
 
-namespace SMAStudiovNext.Windows
+namespace SMAStudiovNext.Modules.DialogAddNewItem.Windows
 {
     /// <summary>
     /// Interaction logic for AddNewItemDialog.xaml

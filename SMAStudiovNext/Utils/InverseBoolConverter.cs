@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace SMAStudiovNext.Core
+namespace SMAStudiovNext.Utils
 {
     [ValueConversion(typeof(bool), typeof(bool))]
     public class InverseBoolConverter : IValueConverter

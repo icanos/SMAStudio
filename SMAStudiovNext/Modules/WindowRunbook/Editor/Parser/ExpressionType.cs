@@ -1,4 +1,4 @@
-﻿namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
+﻿namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Parser
 {
     public enum ExpressionType
     {

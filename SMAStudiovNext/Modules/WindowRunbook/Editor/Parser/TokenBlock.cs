@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
+﻿namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Parser
 {
     public class TokenBlock
     {

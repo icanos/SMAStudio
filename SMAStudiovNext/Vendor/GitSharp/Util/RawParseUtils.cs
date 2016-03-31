@@ -41,9 +41,9 @@
 
 using System;
 using System.Text;
-using GitSharp.Core.Util.JavaHelper;
+using SMAStudiovNext.Vendor.GitSharp.Util.JavaHelper;
 
-namespace GitSharp.Core.Util
+namespace SMAStudiovNext.Vendor.GitSharp.Util
 {
     public static class Constants
     {

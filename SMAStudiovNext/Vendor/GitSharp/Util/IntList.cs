@@ -39,7 +39,7 @@
 using System;
 using System.Text;
 
-namespace GitSharp.Core.Util
+namespace SMAStudiovNext.Vendor.GitSharp.Util
 {
     /// <summary>
     /// A more efficient <see cref="List{Int32}"/> using a primitive integer array.

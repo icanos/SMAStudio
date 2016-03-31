@@ -1,21 +1,21 @@
-﻿using Caliburn.Micro;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel.Composition;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
+using Gemini.Framework.Threading;
 using Gemini.Modules.Output;
 using SMAStudiovNext.Commands;
 using SMAStudiovNext.Core;
-using SMAStudiovNext.Modules.EnvironmentExplorer.Commands;
-using SMAStudiovNext.Modules.EnvironmentExplorer.Views;
-using System.Collections.ObjectModel;
-using System.ComponentModel.Composition;
-using System.Windows.Input;
-using System;
-using System.Threading.Tasks;
-using SMAStudiovNext.Modules.ConnectionManager.Windows;
-using Gemini.Framework.Threading;
+using SMAStudiovNext.Modules.DialogConnectionManager.Windows;
+using SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands;
+using SMAStudiovNext.Modules.PartEnvironmentExplorer.Views;
+using SMAStudiovNext.Utils;
 
-namespace SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels
+namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.ViewModels
 {
     [Export(typeof(EnvironmentExplorerViewModel))]
     public class EnvironmentExplorerViewModel : Tool, ICommandHandler<NewConnectionCommandDefinition>

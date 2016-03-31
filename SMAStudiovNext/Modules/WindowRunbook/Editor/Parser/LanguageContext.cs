@@ -1,14 +1,12 @@
-﻿using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.Runbook.Editor.Completion;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation.Language;
-using System.Text;
 using System.Threading.Tasks;
-using SMAStudiovNext.Modules.WindowRunbook.Editor.Parser;
+using SMAStudiovNext.Models;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
 
-namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
+namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Parser
 {
     public delegate void OnParseErrorDelegate(object sender, ParseErrorEventArgs e);
     public delegate void OnClearParseErrorsDelegate(object sender, EventArgs e);

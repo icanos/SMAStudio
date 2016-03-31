@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
 
-namespace SMAStudiovNext.Core
+namespace SMAStudiovNext.Utils
 {
     public class DataProtection
     {

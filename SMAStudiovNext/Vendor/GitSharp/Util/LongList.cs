@@ -37,72 +37,75 @@
 
 
 /* A more efficient List<Long> using a primitive long array. */
+
 using System;
 using System.Text;
 
-public class LongList
+namespace SMAStudiovNext.Vendor.GitSharp.Util
 {
-    private long[] entries;
-
-    private int count;
-
-    /* Create an empty list with a default capacity. */
-    public LongList() : this(10)
+    public class LongList
     {
+        private long[] entries;
 
-    }
+        private int count;
 
-    /*
+        /* Create an empty list with a default capacity. */
+        public LongList() : this(10)
+        {
+
+        }
+
+        /*
 	 * Create an empty list with the specified capacity.
 	 *
 	 * @param capacity
 	 *            number of entries the list can initially hold.
 	 */
-    public LongList(int capacity)
-    {
-        entries = new long[capacity];
-    }
+        public LongList(int capacity)
+        {
+            entries = new long[capacity];
+        }
 
-    /* @return number of entries in this list */
-    public int size()
-    {
-        return count;
-    }
+        /* @return number of entries in this list */
+        public int size()
+        {
+            return count;
+        }
 
-    /*
+        /*
 	 * @param i
 	 *            index to read, must be in the range [0, {@link #size()}).
 	 * @return the number at the specified index
 	 * @throws ArrayIndexOutOfBoundsException
 	 *             the index outside the valid range
 	 */
-    public long get(int i)
-    {
-        if (count <= i)
-            throw new ArgumentOutOfRangeException("i");
-        return entries[i];
-    }
+        public long get(int i)
+        {
+            if (count <= i)
+                throw new ArgumentOutOfRangeException("i");
+            return entries[i];
+        }
 
-    /** Empty this list */
-    public void clear()
-    {
-        count = 0;
-    }
+        /** Empty this list */
+        public void clear()
+        {
+            count = 0;
+        }
 
-    /**
+        /**
 	 * Add an entry to the end of the list.
 	 *
 	 * @param n
 	 *            the number to add.
 	 */
-    public void add(long n)
-    {
-        if (count == entries.Length)
-            grow();
-        entries[count++] = n;
-    }
+        public void add(long n)
+        {
+            if (count == entries.Length)
+                grow();
+            entries[count++] = n;
+        }
 
-    /**
+        /**
 	 * Assign an entry in the list.
 	 *
 	 * @param index
@@ -110,17 +113,17 @@ public class LongList
 	 * @param n
 	 *            value to store at the position.
 	 */
-    public void set(int index, long n)
-    {
-        if (count < index)
-            throw new ArgumentOutOfRangeException("index");
-        else if (count == index)
-            add(n);
-        else
-            entries[index] = n;
-    }
+        public void set(int index, long n)
+        {
+            if (count < index)
+                throw new ArgumentOutOfRangeException("index");
+            else if (count == index)
+                add(n);
+            else
+                entries[index] = n;
+        }
 
-    /**
+        /**
 	 * Pad the list with entries.
 	 *
 	 * @param toIndex
@@ -130,30 +133,31 @@ public class LongList
 	 * @param val
 	 *            value to insert into padded positions.
 	 */
-    public void fillTo(int toIndex, long val)
-    {
-        while (count < toIndex)
-            add(val);
-    }
-
-    private void grow()
-    {
-        long[] n = new long[(entries.Length + 16) * 3 / 2];
-        System.Array.Copy(entries, 0, n, 0, count);
-        entries = n;
-    }
-
-    public String toString()
-    {
-        StringBuilder r = new StringBuilder();
-        r.Append('[');
-        for (int i = 0; i < count; i++)
+        public void fillTo(int toIndex, long val)
         {
-            if (i > 0)
-                r.Append(", ");
-            r.Append(entries[i]);
+            while (count < toIndex)
+                add(val);
         }
-        r.Append(']');
-        return r.ToString();
+
+        private void grow()
+        {
+            long[] n = new long[(entries.Length + 16) * 3 / 2];
+            System.Array.Copy(entries, 0, n, 0, count);
+            entries = n;
+        }
+
+        public String toString()
+        {
+            StringBuilder r = new StringBuilder();
+            r.Append('[');
+            for (int i = 0; i < count; i++)
+            {
+                if (i > 0)
+                    r.Append(", ");
+                r.Append(entries[i]);
+            }
+            r.Append(']');
+            return r.ToString();
+        }
     }
 }

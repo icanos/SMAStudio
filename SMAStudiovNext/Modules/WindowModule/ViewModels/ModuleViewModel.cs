@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading.Tasks;
 using SMAStudiovNext.Services;
 using System.Windows;
+using SMAStudiovNext.Commands;
+using SMAStudiovNext.Exceptions;
 
 namespace SMAStudiovNext.Modules.WindowModule.ViewModels
 {

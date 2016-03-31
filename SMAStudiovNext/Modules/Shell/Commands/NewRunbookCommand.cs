@@ -1,15 +1,14 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework.Services;
 using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.Credential.ViewModels;
-using SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels;
-using SMAStudiovNext.Modules.Runbook.ViewModels;
-using SMAStudiovNext.Windows;
 using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Linq;
+using SMAStudiovNext.Modules.DialogAddNewItem.Windows;
+using SMAStudiovNext.Modules.PartEnvironmentExplorer.ViewModels;
+using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
 
 namespace SMAStudiovNext.Modules.Shell.Commands
 {

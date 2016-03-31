@@ -1,8 +1,8 @@
-﻿using Gemini.Framework.Menus;
-using SMAStudiovNext.Modules.EnvironmentExplorer.Commands;
-using System.ComponentModel.Composition;
+﻿using System.ComponentModel.Composition;
+using Gemini.Framework.Menus;
+using SMAStudiovNext.Commands;
 
-namespace SMAStudiovNext.Modules.EnvironmentExplorer
+namespace SMAStudiovNext.Modules.PartEnvironmentExplorer
 {
     public static class MenuDefinitions
     {

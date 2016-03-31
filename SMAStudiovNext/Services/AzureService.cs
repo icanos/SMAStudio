@@ -10,8 +10,6 @@ using SMAStudiovNext.Core.Exceptions;
 using SMAStudiovNext.Core.Tracing;
 using SMAStudiovNext.Icons;
 using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.Runbook.Editor.Completion;
-using SMAStudiovNext.Modules.Runbook.ViewModels;
 using SMAStudiovNext.Utils;
 using SMAStudiovNext.Vendor.Azure;
 using System;
@@ -28,6 +26,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Xml.Linq;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
+using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
 
 namespace SMAStudiovNext.Services
 {

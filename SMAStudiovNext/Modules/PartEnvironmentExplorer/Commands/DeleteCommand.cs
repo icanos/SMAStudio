@@ -1,13 +1,13 @@
-﻿using Caliburn.Micro;
-using SMAStudiovNext.Core;
-using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.EnvironmentExplorer.ViewModels;
-using SMAStudiovNext.Services;
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Input;
+using Caliburn.Micro;
+using SMAStudiovNext.Exceptions;
+using SMAStudiovNext.Models;
+using SMAStudiovNext.Modules.PartEnvironmentExplorer.ViewModels;
+using SMAStudiovNext.Utils;
 
-namespace SMAStudiovNext.Modules.EnvironmentExplorer.Commands
+namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands
 {
     public class DeleteCommand : ICommand
     {

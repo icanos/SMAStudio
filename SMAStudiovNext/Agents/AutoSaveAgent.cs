@@ -4,7 +4,6 @@ using Gemini.Framework.Services;
 using Gemini.Modules.Output;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.Runbook.ViewModels;
 using SMAStudiovNext.Services;
 using System;
 using System.Collections.Generic;
@@ -14,6 +13,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
+using SMAStudiovNext.Utils;
 
 namespace SMAStudiovNext.Agents
 {

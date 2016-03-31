@@ -7,8 +7,6 @@ using Gemini.Modules.Output;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Icons;
 using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.Runbook.Editor.Completion;
-using SMAStudiovNext.Modules.Runbook.ViewModels;
 using SMAStudiovNext.SMA;
 using System;
 using System.Collections.Generic;
@@ -19,6 +17,9 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
+using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
+using SMAStudiovNext.Utils;
 
 namespace SMAStudiovNext.Services
 {

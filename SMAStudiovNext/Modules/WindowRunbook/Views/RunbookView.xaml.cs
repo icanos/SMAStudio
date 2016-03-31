@@ -1,10 +1,10 @@
-﻿using SMAStudiovNext.Modules.Runbook.Editor;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using SMAStudiovNext.Modules.WindowRunbook.Editor;
 
-namespace SMAStudiovNext.Modules.Runbook.Views
+namespace SMAStudiovNext.Modules.WindowRunbook.Views
 {
     /// <summary>
     /// Interaction logic for PowershellEditorView.xaml

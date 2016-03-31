@@ -1,13 +1,11 @@
-﻿using SMAStudiovNext.SMA;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.Services.Client;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SMAStudiovNext.SMA;
 
-namespace SMAStudiovNext.Core
+namespace SMAStudiovNext.Utils
 {
     public static class ActionExtensions
     {

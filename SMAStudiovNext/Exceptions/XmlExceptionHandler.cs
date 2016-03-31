@@ -1,9 +1,9 @@
-﻿using Caliburn.Micro;
-using Gemini.Modules.Output;
-using System.Windows;
+﻿using System.Windows;
 using System.Xml;
+using Caliburn.Micro;
+using Gemini.Modules.Output;
 
-namespace SMAStudiovNext.Core
+namespace SMAStudiovNext.Exceptions
 {
     public class XmlExceptionHandler
     {

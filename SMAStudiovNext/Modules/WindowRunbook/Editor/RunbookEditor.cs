@@ -1,24 +1,24 @@
-﻿using ICSharpCode.AvalonEdit;
-using ICSharpCode.AvalonEdit.Folding;
-using ICSharpCode.AvalonEdit.Highlighting;
-using ICSharpCode.AvalonEdit.Highlighting.Xshd;
-using SMAStudiovNext.Modules.Runbook.Resources;
-using System;
+﻿using System;
 using System.Management.Automation.Language;
 using System.Reflection;
-using System.Windows.Media;
-using System.Windows.Threading;
-using System.Xml;
-using SMAStudiovNext.Core;
-using SMAStudiovNext.Themes;
-using SMAStudiovNext.Modules.Runbook.Editor.Parser;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using SMAStudiovNext.Modules.Runbook.SyntaxHighlighting;
+using System.Windows.Media;
+using System.Windows.Threading;
+using System.Xml;
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Folding;
+using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Highlighting.Xshd;
+using SMAStudiovNext.Core;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Parser;
 using SMAStudiovNext.Modules.WindowRunbook.Editor.Renderers;
+using SMAStudiovNext.Modules.WindowRunbook.Resources;
+using SMAStudiovNext.Modules.WindowRunbook.SyntaxHighlightning;
+using SMAStudiovNext.Themes;
 
-namespace SMAStudiovNext.Modules.Runbook.Editor
+namespace SMAStudiovNext.Modules.WindowRunbook.Editor
 {
     public delegate void ToolTipRequestEventHandler(object sender, ToolTipRequestEventArgs args);
 
@@ -34,7 +34,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
         private readonly PowershellFoldingStrategy _foldingStrategy;
         private readonly LanguageContext _languageContext;
         private ThemedHighlightingColorizer _colorizer;
-        private BracketHighlightRenderer _bracketRenderer;
+        private readonly BracketHighlightRenderer _bracketRenderer;
         private ToolTip _toolTip;
 
         public RunbookEditor()
@@ -58,8 +58,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
 
             _foldingStrategy = new PowershellFoldingStrategy();
 
-            var foldingUpdateTimer = new DispatcherTimer();
-            foldingUpdateTimer.Interval = TimeSpan.FromSeconds(4);
+            var foldingUpdateTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(4) };
             foldingUpdateTimer.Tick += delegate { UpdateFoldings(); };
             foldingUpdateTimer.Start();
 
@@ -230,15 +229,18 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
             var resourceName = "SMAStudiovNext.Modules.WindowRunbook.SyntaxHighlightning.Powershell.xshd";
 
             var stream = assembly.GetManifestResourceStream(resourceName);
-            var reader = new XmlTextReader(stream);
+            if (stream != null)
+            {
+                var reader = new XmlTextReader(stream);
 
-            SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
             
-            _colorizer = new ThemedHighlightingColorizer(SyntaxHighlighting);
-            TextArea.TextView.LineTransformers.Add(_colorizer);
+                _colorizer = new ThemedHighlightingColorizer(SyntaxHighlighting);
+                TextArea.TextView.LineTransformers.Add(_colorizer);
 
-            reader.Close();
-            stream.Close();
+                reader.Close();
+                stream.Close();
+            }
         }
         
         public LanguageContext LanguageContext

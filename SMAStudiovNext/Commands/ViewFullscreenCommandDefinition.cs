@@ -1,13 +1,8 @@
-﻿using Gemini.Framework.Commands;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.Composition;
 using System.Windows.Input;
+using Gemini.Framework.Commands;
 
-namespace SMAStudiovNext.Modules.Shell.Commands
+namespace SMAStudiovNext.Commands
 {
     [CommandDefinition]
     public class ViewFullscreenCommandDefinition : CommandDefinition

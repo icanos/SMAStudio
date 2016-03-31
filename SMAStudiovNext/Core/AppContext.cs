@@ -1,11 +1,11 @@
 ﻿using Microsoft.Practices.Unity;
 using SMAStudiovNext.Commands;
-using SMAStudiovNext.Language.Snippets;
-using SMAStudiovNext.Modules.EnvironmentExplorer.Commands;
 using SMAStudiovNext.Modules.Shell.Commands;
 using SMAStudiovNext.Services;
 using SMAStudiovNext.Themes;
 using System.Windows.Input;
+using SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Snippets;
 
 namespace SMAStudiovNext.Core
 {

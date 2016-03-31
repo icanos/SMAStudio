@@ -1,4 +1,4 @@
-﻿<Window x:Class="SMAStudiovNext.Modules.StartRunDialog.Windows.PrepareRunWindow"
+﻿<Window x:Class="SMAStudiovNext.Modules.DialogStartRun.Windows.PrepareRunWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:SMAStudiovNext.Modules.DialogStartRun"

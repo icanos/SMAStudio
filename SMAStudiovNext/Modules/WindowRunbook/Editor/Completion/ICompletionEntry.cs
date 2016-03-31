@@ -1,4 +1,4 @@
-﻿namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
+﻿namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Completion
 {
     public interface ICompletionEntry
     {

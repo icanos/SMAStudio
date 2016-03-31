@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ICSharpCode.AvalonEdit.Folding;
+﻿using System.Collections.Generic;
 using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Folding;
 
-namespace SMAStudiovNext.Modules.Runbook.Resources
+namespace SMAStudiovNext.Modules.WindowRunbook.Resources
 {
     public class PowershellFoldingStrategy
     {

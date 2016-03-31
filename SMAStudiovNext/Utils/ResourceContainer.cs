@@ -1,9 +1,10 @@
-﻿using Caliburn.Micro;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using Caliburn.Micro;
+using SMAStudiovNext.Core;
 
-namespace SMAStudiovNext.Core
+namespace SMAStudiovNext.Utils
 {
     public class ResourceContainer : PropertyChangedBase, IDisposable
     {

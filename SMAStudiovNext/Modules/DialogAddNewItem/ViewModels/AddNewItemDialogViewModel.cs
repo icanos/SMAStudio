@@ -1,15 +1,10 @@
-﻿using Caliburn.Micro;
-using SMAStudiovNext.Core;
-using SMAStudiovNext.Models;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Caliburn.Micro;
+using SMAStudiovNext.Modules.DialogAddNewItem.Models;
+using SMAStudiovNext.Utils;
 
-namespace SMAStudiovNext.Modules.AddNewItemDialog.ViewModels
+namespace SMAStudiovNext.Modules.DialogAddNewItem.ViewModels
 {
     public class AddNewItemDialogViewModel : PropertyChangedBase
     {

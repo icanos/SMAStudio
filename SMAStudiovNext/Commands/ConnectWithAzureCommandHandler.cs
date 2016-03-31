@@ -1,10 +1,10 @@
 ﻿using Gemini.Framework.Commands;
 using Gemini.Framework.Threading;
-using SMAStudiovNext.Modules.Azure.Windows;
 using SMAStudiovNext.Services;
 using System;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using SMAStudiovNext.Modules.DialogConnectAzure.Windows;
 
 namespace SMAStudiovNext.Commands
 {

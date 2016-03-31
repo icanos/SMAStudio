@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace SMAStudiovNext.Language.Snippets
+namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Snippets
 {
     public interface ISnippetsCollection
     {

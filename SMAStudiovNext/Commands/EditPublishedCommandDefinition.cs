@@ -1,8 +1,8 @@
-﻿using Gemini.Framework.Commands;
+﻿using System;
+using Gemini.Framework.Commands;
 using SMAStudiovNext.Icons;
-using System;
 
-namespace SMAStudiovNext.Modules.Runbook.Commands
+namespace SMAStudiovNext.Commands
 {
     [CommandDefinition]
     public class EditPublishedCommandDefinition : CommandDefinition

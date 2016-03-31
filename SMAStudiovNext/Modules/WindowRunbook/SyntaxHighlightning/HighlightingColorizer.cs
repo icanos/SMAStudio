@@ -1,14 +1,4 @@
-﻿using ICSharpCode.AvalonEdit.Rendering;
-using ICSharpCode.AvalonEdit.Document;
-using System.Windows.Media;
-using SMAStudiovNext.Themes;
-using SMAStudiovNext.Core;
-using System.Windows;
-using SMAStudiovNext.Modules.Runbook.Editor.Parser;
-using System.Linq;
-using System.Management.Automation.Language;
-
-namespace SMAStudiovNext.Modules.Runbook.SyntaxHighlightning
+﻿namespace SMAStudiovNext.Modules.WindowRunbook.SyntaxHighlightning
 {
     /*public class HighlightingColorizer : DocumentColorizingTransformer
     {

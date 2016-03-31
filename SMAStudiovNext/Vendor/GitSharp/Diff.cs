@@ -39,11 +39,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using GitSharp.Core.Diff;
+using SMAStudiovNext.Vendor.GitSharp.Core;
 
-namespace GitSharp
+namespace SMAStudiovNext.Vendor.GitSharp
 {
     /// <summary>
     /// A Diff represents the line-based differences between two text sequences given as string or byte array as a list of Sections. The process of 

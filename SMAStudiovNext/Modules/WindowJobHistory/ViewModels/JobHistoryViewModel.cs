@@ -1,19 +1,19 @@
-﻿using Caliburn.Micro;
-using Gemini.Framework;
-using SMAStudiovNext.Core;
-using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.Runbook.ViewModels;
-using SMAStudiovNext.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Caliburn.Micro;
+using Gemini.Framework;
+using SMAStudiovNext.Core;
+using SMAStudiovNext.Exceptions;
+using SMAStudiovNext.Models;
+using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
+using SMAStudiovNext.Services;
+using SMAStudiovNext.Utils;
 
-namespace SMAStudiovNext.Modules.JobHistory.ViewModels
+namespace SMAStudiovNext.Modules.WindowJobHistory.ViewModels
 {
     public class JobHistoryViewModel : Document, IViewModel
     {

@@ -1,16 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
-using System.Threading.Tasks;
-using ICSharpCode.AvalonEdit.CodeCompletion;
-using SMAStudiovNext.Language.Snippets;
-using System.Windows.Media.Imaging;
 using SMAStudiovNext.Icons;
-using System.Collections.Generic;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Snippets;
 using SMAStudiovNext.Utils;
 
-namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
+namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Completion
 {
 #pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
     public abstract class CompletionDataBase : ICompletionData

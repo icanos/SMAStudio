@@ -1,10 +1,11 @@
-﻿using SMAStudiovNext.Core;
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using SMAStudiovNext.Core;
+using SMAStudiovNext.Utils;
 
-namespace SMAStudiovNext.Modules.EnvironmentExplorer.Views
+namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Views
 {
     /// <summary>
     /// Interaction logic for RunbookExplorer.xaml

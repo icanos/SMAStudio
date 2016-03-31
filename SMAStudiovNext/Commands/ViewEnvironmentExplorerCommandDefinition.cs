@@ -1,11 +1,6 @@
 ﻿using Gemini.Framework.Commands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SMAStudiovNext.Modules.EnvironmentExplorer.Commands
+namespace SMAStudiovNext.Commands
 {
     [CommandDefinition]
     public class ViewEnvironmentExplorerCommandDefinition : CommandDefinition

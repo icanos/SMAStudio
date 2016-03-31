@@ -3,7 +3,7 @@ using System.Management.Automation.Language;
 using System.Management.Automation.Runspaces;
 using System.Reflection;
 
-namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
+namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Completion
 {
     /// <summary>
     /// Thanks to https://github.com/adamdriscoll/poshtools/

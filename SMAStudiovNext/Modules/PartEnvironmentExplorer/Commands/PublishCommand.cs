@@ -1,14 +1,10 @@
-﻿using SMAStudiovNext.Core;
-using SMAStudiovNext.Models;
-using SMAStudiovNext.Modules.Runbook.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows.Input;
+using SMAStudiovNext.Models;
+using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
+using SMAStudiovNext.Utils;
 
-namespace SMAStudiovNext.Modules.EnvironmentExplorer.Commands
+namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands
 {
     public class PublishCommand : ICommand
     {

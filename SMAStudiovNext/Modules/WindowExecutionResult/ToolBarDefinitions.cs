@@ -1,9 +1,8 @@
-﻿using Gemini.Framework.ToolBars;
+﻿using System.ComponentModel.Composition;
+using Gemini.Framework.ToolBars;
 using SMAStudiovNext.Commands;
-using SMAStudiovNext.Modules.Runbook.Commands;
-using System.ComponentModel.Composition;
 
-namespace SMAStudiovNext.Modules.ExecutionResult
+namespace SMAStudiovNext.Modules.WindowExecutionResult
 {
     internal static class ToolBarDefinitions
     {

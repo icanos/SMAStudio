@@ -1,7 +1,7 @@
-﻿using ICSharpCode.AvalonEdit.CodeCompletion;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using ICSharpCode.AvalonEdit.CodeCompletion;
 
-namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
+namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Completion
 {
     public class CompletionResult
     {

@@ -1,10 +1,11 @@
-﻿using Caliburn.Micro;
-using Gemini.Modules.Output;
-using System;
+﻿using System;
 using System.IO;
 using System.Windows;
+using Caliburn.Micro;
+using Gemini.Modules.Output;
+using SMAStudiovNext.Utils;
 
-namespace SMAStudiovNext.Core
+namespace SMAStudiovNext.Exceptions
 {
     public class GlobalExceptionHandler
     {
