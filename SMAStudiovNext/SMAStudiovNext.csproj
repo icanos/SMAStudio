@@ -251,10 +251,12 @@
     <Compile Include="Modules\WindowRunbook\Editor\Completion\Glyph.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Completion\CompletionUtils.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\KeystrokeService.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Parser\BracketSearchResult.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Parser\ExpressionType.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Parser\LanguageContext.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Parser\ParseErrorEventArgs.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Parser\TokenBlock.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Renderers\BracketHighlightRenderer.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\TextMarker.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\TextMarkerService.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\ToolTipRequestEventArgs.cs" />

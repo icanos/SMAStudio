@@ -6,6 +6,7 @@ using System.Linq;
 using System.Management.Automation.Language;
 using System.Text;
 using System.Threading.Tasks;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Parser;
 
 namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
 {
@@ -38,55 +39,12 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
 
             if (_parseErrors != null && _parseErrors.Length > 0)
             {
-                if (OnParseError != null)
-                    OnParseError(this, new ParseErrorEventArgs(_parseErrors));
+                OnParseError?.Invoke(this, new ParseErrorEventArgs(_parseErrors));
             }
             else
             {
-                if (OnClearParseErrors != null)
-                    OnClearParseErrors(this, new EventArgs());
+                OnClearParseErrors?.Invoke(this, new EventArgs());
             }
-        }
-        
-        /// <summary>
-        /// Retrieve a list of variables that are being assigned in the script
-        /// </summary>
-        /// <param name="position"></param>
-        /// <returns></returns>
-        private IList<Token> GetAssigningVariables(int position)
-        {
-            var result = new List<Token>();
-            var currentContext = GetSubContext(position);
-
-            for (int i = 0; i < _tokens.Length - 1; i++)
-            {
-                var token = _tokens[i];
-                var nextToken = _tokens[i + 1];
-
-                if (token.Extent.StartOffset > position)
-                    break;
-
-                if (token.Kind == TokenKind.Variable 
-                    && (nextToken.TokenFlags == TokenFlags.AssignmentOperator && nextToken.Kind == TokenKind.Equals
-                        || nextToken.TokenFlags == TokenFlags.Keyword && nextToken.Kind == TokenKind.In
-                    ))
-                {
-                    var variableContext = GetSubContext(token.Extent.EndOffset);
-                    
-                    if (currentContext != null && variableContext != null
-                        && currentContext.StartOffset != variableContext.StartOffset
-                        && currentContext.EndOffset != variableContext.EndOffset)
-                    {
-                        continue;
-                    }
-                    else if (currentContext == null && variableContext != null)
-                        continue;
-
-                    result.Add(token);
-                }
-            }
-
-            return result;
         }
 
         /// <summary>
@@ -165,7 +123,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
             var closingBrace = default(Token);
             var openedBraces = 0;
 
-            for (int i = 0; i < segments.Count; i++)
+            for (var i = 0; i < segments.Count; i++)
             {
                 var token = segments[i];
 
@@ -199,7 +157,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
 
             if (openingBrace != null && position >= openingBrace.Extent.StartOffset)
             {
-                bool isInContext = false;
+                var isInContext = false;
 
                 if (closingBrace != null)
                 {
@@ -222,6 +180,71 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
                 StartOffset = (openingBrace == null) ? 0 : openingBrace.Extent.StartOffset,
                 EndOffset = (closingBrace == null) ? position : closingBrace.Extent.EndOffset
             };
+        }
+
+        public async Task<BracketSearchResult> FindBracketMatch(int position, TokenKind openToken, TokenKind closeToken, bool startWithClosedBracket = false)
+        {
+            return await Task.Run(() => {
+                var segments = default(List<Token>);//_tokens.Where(item => item.Extent.EndOffset >= position || item.Extent.EndOffset == (position - 1)).ToList();
+                var openingBrace = default(Token);
+                var closingBrace = default(Token);
+                var openedBraces = 0;
+
+                if (_tokens == null)
+                    return null;
+
+                if (startWithClosedBracket)
+                {
+                    segments = _tokens.Where(item => item.Extent.StartOffset <= position).Reverse().ToList();
+                }
+                else
+                {
+                    segments =
+                        _tokens.Where(item => item.Extent.EndOffset > position)// || item.Extent.EndOffset == (position - 1))
+                            .ToList();
+                }
+
+                foreach (var token in segments)
+                {
+                    if (token.Kind == openToken)
+                    {
+                        if (startWithClosedBracket)
+                            openedBraces--;
+                        else
+                            openedBraces++;
+
+                        if ((openingBrace == null && !startWithClosedBracket) ||
+                            (openedBraces == 0 && startWithClosedBracket))
+                            openingBrace = token;
+                    }
+
+                    if (token.Kind == closeToken)
+                    {
+                        if (startWithClosedBracket)
+                            openedBraces++;
+                        else
+                            openedBraces--;
+
+                        if ((closingBrace == null && startWithClosedBracket) ||
+                            (openedBraces == 0 && !startWithClosedBracket))
+                            closingBrace = token;
+                    }
+
+                    if (openedBraces == 0)
+                        break;
+                }
+
+                if (openingBrace == null || closingBrace == null)
+                    return null;
+
+                return new BracketSearchResult
+                {
+                    ClosingBracketOffset = closingBrace.Extent.StartOffset,
+                    ClosingBracketLength = closingBrace.Extent.EndOffset - closingBrace.Extent.StartOffset,
+                    OpeningBracketOffset = openingBrace.Extent.StartOffset,
+                    OpeningBracketLength = openingBrace.Extent.EndOffset - openingBrace.Extent.StartOffset
+                };
+            });
         }
 
         /// <summary>

@@ -38,21 +38,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
         private void OnTextEntered(object sender, TextCompositionEventArgs e)
         {
             var ch = e.Text[0];
-            //var lineText = string.Empty;
-            //var caretPosition = -1;
-            //var caretLinePosition = -1;
-
-            /*Execute.OnUIThread(() =>
-            {
-                var line = _textArea.Document.GetLineByOffset(_textArea.Caret.Offset);
-                lineText = _textArea.Document.GetText(line);
-                caretPosition = _textArea.Caret.Offset;
-                caretLinePosition = caretPosition - line.Offset;
-            });*/
-
-            //var lineParts = lineText.Substring(0, caretLinePosition).Split('|');
-
-            //if (IsCodeCompletionTrigger(ch))// || CompletionUtils.IsCommand(lineParts[lineParts.Length - 1]))
+            
             if ((IsCodeCompletionTrigger(ch) || char.IsLetter(ch)) && _completionWindow == null)
             {
                 TriggerCompletion();
@@ -180,11 +166,16 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
             return word;
         }
 
-        private bool IsCodeCompletionTrigger(char ch)
+        public static bool IsCodeCompletionTrigger(char ch)
         {
             return ch == '-' || ch == '$' || ch == ':';
         }
-        
+
+        public static bool IsBracketOrParen(char ch)
+        {
+            return ch == '(' || ch == ')' || ch == '{' || ch == '}';
+        }
+
         private Token IsPreviousTokenCommand(int position)
         {
             var line = _textArea.Document.GetLineByOffset(position);

@@ -4,6 +4,7 @@ using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using SMAStudiovNext.Modules.Runbook.Resources;
 using System;
+using System.Management.Automation.Language;
 using System.Reflection;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -15,6 +16,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using SMAStudiovNext.Modules.Runbook.SyntaxHighlighting;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Renderers;
 
 namespace SMAStudiovNext.Modules.Runbook.Editor
 {
@@ -29,9 +31,10 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
     public class RunbookEditor : TextEditor
     {
         private FoldingManager _foldingManager;
-        private PowershellFoldingStrategy _foldingStrategy;
-        private LanguageContext _languageContext;
+        private readonly PowershellFoldingStrategy _foldingStrategy;
+        private readonly LanguageContext _languageContext;
         private ThemedHighlightingColorizer _colorizer;
+        private BracketHighlightRenderer _bracketRenderer;
         private ToolTip _toolTip;
 
         public RunbookEditor()
@@ -51,6 +54,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
 
             MouseHover += OnMouseHover;
             MouseHoverStopped += OnMouseHoverStopped;
+            TextArea.Caret.PositionChanged += HighlightBrackets;
 
             _foldingStrategy = new PowershellFoldingStrategy();
 
@@ -59,7 +63,73 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
             foldingUpdateTimer.Tick += delegate { UpdateFoldings(); };
             foldingUpdateTimer.Start();
 
+            _bracketRenderer = new BracketHighlightRenderer(this.TextArea.TextView, _languageContext);
+            TextArea.TextView.BackgroundRenderers.Add(_bracketRenderer);
+
             InitializeColorizer();
+        }
+
+        private async void HighlightBrackets(object sender, EventArgs eventArgs)
+        {
+            if (TextArea.Caret.Offset < 1)
+            {
+                _bracketRenderer.SetHighlight(null);
+                return;
+            }
+
+            var charBack = Text[TextArea.Caret.Offset - 1];
+            var charFront = Text.Length > TextArea.Caret.Offset ? Text[TextArea.Caret.Offset] : '\0';
+            var character = '\0';
+            var isInFrontOf = false;
+
+            if (KeystrokeService.IsBracketOrParen(charBack))
+            {
+                character = charBack;
+            }
+            else if (KeystrokeService.IsBracketOrParen(charFront))
+            {
+                character = charFront;
+                isInFrontOf = true;
+            }
+
+            if (character != '\0')
+            {
+                var openToken = default(TokenKind);//character == '{' ? TokenKind.LCurly : TokenKind.LParen;
+                var closeToken = default(TokenKind);// character == '}' ? TokenKind.RCurly : TokenKind.RParen;
+                var startWithClose = false;
+
+                if (character == '{' || character == '}')
+                {
+                    openToken = TokenKind.LCurly;
+                    closeToken = TokenKind.RCurly;
+                }
+                else
+                {
+                    openToken = TokenKind.LParen;
+                    closeToken = TokenKind.RParen;
+                }
+
+                if (character == '}' || character == ')')
+                    startWithClose = true;
+
+                var offset = TextArea.Caret.Offset;
+                if (!isInFrontOf)
+                    offset -= 1;
+
+                var result = await _languageContext.FindBracketMatch(offset, openToken, closeToken, startWithClose);
+
+                if (result == null)
+                {
+                    _bracketRenderer.SetHighlight(null);
+                    return;
+                }
+
+                _bracketRenderer.SetHighlight(result);
+            }
+            else
+            {
+                _bracketRenderer.SetHighlight(null);
+            }
         }
 
         private void OnMouseHover(object sender, System.Windows.Input.MouseEventArgs e)
