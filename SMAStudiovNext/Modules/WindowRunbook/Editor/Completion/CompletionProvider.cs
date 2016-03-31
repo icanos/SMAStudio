@@ -35,8 +35,8 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
         };
 
         private long _requestTrigger;
-        private Runspace _runspace;
-        private object _syncLock = new object();
+        private readonly Runspace _runspace;
+        private readonly object _syncLock = new object();
 
         public event CompletionResultDelegate OnCompletionCompleted;
 
@@ -89,11 +89,11 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
         /// <param name="triggerTag">Counter</param>
         public void GetCompletionData(string completionWord, string content, string lineContent, DocumentLine line, int position, char? triggerChar, long triggerTag)
         {
-            if (_requestTrigger == 0 || triggerTag > _requestTrigger)
-            {
-                DismissGetCompletionResults();
-                ProcessCompletion(content, completionWord, position, triggerTag);
-            }
+            if (_requestTrigger != 0 && triggerTag <= _requestTrigger)
+                return;
+
+            DismissGetCompletionResults();
+            ProcessCompletion(content, completionWord, position, triggerTag);
         }
 
         /// <summary>
@@ -122,15 +122,9 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
                 var runbookViewModel = (runbook.Tag as RunbookModelProxy).GetViewModel<RunbookViewModel>();
                 var parameters = runbookViewModel.GetParameters(completionWord);
 
-                var completionData = new List<ICompletionData>();
+                var completionData = parameters.ToList();
 
-                foreach (var parameter in parameters)
-                {
-                    completionData.Add(parameter);
-                }
-
-                if (OnCompletionCompleted != null)
-                    OnCompletionCompleted(this, new CompletionEventArgs(completionData));
+                OnCompletionCompleted?.Invoke(this, new CompletionEventArgs(completionData));
 
                 // Reset trigger
                 lock (_syncLock)
@@ -180,7 +174,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
 
                     var completionData = new List<ICompletionData>();
 
-                    if (!String.IsNullOrEmpty(completionWord))
+                    if (!string.IsNullOrEmpty(completionWord))
                     {
                         // Add snippets
                         completionData.AddRange(_snippetsCollection.Snippets.Where(item => item.Name.StartsWith(completionWord, StringComparison.InvariantCultureIgnoreCase)).Select(item => new SnippetCompletionData(item)));
@@ -192,6 +186,9 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
                         completionData.AddRange(_backendContext.Runbooks.Where(item => (item.Tag as RunbookModelProxy).RunbookName.StartsWith(completionWord, StringComparison.InvariantCultureIgnoreCase)).Select(item => new KeywordCompletionData((item.Tag as RunbookModelProxy).RunbookName)).ToList());
 
                     }
+
+                    if (commandCompletion == null)
+                        return;
 
                     // Add powershell completions
                     foreach (var item in commandCompletion.CompletionMatches)
@@ -223,8 +220,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
                     // Is this inferring performance penalties?
                     completionData = completionData.OrderBy(item => item.Text).ToList();
 
-                    if (OnCompletionCompleted != null)
-                        OnCompletionCompleted(this, new CompletionEventArgs(completionData));
+                    OnCompletionCompleted?.Invoke(this, new CompletionEventArgs(completionData));
 
                     // Reset trigger
                     lock (_syncLock)
@@ -242,7 +238,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
         /// <summary>
         /// Dismiss the current running completion request
         /// </summary>
-        private void DismissGetCompletionResults()
+        private static void DismissGetCompletionResults()
         {
             try
             {

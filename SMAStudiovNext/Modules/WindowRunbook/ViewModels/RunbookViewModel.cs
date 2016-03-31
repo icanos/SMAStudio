@@ -244,7 +244,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             _completionProvider = new CompletionProvider(_backendContext, _view.TextEditor.LanguageContext);
             Task.Run(() => { _completionProvider.Initialize(); });
 
-            _keystrokeService = new KeystrokeService(_view.TextEditor.TextArea, _completionProvider);
+            _keystrokeService = new KeystrokeService(_view.TextEditor.TextArea, _completionProvider, _view.TextEditor.LanguageContext);
 
             // Attach the parse error event handler
             _view.TextEditor.LanguageContext.OnParseError += OnDraftParseError;
@@ -379,6 +379,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
         private void OnCtrlSpaceCommand(object sender, ExecutedRoutedEventArgs e)
         {
             //ShowCompletion(completionWord: "", controlSpace: true);
+            _keystrokeService.TriggerCompletion();
         }
 
         /// <summary>
@@ -404,7 +405,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
 
         public Token GetCurrentContext()
         {
-            int caretOffset = 0;
+            var caretOffset = 0;
             var line = default(DocumentLine);
 
             if (_view == null)
@@ -429,10 +430,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 context = _view.TextEditor.LanguageContext;
             });
 
-            if (context == null)
-                return;
-
-            context.Parse(contentToParse);
+            context?.Parse(contentToParse);
         }
 
         private void GetCompletionOffset(out int offset)
@@ -537,32 +535,27 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 return _parameters;
 
             var completionEntries = new List<ICompletionData>();
-            var fixedCompletionWord = completionWord != null ? completionWord.Replace("-", "") : null;
-            Token[] tokens;
-            ParseError[] parseErrors;
-            
-            string contentToParse = string.Empty;
-            if (_runbook.DraftRunbookVersionID.HasValue)
-                contentToParse = GetContentInternal(null, RunbookType.Draft, false);
-            else
-                contentToParse = GetContentInternal(null, RunbookType.Published, false);
-            /*if (String.IsNullOrEmpty(Content))
+            var fixedCompletionWord = completionWord?.Replace("-", "");
+
+            // Check if the content's already been loaded
+            string contentToParse;
+            ScriptBlockAst scriptBlock;
+            if (!string.IsNullOrEmpty(_view?.TextEditor.Text))
             {
-                //contentToParse = GetContent(RunbookType.Draft, true);
-                if (_runbook.DraftRunbookVersionID.HasValue)
-                    contentToParse = await GetContentInternal(null, RunbookType.Draft, true);
+                contentToParse = _view.TextEditor.Text;
+                scriptBlock = _view.TextEditor.LanguageContext.ScriptBlock;
+            }
+            else
+            {
+                contentToParse = GetContentInternal(null,
+                    _runbook.DraftRunbookVersionID.HasValue ? RunbookType.Draft : RunbookType.Published, false);
 
-                if (String.IsNullOrEmpty(contentToParse))
-                {
-                    contentToParse = GetContent(RunbookType.Published, true);
+                Token[] tokens;
+                ParseError[] parseErrors;
 
-                    if (_view != null)
-                        contentToParse = _view.PublishedTextEditor.Text;
-                }
-            }*/
-
-            var scriptBlock = System.Management.Automation.Language.Parser.ParseInput(contentToParse, out tokens, out parseErrors);
-
+                scriptBlock = System.Management.Automation.Language.Parser.ParseInput(contentToParse, out tokens, out parseErrors);
+            }
+            
             if ((scriptBlock.EndBlock == null || scriptBlock.EndBlock.Statements.Count == 0))
             {
                 return new List<ICompletionData>();
@@ -581,10 +574,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                 {
                     try
                     {
-                        bool isMandatory = false;
+                        var isMandatory = false;
                         AttributeBaseAst attrib = null;
 
-                        if (param.Attributes.Count > 1)
+                        if (param.Attributes.Count > 0)
                             attrib = param.Attributes[param.Attributes.Count - 1]; // always the last one
 
                         if (fixedCompletionWord != null && !param.Name.Extent.Text.Substring(1).StartsWith(fixedCompletionWord, StringComparison.InvariantCultureIgnoreCase))
@@ -593,19 +586,16 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                         if (param.Attributes.Count > 1)
                         {
                             // Probably contains a Parameter(Mandatory = ...) or something, check it out
-                            if (param.Attributes[0] is AttributeAst)
+                            var ast = param.Attributes[0] as AttributeAst;
+                            if (ast != null)
                             {
-                                var parameterAttrib = (AttributeAst)param.Attributes[0];
-                                if (parameterAttrib.Extent.Text.Contains("[Parameter") ||
-                                    parameterAttrib.Extent.Text.Contains("[parameter"))
+                                if (ast.Extent.Text.Contains("[Parameter") ||
+                                    ast.Extent.Text.Contains("[parameter"))
                                 {
-                                    foreach (var namedParameter in parameterAttrib.NamedArguments)
+                                    foreach (var namedParameter in ast.NamedArguments.Where(namedParameter => namedParameter.ArgumentName.Equals("Mandatory", StringComparison.InvariantCultureIgnoreCase)))
                                     {
-                                        if (namedParameter.ArgumentName.Equals("Mandatory", StringComparison.InvariantCultureIgnoreCase))
-                                        {
-                                            isMandatory = namedParameter.Argument.Extent.Text.Equals("$true") ? true : false;
-                                            break;
-                                        }
+                                        isMandatory = namedParameter.Argument.Extent.Text.Equals("$true") ? true : false;
+                                        break;
                                     }
                                 }
                             }
@@ -620,6 +610,10 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
                             Type = attrib != null ? attrib.TypeName.Name : "",
                             IsRequired = isMandatory
                         };
+
+                        if (attrib != null &&
+                            attrib.TypeName.Name.Equals("bool", StringComparison.InvariantCultureIgnoreCase))
+                            input.Value = false;
                         
                         completionEntries.Add(input);
                     }
@@ -876,7 +870,7 @@ namespace SMAStudiovNext.Modules.Runbook.ViewModels
             {
                 var pair = new NameValuePair();
                 pair.Name = (param as ParameterCompletionData).RawName;
-                pair.Value = ((ParameterCompletionData)param).Value;
+                pair.Value = ((ParameterCompletionData)param).Value.ToString();
 
                 parameters.Add(pair);
             }

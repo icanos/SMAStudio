@@ -1,27 +1,41 @@
 ﻿<Window x:Class="SMAStudiovNext.Modules.StartRunDialog.Windows.PrepareRunWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:SMAStudiovNext.Modules.DialogStartRun"
         Title="Start: Parameters" Height="350" Width="400">
     <Window.Resources>
-        <DataTemplate x:Key="InputListBoxItem">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150" />
-                    <ColumnDefinition Width="Auto" MinWidth="200" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="{Binding Path=RawName}" />
-                <TextBox Grid.Column="1" Text="{Binding Path=Value, UpdateSourceTrigger=PropertyChanged}" Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ColumnDefinition}}, Path=Width}" />
-            </Grid>
-        </DataTemplate>
         <Style TargetType="ListBox">
             <Setter Property="KeyboardNavigation.TabNavigation" Value="Continue" />
         </Style>
         <Style TargetType="ListBoxItem">
             <Setter Property="IsTabStop" Value="False" />
         </Style>
+        <local:PropertyDataTemplateSelector x:Key="PropertyDataTemplateSelector" />
     </Window.Resources>
     <StackPanel Orientation="Vertical">
-        <ListBox x:Name="lstInput" Height="270" Margin="5,5,5,5" ItemsSource="{Binding Path=Inputs}" ItemTemplate="{DynamicResource InputListBoxItem}">
+        <ListBox x:Name="lstInput" Height="270" Margin="5,5,5,5" ItemsSource="{Binding Path=Inputs}" ItemTemplateSelector="{StaticResource PropertyDataTemplateSelector}">
+            <ListBox.Resources>
+                <DataTemplate x:Key="InputListBoxItem">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="Auto" MinWidth="200" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding Path=RawName}" />
+                        <TextBox Grid.Column="1" Text="{Binding Path=Value, UpdateSourceTrigger=PropertyChanged}" Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ColumnDefinition}}, Path=Width}" />
+                    </Grid>
+                </DataTemplate>
+                <DataTemplate x:Key="CheckboxListBoxItem">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="Auto" MinWidth="200" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding Path=RawName}" />
+                        <CheckBox Grid.Column="1" IsChecked="{Binding Path=Value}" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.Resources>
 
         </ListBox>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

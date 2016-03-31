@@ -20,8 +20,6 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
         private ParseError[] _parseErrors;
         private ScriptBlockAst _scriptBlock;
 
-        private bool _hasHadParseErrors = false;
-
         public LanguageContext()
         {
 
@@ -40,8 +38,6 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
 
             if (_parseErrors != null && _parseErrors.Length > 0)
             {
-                _hasHadParseErrors = true;
-
                 if (OnParseError != null)
                     OnParseError(this, new ParseErrorEventArgs(_parseErrors));
             }
@@ -109,12 +105,11 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
                 segments = _tokens.Where(item => item.Extent.StartOffset <= position && item.Kind == TokenKind.Variable).ToList();
             //segments = GetAssigningVariables(position);
 
-            for (int i = 0; i < segments.Count; i++)
+            for (var i = 0; i < segments.Count; i++)
             {
                 var token = segments[i];
 
-                var variableName = token.Extent.Text;
-                variableName = ApplyUsingStatement(token, position, applyUsing);
+                var variableName = ApplyUsingStatement(token, position, applyUsing);
 
                 if (takenVariables.Contains(variableName))
                     continue;
@@ -144,10 +139,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Parser
         {
             var tokenBlock = GetSubContext(position);
 
-            if (tokenBlock == null)
-                return false;
-
-            if (position >= tokenBlock.StartOffset && position <= tokenBlock.EndOffset)
+            if (position >= tokenBlock?.StartOffset && position <= tokenBlock.EndOffset)
                 return true;
 
             return false;

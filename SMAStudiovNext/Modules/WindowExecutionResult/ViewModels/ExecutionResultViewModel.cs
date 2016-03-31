@@ -27,6 +27,7 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
         private readonly RunbookViewModel _runbookViewModel;
         private readonly IBackendService _backendService;
         private readonly IPropertyGrid _inspectorTool;
+        private readonly IOutput _output;
         private readonly IList<string> _completedExecutionStatus = new List<string> { "Completed", "Failed", "Stopped" };
         private Guid _jobId;
 
@@ -54,6 +55,7 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
             }
 
             _inspectorTool = (IPropertyGrid)propertyTool;
+            _output = IoC.Get<IOutput>();
         }
 
         public ExecutionResultViewModel(RunbookViewModel runbookViewModel, bool isTestRun)
@@ -142,6 +144,13 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
                             _propertyInfo.WarningCount = job.WarningCount;
                             _propertyInfo.Exception = job.JobException;
 
+                            if (!string.IsNullOrEmpty(job.JobException))
+                            {
+                                _output.AppendLine("Error when executing runbook:");
+                                _output.AppendLine(job.JobException);
+                                _output.AppendLine(" ");
+                            }
+
                             _inspectorTool.SelectedObject = _propertyInfo;
                         });
                     }
@@ -167,10 +176,9 @@ namespace SMAStudiovNext.Modules.ExecutionResult.ViewModels
 
                                 if (!String.IsNullOrEmpty(job.JobException) && !hasDisplayedException)
                                 {
-                                    var output = IoC.Get<IOutput>();
-                                    output.AppendLine("Error when executing runbook:");
-                                    output.AppendLine(job.JobException);
-                                    output.AppendLine(" ");
+                                    _output.AppendLine("Error when executing runbook:");
+                                    _output.AppendLine(job.JobException);
+                                    _output.AppendLine(" ");
 
                                     hasDisplayedException = true;
                                 }

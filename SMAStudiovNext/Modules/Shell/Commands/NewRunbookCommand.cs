@@ -29,52 +29,51 @@ namespace SMAStudiovNext.Modules.Shell.Commands
             var dialog = new UIAddNewItemDialog();
             dialog.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
 
-            if ((bool)dialog.ShowDialog())
-            {
-                var reader = new StreamReader(dialog.SelectedTemplate.Path);
-                reader.ReadLine(); // Skip the first line since that contains the DESCRIPTION
-                string runbookContent = reader.ReadToEnd();
+            var showDialog = dialog.ShowDialog();
+            if (showDialog == null || !(bool) showDialog)
+                return;
 
-                reader.Close();
+            var reader = new StreamReader(dialog.SelectedTemplate.Path);
+            reader.ReadLine(); // Skip the first line since that contains the DESCRIPTION
+            var runbookContent = reader.ReadToEnd();
+
+            reader.Close();
                 
-                var context = IoC.Get<EnvironmentExplorerViewModel>().GetCurrentContext();
-                if (context != null)
+            var context = IoC.Get<EnvironmentExplorerViewModel>().GetCurrentContext();
+            if (context != null)
+            {
+                var viewModel = default(RunbookViewModel);
+
+                var check = context.Runbooks.FirstOrDefault(r => r.Title.Equals(dialog.CreatedName, StringComparison.InvariantCultureIgnoreCase));
+                if (check == null)
                 {
-                    var viewModel = default(RunbookViewModel);
-
-                    var check = context.Runbooks.FirstOrDefault(r => r.Title.Equals(dialog.CreatedName, StringComparison.InvariantCultureIgnoreCase));
-                    if (check == null)
+                    switch (context.ContextType)
                     {
-                        switch (context.ContextType)
-                        {
-                            case Core.ContextType.SMA:
-                                var runbook = new SMA.Runbook();
-                                runbook.RunbookName = dialog.CreatedName;
+                        case Core.ContextType.SMA:
+                            var runbook = new SMA.Runbook {RunbookName = dialog.CreatedName};
 
-                                viewModel = new RunbookViewModel(new RunbookModelProxy(runbook, context));
-                                viewModel.AddSnippet(runbookContent);
-                                break;
-                            case Core.ContextType.Azure:
-                                var azureRunbook = new Vendor.Azure.Runbook();
-                                azureRunbook.RunbookName = dialog.CreatedName;
+                            viewModel = new RunbookViewModel(new RunbookModelProxy(runbook, context));
+                            viewModel.AddSnippet(runbookContent);
+                            break;
+                        case Core.ContextType.Azure:
+                            var azureRunbook = new Vendor.Azure.Runbook {RunbookName = dialog.CreatedName};
 
-                                viewModel = new RunbookViewModel(new RunbookModelProxy(azureRunbook, context));
-                                viewModel.AddSnippet(runbookContent);
-                                break;
-                        }
-
-                        if (viewModel != null)
-                            shell.OpenDocument(viewModel);
+                            viewModel = new RunbookViewModel(new RunbookModelProxy(azureRunbook, context));
+                            viewModel.AddSnippet(runbookContent);
+                            break;
                     }
-                    else
-                    {
-                        MessageBox.Show("A runbook with the same name already exists.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
+
+                    if (viewModel != null)
+                        shell.OpenDocument(viewModel);
                 }
                 else
                 {
-                    MessageBox.Show("Unable to determine context.");
+                    MessageBox.Show("A runbook with the same name already exists.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
+            }
+            else
+            {
+                MessageBox.Show("Unable to determine context.");
             }
         }
     }

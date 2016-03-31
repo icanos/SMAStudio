@@ -9,22 +9,25 @@ using System.Management.Automation.Language;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using SMAStudiovNext.Modules.Runbook.Editor.Parser;
 
 namespace SMAStudiovNext.Modules.Runbook.Editor
 {
     public class KeystrokeService
     {
         private readonly ICompletionProvider _completionProvider;
+        private readonly LanguageContext _languageContext;
         private readonly TextArea _textArea;
 
         private CompletionWindow _completionWindow = null;
         private long _triggerTag;
         private bool _openedByControlSpace = false;
 
-        public KeystrokeService(TextArea textArea, ICompletionProvider completionProvider)
+        public KeystrokeService(TextArea textArea, ICompletionProvider completionProvider, LanguageContext languageContext)
         {
             _completionProvider = completionProvider;
             _completionProvider.OnCompletionCompleted += OnCompletionResultRetrieved;
+            _languageContext = languageContext;
 
             _textArea = textArea;
             _textArea.KeyUp += OnKeyReleased;
@@ -35,21 +38,22 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
         private void OnTextEntered(object sender, TextCompositionEventArgs e)
         {
             var ch = e.Text[0];
-            var lineText = string.Empty;
-            var caretPosition = -1;
-            var caretLinePosition = -1;
+            //var lineText = string.Empty;
+            //var caretPosition = -1;
+            //var caretLinePosition = -1;
 
-            Execute.OnUIThread(() =>
+            /*Execute.OnUIThread(() =>
             {
                 var line = _textArea.Document.GetLineByOffset(_textArea.Caret.Offset);
                 lineText = _textArea.Document.GetText(line);
                 caretPosition = _textArea.Caret.Offset;
                 caretLinePosition = caretPosition - line.Offset;
-            });
+            });*/
 
-            var lineParts = lineText.Substring(0, caretLinePosition).Split('|');
+            //var lineParts = lineText.Substring(0, caretLinePosition).Split('|');
 
-            if (IsCodeCompletionTrigger(ch))// || CompletionUtils.IsCommand(lineParts[lineParts.Length - 1]))
+            //if (IsCodeCompletionTrigger(ch))// || CompletionUtils.IsCommand(lineParts[lineParts.Length - 1]))
+            if ((IsCodeCompletionTrigger(ch) || char.IsLetter(ch)) && _completionWindow == null)
             {
                 TriggerCompletion();
             }
@@ -134,6 +138,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
             var token = default(Token);
             if ((token = IsPreviousTokenCommand(caretPosition)) != null)
             {
+                // ReSharper disable once AssignmentInConditionalExpression
                 if (_completionProvider.IsRunbook(token))
                 {
                     // We need to retrieve completion for runbook parameters
@@ -152,7 +157,8 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
             {
                 Interlocked.Increment(ref _triggerTag);
 
-                _completionProvider.GetCompletionData(completionWord, script, lineTextUpToCaret, null, caretPosition, null, _triggerTag);
+                _completionProvider.GetCompletionData(completionWord, script, lineTextUpToCaret, null, caretPosition,
+                    null, _triggerTag);
             });
         }
 
@@ -184,20 +190,20 @@ namespace SMAStudiovNext.Modules.Runbook.Editor
             var line = _textArea.Document.GetLineByOffset(position);
             var lineText = _textArea.Document.GetText(line);
 
-            Token[] tokens;
-            ParseError[] errors;
-            System.Management.Automation.Language.Parser.ParseInput(lineText, out tokens, out errors);
+            //Token[] tokens;
+            //ParseError[] errors;
+            //System.Management.Automation.Language.Parser.ParseInput(lineText, out tokens, out errors);
 
-            if (tokens.Length >= 2)
+            if (_languageContext.Tokens.Length >= 2)
             {
-                var filteredTokens = tokens.Where(t => t.Extent.EndOffset < (position - line.Offset)).ToList();
+                var filteredTokens = _languageContext.Tokens.Where(t => t.Extent.StartLineNumber == line.LineNumber && t.Extent.EndOffset <= position).ToList();
 
                 if (filteredTokens.Count < 1)
                     return null;
 
                 var token = filteredTokens[filteredTokens.Count - 1];
 
-                if (token.Kind == TokenKind.Identifier && token.TokenFlags == TokenFlags.CommandName)
+                if (token.TokenFlags == TokenFlags.CommandName)
                     return token;
             }
 

@@ -338,7 +338,7 @@ namespace SMAStudiovNext.Modules.Runbook.Editor.Completion
 
         public bool IsRequired { get; set; }
 
-        public string Value { get; set; }
+        public object Value { get; set; }
 
         public string RawName { get; set; }
 

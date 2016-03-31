@@ -182,7 +182,7 @@
     </ApplicationDefinition>
     <Compile Include="Agents\AutoSaveAgent.cs" />
     <Compile Include="Agents\IAgent.cs" />
-    <Compile Include="Agents\RunbooksScanningAgent.cs" />
+    <Compile Include="Agents\BackgroundParserAgent.cs" />
     <Compile Include="Agents\SnippetsAgent.cs" />
     <Compile Include="Agents\ThemesAgent.cs" />
     <Compile Include="App.xaml.cs">
@@ -214,6 +214,7 @@
     <Compile Include="Modules\DialogDocumentation\Windows\DocumentationWindow.xaml.cs">
       <DependentUpon>DocumentationWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Modules\DialogStartRun\PropertyDataTemplateSelector.cs" />
     <Compile Include="Modules\PartEnvironmentExplorer\Commands\DocumentationCommand.cs" />
     <Compile Include="Modules\Shell\Commands\AboutCommandHandler.cs" />
     <Compile Include="Modules\Shell\Commands\NewConnectionObjectCommand.cs" />
