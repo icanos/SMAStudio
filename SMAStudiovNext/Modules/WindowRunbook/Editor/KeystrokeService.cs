@@ -8,6 +8,7 @@ using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging;
 using SMAStudiovNext.Modules.WindowRunbook.Editor.Parser;
 
 namespace SMAStudiovNext.Modules.WindowRunbook.Editor
@@ -17,16 +18,18 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
         private readonly ICompletionProvider _completionProvider;
         private readonly LanguageContext _languageContext;
         private readonly TextArea _textArea;
+        private readonly DebuggerService _debuggerService;
 
         private CompletionWindow _completionWindow = null;
         private long _triggerTag;
         private bool _openedByControlSpace = false;
 
-        public KeystrokeService(TextArea textArea, ICompletionProvider completionProvider, LanguageContext languageContext)
+        public KeystrokeService(TextArea textArea, ICompletionProvider completionProvider, LanguageContext languageContext, DebuggerService debuggerService)
         {
             _completionProvider = completionProvider;
             _completionProvider.OnCompletionCompleted += OnCompletionResultRetrieved;
             _languageContext = languageContext;
+            _debuggerService = debuggerService;
 
             _textArea = textArea;
             _textArea.KeyUp += OnKeyReleased;
@@ -63,6 +66,20 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
                 _completionWindow.CompletionList.RequestInsertion(e);
 
                 return;
+            }
+
+            // Debugging
+            if (_debuggerService.IsActiveDebugging)
+            {
+                switch (e.Key)
+                {
+                    case Key.F10:
+                        _debuggerService.StepOver();
+                        break;
+                    case Key.F11:
+                        _debuggerService.StepInto();
+                        break;
+                }
             }
         }
 
@@ -112,7 +129,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
                 script = _textArea.Document.Text;
             });
 
-            if (CompletionUtils.IsInCommentArea(caretPosition, _textArea))
+            if (CompletionUtils.IsInCommentArea(caretPosition, _textArea) || CompletionUtils.IsInStringArea(caretPosition, _textArea))
             {
                 Logger.DebugFormat("Is in comment area, skip.");
                 return;

@@ -11,6 +11,7 @@ using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
+using Gemini.Framework.Threading;
 using Gemini.Modules.ErrorList;
 using Gemini.Modules.Output;
 using ICSharpCode.AvalonEdit.CodeCompletion;
@@ -25,6 +26,7 @@ using SMAStudiovNext.Modules.WindowExecutionResult.ViewModels;
 using SMAStudiovNext.Modules.WindowJobHistory.ViewModels;
 using SMAStudiovNext.Modules.WindowRunbook.Editor;
 using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging;
 using SMAStudiovNext.Modules.WindowRunbook.Editor.Parser;
 using SMAStudiovNext.Modules.WindowRunbook.Editor.Snippets;
 using SMAStudiovNext.Modules.WindowRunbook.Views;
@@ -39,15 +41,20 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
         ICommandHandler<PublishCommandDefinition>,
         ICommandHandler<EditPublishedCommandDefinition>,
         ICommandHandler<TestCommandDefinition>,
-        ICommandHandler<RunCommandDefinition>
+        ICommandHandler<RunCommandDefinition>,
+        ICommandHandler<DebugCommandDefinition>,
+        ICommandHandler<StopCommandDefinition>,
+        IDisposable
     {
         private readonly IBackendContext _backendContext;
         private readonly IStatusManager _statusManager;
+        private readonly DebuggerService _debuggerService;
+        private readonly BookmarkManager _bookmarkManager;
         private readonly object _lock = new object();
 
-        private IList<ICompletionData> _parameters = null;
+        private IList<ICompletionData> _parameters;
         private ICompletionProvider _completionProvider;
-        private KeystrokeService _keystrokeService = null;
+        private KeystrokeService _keystrokeService;
         private RunbookModelProxy _runbook;
         private IRunbookView _view;
         private bool _inTestRun = false;
@@ -62,13 +69,121 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
         /// </summary>
         private string _cachedDraftContent = string.Empty;
 
+        private int _previousDebugLine = -1;
+
         public RunbookViewModel(RunbookModelProxy runbook)
         {
             _runbook = runbook;
             _backendContext = runbook.Context;
             _statusManager = AppContext.Resolve<IStatusManager>();
+            _debuggerService = new DebuggerService(this);
+            _debuggerService.DebuggerStopped += DebuggerStopped;
+            _debuggerService.DebuggerFinished += DebuggerFinished;
 
-            //Owner = runbook.Context.Service;
+            _bookmarkManager = new BookmarkManager();
+            _bookmarkManager.OnBookmarkUpdated += BookmarkManagerOnBookmarkUpdated;
+        }
+
+        private void DebuggerFinished(object sender, EventArgs e)
+        {
+            if (_view != null)
+                _view.TextMarkerService.IsActiveDebugging = false;
+
+            RemovePreviousDebugLine();
+            NotifyOfPropertyChange("DisplayName");
+
+            Refresh();
+        }
+
+        private void DebuggerStopped(object sender, DebugEventArgs e)
+        {
+            var line = default(DocumentLine);
+            
+            Execute.OnUIThread(() =>
+            {
+                _view.TextMarkerService.IsActiveDebugging = true;
+                NotifyOfPropertyChange("DisplayName");
+                line = _view.TextEditor.Document.GetLineByNumber(e.LineNumber);
+            });
+
+            // Remove previous text marker
+            RemovePreviousDebugLine();
+
+            // Add a marker to the current line
+            Execute.OnUIThread(() =>
+            {
+                var newMarker = new TextMarker(_view.TextMarkerService, line.Offset, (line.EndOffset - line.Offset))
+                {
+                    BackgroundColor = Colors.Gold,
+                    ForegroundColor = Colors.Black,
+                    Bookmark = new Bookmark(BookmarkType.CurrentDebugPoint, e.LineNumber)
+                };
+            
+                _view.TextMarkerService.AddMarker(newMarker);
+            });
+
+            // Last
+            _previousDebugLine = e.LineNumber;
+        }
+
+        private void RemovePreviousDebugLine()
+        {
+            var previousLine = default(DocumentLine);
+
+            Execute.OnUIThread(() =>
+            {
+                if (_previousDebugLine > -1)
+                    previousLine = _view.TextEditor.Document.GetLineByNumber(_previousDebugLine);
+            });
+
+            // Remove previous text marker
+            if (_previousDebugLine > -1)
+            {
+                var markers =
+                    _view.TextMarkerService.GetMarkersAtOffset(previousLine.Offset)
+                        .Where(item => item.Bookmark != null && (/*item.Bookmark.BookmarkType == BookmarkType.Breakpoint ||*/ item.Bookmark.BookmarkType == BookmarkType.CurrentDebugPoint))
+                        .ToList();
+
+                Execute.OnUIThread(() =>
+                {
+                    foreach (var marker in markers)
+                        _view.TextMarkerService.Remove(marker);
+                });
+            }
+        }
+
+        private void BookmarkManagerOnBookmarkUpdated(object sender, BookmarkEventArgs bookmarkEventArgs)
+        {
+            if (bookmarkEventArgs.Bookmark.BookmarkType != BookmarkType.Breakpoint)
+                return;
+
+            if (bookmarkEventArgs.IsDeleted)
+            {
+                _debuggerService.RemoveBreakpoint(bookmarkEventArgs.Bookmark.LineNumber);
+
+                var line = _view.TextEditor.Document.GetLineByNumber(bookmarkEventArgs.Bookmark.LineNumber);
+                var markers = _view.TextMarkerService.GetMarkersAtOffset(line.Offset).Where(item => item.Bookmark != null && item.Bookmark.BookmarkType == BookmarkType.Breakpoint).ToList();
+
+                Execute.OnUIThread(() =>
+                {
+                    foreach (var marker in markers)
+                        _view.TextMarkerService.Remove(marker);
+                });
+            }
+            else
+            {
+                _debuggerService.AddBreakpoint(bookmarkEventArgs.Bookmark.LineNumber);
+
+                // Add a text marker as well
+                var line = _view.TextEditor.Document.GetLineByNumber(bookmarkEventArgs.Bookmark.LineNumber);
+                var marker = new TextMarker(_view.TextMarkerService, line.Offset, line.EndOffset - line.Offset);
+
+                marker.Bookmark = bookmarkEventArgs.Bookmark;
+                marker.BackgroundColor = Colors.DarkRed;
+                marker.ForegroundColor = Colors.White;
+
+                _view.TextMarkerService.AddMarker(marker);
+            }
         }
 
         public override void CanClose(Action<bool> callback)
@@ -92,6 +207,10 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
             if (dialogResult.HasValue && dialogResult.Value)
             {
                 _initialContentLoading = false;
+
+                _debuggerService.DebuggerStopped -= DebuggerStopped;
+                _debuggerService.DebuggerFinished -= DebuggerFinished;
+                _debuggerService.Dispose();
             }
 
             base.TryClose(dialogResult);
@@ -244,11 +363,13 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
             _completionProvider = new CompletionProvider(_backendContext, _view.TextEditor.LanguageContext);
             Task.Run(() => { _completionProvider.Initialize(); });
 
-            _keystrokeService = new KeystrokeService(_view.TextEditor.TextArea, _completionProvider, _view.TextEditor.LanguageContext);
+            _keystrokeService = new KeystrokeService(_view.TextEditor.TextArea, _completionProvider, _view.TextEditor.LanguageContext, _debuggerService);
+            _view.TextEditor.TextArea.LeftMargins.Insert(0, new IconBarMargin(_bookmarkManager));
 
             // Attach the parse error event handler
             _view.TextEditor.LanguageContext.OnParseError += OnDraftParseError;
             _view.TextEditor.LanguageContext.OnClearParseErrors += OnClearDraftParseErrors;
+            _view.TextEditor.ToolTipRequest += OnToolTipRequest;
 
             if (_runbook.RunbookID != Guid.Empty)
             {
@@ -321,6 +442,31 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
             _statusManager.SetTimeoutText("Tips! Use Ctrl+H to view job history.", 10);
         }
 
+        private void OnToolTipRequest(object sender, ToolTipRequestEventArgs args)
+        {
+            if (_debuggerService.IsActiveDebugging)
+            {
+                // TODO: Get value from variable
+                var tokens =
+                    _view.TextEditor.LanguageContext.Tokens.Where(
+                        x =>
+                            x.Extent.StartLineNumber == args.LogicalPosition.Line &&
+                            x.Extent.StartColumnNumber <= args.LogicalPosition.Column &&
+                            x.Extent.EndColumnNumber >= args.LogicalPosition.Column)
+                        .ToList();
+
+                if (tokens.Count > 0)
+                {
+                    args.ContentToShow = tokens[0].Kind + "";
+                    var test = _debuggerService.GetStackFrames();
+                }
+
+                return;
+            }
+
+            //args.ContentToShow = "Hej där!";
+        }
+
         private void OnClearDraftParseErrors(object sender, EventArgs e)
         {
             if ((DateTime.Now - LastKeyStroke).Seconds < 2)
@@ -328,7 +474,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 
             Execute.OnUIThread(() =>
             {
-                _view.TextMarkerService.RemoveAll(x => true);
+                _view.TextMarkerService.RemoveAll(x => x.Bookmark == null || x.Bookmark.BookmarkType == BookmarkType.ParseError);
 
                 var errorList = IoC.Get<IErrorList>();
 
@@ -344,7 +490,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 
             Execute.OnUIThread(() =>
             {
-                _view.TextMarkerService.RemoveAll(x => true);
+                _view.TextMarkerService.RemoveAll(x => x.Bookmark == null || x.Bookmark.BookmarkType == BookmarkType.ParseError);
 
                 var errorList = IoC.Get<IErrorList>();
 
@@ -432,98 +578,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 
             context?.Parse(contentToParse);
         }
-
-        private void GetCompletionOffset(out int offset)
-        {
-            offset = _view.TextEditor.CaretOffset;
-        }
-
-        /*private async Task ShowCompletionWindow(object sender)
-        {
-            var word = string.Empty;
-            var lineStr = string.Empty;
-            var content = string.Empty;
-            var caretOffset = 0;
-            var line = default(DocumentLine);
-
-            Execute.OnUIThread(() =>
-            {
-                line = _view.TextEditor.Document.GetLineByOffset(_view.TextEditor.CaretOffset);
-                lineStr = _view.TextEditor.Document.GetText(line);
-
-                caretOffset = _view.TextEditor.CaretOffset;
-                content = _view.TextEditor.Document.Text;
-            });
-
-            for (int i = caretOffset - 1; i >= 0; i--)
-            {
-                var ch = content[i];
-
-                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '(')
-                    break;
-
-                word = content[i] + word;
-            }
-
-            if (word == string.Empty)
-                return;
-            
-            ShowCompletion(completionWord: word, controlSpace: false);
-        }
-
-        private void ShowCompletion(string completionWord, bool controlSpace)
-        {
-            if (_completionWindow == null)
-            {
-                int offset;
-                GetCompletionOffset(out offset);
-
-                var line = _view.TextEditor.Document.GetLineByOffset(offset);
-                var lineStr = _view.TextEditor.Document.GetText(line);
-                var completionChar = controlSpace ? (char?)null : _view.TextEditor.Document.GetCharAt(offset - 1);
-                var results = _completionProvider.GetCompletionData(
-                        completionWord,
-                        _view.TextEditor.Text,
-                        lineStr,
-                        line,
-                        offset,
-                        completionChar
-                    );
-
-                if (results.CompletionData == null)
-                    return;
-
-                Execute.OnUIThread(() =>
-                {
-                    if (_completionWindow == null && results.CompletionData.Any())
-                    {
-                        _completionWindow = new CompletionWindow(_view.TextEditor.TextArea)
-                        {
-                            CloseWhenCaretAtBeginning = controlSpace,
-                            CloseAutomatically = true,
-                            Width = 300
-                        };
-
-                        if (completionChar != null && char.IsLetterOrDigit(completionChar.Value))
-                            _completionWindow.StartOffset -= 1;
-
-                        var data = _completionWindow.CompletionList.CompletionData;
-                        foreach (var completion in results.CompletionData)
-                        {
-                            data.Add(completion);
-                        }
-
-                        _completionWindow.Show();
-
-                        _completionWindow.Closed += (o, args) =>
-                        {
-                            _completionWindow = null;
-                        };
-                    }
-                });
-            }
-        }*/
-
+        
         /// <summary>
         /// TODO: Async this!
         /// </summary>
@@ -538,16 +593,18 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
             var fixedCompletionWord = completionWord?.Replace("-", "");
 
             // Check if the content's already been loaded
-            string contentToParse;
-            ScriptBlockAst scriptBlock;
-            if (!string.IsNullOrEmpty(_view?.TextEditor.Text))
+            ScriptBlockAst scriptBlock = null;
+            Execute.OnUIThread(() =>
             {
-                contentToParse = _view.TextEditor.Text;
-                scriptBlock = _view.TextEditor.LanguageContext.ScriptBlock;
-            }
-            else
+                if (!string.IsNullOrEmpty(_view?.TextEditor.Text))
+                {
+                    scriptBlock = _view.TextEditor.LanguageContext.ScriptBlock;
+                }
+            });
+            
+            if (scriptBlock == null)
             {
-                contentToParse = GetContentInternal(null,
+                var contentToParse = GetContentInternal(null,
                     _runbook.DraftRunbookVersionID.HasValue ? RunbookType.Draft : RunbookType.Published, false);
 
                 Token[] tokens;
@@ -724,7 +781,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 
             try
             {
-                var result = await _backendContext.Service.Save(this, command).ConfigureAwait(false);
+                await _backendContext.Service.Save(this, command).ConfigureAwait(false);
 
                 _runbook.ViewModel = this;
                 _backendContext.AddToRunbooks(_runbook);
@@ -741,6 +798,42 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
         void ICommandHandler<SaveCommandDefinition>.Update(Command command)
         {
             if (UnsavedChanges)
+                command.Enabled = true;
+            else
+                command.Enabled = false;
+        }
+
+        Task ICommandHandler<StopCommandDefinition>.Run(Command command)
+        {
+            _debuggerService.Stop();
+            NotifyOfPropertyChange("DisplayName");
+
+            return TaskUtility.Completed;
+        }
+
+        void ICommandHandler<StopCommandDefinition>.Update(Command command)
+        {
+            if (_debuggerService != null && _debuggerService.IsActiveDebugging)
+                command.Enabled = true;
+            else
+                command.Enabled = false;
+        }
+
+        async Task ICommandHandler<DebugCommandDefinition>.Run(Command command)
+        {
+            var output = IoC.Get<IOutput>();
+            output.AppendLine("    ");
+            output.AppendLine("Starting a debug session...");
+
+            await _debuggerService.Start(new List<KeyValuePair<string, object>>());
+            NotifyOfPropertyChange("DisplayName");
+            
+            //return TaskUtility.Completed;
+        }
+
+        void ICommandHandler<DebugCommandDefinition>.Update(Command command)
+        {
+            if (_runbook.DraftRunbookVersionID.HasValue)
                 command.Enabled = true;
             else
                 command.Enabled = false;
@@ -788,7 +881,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 
         void ICommandHandler<TestCommandDefinition>.Update(Command command)
         {
-            if (_runbook.DraftRunbookVersionID.HasValue && !_inTestRun)
+            if (_runbook.DraftRunbookVersionID.HasValue && !_inTestRun && (_debuggerService == null || !_debuggerService.IsActiveDebugging))
                 command.Enabled = true;
             else
                 command.Enabled = false;
@@ -815,7 +908,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 
         void ICommandHandler<RunCommandDefinition>.Update(Command command)
         {
-            if (_runbook.PublishedRunbookVersionID.HasValue)
+            if (_runbook.PublishedRunbookVersionID.HasValue && (_debuggerService == null || !_debuggerService.IsActiveDebugging))
                 command.Enabled = true;
             else
                 command.Enabled = false;
@@ -1023,6 +1116,9 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
                 if (UnsavedChanges)
                     displayName += "*";
 
+                if (_debuggerService != null && _debuggerService.IsActiveDebugging)
+                    displayName += " (debugging)";
+
                 return displayName;
             }
             set { }
@@ -1037,5 +1133,23 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 
         public IEnumerable<Diff.Section> DiffSectionB { get; set; }
         #endregion
+
+        protected override void OnDeactivate(bool close)
+        {
+            if (close)
+                Dispose();
+
+            base.OnDeactivate(close);
+        }
+
+        public void Dispose()
+        {
+            // This is needed in case we're running a debugging session and closing the runbook/application.
+            // If this was not called, the application would hang in the background since we'd be waiting for a
+            // task to complete which we don't have access to anymore.
+            _debuggerService.DebuggerStopped -= DebuggerStopped;
+            _debuggerService.DebuggerFinished -= DebuggerFinished;
+            _debuggerService.Dispose();
+        }
     }
 }

@@ -114,5 +114,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
         }
 
         public object ToolTip { get; set; }
+
+        public Bookmark Bookmark { get; set; }
     }
 }

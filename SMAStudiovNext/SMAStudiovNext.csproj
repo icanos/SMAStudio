@@ -117,6 +117,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\System.Management.Automation.dll</HintPath>
@@ -192,6 +193,7 @@
     <Compile Include="Commands\AboutCommandDefinition.cs" />
     <Compile Include="Commands\ConnectWithAzureCommandDefinition.cs" />
     <Compile Include="Commands\ConnectWithAzureCommandHandler.cs" />
+    <Compile Include="Commands\DebugCommandDefinition.cs" />
     <Compile Include="Commands\GenerateCertificateCommand.cs" />
     <Compile Include="Commands\GoToDefinitionCommand.cs" />
     <Compile Include="Commands\NewConnectionCommandDefinition.cs" />
@@ -244,12 +246,27 @@
     <Compile Include="Modules\WindowModule\Views\ModuleView.xaml.cs">
       <DependentUpon>ModuleView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Modules\WindowRunbook\Editor\Bookmark.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\BookmarkEventArgs.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\BookmarkManager.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Completion\CommandCompletionHelper.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Completion\CompletionEventArgs.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Completion\CompletionProvider.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Completion\EdgeTrackingMode.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Completion\Glyph.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Completion\CompletionUtils.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Debugging\BreakpointEventArgs.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Debugging\DebugEventArgs.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Debugging\DebuggerService.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Debugging\Host\CustomHost.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Debugging\Host\CustomHostUserInterface.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Debugging\LineBreakpoint.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Debugging\StackFrameDetails.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Debugging\VariableContainerDetails.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Debugging\VariableDetails.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Debugging\VariableDetailsBase.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Debugging\VariableScope.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\IconBarMargin.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\KeystrokeService.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Parser\BracketSearchResult.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Parser\ExpressionType.cs" />
@@ -660,6 +677,10 @@
     <ProjectReference Include="..\Libraries\gemini\src\Gemini\Gemini.csproj">
       <Project>{13dbfc87-c152-4a86-94b0-d9944beef647}</Project>
       <Name>Gemini</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Libraries\PowerShellEditorServices\src\PowerShellEditorServices\PowerShellEditorServices.csproj">
+      <Project>{81e8cbcd-6319-49e7-9662-0475bd0791f4}</Project>
+      <Name>PowerShellEditorServices</Name>
     </ProjectReference>
     <ProjectReference Include="..\Libraries\Xceed.Wpf.AvalonDock\Xceed.Wpf.AvalonDock.csproj">
       <Project>{db81988f-e0f2-45a0-a1fd-8c37f3d35244}</Project>

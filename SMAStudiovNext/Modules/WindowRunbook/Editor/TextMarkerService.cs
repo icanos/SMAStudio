@@ -76,6 +76,11 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
             return marker;
         }
 
+        public void AddMarker(TextMarker marker)
+        {
+            _markers.Add(marker);
+        }
+
         public IEnumerable<TextMarker> GetMarkersAtOffset(int offset)
         {
             if (_markers == null)
@@ -151,6 +156,12 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
                     if (geometry != null)
                     {
                         var color = marker.BackgroundColor.Value;
+
+                        if (IsActiveDebugging)
+                            color.A = 0x77;
+                        else
+                            color.A = 0xff;
+
                         var brush = new SolidColorBrush(color);
                         brush.Freeze();
                         drawingContext.DrawGeometry(brush, null, geometry);
@@ -183,6 +194,8 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
                 }
             }
         }
+
+        public bool IsActiveDebugging { get; set; }
 
         private static IEnumerable<Point> CreatePoints(Point start, double offset, int count)
         {

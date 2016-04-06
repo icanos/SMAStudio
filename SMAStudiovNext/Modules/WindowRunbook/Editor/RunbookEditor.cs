@@ -131,7 +131,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
             }
         }
 
-        private void OnMouseHover(object sender, System.Windows.Input.MouseEventArgs e)
+        private void OnMouseHover(object sender, MouseEventArgs e)
         {
             var position = TextArea.TextView.GetPositionFloor(e.GetPosition(TextArea.TextView) + TextArea.TextView.ScrollOffset);
             var args = new ToolTipRequestEventArgs { InDocument = position.HasValue };

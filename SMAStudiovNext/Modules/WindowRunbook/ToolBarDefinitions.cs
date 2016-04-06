@@ -17,5 +17,9 @@ namespace SMAStudiovNext.Modules.WindowRunbook
         [Export]
         public static ToolBarItemDefinition CheckInItem = new CommandToolBarItemDefinition<PublishCommandDefinition>(
             Shell.ToolBarDefinitions.ExecutionToolBarGroup, 1, ToolBarItemDisplay.IconAndText);
+
+        [Export]
+        public static ToolBarItemDefinition RunItem = new CommandToolBarItemDefinition<DebugCommandDefinition>(
+            Shell.ToolBarDefinitions.ExecutionToolBarGroup, 2, ToolBarItemDisplay.IconAndText);
     }
 }

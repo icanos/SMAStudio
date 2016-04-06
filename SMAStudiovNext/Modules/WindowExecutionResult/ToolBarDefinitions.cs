@@ -8,14 +8,14 @@ namespace SMAStudiovNext.Modules.WindowExecutionResult
     {
         [Export]
         public static ToolBarItemDefinition RunItem = new CommandToolBarItemDefinition<RunCommandDefinition>(
-            Shell.ToolBarDefinitions.ExecutionToolBarGroup, 2, ToolBarItemDisplay.IconAndText);
-
-        [Export]
-        public static ToolBarItemDefinition PauseItem = new CommandToolBarItemDefinition<PauseCommandDefinition>(
             Shell.ToolBarDefinitions.ExecutionToolBarGroup, 3, ToolBarItemDisplay.IconAndText);
 
         [Export]
-        public static ToolBarItemDefinition StopItem = new CommandToolBarItemDefinition<StopCommandDefinition>(
+        public static ToolBarItemDefinition PauseItem = new CommandToolBarItemDefinition<PauseCommandDefinition>(
             Shell.ToolBarDefinitions.ExecutionToolBarGroup, 4, ToolBarItemDisplay.IconAndText);
+
+        [Export]
+        public static ToolBarItemDefinition StopItem = new CommandToolBarItemDefinition<StopCommandDefinition>(
+            Shell.ToolBarDefinitions.ExecutionToolBarGroup, 5, ToolBarItemDisplay.IconAndText);
     }
 }
