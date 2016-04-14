@@ -134,6 +134,7 @@
       <HintPath>..\packages\Microsoft.Tpl.Dataflow.4.5.24\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -248,6 +249,7 @@
     </Compile>
     <Compile Include="Modules\WindowRunbook\Editor\Bookmark.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\BookmarkEventArgs.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\BookmarkLineTracker.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\BookmarkManager.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Completion\CommandCompletionHelper.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Completion\CompletionEventArgs.cs" />
@@ -267,6 +269,9 @@
     <Compile Include="Modules\WindowRunbook\Editor\Debugging\VariableDetailsBase.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Debugging\VariableScope.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\IconBarMargin.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Inspector\InspectableObject.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Inspector\ObjectInspectorWindow.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Inspector\VariableInspector.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\KeystrokeService.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Parser\BracketSearchResult.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Parser\ExpressionType.cs" />
@@ -274,9 +279,13 @@
     <Compile Include="Modules\WindowRunbook\Editor\Parser\ParseErrorEventArgs.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Parser\TokenBlock.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\Renderers\BracketHighlightRenderer.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Renderers\DebugMarkerRenderer.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Renderers\IMarkerRenderer.cs" />
+    <Compile Include="Modules\WindowRunbook\Editor\Renderers\ParseErrorRenderer.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\TextMarker.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\TextMarkerService.cs" />
     <Compile Include="Modules\WindowRunbook\Editor\ToolTipRequestEventArgs.cs" />
+    <Compile Include="Modules\WindowRunbook\InsightService.cs" />
     <Compile Include="Modules\WindowRunbook\SyntaxHighlightning\ThemedHighlightingColorizer.cs" />
     <Compile Include="Modules\WindowRunbook\ViewModels\RunbookViewModel.cs" />
     <Compile Include="Themes\IThemeManager.cs" />
@@ -288,6 +297,7 @@
     <Compile Include="Exceptions\GlobalExceptionHandler.cs" />
     <Compile Include="Core\IBackendContext.cs" />
     <Compile Include="Core\IEnvironmentExplorerItem.cs" />
+    <Compile Include="Utils\ExtensionMethods.cs" />
     <Compile Include="Utils\GlyphExtensions.cs" />
     <Compile Include="Utils\InverseBoolConverter.cs" />
     <Compile Include="Core\IStatusManager.cs" />
@@ -523,6 +533,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Modules\WindowModule\Views\ModuleView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\WindowRunbook\Editor\Inspector\ObjectInspectorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

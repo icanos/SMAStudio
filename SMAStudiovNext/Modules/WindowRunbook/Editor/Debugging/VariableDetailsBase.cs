@@ -29,6 +29,8 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging
         /// </summary>
         public string ValueString { get; protected set; }
 
+        public object Value { get; protected set; }
+
         /// <summary>
         /// Returns true if the variable's value is expandable, meaning
         /// that it has child properties or its contents can be enumerated.

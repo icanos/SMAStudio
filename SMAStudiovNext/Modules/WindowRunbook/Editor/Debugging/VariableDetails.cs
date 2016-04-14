@@ -34,6 +34,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging
             Name = name;
             IsExpandable = GetIsExpandable(value);
             ValueString = GetValueString(value, IsExpandable);
+            Value = value;
         }
 
         /// <summary>

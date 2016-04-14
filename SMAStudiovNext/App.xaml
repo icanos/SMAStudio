@@ -10,6 +10,7 @@
                     <gemini:AppBootstrapper x:Key="bootstrapper" />
                     <!--<ResourceDictionary Source="Resources/Icons.xaml" />-->
                 </ResourceDictionary>
+                <ResourceDictionary Source="/SMAStudiovNext;component/Modules/WindowRunbook/Editor/Inspector/ObjectInspectorWindow.xaml" />
                 <ResourceDictionary Source="Resources/Glyphs.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

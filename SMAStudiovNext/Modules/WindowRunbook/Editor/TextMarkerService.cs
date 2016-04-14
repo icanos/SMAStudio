@@ -157,7 +157,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
                     {
                         var color = marker.BackgroundColor.Value;
 
-                        if (IsActiveDebugging)
+                        if (IsActiveDebugging && marker.Bookmark != null && marker.Bookmark.BookmarkType == BookmarkType.Breakpoint)
                             color.A = 0x77;
                         else
                             color.A = 0xff;
@@ -211,8 +211,22 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
             var lineStart = line.Offset;
             var lineEnd = lineStart + line.Length;
 
-            foreach (var marker in _markers.FindOverlappingSegments(lineStart, line.Length))
+            foreach (var marker in _markers.FindOverlappingSegments(lineStart, line.Length)) //_markers.Where(item => item.Bookmark != null && item.Bookmark.LineNumber == line.LineNumber))//
             {
+                var startPos = 0;
+                var endPos = 0;
+
+                if (BookmarkManager.IsLineBookmark(marker.Bookmark))
+                {
+                    startPos = line.Offset;
+                    endPos = line.EndOffset;
+                }
+                else
+                {
+                    startPos = Math.Max(marker.StartOffset, lineStart);
+                    endPos = Math.Min(marker.EndOffset, lineEnd);
+                }
+                
                 Brush foregroundBrush = null;
                 if (marker.ForegroundColor != null)
                 {
@@ -221,8 +235,8 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
                 }
 
                 ChangeLinePart(
-                    Math.Max(marker.StartOffset, lineStart),
-                    Math.Min(marker.EndOffset, lineEnd),
+                    startPos,
+                    endPos,
                     element => {
                         if (foregroundBrush != null)
                         {

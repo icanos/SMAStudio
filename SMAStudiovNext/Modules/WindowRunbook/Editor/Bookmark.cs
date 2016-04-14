@@ -25,6 +25,17 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
 
         public int LineNumber { get; set; }
 
+        private TextMarker _textMarker;
+        public TextMarker TextMarker
+        {
+            get { return _textMarker; }
+            set
+            {
+                _textMarker = value;
+                _textMarker.Bookmark = this;
+            }
+        }
+
         public override bool Equals(object obj)
         {
             var bookmark = obj as Bookmark;

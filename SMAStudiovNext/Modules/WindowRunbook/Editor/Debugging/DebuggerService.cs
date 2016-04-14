@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Caliburn.Micro;
 using Gemini.Modules.Output;
 using Microsoft.PowerShell;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging.Host;
 using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
 using SMAStudiovNext.Utils;
 
@@ -53,7 +54,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging
             _cancellationTokenSource = new CancellationTokenSource();
 
             _initialSessionState = InitialSessionState.CreateDefault2();
-            _runspace = RunspaceFactory.CreateRunspace(_initialSessionState);//(new CustomHost());
+            _runspace = RunspaceFactory.CreateRunspace(new CustomHost(), _initialSessionState);//(new CustomHost());
             _runspace.ApartmentState = ApartmentState.STA;
             _runspace.ThreadOptions = PSThreadOptions.ReuseThread;
             _runspace.Open();
@@ -103,10 +104,11 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging
 
             if (_setBreakpoints != null)
             {
-                foreach (var bp in _setBreakpoints)
-                {
-                    command.AddCommand("Remove-PSBreakpoint").AddParameter("Id", bp.Id);
-                }
+                command.AddCommand(@"Microsoft.PowerShell.Utility\Get-PSBreakpoint");
+                command.AddCommand(@"Microsoft.PowerShell.Utility\Remove-PSBreakpoint");
+
+                await ExecuteCommand<object>(command);
+                command.Clear();
             }
 
             if (_breakpoints.Count > 0)
@@ -125,7 +127,29 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging
                 command.Clear();
             }
 
-            command.AddScript(_cachedScriptPath);
+            var inputArgs = string.Empty;
+
+            foreach (var input in inputParameters)
+            {
+                if (input.Key.StartsWith("-"))
+                    inputArgs += " " + input.Key;
+                else
+                    inputArgs += " -" + input.Key;
+
+                if (input.Value is string)
+                    inputArgs += " \"" + input.Value + "\"";
+                else if (input.Value is bool)
+                {
+                    if (((bool) input.Value) == true)
+                        inputArgs += " $true";
+                    else
+                        inputArgs += " $false";
+                }
+                else
+                    inputArgs += " " + input.Value;
+            }
+
+            command.AddScript(_cachedScriptPath + inputArgs);
             await ExecuteCommand<object>(command, true);
             
             if (_cachedScriptPath != null)
@@ -157,6 +181,8 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging
         {
             ResumeDebugger(DebuggerResumeAction.Stop);
             IsActiveDebugging = false;
+
+            //DebuggerFinished?.Invoke(this, new EventArgs());
         }
 
         /// <summary>
@@ -237,17 +263,27 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging
                 if (taskIdx == 0)
                 {
                     // Set the resume action to what the user choose
-                    e.ResumeAction = _debuggerExecutionTask.Task.Result;
+                    try
+                    {
+                        e.ResumeAction = _debuggerExecutionTask.Task.Result;
+                    }
+                    catch (TaskCanceledException) { }
+                    catch (AggregateException) { }
                     break;
                 }
                 else if (taskIdx == 1)
                 {
-                    var executionRequest = _pipelineExecutionTask.Task.Result;
+                    try
+                    {
+                        var executionRequest = _pipelineExecutionTask.Task.Result;
 
-                    _pipelineExecutionTask = new TaskCompletionSource<IPipelineExecutionRequest>();
+                        _pipelineExecutionTask = new TaskCompletionSource<IPipelineExecutionRequest>();
 
-                    executionRequest.Execute().Wait(_cancellationTokenSource.Token);
-                    _pipelineResultTask.SetResult(executionRequest);
+                        executionRequest.Execute().Wait(_cancellationTokenSource.Token);
+                        _pipelineResultTask.SetResult(executionRequest);
+                    }
+                    catch (TaskCanceledException) { }
+                    catch (AggregateException) { }
                 }
             }
 
@@ -440,10 +476,14 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging
                 var executionRequest = new PipelineExecutionRequest<T>(this, command, redirectOutput);
 
                 _pipelineResultTask = new TaskCompletionSource<IPipelineExecutionRequest>();
-                _pipelineExecutionTask.SetResult(executionRequest);
 
-                await _pipelineResultTask.Task;
-                return executionRequest.Results;
+                if (_pipelineExecutionTask.TrySetResult(executionRequest))
+                {
+                    await _pipelineResultTask.Task;
+                    return executionRequest.Results;
+                }
+
+                return null;
             }
             
             var scriptOutput = new PSDataCollection<PSObject>();
@@ -452,16 +492,16 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging
                 scriptOutput.DataAdded += (sender, args) =>
                 {
                     // Stream script output to console.
-                    var output = IoC.Get<IOutput>();
-
-                    foreach (var item in scriptOutput.ReadAll())
+                    Execute.OnUIThread(() =>
                     {
-                        output.AppendLine(item.ToString());
-                    }
+                        var output = IoC.Get<IOutput>();
+
+                        foreach (var item in scriptOutput.ReadAll())
+                            output.AppendLine(item.ToString());
+                    });
                 };
             }
 
-            //result = _powerShell.Invoke<T>();
             if (_runspace.RunspaceAvailability == RunspaceAvailability.AvailableForNestedCommand
                 || _debuggerExecutionTask != null)
             {
@@ -481,9 +521,9 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging
                 );
             }
 
-            _powerShell.Commands.Clear();
+            _powerShell?.Commands.Clear();
 
-            if (_powerShell.HadErrors)
+            if (_powerShell == null || _powerShell.HadErrors)
                 return null;
 
             return result;
@@ -498,18 +538,16 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging
                 outputCollection.DataAdded += (sender, args) =>
                 {
                     // Stream script output to console.
-                    var output = IoC.Get<IOutput>();
-
-                    foreach (var item in outputCollection.ReadAll())
+                    Execute.OnUIThread(() =>
                     {
-                        output.AppendLine(item.ToString());
-                    }
+                        var output = IoC.Get<IOutput>();
+
+                        foreach (var item in outputCollection.ReadAll())
+                            output.AppendLine(item.ToString());
+                    });
                 };
             }
             
-            //command.AddCommand("Out-Default");
-            //command.Commands[0].MergeMyResults(PipelineResultTypes.Error, PipelineResultTypes.Output);
-
             _runspace.Debugger.ProcessCommand(
                 command, outputCollection);
             
@@ -579,7 +617,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging
 
             public async Task Execute()
             {
-                this.Results =
+                Results =
                     await _debuggerService.ExecuteCommand<TResult>(
                         _psCommand,
                         _sendOutputToHost);
@@ -590,9 +628,14 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging
 
         public void Dispose()
         {
-            _pipelineExecutionTask?.SetCanceled();
-            _pipelineResultTask?.SetCanceled();
-            _debuggerExecutionTask?.SetCanceled();
+            try
+            {
+                _pipelineExecutionTask?.SetCanceled();
+                _pipelineResultTask?.SetCanceled();
+                _debuggerExecutionTask?.SetCanceled();
+            }
+            catch (InvalidOperationException) { }
+
             _cancellationTokenSource.Cancel();
 
             if (_powerShell != null)

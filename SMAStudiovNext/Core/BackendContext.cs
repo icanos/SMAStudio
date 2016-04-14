@@ -158,77 +158,77 @@ namespace SMAStudiovNext.Core
 
         public void ParseTags()
         {
-            var unmatchedTag = new Tag("(untagged)");
-            var unmatchedTagMenuItem = new ResourceContainer("(untagged)", unmatchedTag, IconsDescription.Folder);
-            unmatchedTagMenuItem.Context = this;
-
-            foreach (var runbook in Runbooks)
-            {
-                var runbookModel = (RunbookModelProxy)runbook.Tag;
-                if (runbookModel.Tags == null)
-                {
-                    Execute.OnUIThread(() =>
-                    {
-                        unmatchedTagMenuItem.Items.Add(runbook);
-                    });
-                    continue;
-                }
-
-                var tags = runbookModel.Tags.Split(',');
-                if (tags.Length == 0)
-                    continue;
-
-                // MARK: Reworked this, I want this to work as follows, instead of creating a top level
-                // folder for each tag, the tags should become nested for each tag added (parse from left to right).
-                // So for eg. Order,Server => Runbooks / Order / Server / <runbook> instead of Runbooks / Order / <runbook> and Runbooks / Server / <runbook>
-
-                var currentTags = Tags;
-
-                //foreach (var tag in tags)
-                for (var i = 0; i < tags.Length; i++)
-                {
-                    var tag = tags[i];
-
-                    var fixedTagName = tag.Trim();
-                    var count = currentTags.Count(x => x.Title == fixedTagName);
-                    var tagResource = default(ResourceContainer);
-
-                    if (count > 0)
-                    {
-                        // A tag already exists with this name, add the runbook
-                        // to that instead of creating a new.
-                        tagResource = currentTags.First(x => x.Title.Equals(fixedTagName, StringComparison.InvariantCultureIgnoreCase));
-
-                        // Need to be executed on the UI thread since 'Tags' is an ObservableCollection.
-                        // Only add the runbook to the deepest node in the tree
-                        try {
-                            if ((i + 1) == tags.Length)
-                                Execute.OnUIThread(() => tagResource.Items.Add(runbook));
-                        }
-                        catch (TaskCanceledException) { }
-                    }
-                    else
-                    {
-                        var tagObj = new Tag(fixedTagName);
-                        tagResource = new ResourceContainer(fixedTagName, tagObj, IconsDescription.Folder);
-                        tagResource.Context = this;
-
-                        // Only add the runbook to the deepest node in the tree
-                        if ((i + 1) == tags.Length)
-                            tagResource.Items.Add(runbook);
-
-                        try {
-                            Execute.OnUIThread(() => currentTags.Add(tagResource));
-                        }
-                        catch (TaskCanceledException) { }
-                    }
-
-                    tagResource.Items = tagResource.Items.OrderBy(item => item.Title).ToObservableCollection();
-                    currentTags = tagResource.Items;
-                }
-            }
-
             try {
+                var unmatchedTag = new Tag("(untagged)");
+                var unmatchedTagMenuItem = new ResourceContainer("(untagged)", unmatchedTag, IconsDescription.Folder);
+                unmatchedTagMenuItem.Context = this;
+
+                foreach (var runbook in Runbooks)
+                {
+                    var runbookModel = (RunbookModelProxy)runbook.Tag;
+                    if (runbookModel.Tags == null)
+                    {
+                        Execute.OnUIThread(() =>
+                        {
+                            unmatchedTagMenuItem.Items.Add(runbook);
+                        });
+                        continue;
+                    }
+
+                    var tags = runbookModel.Tags.Split(',');
+                    if (tags.Length == 0)
+                        continue;
+
+                    // MARK: Reworked this, I want this to work as follows, instead of creating a top level
+                    // folder for each tag, the tags should become nested for each tag added (parse from left to right).
+                    // So for eg. Order,Server => Runbooks / Order / Server / <runbook> instead of Runbooks / Order / <runbook> and Runbooks / Server / <runbook>
+
+                    var currentTags = Tags;
+
+                    //foreach (var tag in tags)
+                    for (var i = 0; i < tags.Length; i++)
+                    {
+                        var tag = tags[i];
+
+                        var fixedTagName = tag.Trim();
+                        var count = currentTags.Count(x => x.Title == fixedTagName);
+                        var tagResource = default(ResourceContainer);
+
+                        if (count > 0)
+                        {
+                            // A tag already exists with this name, add the runbook
+                            // to that instead of creating a new.
+                            tagResource = currentTags.First(x => x.Title.Equals(fixedTagName, StringComparison.InvariantCultureIgnoreCase));
+
+                            // Need to be executed on the UI thread since 'Tags' is an ObservableCollection.
+                            // Only add the runbook to the deepest node in the tree
+                            try {
+                                if ((i + 1) == tags.Length)
+                                    Execute.OnUIThread(() => tagResource.Items.Add(runbook));
+                            }
+                            catch (TaskCanceledException) { }
+                        }
+                        else
+                        {
+                            var tagObj = new Tag(fixedTagName);
+                            tagResource = new ResourceContainer(fixedTagName, tagObj, IconsDescription.Folder);
+                            tagResource.Context = this;
+
+                            // Only add the runbook to the deepest node in the tree
+                            if ((i + 1) == tags.Length)
+                                tagResource.Items.Add(runbook);
+
+                            try {
+                                Execute.OnUIThread(() => currentTags.Add(tagResource));
+                            }
+                            catch (TaskCanceledException) { }
+                        }
+
+                        tagResource.Items = tagResource.Items.OrderBy(item => item.Title).ToObservableCollection();
+                        currentTags = tagResource.Items;
+                    }
+                }
+            
                 Execute.OnUIThread(() =>
                 {
                 // We want unmatched at the bottom

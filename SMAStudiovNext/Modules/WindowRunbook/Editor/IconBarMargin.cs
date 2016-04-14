@@ -6,6 +6,7 @@ using System.Windows.Media;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Rendering;
 using ICSharpCode.AvalonEdit.Utils;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Renderers;
 
 namespace SMAStudiovNext.Modules.WindowRunbook.Editor
 {
@@ -83,16 +84,30 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
             foreach (var line in textView.VisualLines)
             {
                 var lineNumber = line.FirstDocumentLine.LineNumber;
-                var bookmark = _manager.Bookmarks.FirstOrDefault(item => item.LineNumber == lineNumber);
+                /*var bookmark = _manager.Bookmarks.FirstOrDefault(item => item.LineNumber == lineNumber && (item.BookmarkType == BookmarkType.Breakpoint || item.BookmarkType == BookmarkType.CurrentDebugPoint));
 
                 if (bookmark == null)
                     continue;
 
-                var lineMiddle = line.GetTextLineVisualYPosition(line.TextLines[0], VisualYPosition.TextMiddle) -
-                                 textView.VerticalOffset;
-                var rect = new Rect(3, PixelSnapHelpers.Round(lineMiddle - 8, pixelSize.Height) + 1, 14, 14);
+                */
+                var bookmark = _manager.Bookmarks.FirstOrDefault(item => item.LineNumber == lineNumber);
+                var renderer = default(IMarkerRenderer);
 
-                drawingContext.DrawRoundedRectangle(Brushes.DarkRed, null, rect, 8, 8);
+                if (bookmark == null)
+                    continue;
+
+                switch (bookmark.BookmarkType)
+                {
+                    case BookmarkType.CurrentDebugPoint:
+                    case BookmarkType.Breakpoint:
+                        renderer = new DebugMarkerRenderer(textView, this);
+                        break;
+                    case BookmarkType.ParseError:
+                        renderer = new ParseErrorRenderer(textView, this);
+                        break;
+                }
+
+                renderer?.Render(drawingContext, line, pixelSize);
             }
         }
 

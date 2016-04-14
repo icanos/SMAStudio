@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Caliburn.Micro;
 using ICSharpCode.AvalonEdit.CodeCompletion;
+using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
@@ -19,17 +20,19 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
         private readonly LanguageContext _languageContext;
         private readonly TextArea _textArea;
         private readonly DebuggerService _debuggerService;
+        private readonly BookmarkManager _bookmarkManager;
 
         private CompletionWindow _completionWindow = null;
         private long _triggerTag;
         private bool _openedByControlSpace = false;
 
-        public KeystrokeService(TextArea textArea, ICompletionProvider completionProvider, LanguageContext languageContext, DebuggerService debuggerService)
+        public KeystrokeService(TextArea textArea, ICompletionProvider completionProvider, LanguageContext languageContext, DebuggerService debuggerService, BookmarkManager bookmarkManager)
         {
             _completionProvider = completionProvider;
             _completionProvider.OnCompletionCompleted += OnCompletionResultRetrieved;
             _languageContext = languageContext;
             _debuggerService = debuggerService;
+            _bookmarkManager = bookmarkManager;
 
             _textArea = textArea;
             _textArea.KeyUp += OnKeyReleased;
@@ -40,6 +43,9 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
         private void OnTextEntered(object sender, TextCompositionEventArgs e)
         {
             var ch = e.Text[0];
+
+            // Update any parse errors to account for the new text inserted
+            _bookmarkManager.RecalculateOffsets(_textArea, BookmarkType.ParseError, _textArea.Caret.Offset, e.Text.Length);
             
             if ((IsCodeCompletionTrigger(ch) || char.IsLetter(ch)) && _completionWindow == null)
             {
@@ -57,6 +63,11 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
                 _completionWindow = null;
 
                 return;
+            }
+
+            if (e.Key == Key.Enter)
+            {
+                // We need to make sure to update the bookmarks found beneath the added line
             }
 
             // If enter or tab is pressed when the completionWindow is open,
