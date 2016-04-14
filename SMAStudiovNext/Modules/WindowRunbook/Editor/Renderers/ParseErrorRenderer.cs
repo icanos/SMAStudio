@@ -27,7 +27,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Renderers
                                  _textView.VerticalOffset;
             
             // Draw the error line
-            drawingContext.DrawLine(new Pen(Brushes.Red, 4), new Point(0, lineMiddle), new Point(16, lineMiddle));
+            drawingContext.DrawLine(new Pen(Brushes.Red, 4), new Point(0, lineMiddle), new Point(20, lineMiddle));
         }
     }
 }
