@@ -32,7 +32,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
 
         public void LineInserted(DocumentLine insertionPos, DocumentLine newLine)
         {
-            _bookmarkManager.AdjustLineOffsets(AdjustTypes.Added, insertionPos.LineNumber, 0);
+            _bookmarkManager.AdjustLineOffsets(AdjustTypes.Added, newLine.LineNumber, 0);
             //Console.WriteLine($"Line inserted at {insertionPos.LineNumber} (new line number: {newLine.LineNumber}) with length: {newLine.Length} with start offset {newLine.Offset} and end offset: {newLine.EndOffset}");
         }
 

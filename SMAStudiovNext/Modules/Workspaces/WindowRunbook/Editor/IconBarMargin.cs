@@ -105,6 +105,9 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
                     case BookmarkType.ParseError:
                         renderer = new ParseErrorRenderer(textView, this);
                         break;
+                    case BookmarkType.AnalyzerWarning:
+                        renderer = new AnalyzerWarningRenderer(textView, this);
+                        break;
                 }
 
                 renderer?.Render(drawingContext, line, pixelSize);

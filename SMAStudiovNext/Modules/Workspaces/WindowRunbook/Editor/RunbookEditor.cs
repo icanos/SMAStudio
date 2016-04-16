@@ -30,15 +30,21 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
     /// </summary>
     public class RunbookEditor : TextEditor
     {
-        private FoldingManager _foldingManager;
         private readonly PowershellFoldingStrategy _foldingStrategy;
+        private readonly BracketHighlightRenderer _bracketRenderer;
         private readonly LanguageContext _languageContext;
         private ThemedHighlightingColorizer _colorizer;
-        private readonly BracketHighlightRenderer _bracketRenderer;
+        private FoldingManager _foldingManager;
         private ToolTip _toolTip;
+        private System.Timers.Timer _keystrokeTimer;
+
+        public event EventHandler<EventArgs> OnTextInputCompleted;
 
         public RunbookEditor()
         {
+            _keystrokeTimer = new System.Timers.Timer(2000);
+            _keystrokeTimer.Elapsed += KeystrokeTimeElapsed;
+
             _languageContext = new LanguageContext();
 
             FontFamily = new FontFamily("Consolas");
@@ -66,6 +72,25 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
             TextArea.TextView.BackgroundRenderers.Add(_bracketRenderer);
 
             InitializeColorizer();
+        }
+
+        protected override void OnTextChanged(EventArgs e)
+        {
+            if (_keystrokeTimer != null && !_keystrokeTimer.Enabled)
+                _keystrokeTimer.Start();
+            else if (_keystrokeTimer != null)
+            {
+                _keystrokeTimer.Stop();
+                _keystrokeTimer.Start();
+            }
+
+            base.OnTextChanged(e);
+        }
+        
+        private void KeystrokeTimeElapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            _keystrokeTimer.Stop();
+            OnTextInputCompleted?.Invoke(this, e);
         }
 
         private async void HighlightBrackets(object sender, EventArgs eventArgs)
@@ -226,7 +251,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
         private void InitializeColorizer()
         {
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "SMAStudiovNext.Modules.WindowRunbook.SyntaxHighlightning.Powershell.xshd";
+            var resourceName = "SMAStudiovNext.Modules.Workspaces.WindowRunbook.SyntaxHighlightning.Powershell.xshd";
 
             var stream = assembly.GetManifestResourceStream(resourceName);
             if (stream != null)
@@ -241,8 +266,8 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
                 reader.Close();
                 stream.Close();
             }
-        }
-        
+        } 
+
         public LanguageContext LanguageContext
         {
             get { return _languageContext; }

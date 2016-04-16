@@ -11,6 +11,9 @@ using SMAStudiovNext.Core;
 using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
 using SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging;
 using SMAStudiovNext.Modules.WindowRunbook.Editor.Parser;
+using System;
+using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
+using System.Windows.Threading;
 
 namespace SMAStudiovNext.Modules.WindowRunbook.Editor
 {
@@ -21,18 +24,20 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
         private readonly TextArea _textArea;
         private readonly DebuggerService _debuggerService;
         private readonly BookmarkManager _bookmarkManager;
+        private readonly RunbookViewModel _runbookViewModel;
 
         private CompletionWindow _completionWindow = null;
         private long _triggerTag;
         private bool _openedByControlSpace = false;
 
-        public KeystrokeService(TextArea textArea, ICompletionProvider completionProvider, LanguageContext languageContext, DebuggerService debuggerService, BookmarkManager bookmarkManager)
+        public KeystrokeService(RunbookViewModel runbookViewModel, TextArea textArea, ICompletionProvider completionProvider, LanguageContext languageContext, DebuggerService debuggerService, BookmarkManager bookmarkManager)
         {
             _completionProvider = completionProvider;
             _completionProvider.OnCompletionCompleted += OnCompletionResultRetrieved;
             _languageContext = languageContext;
             _debuggerService = debuggerService;
             _bookmarkManager = bookmarkManager;
+            _runbookViewModel = runbookViewModel;
 
             _textArea = textArea;
             _textArea.KeyUp += OnKeyReleased;
@@ -44,10 +49,23 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
         {
             var ch = e.Text[0];
 
+            // Set last key stroke
+            _runbookViewModel.LastKeyStroke = DateTime.Now;
+
+            // Notify our language context that the document is dirty and needs a reparsing
+            _languageContext.IsDirty = true;
+
             // Update any parse errors to account for the new text inserted
-            _bookmarkManager.RecalculateOffsets(_textArea, BookmarkType.ParseError, _textArea.Caret.Offset, e.Text.Length);
-            
-            if ((IsCodeCompletionTrigger(ch) || char.IsLetter(ch)) && _completionWindow == null)
+            var caretOffset = _textArea.Caret.Offset;
+            Task.Run(() =>
+            {
+                _bookmarkManager.RecalculateOffsets(_textArea, BookmarkType.ParseError, caretOffset, e.Text.Length);
+                _bookmarkManager.RecalculateOffsets(_textArea, BookmarkType.AnalyzerInfo, caretOffset, e.Text.Length);
+                _bookmarkManager.RecalculateOffsets(_textArea, BookmarkType.AnalyzerWarning, caretOffset, e.Text.Length);
+            });
+
+            //if ((IsCodeCompletionTrigger(ch) || char.IsLetter(ch)) && _completionWindow == null)
+            if (IsCodeCompletionTrigger(ch) || IsCompletionPosition(caretOffset))
             {
                 TriggerCompletion();
             }
@@ -63,11 +81,6 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
                 _completionWindow = null;
 
                 return;
-            }
-
-            if (e.Key == Key.Enter)
-            {
-                // We need to make sure to update the bookmarks found beneath the added line
             }
 
             // If enter or tab is pressed when the completionWindow is open,
@@ -193,9 +206,44 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
             return word;
         }
 
+        public bool IsCompletionPosition(int position)
+        {
+            if (position <= 2)
+                return false;
+
+            if (_textArea.Document.Text[position - 1].Equals("$"))
+                return false;
+
+            var prevPos = position - 2;
+            var prevChar = _textArea.Document.Text[prevPos];
+
+            var line = _textArea.Document.GetLineByOffset(position);
+            var text = _textArea.Document.GetText(line).Substring(0, position - line.Offset - 1);
+
+            if (text.Trim().Length == 0)
+                return true;
+
+            if (prevChar == '(' || prevChar == '|')
+                return true;
+
+            for (var i = position - line.Offset - 2; i >= 0; i--)
+            {
+                var ch = text[i];
+
+                if (ch == '"' || ch == ')')
+                    return false;
+
+                if (ch == '|')
+                    return true;
+            }
+
+            return false;
+            //return prevChar == ' ' || prevChar == '\t' || prevChar == '\n' || prevChar == '(' || prevChar == '|';
+        }
+
         public static bool IsCodeCompletionTrigger(char ch)
         {
-            return ch == '-' || ch == '$' || ch == ':';
+            return ch == '-' || ch == '.' || ch == ':';
         }
 
         public static bool IsBracketOrParen(char ch)

@@ -49,9 +49,9 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
         private readonly IBackendContext _backendContext;
         private readonly IStatusManager _statusManager;
         private readonly DebuggerService _debuggerService;
-        private readonly BookmarkManager _bookmarkManager;
         private readonly object _lock = new object();
 
+        private BookmarkManager _bookmarkManager;
         private IList<ICompletionData> _parameters;
         private ICompletionProvider _completionProvider;
         private KeystrokeService _keystrokeService;
@@ -81,9 +81,6 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
             _debuggerService = new DebuggerService(this);
             _debuggerService.DebuggerStopped += DebuggerStopped;
             _debuggerService.DebuggerFinished += DebuggerFinished;
-
-            _bookmarkManager = new BookmarkManager();
-            _bookmarkManager.OnBookmarkUpdated += BookmarkManagerOnBookmarkUpdated;
         }
 
         private void DebuggerFinished(object sender, EventArgs e)
@@ -234,21 +231,16 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
                 }
             }
 
+            // Clean up closing
+            _initialContentLoading = false;
+
+            _debuggerService.DebuggerStopped -= DebuggerStopped;
+            _debuggerService.DebuggerFinished -= DebuggerFinished;
+            _debuggerService.Dispose();
+
+            ClearWarningsAndErrors();
+
             callback(true);
-        }
-
-        public override void TryClose(bool? dialogResult = default(bool?))
-        {
-            if (dialogResult.HasValue && dialogResult.Value)
-            {
-                _initialContentLoading = false;
-
-                _debuggerService.DebuggerStopped -= DebuggerStopped;
-                _debuggerService.DebuggerFinished -= DebuggerFinished;
-                _debuggerService.Dispose();
-            }
-
-            base.TryClose(dialogResult);
         }
 
         /// <summary>
@@ -398,17 +390,23 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
             _completionProvider = new CompletionProvider(_backendContext, _view.TextEditor.LanguageContext);
             Task.Run(() => { _completionProvider.Initialize(); });
 
-            _keystrokeService = new KeystrokeService(_view.TextEditor.TextArea, _completionProvider,
+            _bookmarkManager = new BookmarkManager(_view.TextMarkerService);
+            _bookmarkManager.OnBookmarkUpdated += BookmarkManagerOnBookmarkUpdated;
+
+            _keystrokeService = new KeystrokeService(this, _view.TextEditor.TextArea, _completionProvider,
                 _view.TextEditor.LanguageContext, _debuggerService, _bookmarkManager);
             _view.TextEditor.TextArea.LeftMargins.Insert(0, new IconBarMargin(_bookmarkManager));
+
             // Add a bookmarks line tracker
             _view.TextEditor.TextArea.Document.LineTrackers.Add(new BookmarkLineTracker(_view.TextEditor.TextArea, _bookmarkManager));
 
             _insightService = new InsightService(_view.TextEditor, _view.TextEditor.LanguageContext, _debuggerService);
 
             // Attach the parse error event handler
+            _view.TextEditor.OnTextInputCompleted += TextEditor_OnTextInputCompleted;
             _view.TextEditor.LanguageContext.OnParseError += OnDraftParseError;
             _view.TextEditor.LanguageContext.OnClearParseErrors += OnClearDraftParseErrors;
+            _view.TextEditor.LanguageContext.OnAnalysisCompleted += OnDraftAnalysisCompleted;
             //_view.TextEditor.ToolTipRequest += OnToolTipRequest;
 
             if (_runbook.RunbookID != Guid.Empty)
@@ -429,6 +427,8 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
                         draftContent = _view.TextEditor.Text;
                         publishedContent = _view.PublishedTextEditor.Text;
                     });
+
+                    ParseContent();
 
                     var diff = new Diff(draftContent, publishedContent);
                     DiffSectionA = diff.Sections;
@@ -482,64 +482,139 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
             _statusManager.SetTimeoutText("Tips! Use Ctrl+H to view job history.", 10);
         }
 
+        private void TextEditor_OnTextInputCompleted(object sender, EventArgs e)
+        {
+            ParseContent();
+        }
+
+        private void OnDraftAnalysisCompleted(object sender, AnalysisEventArgs e)
+        {
+            //if ((DateTime.Now - LastKeyStroke).Seconds < 2)
+            //    return;
+            var addedAndFoundMarkers = new List<Bookmark>();
+
+            foreach (var record in e.Records)
+            {
+                var bookmarkType = default(BookmarkType);
+
+                switch (record.Severity)
+                {
+                    case Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic.DiagnosticSeverity.Information:
+                        bookmarkType = BookmarkType.AnalyzerInfo;
+                        break;
+                    case Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic.DiagnosticSeverity.Warning:
+                        bookmarkType = BookmarkType.AnalyzerWarning;
+                        break;
+                }
+
+                // Try to find a bookmark for this record
+                var foundMarker = _bookmarkManager.Bookmarks.FirstOrDefault(x =>
+                    x.LineNumber == record.Extent.StartLineNumber &&
+                    x.BookmarkType.Equals(bookmarkType));// &&
+                    //x.TextMarker != null &&
+                    //x.TextMarker.StartOffset == record.Extent.StartOffset);
+
+                if (foundMarker != null)
+                {
+                    addedAndFoundMarkers.Add(foundMarker);
+                    continue;
+                }
+
+                Execute.OnUIThread(() =>
+                {
+                    var bookmark = new Bookmark(
+                        bookmarkType,
+                        _view.TextMarkerService,
+                        record.Extent.StartLineNumber,
+                        record.Extent.StartColumnNumber,
+                        record.Extent.StartOffset,
+                        record.Extent.EndOffset - record.Extent.StartOffset,
+                        record.Message,
+                        _runbook.RunbookName);
+
+                    if (_bookmarkManager.Add(bookmark))
+                        addedAndFoundMarkers.Add(bookmark);
+                });
+            }
+
+            // Remove any deprecated warnings/errors
+            var bookmarksToRemove = _bookmarkManager.Bookmarks.Where(x => (x.BookmarkType == BookmarkType.AnalyzerInfo || x.BookmarkType == BookmarkType.AnalyzerWarning) && !addedAndFoundMarkers.Contains(x)).ToList();
+            foreach (var bookmark in bookmarksToRemove)
+            {
+                Execute.OnUIThread(() => bookmark.CleanUp());
+                _bookmarkManager.Bookmarks.Remove(bookmark);
+            }
+
+            addedAndFoundMarkers.Clear();
+        }
+
         private void OnClearDraftParseErrors(object sender, EventArgs e)
         {
-            if ((DateTime.Now - LastKeyStroke).Seconds < 2)
-                return;
-
             // Remove all parse errors
-            _bookmarkManager.Bookmarks.Remove(x => x.BookmarkType == BookmarkType.ParseError);
-
-            Execute.OnUIThread(() =>
+            var bookmarksToRemove = _bookmarkManager.Bookmarks.Where(x => x.BookmarkType == BookmarkType.ParseError).ToList();
+            foreach (var bookmark in bookmarksToRemove)
             {
-                _view.TextMarkerService.RemoveAll(x => x.Bookmark == null || x.Bookmark.BookmarkType == BookmarkType.ParseError);
-
-                var errorList = IoC.Get<IErrorList>();
-
-                // Remove the errors
-                errorList.Items.Clear();
-            });
+                Execute.OnUIThread(() => bookmark.CleanUp());
+                _bookmarkManager.Bookmarks.Remove(bookmark);
+            }
         }
         
         private void OnDraftParseError(object sender, ParseErrorEventArgs e)
         {
-            if ((DateTime.Now - LastKeyStroke).Seconds < 2)
-                return;
+            var addedAndFoundMarkers = new List<Bookmark>();
 
-            // Remove all bookmarks for parse errors
-            _bookmarkManager.Bookmarks.Remove(x => x.BookmarkType == BookmarkType.ParseError);
-
-            Execute.OnUIThread(() =>
+            foreach (var record in e.Errors)
             {
-                _view.TextMarkerService.RemoveAll(x => x.Bookmark == null || x.Bookmark.BookmarkType == BookmarkType.ParseError);
+                // Try to find a bookmark for this record
+                var foundMarker = _bookmarkManager.Bookmarks.FirstOrDefault(x =>
+                    x.LineNumber == record.Extent.StartLineNumber &&
+                    x.BookmarkType.Equals(BookmarkType.ParseError) &&
+                    x.TextMarker != null &&
+                    x.TextMarker.StartOffset == record.Extent.StartOffset);
 
-                var errorList = IoC.Get<IErrorList>();
-
-                // Remove the errors
-                errorList.Items.Clear();
-
-                foreach (var error in e.Errors)
+                if (foundMarker != null)
                 {
-                    var bookmark = new Bookmark(BookmarkType.ParseError, error.Extent.StartLineNumber);
-                    var marker = _view.TextMarkerService.TryCreate(error.Extent.StartOffset, error.Extent.EndOffset - error.Extent.StartOffset);
-                    if (marker != null)
-                    {
-                        marker.MarkerColor = Colors.Red;
-                        marker.ToolTip = error.Message;
-                    }
-
-                    bookmark.TextMarker = marker;
-                    _bookmarkManager.Add(bookmark);
-
-                    // Add the errors to our Error List as well
-                    errorList.AddItem(ErrorListItemType.Error, error.Message, _runbook.RunbookName, error.Extent.StartLineNumber, error.Extent.StartColumnNumber, () =>
-                    {
-                        _view.TextEditor.CaretOffset = error.Extent.StartOffset;
-                    });
+                    addedAndFoundMarkers.Add(foundMarker);
+                    continue;
                 }
 
-                _lastErrorUpdate = DateTime.Now;
-            });
+                Execute.OnUIThread(() =>
+                {
+                    var bookmark = new Bookmark(
+                        BookmarkType.ParseError,
+                        _view.TextMarkerService,
+                        record.Extent.StartLineNumber,
+                        record.Extent.StartColumnNumber,
+                        record.Extent.StartOffset,
+                        record.Extent.EndOffset - record.Extent.StartOffset,
+                        record.Message,
+                        _runbook.RunbookName);
+
+                    if (_bookmarkManager.Add(bookmark))
+                        addedAndFoundMarkers.Add(bookmark);
+                });
+            }
+
+            // Remove any deprecated warnings/errors
+            var bookmarksToRemove = _bookmarkManager.Bookmarks.Where(x => (x.BookmarkType == BookmarkType.ParseError) && !addedAndFoundMarkers.Contains(x)).ToList();
+            foreach (var bookmark in bookmarksToRemove)
+            {
+                Execute.OnUIThread(() => bookmark.CleanUp());
+                _bookmarkManager.Bookmarks.Remove(bookmark);
+            }
+
+            addedAndFoundMarkers.Clear();
+        }
+
+        public void ClearWarningsAndErrors()
+        {
+            var items = _bookmarkManager.Bookmarks.Where(x => x.ErrorListItem != null && x.ErrorListItem.File.Equals(Runbook.RunbookName)).ToList();
+
+            foreach (var item in items)
+            {
+                Execute.OnUIThread(() => item.CleanUp());
+                _bookmarkManager.Bookmarks.Remove(item);
+            }
         }
 
         /// <summary>
@@ -595,11 +670,15 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
             var contentToParse = string.Empty;
             var context = default(LanguageContext);
 
-            Execute.OnUIThread(() =>
+            try
             {
-                contentToParse = _view.TextEditor.Text;
-                context = _view.TextEditor.LanguageContext;
-            });
+                Execute.OnUIThread(() =>
+                {
+                    contentToParse = _view.TextEditor.Text;
+                    context = _view.TextEditor.LanguageContext;
+                });
+            }
+            catch (TaskCanceledException) { }
 
             context?.Parse(contentToParse);
         }

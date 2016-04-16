@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging;
 using ICSharpCode.AvalonEdit.Editing;
+using Caliburn.Micro;
 
 namespace SMAStudiovNext.Modules.WindowRunbook.Editor
 {
@@ -18,13 +19,15 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
     public class BookmarkManager
     {
         private readonly ObservableCollection<Bookmark> _bookmarks;
+        private readonly TextMarkerService _textMarkerService;
 
         public event EventHandler<EventArgs> OnRedrawRequested;
         public event EventHandler<BookmarkEventArgs> OnBookmarkUpdated;
 
-        public BookmarkManager()
+        public BookmarkManager(TextMarkerService textMarkerService)
         {
             _bookmarks = new ObservableCollection<Bookmark>();
+            _textMarkerService = textMarkerService;
         }
 
         public void AdjustLineOffsets(AdjustTypes adjustType, int lineNumber, int offsetToAdd)
@@ -47,17 +50,31 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
                 case BookmarkType.Breakpoint:
                     // lineNumberOrCaretOffset: This will be a line number since breakpoints only work on whole lines
 
-                    foreach (var marker in _bookmarks.Where(item => item.LineNumber >= lineNumberOrCaretOffset))
+                    foreach (var marker in _bookmarks.Where(item => item.LineNumber >= lineNumberOrCaretOffset).ToList())
                     {
+                        if (marker.TextMarker == null)
+                        {
+                            _bookmarks.Remove(marker);
+                            continue;
+                        }
+
                         var line = textArea.Document.GetLineByNumber(marker.LineNumber);
                         marker.TextMarker.StartOffset = line.Offset;
                         marker.TextMarker.Length = line.Length;
                     }
                     break;
+                case BookmarkType.AnalyzerInfo:
+                case BookmarkType.AnalyzerWarning:
                 case BookmarkType.ParseError:
                     // lineNumberOrCaretOffset: This will be the caret offset
-                    foreach (var marker in _bookmarks.Where(item => item.TextMarker.StartOffset >= lineNumberOrCaretOffset))
+                    foreach (var marker in _bookmarks.Where(item => item.TextMarker.StartOffset >= lineNumberOrCaretOffset && item.BookmarkType == bookmarkType))
                     {
+                        if (marker.TextMarker == null)
+                        {
+                            _bookmarks.Remove(marker);
+                            continue;
+                        }
+
                         marker.TextMarker.StartOffset += textLength;
                     }
                     break;
@@ -65,7 +82,18 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
                     break;
             }
 
-            textArea.TextView.InvalidateLayer(ICSharpCode.AvalonEdit.Rendering.KnownLayer.Selection);
+            Execute.OnUIThread(() =>
+            {
+                textArea.TextView.InvalidateLayer(ICSharpCode.AvalonEdit.Rendering.KnownLayer.Selection);
+            });
+        }
+
+        public void RecalculateOffsets(TextArea textArea, IEnumerable<BookmarkType> bookmarkTypes, int lineNumberOrCaretOffset, int textLength = 1)
+        {
+            foreach (var bookmarkType in bookmarkTypes)
+            {
+                RecalculateOffsets(textArea, bookmarkType, lineNumberOrCaretOffset, textLength);
+            }
         }
 
         private void AdjustLineAdd(int lineNumber, int offsetToAdd)
@@ -85,6 +113,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
             var lines = _bookmarks.Where(item => item.LineNumber == lineNumber).ToList();
             foreach (var line in lines)
             {
+                line.CleanUp();
                 _bookmarks.Remove(line);
                 OnBookmarkUpdated?.Invoke(this, new BookmarkEventArgs(line, true));
             }
@@ -113,6 +142,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
 
         public void Remove(Bookmark bookmark)
         {
+            bookmark.CleanUp();
             _bookmarks.Remove(bookmark);
 
             OnRedrawRequested?.Invoke(this, new EventArgs());
@@ -126,6 +156,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
 
             foreach (var bookmark in bookmarks)
             {
+                bookmark.CleanUp();
                 _bookmarks.Remove(bookmark);
                 OnBookmarkUpdated?.Invoke(this, new BookmarkEventArgs(bookmark, true));
             }

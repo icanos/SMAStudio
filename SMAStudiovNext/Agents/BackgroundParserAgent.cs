@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
+using Microsoft.Windows.PowerShell.ScriptAnalyzer;
+using System.Windows;
+using System;
 
 namespace SMAStudiovNext.Agents
 {
@@ -31,7 +34,7 @@ namespace SMAStudiovNext.Agents
         /// </summary>
         public void Start()
         {
-            _backgroundThread.Start();
+            //_backgroundThread.Start();
             //Task.Run(async () => { await StartInternal(); });
         }
 
@@ -44,10 +47,9 @@ namespace SMAStudiovNext.Agents
             while (_isRunning)
             {
                 var runbook = _shell.ActiveItem as RunbookViewModel;
+
                 runbook?.ParseContent();
-                
-                // If we're "sleeping", eg. out of focus etc, slow down parsing.
-                Thread.Sleep(1 * 1000);
+                Thread.Sleep(2 * 1000);
             }
         }
         

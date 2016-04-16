@@ -113,8 +113,27 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
             }
         }
 
-        public object ToolTip { get; set; }
+        private object _toolTip;
+        public object ToolTip
+        {
+            get
+            {
+                if (_toolTip == null && Bookmark != null)
+                    return Bookmark.Message;
 
-        public Bookmark Bookmark { get; set; }
+                return _toolTip;
+            }
+            set { _toolTip = value; }
+        }
+
+        private Bookmark _bookmark;
+        public Bookmark Bookmark
+        {
+            get { return _bookmark; }
+            set
+            {
+                _bookmark = value;
+            }
+        }
     }
 }

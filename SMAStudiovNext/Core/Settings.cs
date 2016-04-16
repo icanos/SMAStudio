@@ -25,6 +25,11 @@ namespace SMAStudiovNext.Core
         public bool Debug { get; set; }
 
         /// <summary>
+        /// Set to true to enable code analysis
+        /// </summary>
+        public bool EnableCodeAnalysis { get; set; }
+
+        /// <summary>
         /// List of connections to different SMA or Azure Automation accounts
         /// </summary>
         public List<BackendConnection> Connections { get; set; }

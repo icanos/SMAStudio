@@ -23,6 +23,7 @@ using System.Windows.Media.Imaging;
 using SMAStudiovNext.Exceptions;
 using SMAStudiovNext.Modules.PartEnvironmentExplorer.ViewModels;
 using SMAStudiovNext.Utils;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Parser;
 
 namespace SMAStudiovNext.Modules.Startup
 {
@@ -53,7 +54,7 @@ namespace SMAStudiovNext.Modules.Startup
         {
             Application.Current.MainWindow.Icon = new BitmapImage(new Uri("pack://application:,,," + IconsDescription.SMAStudio32, UriKind.RelativeOrAbsolute));
             AppContext.Start();
-            GlobalExceptionHandler.Configure();
+            //GlobalExceptionHandler.Configure();
             CertificateManager.Configure();
 
             // Force software rendering!
@@ -129,6 +130,11 @@ namespace SMAStudiovNext.Modules.Startup
                         StartConnection(SettingsService.CurrentSettings.Connections[i]);
                     }
                 });
+            }
+
+            if (SettingsService.CurrentSettings.EnableCodeAnalysis)
+            {
+                AnalyzerService.Start();
             }
 
             _output.AppendLine("Started Automation Studio");

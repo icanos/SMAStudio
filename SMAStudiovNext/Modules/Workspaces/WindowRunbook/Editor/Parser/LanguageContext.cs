@@ -5,6 +5,11 @@ using System.Management.Automation.Language;
 using System.Threading.Tasks;
 using SMAStudiovNext.Models;
 using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
+using Microsoft.Windows.PowerShell.ScriptAnalyzer;
+using SMAStudiovNext.Services;
+using System.Management.Automation;
+using Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic;
+using Caliburn.Micro;
 
 namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Parser
 {
@@ -18,14 +23,16 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Parser
         private Token[] _tokens;
         private ParseError[] _parseErrors;
         private ScriptBlockAst _scriptBlock;
+        private bool _currentlyHasParseErrors;
 
         public LanguageContext()
         {
-
+            
         }
 
         public event OnParseErrorDelegate OnParseError;
         public event OnClearParseErrorsDelegate OnClearParseErrors;
+        public event EventHandler<AnalysisEventArgs> OnAnalysisCompleted;
 
         /// <summary>
         /// Parse the runbook content
@@ -33,15 +40,37 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Parser
         /// <param name="content"></param>
         public void Parse(string content)
         {
+            if (_tokens == null || _scriptBlock == null)
+                IsDirty = true;
+
+            if (!IsDirty)
+                return;
+
             _scriptBlock = System.Management.Automation.Language.Parser.ParseInput(content, out _tokens, out _parseErrors);
 
             if (_parseErrors != null && _parseErrors.Length > 0)
             {
+                _currentlyHasParseErrors = true;
                 OnParseError?.Invoke(this, new ParseErrorEventArgs(_parseErrors));
             }
-            else
+            else if (_currentlyHasParseErrors)
             {
+                _currentlyHasParseErrors = false;
                 OnClearParseErrors?.Invoke(this, new EventArgs());
+            }
+
+            // Analyze the code too
+            if (SettingsService.CurrentSettings.EnableCodeAnalysis && !string.IsNullOrEmpty(content) && IsDirty)
+            {
+                Task.Run(() =>
+                {
+                    var records = AnalyzerService.Analyze(_scriptBlock, _tokens);//ScriptAnalyzer.Instance.AnalyzeSyntaxTree(_scriptBlock, _tokens, string.Empty);
+
+                    if (SettingsService.CurrentSettings.EnableCodeAnalysis)
+                    {// && (_cachedRecords == null || _cachedRecords.Count() != records.Count()))
+                        Execute.OnUIThread(() => { OnAnalysisCompleted?.Invoke(this, new AnalysisEventArgs(records)); });
+                    }
+                });
             }
         }
 
@@ -363,6 +392,11 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Parser
         {
             get { return _scriptBlock; }
         }
+
+        /// <summary>
+        /// Gets or sets if the document is dirty (meaning it has changed and needs to be recalculated).
+        /// </summary>
+        public bool IsDirty { get; set; }
 
         /// <summary>
         /// Apply '$Using:' to variables defined outside current InlineScript scope

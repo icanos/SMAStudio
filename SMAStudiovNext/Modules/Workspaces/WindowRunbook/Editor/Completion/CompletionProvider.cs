@@ -57,17 +57,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Completion
                 return _languageContext;
             }
         }
-
-        /*public IList<ICompletionEntry> Keywords
-        {
-            get; set;
-        }
-
-        public IList<ICompletionEntry> Runbooks
-        {
-            get; set;
-        }*/
-
+        
         /// <summary>
         /// Initializes the Powershell code completion engine, since it takes quite a while
         /// for the first completion to complete.
@@ -93,7 +83,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Completion
                 return;
 
             DismissGetCompletionResults();
-            ProcessCompletion(content, completionWord, position, triggerTag);
+            ProcessCompletion(content, triggerChar, completionWord, position, triggerTag);
         }
 
         /// <summary>
@@ -151,7 +141,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Completion
         /// <param name="completionWord">Word to complete</param>
         /// <param name="position">Caret offset</param>
         /// <param name="triggerTag">Counter</param>
-        private void ProcessCompletion(string content, string completionWord, int position, long triggerTag)
+        private void ProcessCompletion(string content, char? triggerChar, string completionWord, int position, long triggerTag)
         {
             lock (_syncLock)
             {
@@ -166,7 +156,12 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Completion
 
                     lock (_syncLock)
                     {
-                        if (_runspace.RunspaceAvailability == RunspaceAvailability.Available)
+                        if (_runspace.RunspaceAvailability == RunspaceAvailability.Available
+                            /*&& (completionWord.StartsWith("$")
+                                || (triggerChar.HasValue 
+                                    && triggerChar.Value.Equals("-"))
+                                )*/
+                           )
                         {
                             commandCompletion = CommandCompletionHelper.GetCommandCompletionList(content, position, _runspace);
                         }
@@ -187,33 +182,39 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Completion
 
                     }
 
-                    if (commandCompletion == null)
+                    //if (commandCompletion == null)
+                    //    return;
+                    if (commandCompletion == null && completionData.Count == 0)
                         return;
 
                     // Add powershell completions
-                    foreach (var item in commandCompletion.CompletionMatches)
+                    if (commandCompletion != null)
                     {
-                        switch (item.ResultType)
+                        foreach (var item in commandCompletion.CompletionMatches)
                         {
-                            case CompletionResultType.Type:
-                            case CompletionResultType.Keyword:
-                                completionData.Add(new KeywordCompletionData(item.CompletionText, Glyph.Keyword, item.ToolTip));
-                                break;
-                            case CompletionResultType.Command:
-                                completionData.Add(new KeywordCompletionData(item.CompletionText, Glyph.MethodPublic, item.ToolTip));
-                                break;
-                            case CompletionResultType.ParameterName:
-                                completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty, item.ToolTip));
-                                break;
-                            case CompletionResultType.ParameterValue:
-                                completionData.Add(new ParameterValueCompletionData(item.CompletionText, item.ToolTip));
-                                break;
-                            case CompletionResultType.Property:
-                                completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty, item.ToolTip, false));
-                                break;
-                            case CompletionResultType.Variable:
-                                completionData.Add(new VariableCompletionData(item.CompletionText, string.Empty));
-                                break;
+                            switch (item.ResultType)
+                            {
+                                case CompletionResultType.Type:
+                                case CompletionResultType.Keyword:
+                                    completionData.Add(new KeywordCompletionData(item.CompletionText, Glyph.Keyword, item.ToolTip));
+                                    break;
+                                case CompletionResultType.Command:
+                                    if (item.CompletionText.Contains("-"))
+                                        completionData.Add(new KeywordCompletionData(item.CompletionText, Glyph.MethodPublic, item.ToolTip));
+                                    break;
+                                case CompletionResultType.ParameterName:
+                                    completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty, item.ToolTip));
+                                    break;
+                                case CompletionResultType.ParameterValue:
+                                    completionData.Add(new ParameterValueCompletionData(item.CompletionText, item.ToolTip));
+                                    break;
+                                case CompletionResultType.Property:
+                                    completionData.Add(new ParameterCompletionData(item.CompletionText, string.Empty, item.ToolTip, false));
+                                    break;
+                                case CompletionResultType.Variable:
+                                    completionData.Add(new VariableCompletionData(item.CompletionText, string.Empty));
+                                    break;
+                            }
                         }
                     }
 
