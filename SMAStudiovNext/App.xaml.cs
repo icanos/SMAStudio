@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SMAStudiovNext.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -13,5 +14,10 @@ namespace SMAStudiovNext
     /// </summary>
     public partial class App : Application
     {
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            GlobalExceptionHandler.Configure();
+            base.OnStartup(e);
+        }
     }
 }

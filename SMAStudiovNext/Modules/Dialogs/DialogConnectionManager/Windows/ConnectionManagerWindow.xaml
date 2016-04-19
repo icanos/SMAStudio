@@ -5,10 +5,54 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:core="clr-namespace:SMAStudiovNext.Core"
         xmlns:utils="clr-namespace:SMAStudiovNext.Utils"
+        xmlns:local="clr-namespace:SMAStudiovNext.Modules.Dialogs.DialogConnectionManager"
         mc:Ignorable="d"
         Title="Connection Manager" Height="436.127" Width="611.272" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
     <Window.Resources>
         <utils:InverseBoolConverter x:Key="InverseBoolConverter" />
+        <local:ConnectionTemplateSelector x:Key="connectionTemplateSelector" />
+        <DataTemplate x:Key="Azure">
+            <StackPanel Orientation="Vertical">
+                <TextBlock TextWrapping="Wrap" Margin="5,5,5,5" Padding="2,2,2,2">
+                            Set up a new connection to Azure, you will need to upload a management certificate to your Azure subscription in order for this to work. The certificate can be
+                            one that you've already uploaded, or you can have Automation Studio generate one for you.
+                </TextBlock>
+                <TextBlock Text="Management Certificate" Margin="5,5,5,5" />
+                <ComboBox Text="Choose a existing certificate" ItemsSource="{Binding Certificates}" SelectedItem="{Binding SelectedCertificate}" Margin="0,0,40,0">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <Button Content="..." Width="30" Margin="0,0,5,0" Click="OnRefreshClicked" />
+                <Button Content="Generate a new certificate" Margin="0,2,5,5" Command="{Binding GenerateCertificateCommand}" CommandParameter="{Binding DataContext}" />
+                <TextBlock Text="Subscription ID" Margin="5,5,5,5" />
+                <TextBox Padding="5,5,5,5" Margin="0,1,5,1" Text="{Binding AzureSubscriptionId}" />
+                <TextBlock Text="Automation Account Name" Margin="5,5,5,5" />
+                <TextBox Padding="5,5,5,5" Margin="0,1,5,1" Text="{Binding AzureAutomationAccount}" />
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="SMA">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Connection Name" FontWeight="Bold" />
+                <TextBox Text="{Binding Path=Name}" Padding="2,2,2,2" />
+                <TextBlock Text="SMA Web Service URL (eg. https://sma-server.local/)" FontWeight="Bold" Margin="0,10,0,0" />
+                <TextBox Text="{Binding Path=SmaConnectionUrl}" Padding="2,2,2,2" />
+                <TextBlock Text="Use Windows Credentials" FontWeight="Bold" Margin="0,10,0,0" />
+                <CheckBox IsChecked="{Binding Path=SmaImpersonatedLogin}" />
+                <TextBlock Text="Domain" FontWeight="Bold" Margin="0,10,0,0" />
+                <TextBox Text="{Binding Path=SmaDomain}" Padding="2,2,2,2" IsEnabled="{Binding Path=SmaImpersonatedLogin, Converter={StaticResource InverseBoolConverter}}" />
+                <TextBlock Text="Username" FontWeight="Bold" Margin="0,10,0,0" />
+                <TextBox Text="{Binding Path=SmaUsername}" Padding="2,2,2,2" IsEnabled="{Binding Path=SmaImpersonatedLogin, Converter={StaticResource InverseBoolConverter}}" />
+                <TextBlock Text="Password" FontWeight="Bold" Margin="0,10,0,0" />
+                <PasswordBox Padding="2,2,2,2" utils:PasswordBoxExtensions.BindPassword="true" utils:PasswordBoxExtensions.BoundPassword="{Binding Path=CleartextPassword, Mode=OneWayToSource}" IsEnabled="{Binding Path=SmaImpersonatedLogin, Converter={StaticResource InverseBoolConverter}}" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Save" Margin="0,10,10,0" Width="70" HorizontalAlignment="Right" Click="SaveButtonClicked" />
+                    <Button Content="Cancel" Margin="0,10,0,0" Width="70" HorizontalAlignment="Right" Click="CancelButtonClicked" />
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -31,23 +75,8 @@
             <TextBlock Text="Connections" FontWeight="Bold" Margin="10,10,0,0" />
             <ListView x:Name="ConnectionsList" Grid.Column="0" Grid.Row="0" Margin="4,4,4,4" BorderThickness="0" ItemsSource="{Binding Path=Connections}" MouseDown="ConnectionsListClick" SelectionChanged="ConnectionSelectionChanged" />
         </StackPanel>
-        <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Vertical" Margin="10,10,10,10" Visibility="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=Window}}" DataContext="{Binding Path=Connection}">
-            <TextBlock Text="Name" FontWeight="Bold" />
-            <TextBox Text="{Binding Path=Name}" Padding="2,2,2,2" />
-            <TextBlock Text="Webservice URL" FontWeight="Bold" Margin="0,10,0,0" />
-            <TextBox Text="{Binding Path=SmaConnectionUrl}" Padding="2,2,2,2" />
-            <TextBlock Text="Use Impersonated Login" FontWeight="Bold" Margin="0,10,0,0" />
-            <CheckBox IsChecked="{Binding Path=SmaImpersonatedLogin}" />
-            <TextBlock Text="Username" FontWeight="Bold" Margin="0,10,0,0" />
-            <TextBox Text="{Binding Path=SmaUsername}" Padding="2,2,2,2" IsEnabled="{Binding Path=SmaImpersonatedLogin, Converter={StaticResource InverseBoolConverter}}" />
-            <TextBlock Text="Domain" FontWeight="Bold" Margin="0,10,0,0" />
-            <TextBox Text="{Binding Path=SmaDomain}" Padding="2,2,2,2" IsEnabled="{Binding Path=SmaImpersonatedLogin, Converter={StaticResource InverseBoolConverter}}" />
-            <TextBlock Text="Password" FontWeight="Bold" Margin="0,10,0,0" />
-            <PasswordBox Padding="2,2,2,2" utils:PasswordBoxExtensions.BindPassword="true" utils:PasswordBoxExtensions.BoundPassword="{Binding Path=CleartextPassword, Mode=OneWayToSource}" IsEnabled="{Binding Path=SmaImpersonatedLogin, Converter={StaticResource InverseBoolConverter}}" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Save" Margin="0,10,10,0" Width="70" HorizontalAlignment="Right" Click="SaveButtonClicked" />
-                <Button Content="Cancel" Margin="0,10,0,0" Width="70" HorizontalAlignment="Right" Click="CancelButtonClicked" />
-            </StackPanel>
+        <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Vertical" Margin="10,10,10,10">
+            <ContentControl DataContext="{Binding Path=Connection}" Content="{Binding}"  ContentTemplateSelector="{StaticResource connectionTemplateSelector}" />
         </StackPanel>
     </Grid>
 </Window>

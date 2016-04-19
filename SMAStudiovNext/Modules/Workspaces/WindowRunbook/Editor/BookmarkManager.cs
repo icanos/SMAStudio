@@ -30,6 +30,15 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
             _textMarkerService = textMarkerService;
         }
 
+        public void ClearErrorsAndWarnings()
+        {
+            foreach (var bookmark in _bookmarks.ToList())
+            {
+                bookmark.CleanUp();
+                _bookmarks.Remove(bookmark);
+            }
+        }
+
         public void AdjustLineOffsets(AdjustTypes adjustType, int lineNumber, int offsetToAdd)
         {
             switch (adjustType)

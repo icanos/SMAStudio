@@ -84,14 +84,19 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
             foreach (var line in textView.VisualLines)
             {
                 var lineNumber = line.FirstDocumentLine.LineNumber;
-                /*var bookmark = _manager.Bookmarks.FirstOrDefault(item => item.LineNumber == lineNumber && (item.BookmarkType == BookmarkType.Breakpoint || item.BookmarkType == BookmarkType.CurrentDebugPoint));
-
-                if (bookmark == null)
-                    continue;
-
-                */
-                var bookmark = _manager.Bookmarks.FirstOrDefault(item => item.LineNumber == lineNumber);
+                var bookmarks = _manager.Bookmarks.Where(item => item.LineNumber == lineNumber).ToList();
                 var renderer = default(IMarkerRenderer);
+                var bookmark = bookmarks.FirstOrDefault();
+
+                // Make sure that a breakpoint or current debug point is always the one rendered if there is multiple bookmarks on the line
+                foreach (var b in bookmarks)
+                {
+                    if (b.BookmarkType == BookmarkType.Breakpoint || b.BookmarkType == BookmarkType.CurrentDebugPoint)
+                    {
+                        bookmark = b;
+                        break;
+                    }
+                }
 
                 if (bookmark == null)
                     continue;

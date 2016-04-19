@@ -213,6 +213,7 @@
     <Compile Include="Models\ConnectionTypeModelProxy.cs" />
     <Compile Include="Models\ModuleModelProxy.cs" />
     <Compile Include="Models\OperationResult.cs" />
+    <Compile Include="Modules\Dialogs\DialogConnectionManager\ConnectionTemplateSelector.cs" />
     <Compile Include="Modules\Dialogs\DialogDocumentation\ViewModels\DocumentationViewModel.cs" />
     <Compile Include="Modules\Dialogs\DialogDocumentation\Windows\DocumentationWindow.xaml.cs">
       <DependentUpon>DocumentationWindow.xaml</DependentUpon>
@@ -700,10 +701,6 @@
     <ProjectReference Include="..\Libraries\gemini\src\Gemini\Gemini.csproj">
       <Project>{13dbfc87-c152-4a86-94b0-d9944beef647}</Project>
       <Name>Gemini</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Libraries\PowerShellEditorServices\src\PowerShellEditorServices\PowerShellEditorServices.csproj">
-      <Project>{81e8cbcd-6319-49e7-9662-0475bd0791f4}</Project>
-      <Name>PowerShellEditorServices</Name>
     </ProjectReference>
     <ProjectReference Include="..\Libraries\PowerShellEditorServices\submodules\PSScriptAnalyzer\Engine\ScriptAnalyzerEngine.csproj">
       <Project>{f4bde3d0-3eef-4157-8a3e-722df7adef60}</Project>

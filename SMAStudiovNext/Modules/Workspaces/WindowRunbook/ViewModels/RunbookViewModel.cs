@@ -94,6 +94,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
             var output = IoC.Get<IOutput>();
             output.AppendLine("Debugging session completed.");
 
+            ParseContent();
             Refresh();
         }
 
@@ -568,9 +569,9 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
                 // Try to find a bookmark for this record
                 var foundMarker = _bookmarkManager.Bookmarks.FirstOrDefault(x =>
                     x.LineNumber == record.Extent.StartLineNumber &&
-                    x.BookmarkType.Equals(BookmarkType.ParseError) &&
-                    x.TextMarker != null &&
-                    x.TextMarker.StartOffset == record.Extent.StartOffset);
+                    x.BookmarkType.Equals(BookmarkType.ParseError));// &&
+                    //x.TextMarker != null &&
+                    //x.TextMarker.StartOffset == record.Extent.StartOffset);
 
                 if (foundMarker != null)
                 {
@@ -931,6 +932,9 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
             if (!result)
                 return;
 
+            // Clear any code analysis warnings etc
+            _bookmarkManager.ClearErrorsAndWarnings();
+
             var output = IoC.Get<IOutput>();
             output.AppendLine("    ");
             output.AppendLine("Starting a debug session...");
@@ -941,8 +945,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 
             await _debuggerService.Start(inputs);
             NotifyOfPropertyChange("DisplayName");
-            
-            //return TaskUtility.Completed;
+            Refresh();
         }
 
         void ICommandHandler<DebugCommandDefinition>.Update(Command command)

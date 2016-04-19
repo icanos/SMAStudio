@@ -54,7 +54,6 @@ namespace SMAStudiovNext.Modules.Startup
         {
             Application.Current.MainWindow.Icon = new BitmapImage(new Uri("pack://application:,,," + IconsDescription.SMAStudio32, UriKind.RelativeOrAbsolute));
             AppContext.Start();
-            //GlobalExceptionHandler.Configure();
             CertificateManager.Configure();
 
             // Force software rendering!

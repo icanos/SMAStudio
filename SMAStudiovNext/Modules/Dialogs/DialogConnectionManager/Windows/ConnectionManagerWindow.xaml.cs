@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Services;
 using SMAStudiovNext.Utils;
+using System;
 
 namespace SMAStudiovNext.Modules.DialogConnectionManager.Windows
 {
@@ -19,7 +20,7 @@ namespace SMAStudiovNext.Modules.DialogConnectionManager.Windows
             InitializeComponent();
 
             DataContext = this;
-            Connections = SettingsService.CurrentSettings.Connections.Where(c => !c.IsAzure).ToObservableCollection();
+            Connections = SettingsService.CurrentSettings.Connections.ToObservableCollection();/*Where(c => !c.IsAzure).*/
 
             Connection = new BackendConnection {SmaImpersonatedLogin = true};
         }
@@ -100,6 +101,11 @@ namespace SMAStudiovNext.Modules.DialogConnectionManager.Windows
                 NotifyPropertyChanged("Connections");
                 NotifyPropertyChanged("IsSelected");
             }
+        }
+
+        private void OnRefreshClicked(object sender, EventArgs e)
+        {
+            //((AzureWindowViewModel)DataContext).LoadCertificates();
         }
 
         private void ConnectionSelectionChanged(object sender, SelectionChangedEventArgs e)
