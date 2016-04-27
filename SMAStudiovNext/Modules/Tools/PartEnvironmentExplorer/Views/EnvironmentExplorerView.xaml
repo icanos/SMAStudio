@@ -7,13 +7,52 @@
              xmlns:gemini="http://schemas.timjones.tw/gemini"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:utils="clr-namespace:SMAStudiovNext.Utils"
+             xmlns:ui="clr-namespace:SMAStudiovNext.UI"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="SearchTextBox_Background" Color="White" />
+        <SolidColorBrush x:Key="SearchTextBox_Foreground" Color="Black" />
+        <LinearGradientBrush x:Key="SearchTextBox_Border" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#FFABADB3" Offset="0.05" />
+            <GradientStop Color="#FFE2E3EA" Offset="0.07" />
+            <GradientStop Color="#FFE3E9EF" Offset="1" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="SearchTextBox_BorderMouseOver" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#FF5C97C1" Offset="0.05" />
+            <GradientStop Color="#FFB9D7EB" Offset="0.07" />
+            <GradientStop Color="#FFC7E2F1" Offset="1" />
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="SearchTextBox_SearchIconBorder" Color="White" />
+        <SolidColorBrush x:Key="SearchTextBox_SearchIconBackground" Color="White" />
+        <LinearGradientBrush x:Key="SearchTextBox_SearchIconBorder_MouseOver" StartPoint="0,0" EndPoint="0,1" >
+            <GradientStop Color="#FFFFFFFF" Offset="0" />
+            <GradientStop Color="#FFE5F4FC" Offset="1" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="SearchTextBox_SearchIconBackground_MouseOver" StartPoint="0,0" EndPoint="0,1" >
+            <GradientStop Color="#FFE7F5FD" Offset="0" />
+            <GradientStop Color="#FFD2EDFC" Offset="0.5" />
+            <GradientStop Color="#FFB6E3FD" Offset="0.51" />
+            <GradientStop Color="#FF9DD5F3" Offset="1" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="SearchTextBox_SearchIconBorder_MouseDown" StartPoint="0,0" EndPoint="0,1" >
+            <GradientStop Color="#FFFFFFFF" Offset="0" />
+            <GradientStop Color="#FFE5F4FC" Offset="1" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="SearchTextBox_SearchIconBackground_MouseDown" StartPoint="0,0" EndPoint="0,1" >
+            <GradientStop Color="#FFE7F5FD" Offset="0" />
+            <GradientStop Color="#FFD2EDFC" Offset="0.5" />
+            <GradientStop Color="#FFB6E3FD" Offset="0.51" />
+            <GradientStop Color="#FF9DD5F3" Offset="1" />
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="SearchTextBox_LabelTextColor" Color="Gray" />
+    </UserControl.Resources>
     <gemini:ClippingHwndHost>
         <gemini:ClippingHwndHost.Content>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="25" />
+                    <!--<RowDefinition Height="35" />-->
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <ToolBar Grid.Row="0" BandIndex="0">
@@ -25,6 +64,24 @@
                         <Image Source="/SMAStudiovNext;component/Icons/ListConnections.png" />
                     </Button>
                 </ToolBar>
+                <!--<StackPanel Grid.Row="1" Orientation="Vertical" Background="{DynamicResource ControlBackground}">
+                    <ui:SearchTextBox LabelText="Search Resource" HorizontalAlignment="Stretch">
+                        <ui:SearchTextBox.Style>
+                            <Style TargetType="{x:Type ui:SearchTextBox}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type ui:SearchTextBox}">
+                                            <StackPanel Orientation="Vertical">
+                                                <Label x:Name="lblPlaceholder" Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=LabelText}" Padding="5,5,5,5" Foreground="Gray" FontStyle="Italic" />
+                                                <Border BorderThickness="0 0 0 1" BorderBrush="DarkGray" />
+                                            </StackPanel>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ui:SearchTextBox.Style>
+                    </ui:SearchTextBox>
+                </StackPanel>-->
                 <TreeView Grid.Row="1" x:Name="treeView" BorderThickness="0" Background="{DynamicResource ControlBackground}" Foreground="{DynamicResource ControlForeground}" ItemsSource="{Binding Items}" HorizontalContentAlignment="Stretch">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseDoubleClick">

@@ -62,17 +62,21 @@ namespace SMAStudiovNext.Core
 
         public void Start()
         {
+            IsReady = false;
+
+            _runbookNameCache.Clear();
+
             Runbooks.Clear();
             Credentials.Clear();
             Schedules.Clear();
             Variables.Clear();
             Modules.Clear();
             Connections.Clear();
+            Tags.Clear();
 
             _statusManager.SetText("Loading data from " + _backendConnection.Name + "...");
             Service.Load();
 
-            _runbookNameCache.Clear();
             foreach (var rb in Runbooks)
                 _runbookNameCache.Add((rb.Tag as RunbookModelProxy).RunbookName);
         }

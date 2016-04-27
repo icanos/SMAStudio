@@ -677,6 +677,12 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
                 {
                     contentToParse = _view.TextEditor.Text;
                     context = _view.TextEditor.LanguageContext;
+
+                    if (string.IsNullOrEmpty(contentToParse))
+                    {
+                        contentToParse = _view.PublishedTextEditor.Text;
+                        context = _view.PublishedTextEditor.LanguageContext;
+                    }
                 });
             }
             catch (TaskCanceledException) { }
@@ -705,17 +711,23 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
                 {
                     scriptBlock = _view.TextEditor.LanguageContext.ScriptBlock;
                 }
+                else
+                {
+                    scriptBlock = _view.PublishedTextEditor.LanguageContext.ScriptBlock;
+                }
             });
             
             if (scriptBlock == null)
             {
-                var contentToParse = GetContentInternal(null,
+                /*var contentToParse = GetContentInternal(null,
                     _runbook.DraftRunbookVersionID.HasValue ? RunbookType.Draft : RunbookType.Published, false);
 
                 Token[] tokens;
                 ParseError[] parseErrors;
 
-                scriptBlock = System.Management.Automation.Language.Parser.ParseInput(contentToParse, out tokens, out parseErrors);
+                scriptBlock = System.Management.Automation.Language.Parser.ParseInput(contentToParse, out tokens, out parseErrors);*/
+                MessageBox.Show("Unable to debug or start the runbook, please close and open the runbook and try again.", "Error");
+                return _parameters;
             }
             
             if ((scriptBlock.EndBlock == null || scriptBlock.EndBlock.Statements.Count == 0))
@@ -974,6 +986,13 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 
         async Task ICommandHandler<PublishCommandDefinition>.Run(Command command)
         {
+            // We need to remove all bookmarks since we're publishing the content
+            foreach (var bookmark in _bookmarkManager.Bookmarks.ToList())
+            {
+                bookmark.CleanUp();
+                _bookmarkManager.Bookmarks.Remove(bookmark);
+            }
+
             await CheckIn();
 
             // Make sure that draft runbook version ID is set to null when published
@@ -1070,6 +1089,12 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 
         private async Task StartRunAsync(Command command, bool isDraft)
         {
+            if (!isDraft)
+            {
+                // We must make sure that the runbook is parsed before trying to start a job
+                ParseContent();
+            }
+
             var dialog = new PrepareRunWindow(this);
             var result = (bool)dialog.ShowDialog();
 

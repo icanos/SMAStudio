@@ -116,7 +116,7 @@ namespace SMAStudiovNext.Modules.WindowExecutionResult.ViewModels
                         Thread.Sleep(1 * 1000);
                     }
 
-                    if (_runbookViewModel.Runbook.JobID != Guid.Empty)
+                    if (_runbookViewModel.Runbook.JobID != null && _runbookViewModel.Runbook.JobID != Guid.Empty)
                         job = _backendService.GetJobDetails(_runbookViewModel.Runbook);
                     else if (_jobId != Guid.Empty)
                         job = _backendService.GetJobDetails(_jobId);
@@ -244,6 +244,10 @@ namespace SMAStudiovNext.Modules.WindowExecutionResult.ViewModels
 
             try
             {
+                // NOTE 20160427: Fixes bug #19
+                if (_runbookViewModel.Runbook.JobID == null)
+                    _runbookViewModel.Runbook.JobID = _jobId;
+
                 if (command.Text.Equals("Pause"))
                     backendService.PauseExecution(_runbookViewModel.Model as RunbookModelProxy, _isTestRun);
                 else
@@ -274,6 +278,10 @@ namespace SMAStudiovNext.Modules.WindowExecutionResult.ViewModels
 
             try
             {
+                // NOTE 20160427: Fixes bug #19
+                if (_runbookViewModel.Runbook.JobID == null)
+                    _runbookViewModel.Runbook.JobID = _jobId;
+
                 backendService.StopExecution(_runbookViewModel.Model as RunbookModelProxy, _isTestRun);
             }
             catch (ApplicationException ex)

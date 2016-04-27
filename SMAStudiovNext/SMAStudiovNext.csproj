@@ -296,6 +296,7 @@
     <Compile Include="Themes\StylePart.cs" />
     <Compile Include="Themes\Theme.cs" />
     <Compile Include="Themes\ThemeManager.cs" />
+    <Compile Include="UI\SearchTextBox.cs" />
     <Compile Include="Utils\AsyncHelper.cs" />
     <Compile Include="Utils\CollectionExtensions.cs" />
     <Compile Include="Exceptions\GlobalExceptionHandler.cs" />
