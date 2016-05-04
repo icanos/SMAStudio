@@ -2,6 +2,7 @@
 	path = Libraries/gemini
 	url = https://github.com/icanos/gemini.git
 	branch = master
-[submodule "Libraries/PowerShellEditorServices"]
-	path = Libraries/PowerShellEditorServices
-	url = https://github.com/icanos/PowerShellEditorServices.git
+[submodule "submodules/PSScriptAnalyzer"]
+	path = submodules/PSScriptAnalyzer
+	url = https://github.com/PowerShell/PSScriptAnalyzer.git
+	branch = master
