@@ -762,7 +762,7 @@ namespace SMAStudiovNext.Services
             if (_connectionData.SmaImpersonatedLogin)
                 ((DataServiceContext)connection).Credentials = CredentialCache.DefaultCredentials;
             else
-                ((DataServiceContext)connection).Credentials = new NetworkCredential(_connectionData.SmaUsername, _connectionData.GetPassword(), _connectionData.SmaDomain);
+                ((DataServiceContext)connection).Credentials = new NetworkCredential(_connectionData.SmaUsername, _connectionData.Decrypt(_connectionData.SmaPassword), _connectionData.SmaDomain);
 
             // Retrieve a single runbook in order to display the message box if cert is invalid (then load everything async)
             try
@@ -843,7 +843,7 @@ namespace SMAStudiovNext.Services
             if (_connectionData.SmaImpersonatedLogin)
                 request.Credentials = CredentialCache.DefaultCredentials;
             else
-                request.Credentials = new NetworkCredential(_connectionData.SmaUsername, _connectionData.GetPassword(), _connectionData.SmaDomain);
+                request.Credentials = new NetworkCredential(_connectionData.SmaUsername, _connectionData.Decrypt(_connectionData.SmaPassword), _connectionData.SmaDomain);
 
             var response = default(HttpWebResponse);
 
@@ -1253,7 +1253,7 @@ namespace SMAStudiovNext.Services
             if (_connectionData.SmaImpersonatedLogin)
                 request.Credentials = CredentialCache.DefaultCredentials;
             else
-                request.Credentials = new NetworkCredential(_connectionData.SmaUsername, _connectionData.GetPassword(), _connectionData.SmaDomain);
+                request.Credentials = new NetworkCredential(_connectionData.SmaUsername, _connectionData.Decrypt(_connectionData.SmaPassword), _connectionData.SmaDomain);
 
             var response = (HttpWebResponse)request.GetResponse();
             var reader = (TextReader)new StreamReader(response.GetResponseStream());
@@ -1275,7 +1275,7 @@ namespace SMAStudiovNext.Services
             if (_connectionData.SmaImpersonatedLogin)
                 request.Credentials = CredentialCache.DefaultCredentials;
             else
-                request.Credentials = new NetworkCredential(_connectionData.SmaUsername, _connectionData.GetPassword(), _connectionData.SmaDomain);
+                request.Credentials = new NetworkCredential(_connectionData.SmaUsername, _connectionData.Decrypt(_connectionData.SmaPassword), _connectionData.SmaDomain);
 
             var response = await request.GetResponseAsync().ConfigureAwait(false);
             if (response.Headers["Content-Length"] != null)

@@ -14,7 +14,8 @@ namespace SMAStudiovNext.Core
     public enum ContextType
     {
         SMA,
-        Azure
+        Azure,
+        AzureRM
     }
 
     /// <summary>
@@ -42,6 +43,10 @@ namespace SMAStudiovNext.Core
             {
                 // SMA
                 _backendService = new SmaService(this, connectionData);
+            }
+            else if (backendType == ContextType.AzureRM)
+            {
+                _backendService = new AzureRMService(this, connectionData);
             }
             else
             {

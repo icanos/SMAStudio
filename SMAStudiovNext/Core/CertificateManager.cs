@@ -48,6 +48,8 @@ namespace SMAStudiovNext.Core
                         return true;
                     }
 
+                    Console.WriteLine($"Certificate {cert.Subject} ({cert.Issuer}) failed the check.");
+
                     return false;
                 };
         }

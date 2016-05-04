@@ -57,6 +57,8 @@ namespace SMAStudiovNext.Core
 
         public bool IsAzure { get; set; }
 
+        public bool IsAzureRM { get; set; }
+
         private string _name = string.Empty;
         public string Name
         {
@@ -98,19 +100,21 @@ namespace SMAStudiovNext.Core
 
         public string AzureSubscriptionId { get; set; }
 
+        public string AzureSubscriptionName { get; set; }
+
         public string AzureAutomationAccount { get; set; }
 
         public string AzureCertificateThumbprint { get; set; }
 
-        public SecureString GetPassword()
+        public SecureString Decrypt(byte[] value)
         {
-            if (SmaPassword == null || SmaPassword.Length == 0)
+            if (value == null || value.Length == 0)
                 return new SecureString();
 
-            byte[] pw = DataProtection.Unprotect(SmaPassword);
+            byte[] pw = DataProtection.Unprotect(value);
             char[] chars = new char[pw.Length / sizeof(char)];
 
-            System.Buffer.BlockCopy(pw, 0, chars, 0, pw.Length);
+            Buffer.BlockCopy(pw, 0, chars, 0, pw.Length);
             SecureString secStr = new SecureString();
 
             foreach (var c in chars)
@@ -120,6 +124,35 @@ namespace SMAStudiovNext.Core
 
             return secStr;
         }
+
+        public string UnsecureDecrypt(byte[] value)
+        {
+            if (value == null || value.Length == 0)
+                return string.Empty;
+
+            byte[] pw = DataProtection.Unprotect(value);
+            char[] chars = new char[pw.Length / sizeof(char)];
+
+            Buffer.BlockCopy(pw, 0, chars, 0, pw.Length);
+
+            return new string(chars);
+        }
+
+        public string AzureRMConnectionName { get; set; }
+
+        public string AzureRMServicePrincipalId { get; set; }
+
+        public byte[] AzureRMServicePrincipalKey { get; set; }
+
+        public string AzureRMTenantId { get; set; }
+
+        public string AzureRMGroupName { get; set; }
+
+        /// <summary>
+        /// Used to store the key while editing the connection, nulled when saved.
+        /// </summary>
+        [XmlIgnore]
+        public string AzureRMServicePrincipalCleartextKey { get; set; }
 
         public override string ToString()
         {

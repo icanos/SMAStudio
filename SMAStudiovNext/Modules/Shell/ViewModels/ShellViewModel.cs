@@ -15,12 +15,17 @@ using Gemini.Modules.StatusBar;
 using Gemini.Modules.ToolBars;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Utils;
+using Gemini.Framework.Commands;
+using SMAStudiovNext.Commands;
+using System.Threading.Tasks;
+using Gemini.Framework.Threading;
+using SMAStudiovNext.Modules.DialogConnectionManager.Windows;
 
 //namespace Gemini.Modules.Shell.ViewModels
 namespace SMAStudiovNext.Modules.Shell.ViewModels
 {
     [Export(typeof(IShell))]
-    public class ShellViewModel : Conductor<IDocument>.Collection.OneActive, IShell
+    public class ShellViewModel : Conductor<IDocument>.Collection.OneActive, IShell, ICommandHandler<NewConnectionCommandDefinition>
     {
         public event EventHandler ActiveDocumentChanging;
         public event EventHandler ActiveDocumentChanged;
@@ -263,6 +268,20 @@ namespace SMAStudiovNext.Modules.Shell.ViewModels
         public void Close()
         {
             Application.Current.MainWindow.Close();
+        }
+
+        void ICommandHandler<NewConnectionCommandDefinition>.Update(Command command)
+        {
+            command.Enabled = true;
+        }
+
+        Task ICommandHandler<NewConnectionCommandDefinition>.Run(Command command)
+        {
+            var connManagerWindow = new ConnectionManagerWindow();
+            connManagerWindow.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+            connManagerWindow.ShowDialog();
+
+            return TaskUtility.Completed;
         }
     }
 }

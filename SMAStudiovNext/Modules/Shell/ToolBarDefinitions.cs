@@ -8,14 +8,14 @@ namespace SMAStudiovNext.Modules.Shell
     public static class ToolBarDefinitions
     {
         [Export]
-        public static ToolBarDefinition ExecutionToolBar = new ToolBarDefinition(1, "Execution");
+        public static ToolBarDefinition ExecutionToolBar = new ToolBarDefinition(2, "Execution");
 
         [Export]
         public static ToolBarItemGroupDefinition ExecutionToolBarGroup = new ToolBarItemGroupDefinition(
             ExecutionToolBar, 8);
 
         [Export]
-        public static ToolBarDefinition AzureToolBar = new ToolBarDefinition(2, "Azure");
+        public static ToolBarDefinition AzureToolBar = new ToolBarDefinition(3, "Azure");
 
         [Export]
         public static ToolBarItemGroupDefinition AzureToolBarGroup = new ToolBarItemGroupDefinition(
@@ -32,10 +32,10 @@ namespace SMAStudiovNext.Modules.Shell
         //
         // Items to add
         //
-
-        //[Export]
-        //public static ToolBarItemDefinition RefreshItem = new CommandToolBarItemDefinition<RefreshCommandDefinition>(
-        //    Gemini.Modules.Shell.ToolBarDefinitions.StandardOpenSaveToolBarGroup, 0);
+        
+        [Export]
+        public static ToolBarItemDefinition ConnectionManagerDefinition = new CommandToolBarItemDefinition<NewConnectionCommandDefinition>(
+            Gemini.Modules.Shell.ToolBarDefinitions.StandardOpenSaveToolBarGroup, 0);
 
         [Export]
         public static ToolBarItemDefinition SaveDefinition = new CommandToolBarItemDefinition<SaveCommandDefinition>(

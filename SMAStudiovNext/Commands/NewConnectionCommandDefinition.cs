@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using SMAStudiovNext.Icons;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,9 +8,10 @@ using System.Threading.Tasks;
 
 namespace SMAStudiovNext.Commands
 {
+    [CommandDefinition]
     public class NewConnectionCommandDefinition : CommandDefinition
     {
-        public const string CommandName = "File.NewConnection";
+        public const string CommandName = "Shell.NewConnection";
 
         public override string Name
         {
@@ -33,6 +35,11 @@ namespace SMAStudiovNext.Commands
             {
                 return "New Connection to Azure or SMA";
             }
+        }
+
+        public override Uri IconSource
+        {
+            get { return new Uri("pack://application:,,," + IconsDescription.Connection); }
         }
     }
 }

@@ -21,6 +21,8 @@ namespace SMAStudiovNext.Modules.Dialogs.DialogConnectionManager
 
                 if (backendConnection.IsAzure)
                     return element.FindResource("Azure") as DataTemplate;
+                else if (backendConnection.IsAzureRM)
+                    return element.FindResource("AzureRM") as DataTemplate;
 
                 return element.FindResource("SMA") as DataTemplate;
             }

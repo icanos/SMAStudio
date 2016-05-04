@@ -151,7 +151,14 @@ namespace SMAStudiovNext.Modules.Startup
 
         public void StartConnection(BackendConnection connection)
         {
-            var backend = new BackendContext(connection.IsAzure ? ContextType.Azure : ContextType.SMA, connection);
+            var contextType = ContextType.SMA;
+
+            if (connection.IsAzure)
+                contextType = ContextType.Azure;
+            else if (connection.IsAzureRM)
+                contextType = ContextType.AzureRM;
+
+            var backend = new BackendContext(contextType, connection);
             backend.OnLoaded += OnBackendReady;
             backend.Start();
 

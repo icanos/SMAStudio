@@ -218,7 +218,12 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
             var prevChar = _textArea.Document.Text[prevPos];
 
             var line = _textArea.Document.GetLineByOffset(position);
-            var text = _textArea.Document.GetText(line).Substring(0, position - line.Offset - 1);
+            var offsetToCut = position - line.Offset - 1;
+
+            if (offsetToCut < 1)
+                return false;
+
+            var text = _textArea.Document.GetText(line).Substring(0, offsetToCut);
 
             if (text.Trim().Length == 0)
                 return true;
