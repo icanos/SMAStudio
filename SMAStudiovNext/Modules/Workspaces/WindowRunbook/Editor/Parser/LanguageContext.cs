@@ -104,7 +104,11 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Parser
                 if ((i - 1) > 0)
                     segmentBefore = segments[i - 1];
 
+#if PSV3
+                if (segmentBefore != null && segmentBefore.TokenFlags == TokenFlags.TypeName)
+#else
                 if (segmentBefore != null && segmentBefore.Kind == TokenKind.Type)
+#endif
                     variables.Add(new VariableCompletionData(variableName, segmentBefore.Extent.Text));
                 else
                     variables.Add(new VariableCompletionData(variableName, ""));
@@ -302,7 +306,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Parser
             var tokenList = _tokens.Where(item => item.Extent.StartLineNumber == lineNumber 
                 && (item.Extent.EndOffset <= position) || (position >= item.Extent.StartOffset && position <= item.Extent.EndOffset)).ToList();
 
-            if (tokenList.Count == 0)
+            if (tokenList.Count == 0 && _tokens != null)
             {
                 tokenList = _tokens.Where(item => item.Extent.StartLineNumber <= lineNumber 
                     && item.Extent.EndLineNumber >= lineNumber).ToList();
