@@ -39,7 +39,7 @@ namespace SMAStudiovNext.Commands
 
         public override Uri IconSource
         {
-            get { return new Uri("pack://application:,,," + IconsDescription.Connection); }
+            get { return new Uri("pack://application:,,," + IconsDescription.ListConnections); }
         }
     }
 }

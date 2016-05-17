@@ -57,6 +57,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
 
             // Update any parse errors to account for the new text inserted
             var caretOffset = _textArea.Caret.Offset;
+            var lineText = _textArea.Document.GetText(_textArea.Document.GetLineByOffset(caretOffset));
             Task.Run(() =>
             {
                 _bookmarkManager.RecalculateOffsets(_textArea, BookmarkType.ParseError, caretOffset, e.Text.Length);
@@ -65,7 +66,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
             });
 
             //if ((IsCodeCompletionTrigger(ch) || char.IsLetter(ch)) && _completionWindow == null)
-            if (IsCodeCompletionTrigger(ch) || IsCompletionPosition(caretOffset))
+            if (_completionWindow == null && (IsCodeCompletionTrigger(ch) || string.IsNullOrEmpty(lineText.Trim())))// || IsCompletionPosition(caretOffset))
             {
                 TriggerCompletion();
             }

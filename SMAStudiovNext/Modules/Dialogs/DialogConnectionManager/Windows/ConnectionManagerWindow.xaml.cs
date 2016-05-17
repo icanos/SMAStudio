@@ -32,7 +32,7 @@ namespace SMAStudiovNext.Modules.DialogConnectionManager.Windows
             InitializeComponent();
 
             DataContext = this;
-            Connections = SettingsService.CurrentSettings.Connections.ToObservableCollection();/*Where(c => !c.IsAzure).*/
+            Connections = SettingsService.CurrentSettings.Connections.ToObservableCollection();
 
             LoadCertificates();
 
@@ -52,7 +52,6 @@ namespace SMAStudiovNext.Modules.DialogConnectionManager.Windows
             }
 
             NotifyPropertyChanged("Certificates");
-            //NotifyOfPropertyChange(() => Certificates);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -109,6 +108,10 @@ namespace SMAStudiovNext.Modules.DialogConnectionManager.Windows
 
             ConnectionsList.SelectedItem = null;
             NotifyPropertyChanged("IsSelected");
+
+            // Force the backend context to refresh all services
+            var backendContext = AppContext.Resolve<IBackendContext>();
+            backendContext.Start();
 
             Close();
         }

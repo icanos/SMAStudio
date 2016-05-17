@@ -41,8 +41,8 @@ namespace SMAStudiovNext.Modules.Shell
         public static ToolBarItemDefinition SaveDefinition = new CommandToolBarItemDefinition<SaveCommandDefinition>(
             Gemini.Modules.Shell.ToolBarDefinitions.StandardOpenSaveToolBarGroup, 1);
 
-        [Export]
-        public static ToolBarItemDefinition ConnectAzureItem = new CommandToolBarItemDefinition<ConnectWithAzureCommandDefinition>(
-            AzureToolBarGroup, 10, ToolBarItemDisplay.IconAndText);
+        //[Export]
+        //public static ToolBarItemDefinition ConnectAzureItem = new CommandToolBarItemDefinition<ConnectWithAzureCommandDefinition>(
+        //    AzureToolBarGroup, 10, ToolBarItemDisplay.IconAndText);
     }
 }
