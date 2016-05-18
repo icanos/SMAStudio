@@ -23,9 +23,9 @@
             <RowDefinition Height="30" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <TextBlock Text="Tags:" Grid.Row="1" Grid.Column="0" Margin="5,5,0,5" />
-        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Tags, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,5,5" />
-        <TabControl Grid.Row="2" Grid.ColumnSpan="2" TabStripPlacement="Bottom">
+        <TextBlock Text="Tags:" Grid.Row="0" Grid.Column="0" Margin="5,5,0,5" />
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Tags, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,5,5" />
+        <TabControl Grid.Row="1" Grid.ColumnSpan="2" TabStripPlacement="Bottom">
             <TabItem Header="Draft">
                 <editor:RunbookEditor x:Name="CodeEditor" Padding="5,5,5,5">
                     <editor:RunbookEditor.ContextMenu>
