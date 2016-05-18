@@ -57,28 +57,22 @@ namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands
 
                 if (viewItem.Tag is IBackendContext)
                 {
+                    LongRunningOperation.Start();
+
                     shell.StatusBar.Items[0].Message = "Loading data from " + (viewItem.Tag as IBackendContext).Name + "...";
-                    (viewItem.Tag as IBackendContext).Start();
+                    Task.Run(() => (viewItem.Tag as IBackendContext).Start());
+
                     return;
                 }
 
                 if (!(viewItem.Tag is ModelProxyBase))
                     return;
-                
-                Caliburn.Micro.Execute.OnUIThread(() =>
-                {
-                    var customShell = (shell as IAutomationStudioShell);
 
-                    if (customShell.Progress == null)
-                        return;
-
-                    customShell.Progress.Visibility = Visibility.Visible;
-                });
+                LongRunningOperation.Start();
+                shell.StatusBar.Items[0].Message = "Loading " + viewItem.Title + "...";
 
                 Task.Run(delegate ()
                 {
-                    shell.StatusBar.Items[0].Message = "Loading " + viewItem.Title + "...";
-
                     var viewModel = (ModelProxyBase)viewItem.Tag;
 
                     if (viewItem.Tag is RunbookModelProxy)

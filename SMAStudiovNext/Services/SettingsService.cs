@@ -4,6 +4,7 @@ using SMAStudiovNext.Core;
 using System.IO;
 using System.Xml.Serialization;
 using SMAStudiovNext.Utils;
+using System;
 
 namespace SMAStudiovNext.Services
 {
@@ -33,6 +34,15 @@ namespace SMAStudiovNext.Services
             }
             else
                 CurrentSettings = new Settings();
+
+            if (CurrentSettings.EnableLocalCopy)
+            {
+                CurrentSettings.AutoSaveInterval = 60;
+                CurrentSettings.LocalCopyPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Automation Studio", "Runbooks");
+
+                if (!Directory.Exists(CurrentSettings.LocalCopyPath))
+                    Directory.CreateDirectory(CurrentSettings.LocalCopyPath);
+            }
         }
 
         public void Save()

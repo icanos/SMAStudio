@@ -247,6 +247,7 @@
     <Compile Include="Core\Documentation\DocumentationManager.cs" />
     <Compile Include="Core\Exceptions\CertificateException.cs" />
     <Compile Include="Core\AccessToken.cs" />
+    <Compile Include="Core\LongRunningOperation.cs" />
     <Compile Include="Core\Net\RestPacket.cs" />
     <Compile Include="Core\Tracing\ITracingWriter.cs" />
     <Compile Include="Core\Tracing\TracingAdapter.cs" />

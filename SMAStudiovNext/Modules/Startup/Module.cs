@@ -213,6 +213,9 @@ namespace SMAStudiovNext.Modules.Startup
 
             if (allContextsReady)
                 AppContext.Resolve<IStatusManager>().SetText("");
+
+            // Cancel the spinner that shows we're loading data
+            LongRunningOperation.Stop();
         }
 
         private void RefreshInspector()

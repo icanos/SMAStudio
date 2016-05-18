@@ -36,7 +36,7 @@ namespace SMAStudiovNext.Agents
 
         public void Start()
         {
-            if (!Directory.Exists(CacheFolder))
+            /*if (!Directory.Exists(CacheFolder))
                 Directory.CreateDirectory(CacheFolder);
 
             var files = Directory.GetFiles(CacheFolder);
@@ -105,11 +105,14 @@ namespace SMAStudiovNext.Agents
                     foreach (var file in files)
                         File.Delete(file);
                 }
-            }
+            }*/
 
-            var backgroundThread = new Thread(new ThreadStart(StartInternal));
-            backgroundThread.Priority = ThreadPriority.BelowNormal;
-            backgroundThread.Start();
+            if (SettingsService.CurrentSettings.EnableLocalCopy)
+            {
+                var backgroundThread = new Thread(new ThreadStart(StartInternal));
+                backgroundThread.Priority = ThreadPriority.BelowNormal;
+                backgroundThread.Start();
+            }
         }
 
         private void StartInternal()
@@ -139,7 +142,9 @@ namespace SMAStudiovNext.Agents
 
                         try
                         {
-                            var textWriter = new StreamWriter(Path.Combine(AppHelper.CachePath, "cache", runbookViewModel.Runbook.Context.ID + "_" + runbookViewModel.Runbook.RunbookID.ToString()), false);
+                            var path = Path.Combine(SettingsService.CurrentSettings.LocalCopyPath, runbookViewModel.Runbook.Context.ID + "_" + runbookViewModel.Runbook.RunbookName + ".ps1");
+
+                            var textWriter = new StreamWriter(path, false);
                             textWriter.Write(runbookViewModel.Content);
                             textWriter.Flush();
                             textWriter.Close();
@@ -156,7 +161,7 @@ namespace SMAStudiovNext.Agents
                     // at the same time as this loop is running.
                 }
 
-                Thread.Sleep(10 * 1000);
+                Thread.Sleep(SettingsService.CurrentSettings.AutoSaveInterval * 1000);
             }
         }
 
@@ -165,7 +170,7 @@ namespace SMAStudiovNext.Agents
             _isRunning = false;
 
             // Remove cached files if the exit is clean
-            if (Directory.Exists(CacheFolder))
+            /*if (Directory.Exists(CacheFolder))
             {
                 var files = Directory.GetFiles(CacheFolder);
 
@@ -180,16 +185,16 @@ namespace SMAStudiovNext.Agents
 
                     }
                 }
-            }
+            }*/
         }
 
-        private string CacheFolder
+        /*private string CacheFolder
         {
             get
             {
                 return Path.Combine(AppHelper.CachePath, "cache");
             }
-        }
+        }*/
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls

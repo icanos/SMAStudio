@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Xml.Serialization;
 using SMAStudiovNext.Utils;
+using System.IO;
 
 namespace SMAStudiovNext.Core
 {
@@ -23,6 +24,23 @@ namespace SMAStudiovNext.Core
         /// If debug is set to True, some extended logging is enabled
         /// </summary>
         public bool Debug { get; set; }
+
+        /// <summary>
+        /// Path to a location where the user wants to store a copy of all runbooks, locally.
+        /// This is also the path to where the auto save feature will store a copy, in case of a crash of
+        /// Automation Studio.
+        /// </summary>
+        public string LocalCopyPath { get; set; }
+
+        /// <summary>
+        /// Set to true to store a local copy of the runbooks
+        /// </summary>
+        public bool EnableLocalCopy { get; set; }
+
+        /// <summary>
+        /// Auto saving interval, defaults to 60
+        /// </summary>
+        public int AutoSaveInterval { get; set; }
 
         /// <summary>
         /// Set to true to enable code analysis

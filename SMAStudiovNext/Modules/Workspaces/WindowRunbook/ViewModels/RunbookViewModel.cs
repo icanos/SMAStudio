@@ -388,7 +388,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
         protected override void OnViewLoaded(object view)
         {
             Logger.DebugFormat("OnViewLoaded(...)");
-            ShowWaitingSpinner();
+            LongRunningOperation.Start();
 
             _view = (IRunbookView)view;
             _completionProvider = new CompletionProvider(_backendContext, _view.TextEditor.LanguageContext);
@@ -441,7 +441,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
                     NotifyOfPropertyChange(() => DiffSectionA);
                     NotifyOfPropertyChange(() => DiffSectionB);
 
-                    HideWaitingSpinner();
+                    LongRunningOperation.Stop();
                 });
             }
             else
@@ -452,7 +452,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
                     AddSnippetInternal(_cachedDraftContent);
                     _cachedDraftContent = string.Empty;
 
-                    HideWaitingSpinner();
+                    LongRunningOperation.Stop();
                 }
             }
 
@@ -834,7 +834,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 
         public async Task CheckIn()
         {
-            ShowWaitingSpinner();
+            LongRunningOperation.Start();
             var output = IoC.Get<IOutput>();
 
             if (UnsavedChanges)
@@ -878,12 +878,12 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
                 GlobalExceptionHandler.Show(ex);
             }
 
-            HideWaitingSpinner();
+            LongRunningOperation.Stop();
         }
 
         public async Task CheckOut()
         {
-            ShowWaitingSpinner();
+            LongRunningOperation.Start();
 
             try
             {
@@ -902,12 +902,12 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
                 GlobalExceptionHandler.Show(ex);
             }
 
-            HideWaitingSpinner();
+            LongRunningOperation.Stop();
         }
 
         private async Task Save(Command command)
         {
-            ShowWaitingSpinner();
+            LongRunningOperation.Start();
 
             // Update the UI to notify that the changes has been saved
             // TODO: REMOVE THIS, SHOULD BE HANDLED BY THE BACKEND SERVICE
@@ -928,7 +928,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
             if (command != null)
                 command.Enabled = true;
 
-            HideWaitingSpinner();
+            LongRunningOperation.Stop();
         }
 
         void ICommandHandler<SaveCommandDefinition>.Update(Command command)
@@ -1187,39 +1187,6 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
             {
                 Execute.OnUIThread(() => { output.AppendLine("Error when trying to " + (isDraft ? "test" : "run") + " the runbook:\r\n" + ex.Message); });
             }
-        }
-
-        /// <summary>
-        /// This is thread safe and will be executed on the UI thread
-        /// </summary>
-        public void ShowWaitingSpinner()
-        {
-            var shell = IoC.Get<IShell>();
-
-            Execute.OnUIThread(() =>
-            {
-                var customShell = (shell as IAutomationStudioShell);
-
-                if (customShell.Progress == null)
-                    return;
-
-                customShell.Progress.Visibility = Visibility.Visible;
-            });
-        }
-
-        public void HideWaitingSpinner()
-        {
-            var shell = IoC.Get<IShell>();
-
-            Execute.OnUIThread(() =>
-            {
-                var customShell = (shell as IAutomationStudioShell);
-
-                if (customShell.Progress == null)
-                    return;
-
-                customShell.Progress.Visibility = Visibility.Hidden;
-            });
         }
 
         #region Properties
