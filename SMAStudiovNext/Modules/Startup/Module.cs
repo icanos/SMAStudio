@@ -158,20 +158,24 @@ namespace SMAStudiovNext.Modules.Startup
             else if (connection.IsAzureRM)
                 contextType = ContextType.AzureRM;
 
+            var environment = IoC.Get<EnvironmentExplorerViewModel>();
             var backend = new BackendContext(contextType, connection);
+            _backendContexts.Add(backend);
+
+            //environment.Items.Add(backend.GetStructure());
+            Execute.OnUIThread(() => environment.Items.Add(backend.GetStructure()));
+
             backend.OnLoaded += OnBackendReady;
             //backend.Start();
 
-            _backendContexts.Add(backend);
-
-            var environment = IoC.Get<EnvironmentExplorerViewModel>();
+            /*
             Execute.OnUIThread(() =>
             {
                 lock (_lock)
                 {
                     environment.Items.Add(backend.GetStructure());
                 }
-            });
+            });*/
         }
 
         public IList<IBackendContext> GetContexts()

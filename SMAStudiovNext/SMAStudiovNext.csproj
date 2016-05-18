@@ -53,6 +53,12 @@
   <PropertyGroup>
     <ApplicationIcon>settings-icon.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>AutomationStudio.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Caliburn.Micro, Version=2.0.2.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -526,6 +532,7 @@
     <EmbeddedResource Include="Modules\Workspaces\WindowRunbook\SyntaxHighlightning\Powershell.xshd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <None Include="AutomationStudio.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\DataSources\SMAStudiovNext.SMA.OrchestratorApi.datasource" />
     <None Include="Properties\Settings.settings">
