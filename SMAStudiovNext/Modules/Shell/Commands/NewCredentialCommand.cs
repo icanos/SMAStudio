@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Input;
 using SMAStudiovNext.Modules.PartEnvironmentExplorer.ViewModels;
 using SMAStudiovNext.Modules.WindowCredential.ViewModels;
+using SMAStudiovNext.Services;
 
 namespace SMAStudiovNext.Modules.Shell.Commands
 {
@@ -23,7 +24,13 @@ namespace SMAStudiovNext.Modules.Shell.Commands
             var shell = IoC.Get<IShell>();
             
             var context = IoC.Get<EnvironmentExplorerViewModel>().GetCurrentContext();
-            var viewModel = new CredentialViewModel(new CredentialModelProxy(new SMA.Credential(), context));
+            var viewModel = default(CredentialViewModel);
+            //var viewModel = new CredentialViewModel(new CredentialModelProxy(new SMA.Credential(), context));
+
+            if (context.Service is AzureService || context.Service is AzureRMService)
+                viewModel = new CredentialViewModel(new CredentialModelProxy(new Vendor.Azure.Credential(), context));
+            else
+                viewModel = new CredentialViewModel(new CredentialModelProxy(new SMA.Credential(), context));
 
             shell.OpenDocument(viewModel);
         }

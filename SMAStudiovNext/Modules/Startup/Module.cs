@@ -160,7 +160,7 @@ namespace SMAStudiovNext.Modules.Startup
 
             var backend = new BackendContext(contextType, connection);
             backend.OnLoaded += OnBackendReady;
-            backend.Start();
+            //backend.Start();
 
             _backendContexts.Add(backend);
 
@@ -183,8 +183,23 @@ namespace SMAStudiovNext.Modules.Startup
         {
             var environment = IoC.Get<EnvironmentExplorerViewModel>();
 
+            // We need to update the environment object
             if (environment != null)
+            {
                 environment.OnBackendReady(sender, e);
+
+                var item = environment.Items.FirstOrDefault(i => i.Title.Equals(e.Context.Name));
+                var idx = environment.Items.IndexOf(item);
+
+                if (item != null)
+                {
+                    var tree = e.Context.GetStructure();
+                    environment.Items[idx].Icon = tree.Icon;
+
+                    foreach (var treeItem in tree.Items)
+                        environment.Items[idx].Items.Add(treeItem);
+                }
+            }
 
             bool allContextsReady = true;
             foreach (var context in GetContexts())

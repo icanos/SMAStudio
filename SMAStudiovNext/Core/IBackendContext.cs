@@ -76,6 +76,8 @@ namespace SMAStudiovNext.Core
 
         Guid ID { get; }
 
+        string Name { get; }
+
         ContextType ContextType { get; }
         
         IBackendService Service { get; }

@@ -261,6 +261,8 @@
       <DependentUpon>DocumentationWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\Dialogs\DialogStartRun\PropertyDataTemplateSelector.cs" />
+    <Compile Include="Modules\Shell\ViewModels\IAutomationStudioShell.cs" />
+    <Compile Include="Modules\Shell\Views\IAutomationStudioShellView.cs" />
     <Compile Include="Modules\Tools\PartEnvironmentExplorer\Commands\DocumentationCommand.cs" />
     <Compile Include="Modules\Shell\Commands\AboutCommandHandler.cs" />
     <Compile Include="Modules\Shell\Commands\NewConnectionObjectCommand.cs" />

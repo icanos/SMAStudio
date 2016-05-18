@@ -27,7 +27,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Views
         {
             get { return _textMarkerService; }
         }
-
+        
         public RunbookView()
         {
             InitializeComponent();

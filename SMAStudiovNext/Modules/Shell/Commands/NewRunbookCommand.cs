@@ -54,6 +54,7 @@ namespace SMAStudiovNext.Modules.Shell.Commands
                             viewModel = new RunbookViewModel(new RunbookModelProxy(runbook, context));
                             viewModel.AddSnippet(runbookContent);
                             break;
+                        case Core.ContextType.AzureRM:
                         case Core.ContextType.Azure:
                             var azureRunbook = new Vendor.Azure.Runbook {RunbookName = dialog.CreatedName};
 

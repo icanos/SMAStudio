@@ -10,7 +10,14 @@ namespace SMAStudiovNext.Vendor.Azure
     {
         public Guid JobID { get; set; }
 
+        /// <summary>
+        /// Azure RM Identifier.
+        /// </summary>
+        public string Id { get; set; }
+
         public string JobStatus { get; set; }
+
+        public string JobStatusDeteails { get; set; }
 
         public DateTime? StartTime { get; set; }
 

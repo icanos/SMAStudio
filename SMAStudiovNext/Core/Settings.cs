@@ -148,6 +148,9 @@ namespace SMAStudiovNext.Core
 
         public string AzureRMGroupName { get; set; }
 
+        [XmlIgnore]
+        public string AzureRMLocation { get; set; }
+
         /// <summary>
         /// Used to store the key while editing the connection, nulled when saved.
         /// </summary>

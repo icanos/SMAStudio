@@ -11,6 +11,10 @@ using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
 using SMAStudiovNext.Modules.WindowSchedule.ViewModels;
 using SMAStudiovNext.Modules.WindowVariable.ViewModels;
 using SMAStudiovNext.Utils;
+using SMAStudiovNext.Services;
+using SMAStudiovNext.Core;
+using SMAStudiovNext.Modules.Shell.ViewModels;
+using System.Windows;
 
 namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands
 {
@@ -31,7 +35,12 @@ namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands
             if (viewItem.Tag == null)
                 return false;
 
-            if (viewItem.Tag is RunbookModelProxy || viewItem.Tag is VariableModelProxy || viewItem.Tag is ScheduleModelProxy || viewItem.Tag is CredentialModelProxy || viewItem.Tag is ConnectionModelProxy)
+            if (viewItem.Tag is RunbookModelProxy 
+                || viewItem.Tag is VariableModelProxy 
+                || viewItem.Tag is ScheduleModelProxy 
+                || viewItem.Tag is CredentialModelProxy 
+                || viewItem.Tag is ConnectionModelProxy
+                || viewItem.Tag is IBackendContext)
                 return true;
 
             return false;
@@ -46,8 +55,25 @@ namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands
                 // This command has been called from the Environment Explorer tool
                 var viewItem = (ResourceContainer)parameter;
 
+                if (viewItem.Tag is IBackendContext)
+                {
+                    shell.StatusBar.Items[0].Message = "Loading data from " + (viewItem.Tag as IBackendContext).Name + "...";
+                    (viewItem.Tag as IBackendContext).Start();
+                    return;
+                }
+
                 if (!(viewItem.Tag is ModelProxyBase))
                     return;
+                
+                Caliburn.Micro.Execute.OnUIThread(() =>
+                {
+                    var customShell = (shell as IAutomationStudioShell);
+
+                    if (customShell.Progress == null)
+                        return;
+
+                    customShell.Progress.Visibility = Visibility.Visible;
+                });
 
                 Task.Run(delegate ()
                 {

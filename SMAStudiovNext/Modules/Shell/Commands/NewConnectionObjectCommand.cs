@@ -29,7 +29,7 @@ namespace SMAStudiovNext.Modules.Shell.Commands
             var context = IoC.Get<EnvironmentExplorerViewModel>().GetCurrentContext();
             var viewModel = default(ConnectionViewModel);
 
-            if (context.Service is AzureService)
+            if (context.Service is AzureService || context.Service is AzureRMService)
                 viewModel = new ConnectionViewModel(new ConnectionModelProxy(new Vendor.Azure.Connection(), context));
             else
                 viewModel = new ConnectionViewModel(new ConnectionModelProxy(new SMA.Connection(), context));

@@ -13,7 +13,7 @@ namespace SMAStudiovNext.Utils
         private object _tag = null;
         private string _title = string.Empty;
         private bool _isExpanded = false;
-
+        private string _icon = string.Empty;
 
         #region Constructors
         public ResourceContainer()
@@ -87,7 +87,11 @@ namespace SMAStudiovNext.Utils
 
         public string Icon
         {
-            get; set;
+            get
+            {
+                return _icon;
+            }
+            set { _icon = value; NotifyOfPropertyChange(() => Icon); }
         }
 
         public object Tag

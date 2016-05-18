@@ -29,7 +29,7 @@ namespace SMAStudiovNext.Modules.Shell.Commands
             var context = IoC.Get<EnvironmentExplorerViewModel>().GetCurrentContext();
             var viewModel = default(ModuleViewModel);
 
-            if (context.Service is AzureService)
+            if (context.Service is AzureService || context.Service is AzureRMService)
                 viewModel = new ModuleViewModel(new ModuleModelProxy(new Vendor.Azure.Module(), context));
             else
                 viewModel = new ModuleViewModel(new ModuleModelProxy(new SMA.Module(), context));

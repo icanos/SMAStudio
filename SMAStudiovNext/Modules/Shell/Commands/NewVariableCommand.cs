@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Input;
 using SMAStudiovNext.Modules.PartEnvironmentExplorer.ViewModels;
 using SMAStudiovNext.Modules.WindowVariable.ViewModels;
+using SMAStudiovNext.Services;
 
 namespace SMAStudiovNext.Modules.Shell.Commands
 {
@@ -25,7 +26,12 @@ namespace SMAStudiovNext.Modules.Shell.Commands
             //MessageBox.Show("Reimplement this with support for both Azure and SMA!");
 
             var context = IoC.Get<EnvironmentExplorerViewModel>().GetCurrentContext();
-            var viewModel = new VariableViewModel(new VariableModelProxy(new SMA.Variable(), context));
+            var viewModel = default(VariableViewModel);
+            
+            if (context.Service is AzureService || context.Service is AzureRMService)
+                viewModel = new VariableViewModel(new VariableModelProxy(new Vendor.Azure.Variable(), context));
+            else
+                viewModel = new VariableViewModel(new VariableModelProxy(new SMA.Variable(), context));
 
             shell.OpenDocument(viewModel);
         }

@@ -21,6 +21,9 @@
         <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
             <ContentControl cal:View.Model="{Binding MainMenu}" />
             <ContentControl cal:View.Model="{Binding ToolBars}" />
+            <StackPanel Background="{DynamicResource MenuDefaultBackground}">
+                <ProgressBar Height="3" x:Name="prgWaiting" Minimum="0" Maximum="100"  IsIndeterminate="True" Visibility="Hidden" Margin="0,3,0,0" />
+            </StackPanel>
         </StackPanel>
 
         <ContentControl DockPanel.Dock="Bottom" cal:View.Model="{Binding StatusBar}" IsTabStop="False" />

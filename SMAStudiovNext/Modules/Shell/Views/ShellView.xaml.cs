@@ -22,11 +22,16 @@ namespace SMAStudiovNext.Modules.Shell.Views
     /// <summary>
     /// Interaction logic for ShellView.xaml
     /// </summary>
-    public partial class ShellView : IShellView
+    public partial class ShellView : IShellView, IAutomationStudioShellView
     {
         public ShellView()
         {
             InitializeComponent();
+        }
+
+        public ProgressBar Progress
+        {
+            get { return prgWaiting; }
         }
 
         public void LoadLayout(Stream stream, Action<ITool> addToolCallback, Action<IDocument> addDocumentCallback,

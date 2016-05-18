@@ -20,12 +20,14 @@ using SMAStudiovNext.Commands;
 using System.Threading.Tasks;
 using Gemini.Framework.Threading;
 using SMAStudiovNext.Modules.DialogConnectionManager.Windows;
+using System.Windows.Controls;
+using SMAStudiovNext.Modules.Shell.Views;
 
 //namespace Gemini.Modules.Shell.ViewModels
 namespace SMAStudiovNext.Modules.Shell.ViewModels
 {
     [Export(typeof(IShell))]
-    public class ShellViewModel : Conductor<IDocument>.Collection.OneActive, IShell, ICommandHandler<NewConnectionCommandDefinition>
+    public class ShellViewModel : Conductor<IDocument>.Collection.OneActive, IShell, ICommandHandler<NewConnectionCommandDefinition>, IAutomationStudioShell
     {
         public event EventHandler ActiveDocumentChanging;
         public event EventHandler ActiveDocumentChanged;
@@ -66,6 +68,17 @@ namespace SMAStudiovNext.Modules.Shell.ViewModels
         public IStatusBar StatusBar
         {
             get { return _statusBar; }
+        }
+
+        public ProgressBar Progress
+        {
+            get
+            {
+                if (_shellView == null)
+                    return null;
+
+                return (_shellView as IAutomationStudioShellView).Progress;
+            }
         }
 
         private ILayoutItem _activeLayoutItem;

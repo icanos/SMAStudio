@@ -79,15 +79,26 @@ namespace SMAStudiovNext.Core
             Connections.Clear();
             Tags.Clear();
 
-            _statusManager.SetText("Loading data from " + _backendConnection.Name + "...");
             Service.Load();
 
             foreach (var rb in Runbooks)
                 _runbookNameCache.Add((rb.Tag as RunbookModelProxy).RunbookName);
+
+            Execute.OnUIThread(() => _statusManager.SetText(""));
         }
 
         public ResourceContainer GetStructure()
         {
+            if (!IsReady)
+            {
+                var icon = IconsDescription.SMAStudio32;
+
+                if (_backendConnection.IsAzure || _backendConnection.IsAzureRM)
+                    icon = IconsDescription.Cloud;
+
+                return new ResourceContainer(_backendConnection.Name, this, icon);
+            }
+
             return Service.GetStructure();
         }
 
@@ -324,6 +335,11 @@ namespace SMAStudiovNext.Core
         public IBackendService Service
         {
             get { return _backendService; }
+        }
+
+        public string Name
+        {
+            get { return _backendConnection.Name; }
         }
 
         private bool _isReady = false;
