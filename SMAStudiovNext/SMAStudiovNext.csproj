@@ -263,7 +263,11 @@
     </Compile>
     <Compile Include="Modules\Dialogs\DialogStartRun\PropertyDataTemplateSelector.cs" />
     <Compile Include="Modules\Shell\ViewModels\IAutomationStudioShell.cs" />
+    <Compile Include="Modules\Shell\ViewModels\SettingsSaveViewModel.cs" />
     <Compile Include="Modules\Shell\Views\IAutomationStudioShellView.cs" />
+    <Compile Include="Modules\Shell\Views\SettingsSaveView.xaml.cs">
+      <DependentUpon>SettingsSaveView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Modules\Tools\PartEnvironmentExplorer\Commands\DocumentationCommand.cs" />
     <Compile Include="Modules\Shell\Commands\AboutCommandHandler.cs" />
     <Compile Include="Modules\Shell\Commands\NewConnectionObjectCommand.cs" />
@@ -550,6 +554,10 @@
     <Page Include="Modules\Shell\Views\SettingsEditorThemeView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Modules\Shell\Views\SettingsSaveView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Modules\Shell\Views\ShellView.xaml">
       <SubType>Designer</SubType>

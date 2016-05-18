@@ -196,6 +196,7 @@ namespace SMAStudiovNext.Modules.WindowExecutionResult.ViewModels
 
                     // The job is completed
                     _runbookViewModel.Runbook.JobID = Guid.Empty;
+                    LongRunningOperation.Stop();
                 }
                 catch (ApplicationException ex)
                 {

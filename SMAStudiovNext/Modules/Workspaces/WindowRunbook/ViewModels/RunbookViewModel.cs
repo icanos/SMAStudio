@@ -1120,6 +1120,8 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
             if (!result)
                 return;
 
+            LongRunningOperation.Start();
+
             if (UnsavedChanges)
                 await Save(command).ConfigureAwait(true);
 
@@ -1180,7 +1182,10 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
                         _runbook.JobID = guid.Value;
 
                     if (_runbook.JobID == Guid.Empty)
+                    {
+                        LongRunningOperation.Stop();
                         Execute.OnUIThread(() => { shell.CloseDocument(executionViewModel); });
+                    }
                 }).ConfigureAwait(true);
             }
             catch (Exception ex)

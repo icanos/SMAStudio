@@ -32,6 +32,7 @@ namespace SMAStudiovNext.Agents
         private void CreateStandardThemes()
         {
             string githubTheme = "<Theme>\r\n" +
+    "\t<Name>Github</Name>\r\n" +
     "\t<Font>Consolas</Font>\r\n" +
     "\t<FontSize>12</FontSize>\r\n" +
     "\t<Background>#ffffff</Background>\r\n" +
@@ -51,6 +52,7 @@ namespace SMAStudiovNext.Agents
 "</Theme>";
 
             string monokaiTheme = "<Theme>\r\n" +
+    "\t<Name>Monokai</Name>\r\n" +
     "\t<Font>Consolas</Font>\r\n" +
     "\t<FontSize>12</FontSize>\r\n" +
     "\t<Background>#272720</Background>\r\n" +
