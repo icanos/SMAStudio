@@ -191,6 +191,8 @@ namespace SMAStudiovNext.Modules.Startup
                 var item = environment.Items.FirstOrDefault(i => i.Title.Equals(e.Context.Name));
                 var idx = environment.Items.IndexOf(item);
 
+                environment.Items[idx].Items.Clear();
+
                 if (item != null)
                 {
                     var tree = e.Context.GetStructure();

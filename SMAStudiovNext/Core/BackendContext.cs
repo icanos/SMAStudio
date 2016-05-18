@@ -186,7 +186,7 @@ namespace SMAStudiovNext.Core
                 foreach (var runbook in Runbooks)
                 {
                     var runbookModel = (RunbookModelProxy)runbook.Tag;
-                    if (runbookModel.Tags == null)
+                    if (runbookModel.Tags == null || runbookModel.Tags == string.Empty)
                     {
                         Execute.OnUIThread(() =>
                         {

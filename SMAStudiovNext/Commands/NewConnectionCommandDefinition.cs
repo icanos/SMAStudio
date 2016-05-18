@@ -33,7 +33,7 @@ namespace SMAStudiovNext.Commands
         {
             get
             {
-                return "New Connection to Azure or SMA";
+                return "Connection Manager";
             }
         }
 

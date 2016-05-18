@@ -35,6 +35,7 @@ namespace SMAStudiovNext.Services
         private const string AzureXNS = "http://schemas.microsoft.com/windowsazure";
         private const string AzureTokenUrl = "https://login.microsoftonline.com/{0}/oauth2/token?api-version=1.0";
         private const string AzureRedirectUrl = "urn:ietf:wg:oauth:2.0:oob";
+        private const string AutoStudioTagName = "AutoStudio";
 
         private readonly IBackendContext _backendContext;
         private readonly BackendConnection _connectionData;
@@ -549,7 +550,8 @@ namespace SMAStudiovNext.Services
                     Id = r.Id,
                     RunbookID = Guid.NewGuid(),
                     RunbookName = r.Name,
-                    State = r.Properties.State
+                    State = r.Properties.State,
+                    Tags = r.Tags.ContainsKey(AutoStudioTagName) ? r.Tags[AutoStudioTagName] : string.Empty
                 }).ToList();
 
                 foreach (var runbook in runbooks)
@@ -564,7 +566,8 @@ namespace SMAStudiovNext.Services
                         Id = r.Id,
                         RunbookID = Guid.NewGuid(),
                         RunbookName = r.Name,
-                        State = r.Properties.State
+                        State = r.Properties.State,
+                        Tags = r.Tags.ContainsKey(AutoStudioTagName) ? r.Tags[AutoStudioTagName] : string.Empty
                     }).ToList();
 
                     foreach (var runbook in runbooks)
@@ -848,42 +851,43 @@ namespace SMAStudiovNext.Services
             var runbookNeedsCreation = false;
             var response = default(RunbookCreateOrUpdateResponse);
 
-            if (runbook.RunbookID == Guid.Empty)
-            {
-                runbookNeedsCreation = true;
+            //if (runbook.RunbookID == Guid.Empty)
+            //{
+                //runbookNeedsCreation = true;
 
-                // This is a new runbook!
-                var draft = new RunbookDraft();
-                draft.InEdit = true;
-                draft.CreationTime = DateTimeOffset.Now;
-                draft.LastModifiedTime = DateTimeOffset.Now;
+            // This is a new runbook!
+            var draft = new RunbookDraft();
+            draft.InEdit = true;
+            draft.CreationTime = DateTimeOffset.Now;
+            draft.LastModifiedTime = DateTimeOffset.Now;
                 
-                var details = new RunbookCreateOrUpdateDraftParameters();
-                details.Name = runbook.RunbookName;
-                details.Location = _connectionData.AzureRMLocation;
+            var details = new RunbookCreateOrUpdateDraftParameters();
+            details.Name = runbook.RunbookName;
+            details.Location = _connectionData.AzureRMLocation;
+            details.Tags.Add(AutoStudioTagName, runbook.Tags);
 
-                details.Properties = new RunbookCreateOrUpdateDraftProperties();
-                details.Properties.RunbookType = "Script";
-                details.Properties.Description = "Runbook created with Automation Studio.";
-                details.Properties.Draft = draft;
+            details.Properties = new RunbookCreateOrUpdateDraftProperties();
+            details.Properties.RunbookType = "Script";
+            details.Properties.Description = "Runbook created with Automation Studio.";
+            details.Properties.Draft = draft;
 
-                response = await _client.Runbooks.CreateOrUpdateWithDraftAsync(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount, details);
+            response = await _client.Runbooks.CreateOrUpdateWithDraftAsync(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount, details);
 
-                if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError)
-                    runbookCreated = false;
-                else
-                    runbookCreated = true;
+            if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError)
+                runbookCreated = false;
+            else
+                runbookCreated = true;
 
-                // Need to set the draft runbook ID to notify the system that this runbook is in draft mode
-                runbook.DraftRunbookVersionID = Guid.NewGuid();
-            }
+            // Need to set the draft runbook ID to notify the system that this runbook is in draft mode
+            runbook.DraftRunbookVersionID = Guid.NewGuid();
+            //}
 
-            if (!runbookCreated && runbookNeedsCreation)
+            if (!runbookCreated /*&& runbookNeedsCreation*/)
             {
                 return new OperationResult
                 {
                     ErrorCode = response.StatusCode.ToString(),
-                    ErrorMessage = "Unable to create the runbook",
+                    ErrorMessage = "Unable to save the runbook",
                     HttpStatusCode = response.StatusCode,
                     Status = OperationStatus.Failed
                 };
