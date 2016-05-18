@@ -10,6 +10,11 @@ namespace SMAStudiovNext.Vendor.Azure
     {
         public Guid ScheduleID { get; set; }
 
+        /// <summary>
+        /// Azure RM Identifier
+        /// </summary>
+        public string Id { get; set; }
+
         public string Name { get; set; }
 
         public DateTime StartTime { get; set; }

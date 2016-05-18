@@ -1,6 +1,6 @@
 ﻿using Gemini.Framework.Commands;
 using Microsoft.Azure;
-using Microsoft.WindowsAzure.Management.Automation;
+using Microsoft.Azure.Management.Automation;
 using Newtonsoft.Json;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Core.Net;
@@ -51,10 +51,10 @@ namespace SMAStudiovNext.Services
             // We need to fetch a token for the backend connection
             InitializeAsync().Wait();
 
-            _certificate = CertificateManager.FindCertificate(_connectionData.AzureCertificateThumbprint);
+            /*_certificate = CertificateManager.FindCertificate(_connectionData.AzureCertificateThumbprint);
             _webRequestHandler = new WebRequestHandler();
             _webRequestHandler.ClientCertificates.Add(_certificate);
-            _client.HttpClient = new HttpClient(_webRequestHandler);
+            _client.HttpClient = new HttpClient(_webRequestHandler);*/
         }
 
         private async Task InitializeAsync()
@@ -85,9 +85,9 @@ namespace SMAStudiovNext.Services
             throw new NotImplementedException();
         }
 
-        public Task<bool> CheckRunningJobs(RunbookModelProxy runbook, bool checkDraft)
+        public async Task<bool> CheckRunningJobs(RunbookModelProxy runbook, bool checkDraft)
         {
-            throw new NotImplementedException();
+            return await Task.Run(() => { return false; });
         }
 
         public bool Delete(ModelProxyBase model)
@@ -97,7 +97,9 @@ namespace SMAStudiovNext.Services
 
         public string GetBackendUrl(RunbookType runbookType, RunbookModelProxy runbook)
         {
-            throw new NotImplementedException();
+            // Azure RM, apart from Classic, only requires the runbook name when fetching the content.
+            // That's why we only return runbook name here.
+            return runbookType + "|" + runbook.RunbookName;
         }
 
         public ConnectionModelProxy GetConnectionDetails(ConnectionModelProxy connection)
@@ -112,12 +114,32 @@ namespace SMAStudiovNext.Services
 
         public string GetContent(string url)
         {
-            throw new NotImplementedException();
+            var parts = url.Split('|');
+            
+            switch (parts[0])
+            {
+                case "Draft":
+                    return _client.RunbookDraft.Content(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount, parts[1]).Stream;
+                default:
+                    return _client.Runbooks.Content(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount, parts[1]).Stream;
+            }
         }
 
-        public Task<string> GetContentAsync(string url)
+        public async Task<string> GetContentAsync(string url)
         {
-            throw new NotImplementedException();
+            var parts = url.Split('|');
+
+            switch (parts[0])
+            {
+                case "Draft":
+                    var draft = await _client.RunbookDraft.ContentAsync(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount, parts[1]);
+
+                    return draft.Stream;
+                default:
+                    var published = await _client.Runbooks.ContentAsync(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount, parts[1]);
+
+                    return published.Stream;
+            }
         }
 
         public JobModelProxy GetJobDetails(Guid jobId)
@@ -159,6 +181,36 @@ namespace SMAStudiovNext.Services
             runbooks.IsExpanded = true;
             resource.Items.Add(runbooks);
 
+            // Connections
+            var connections = new ResourceContainer("Connections", new Folder("Connections"), IconsDescription.Folder);
+            connections.Context = _backendContext;
+            connections.Items = _backendContext.Connections;
+            resource.Items.Add(connections);
+
+            // Credentials
+            var credentials = new ResourceContainer("Credentials", new Folder("Credentials"), IconsDescription.Folder);
+            credentials.Context = _backendContext;
+            credentials.Items = _backendContext.Credentials;
+            resource.Items.Add(credentials);
+
+            // Modules
+            var modules = new ResourceContainer("Modules", new Folder("Modules"), IconsDescription.Folder);
+            modules.Context = _backendContext;
+            modules.Items = _backendContext.Modules;
+            resource.Items.Add(modules);
+
+            // Schedules
+            var schedules = new ResourceContainer("Schedules", new Folder("Schedules"), IconsDescription.Folder);
+            schedules.Context = _backendContext;
+            schedules.Items = _backendContext.Schedules;
+            resource.Items.Add(schedules);
+
+            // Variables
+            var variables = new ResourceContainer("Variables", new Folder("Variables"), IconsDescription.Folder);
+            variables.Context = _backendContext;
+            variables.Items = _backendContext.Variables;
+            resource.Items.Add(variables);
+
             return resource;
         }
 
@@ -167,22 +219,126 @@ namespace SMAStudiovNext.Services
             if (SettingsService.CurrentSettings == null)
                 return;
 
-            var runbooksResponse = _client.Runbooks.List(_connectionData.AzureAutomationAccount);
+            var runbooksResponse = _client.Runbooks.List(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount);
+            //_client.Runbooks.List(_connectionData.AzureAutomationAccount);
 
             if (runbooksResponse.Runbooks.Count > 0)
             {
                 var runbooks = runbooksResponse.Runbooks.Select(r => new Vendor.Azure.Runbook
                 {
                     Id = r.Id,
-                    RunbookID = Guid.Parse(r.Id),
-                    RunbookName = r.Name
+                    RunbookID = Guid.NewGuid(),
+                    RunbookName = r.Name,
+                    State = r.Properties.State
                 }).ToList();
 
                 foreach (var runbook in runbooks)
                     _backendContext.Runbooks.Add(new ResourceContainer(runbook.RunbookName, new RunbookModelProxy(runbook, _backendContext), IconsDescription.Runbook));
-
-                // Get next page
             }
+
+            var variablesResponse = _client.Variables.List(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount);
+
+            if (variablesResponse.Variables.Count > 0)
+            {
+                var variables = variablesResponse.Variables.Select(v => new Vendor.Azure.Variable
+                {
+                    Id = v.Id,
+                    VariableID = Guid.NewGuid(),
+                    Value = v.Properties.Value,
+                    Name = v.Name,
+                    IsEncrypted = v.Properties.IsEncrypted
+                });
+
+                foreach (var variable in variables)
+                    _backendContext.Variables.Add(new ResourceContainer(variable.Name, new VariableModelProxy(variable, _backendContext), IconsDescription.Variable));
+            }
+
+            var credentialsResponse = _client.PsCredentials.List(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount);
+
+            if (credentialsResponse.Credentials.Count > 0)
+            {
+                var credentials = credentialsResponse.Credentials.Select(c => new Vendor.Azure.Credential
+                {
+                    Id = c.Id,
+                    CredentialID = Guid.NewGuid(),
+                    Name = c.Name,
+                    UserName = c.Properties.UserName
+                });
+
+                foreach (var credential in credentials)
+                    _backendContext.Credentials.Add(new ResourceContainer(credential.Name, new CredentialModelProxy(credential, _backendContext), IconsDescription.Credential));
+            }
+
+            var connectionsResponse = _client.Connections.List(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount);
+
+            if (connectionsResponse.Connection.Count > 0)
+            {
+                foreach (var connection in connectionsResponse.Connection)
+                {
+                    var conn = new Vendor.Azure.Connection();
+                    conn.Name = connection.Name;
+                    conn.LastModifiedTime = connection.Properties.LastModifiedTime.DateTime;
+                    conn.Description = connection.Properties.Description;
+                    conn.ConnectionType = new Vendor.Azure.ConnectionType
+                    {
+                        Name = connection.Properties.ConnectionType.Name,
+                        CreationTime = connection.Properties.CreationTime.DateTime,
+                        LastModifiedTime = connection.Properties.LastModifiedTime.DateTime
+                    };
+
+                    foreach (var def in connection.Properties.FieldDefinitionValues)
+                    {
+                        conn.ConnectionFieldValues.Add(new Vendor.Azure.ConnectionFieldValue
+                        {
+                            Connection = conn,
+                            ConnectionFieldName = def.Key,
+                            ConnectionName = conn.Name,
+                            ConnectionTypeName = conn.ConnectionType.Name,
+                            IsEncrypted = false,
+                            IsOptional = false,
+                            Type = string.Empty,
+                            Value = def.Value
+                        });
+                    }
+
+                    _backendContext.Connections.Add(new ResourceContainer(conn.Name, new ConnectionModelProxy(conn, _backendContext), IconsDescription.Connection));
+                }
+            }
+
+            var modulesResponse = _client.Modules.List(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount);
+
+            if (modulesResponse.Modules.Count > 0)
+            {
+                var modules = modulesResponse.Modules.Select(m => new Vendor.Azure.Module
+                {
+                    CreationTime = m.Properties.CreationTime.DateTime,
+                    LastModifiedTime = m.Properties.LastModifiedTime.DateTime,
+                    ModuleName = m.Name,
+                    ModuleUrl = m.Location,
+                    ModuleVersion = m.Properties.Version
+                });
+
+                foreach (var module in modules)
+                    _backendContext.Modules.Add(new ResourceContainer(module.ModuleName, new ModuleModelProxy(module, _backendContext), IconsDescription.Folder));
+            }
+
+            var schedulesResponse = _client.Schedules.List(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount);
+
+            if (schedulesResponse.Schedules.Count > 0)
+            {
+                /*var schedules = schedulesResponse.Schedules.Select(s => new Vendor.Azure.Schedule
+                {
+                    Id = s.Id,
+                    ScheduleID = Guid.NewGuid(),
+                    DayInterval = (int)s.Properties.Interval,
+                    ExpiryTime = s.Properties.ExpiryTime.DateTime,
+                    
+                });*/
+                _backendContext.Schedules.Add(new ResourceContainer("Schedules not supported yet.", new ScheduleModelProxy(new Vendor.Azure.Schedule(), _backendContext), IconsDescription.Schedule));
+            }
+
+            _backendContext.ParseTags();
+            _backendContext.IsReady = true;
         }
 
         public Task PauseExecution(RunbookModelProxy runbook, bool isDraft = false)

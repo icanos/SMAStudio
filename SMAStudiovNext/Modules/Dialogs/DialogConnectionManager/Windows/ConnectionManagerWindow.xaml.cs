@@ -36,7 +36,7 @@ namespace SMAStudiovNext.Modules.DialogConnectionManager.Windows
 
             LoadCertificates();
 
-            Connection = new BackendConnection {SmaImpersonatedLogin = true};
+            //Connection = new BackendConnection {SmaImpersonatedLogin = true};
         }
 
         private void LoadCertificates()

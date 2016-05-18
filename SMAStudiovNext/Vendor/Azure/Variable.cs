@@ -10,6 +10,11 @@ namespace SMAStudiovNext.Vendor.Azure
     {
         public Guid VariableID { get; set; }
 
+        /// <summary>
+        /// Azure RM Identifiers use a URL like syntax for the identifier.
+        /// </summary>
+        public string Id { get; set; }
+
         public string Name { get; set; }
 
         public string Value { get; set; }

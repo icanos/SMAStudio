@@ -10,6 +10,11 @@ namespace SMAStudiovNext.Vendor.Azure
     {
         public Guid CredentialID { get; set; }
 
+        /// <summary>
+        /// Azure RM Identifiers are URL like identifiers.
+        /// </summary>
+        public string Id { get; set; }
+
         public string Name { get; set; }
 
         public string UserName { get; set; }
