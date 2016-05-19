@@ -26,6 +26,7 @@ namespace SMAStudiovNext.Agents
 
         private object _syncLock = new object();
         private bool _isRunning = true;
+        private Thread _backgroundThread;
 
         public AutoSaveAgent()
         {
@@ -109,65 +110,76 @@ namespace SMAStudiovNext.Agents
 
             if (SettingsService.CurrentSettings.EnableLocalCopy)
             {
-                var backgroundThread = new Thread(new ThreadStart(StartInternal));
-                backgroundThread.Priority = ThreadPriority.BelowNormal;
-                backgroundThread.Start();
+                _backgroundThread = new Thread(new ThreadStart(StartInternal));
+                _backgroundThread.Priority = ThreadPriority.BelowNormal;
+                _backgroundThread.Start();
             }
         }
 
         private void StartInternal()
         {
-            while (_isRunning)
+            try
             {
-                IList<IDocument> documents = null;
-
-                lock (_syncLock)
+                while (_isRunning)
                 {
-                    documents = _shell.Documents;
-                }
+                    IList<IDocument> documents = null;
 
-                try {
-                    foreach (var document in documents)
+                    lock (_syncLock)
                     {
-                        if (!_isRunning)
-                            break;
+                        documents = _shell.Documents;
+                    }
 
-                        if (!(document is RunbookViewModel))
-                            continue;
-
-                        var runbookViewModel = (RunbookViewModel)document;
-
-                        if (!runbookViewModel.UnsavedChanges)
-                            continue;
-
-                        try
+                    try
+                    {
+                        foreach (var document in documents)
                         {
-                            var path = Path.Combine(SettingsService.CurrentSettings.LocalCopyPath, runbookViewModel.Runbook.Context.ID + "_" + runbookViewModel.Runbook.RunbookName + ".ps1");
+                            if (!_isRunning)
+                                break;
 
-                            var textWriter = new StreamWriter(path, false);
-                            textWriter.Write(runbookViewModel.Content);
-                            textWriter.Flush();
-                            textWriter.Close();
-                        }
-                        catch (IOException)
-                        {
+                            if (!(document is RunbookViewModel))
+                                continue;
 
+                            var runbookViewModel = (RunbookViewModel)document;
+
+                            if (!runbookViewModel.UnsavedChanges)
+                                continue;
+
+                            try
+                            {
+                                var path = Path.Combine(SettingsService.CurrentSettings.LocalCopyPath, runbookViewModel.Runbook.Context.ID + "_" + runbookViewModel.Runbook.RunbookName + ".ps1");
+
+                                var textWriter = new StreamWriter(path, false);
+                                textWriter.Write(runbookViewModel.Content);
+                                textWriter.Flush();
+                                textWriter.Close();
+                            }
+                            catch (IOException)
+                            {
+
+                            }
                         }
                     }
-                }
-                catch (Exception)
-                {
-                    // We might get an exception here if we're closing the application
-                    // at the same time as this loop is running.
-                }
+                    catch (Exception)
+                    {
+                        // We might get an exception here if we're closing the application
+                        // at the same time as this loop is running.
+                    }
 
-                Thread.Sleep(SettingsService.CurrentSettings.AutoSaveInterval * 1000);
+                    Thread.Sleep(SettingsService.CurrentSettings.AutoSaveInterval * 1000);
+                }
+            }
+            catch (ThreadAbortException)
+            {
+
             }
         }
 
         public void Stop()
         {
             _isRunning = false;
+
+            if (_backgroundThread != null)
+                _backgroundThread.Abort();
 
             // Remove cached files if the exit is clean
             /*if (Directory.Exists(CacheFolder))

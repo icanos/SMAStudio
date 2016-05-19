@@ -32,6 +32,7 @@ namespace SMAStudiovNext.Modules.WindowModule.ViewModels
                 ModuleName = string.Empty;
 
             ModuleVersion = "1.0.0.0";
+            LongRunningOperation.Stop();
         }
 
         public override void CanClose(Action<bool> callback)
@@ -105,6 +106,8 @@ namespace SMAStudiovNext.Modules.WindowModule.ViewModels
         {
             await Task.Run(delegate ()
             {
+                LongRunningOperation.Start();
+
                 model.ViewModel = this;
                 model.ModuleName = ModuleName;
                 model.ModuleUrl = ModuleUrl;
@@ -123,6 +126,8 @@ namespace SMAStudiovNext.Modules.WindowModule.ViewModels
                 // Update the UI to notify that the changes has been saved
                 UnsavedChanges = false;
                 NotifyOfPropertyChange(() => DisplayName);
+
+                LongRunningOperation.Stop();
             });
         }
 

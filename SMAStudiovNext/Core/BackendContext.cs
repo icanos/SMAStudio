@@ -102,9 +102,54 @@ namespace SMAStudiovNext.Core
             return Service.GetStructure();
         }
 
+        public async Task Copy(RunbookModelProxy runbook)
+        {
+            var newRunbook = default(RunbookModelProxy);
+
+            switch (runbook.Context.ContextType)
+            {
+                case ContextType.SMA:
+                    newRunbook = new RunbookModelProxy(new SMA.Runbook
+                    {
+                        RunbookName = runbook.RunbookName,
+                        Tags = runbook.Tags != null ? runbook.Tags : string.Empty
+                    }, this);
+                    break;
+                default:
+                    newRunbook = new RunbookModelProxy(new Vendor.Azure.Runbook
+                    {
+                        RunbookName = runbook.RunbookName,
+                        Tags = runbook.Tags != null ? runbook.Tags : string.Empty
+                    }, this);
+                    break;
+            }
+
+            var runbookDraftContent = await runbook.Context.Service.GetContentAsync(runbook.Context.Service.GetBackendUrl(RunbookType.Draft, runbook));
+            var runbookPublishedContent = await runbook.Context.Service.GetContentAsync(runbook.Context.Service.GetBackendUrl(RunbookType.Published, runbook));
+
+            if (string.IsNullOrEmpty(runbookPublishedContent))
+            {
+                // We only have draft content
+                await Service.SaveRunbookAsync(newRunbook, runbookDraftContent);
+            }
+            else
+            {
+                await Service.SaveRunbookAsync(newRunbook, string.Empty);
+                await Service.SaveRunbookContentAsync(newRunbook, runbookPublishedContent, RunbookType.Published);
+                await Service.SaveRunbookContentAsync(newRunbook, runbookDraftContent, RunbookType.Draft);
+            }
+
+            AddToRunbooks(newRunbook);
+            Start();
+        }
+
         public void AddToRunbooks(RunbookModelProxy runbook)
         {
-            try {
+            if (_runbookNameCache.Contains(runbook.RunbookName))
+                return;
+
+            try
+            {
                 Execute.OnUIThread(() =>
                 {
                     Runbooks.Add(new ResourceContainer(runbook.RunbookName, runbook, IconsDescription.Runbook));
@@ -178,7 +223,8 @@ namespace SMAStudiovNext.Core
 
         public void ParseTags()
         {
-            try {
+            try
+            {
                 var unmatchedTag = new Tag("(untagged)");
                 var unmatchedTagMenuItem = new ResourceContainer("(untagged)", unmatchedTag, IconsDescription.Folder);
                 unmatchedTagMenuItem.Context = this;
@@ -251,8 +297,8 @@ namespace SMAStudiovNext.Core
             
                 Execute.OnUIThread(() =>
                 {
-                // We want unmatched at the bottom
-                Tags = Tags.OrderBy(item => item.Title).ToObservableCollection();
+                    // We want unmatched at the bottom
+                    Tags = Tags.OrderBy(item => item.Title).ToObservableCollection();
                     Tags.Add(unmatchedTagMenuItem);
 
                     NotifyOfPropertyChange(() => Tags);

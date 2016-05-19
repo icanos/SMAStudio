@@ -115,11 +115,14 @@ namespace SMAStudiovNext.Modules.WindowConnection.ViewModels
                                 }
                             }
                         }
+
+                        LongRunningOperation.Stop();
                     });
 
                 }
                 catch (ApplicationException ex)
                 {
+                    LongRunningOperation.Stop();
                     GlobalExceptionHandler.Show(ex);
                 }
             });
@@ -299,6 +302,8 @@ namespace SMAStudiovNext.Modules.WindowConnection.ViewModels
         {
             await Task.Run(delegate ()
             {
+                LongRunningOperation.Start();
+
                 //model.Value = JsonConverter.ToJson(value);
                 model.ViewModel = this;
                 model.Description = Description;
@@ -326,6 +331,8 @@ namespace SMAStudiovNext.Modules.WindowConnection.ViewModels
                 // Update the UI to notify that the changes has been saved
                 UnsavedChanges = false;
                 NotifyOfPropertyChange(() => DisplayName);
+
+                LongRunningOperation.Stop();
             });
         }
 

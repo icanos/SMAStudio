@@ -47,6 +47,8 @@ namespace SMAStudiovNext.Core
         
         void SignalCompleted();
 
+        Task Copy(RunbookModelProxy runbook);
+
         bool IsRunbook(string name);
 
         /// <summary>

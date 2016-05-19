@@ -32,6 +32,7 @@ namespace SMAStudiovNext.Modules.WindowVariable.ViewModels
                 value = JsonConverter.FromJson(variable.Value).ToString();
 
             Owner = variable.Context.Service;
+            LongRunningOperation.Stop();
         }
 
         public override void CanClose(Action<bool> callback)
@@ -151,6 +152,8 @@ namespace SMAStudiovNext.Modules.WindowVariable.ViewModels
         {
             await Task.Run(delegate ()
             {
+                LongRunningOperation.Start();
+
                 model.Value = JsonConverter.ToJson(value);
                 model.ViewModel = this;
 
@@ -166,6 +169,8 @@ namespace SMAStudiovNext.Modules.WindowVariable.ViewModels
                 // Update the UI to notify that the changes has been saved
                 UnsavedChanges = false;
                 NotifyOfPropertyChange(() => DisplayName);
+
+                LongRunningOperation.Stop();
             });
         }
     }

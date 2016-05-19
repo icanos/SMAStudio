@@ -99,6 +99,8 @@
                                 <Separator />
                                 <MenuItem Header="Add Module" Command="{Binding NewModuleCommand}" />
                             </MenuItem>
+                            <MenuItem x:Name="btnCopyResource" Header="Copy to..." />
+                            <Separator />
                             <MenuItem Header="Job History" Command="{Binding HistoryCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
                                                                                   AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}" />
                             <MenuItem Header="Auto Documentation" Command="{Binding DocumentationCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
@@ -107,11 +109,10 @@
                             <Separator />
                             <MenuItem Header="Publish" Command="{Binding PublishCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
                                                                                   AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}"/>
+                            <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" />
                             <Separator />
                             <MenuItem Header="Delete" Command="{Binding DeleteCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
                                                                                     AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}" />
-                            <Separator />
-                            <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" />
                         </ContextMenu>
                     </TreeView.ContextMenu>
                     <TreeView.ItemContainerStyle>

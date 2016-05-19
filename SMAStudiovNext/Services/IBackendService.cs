@@ -123,6 +123,19 @@ namespace SMAStudiovNext.Services
         Task StopExecution(RunbookModelProxy runbook, bool isDraft = false);
 
         /// <summary>
+        /// Save content to a runbook
+        /// </summary>
+        /// <param name="runbook">Runbook to save the content to</param>
+        /// <param name="runbookContent">Content to save</param>
+        /// <param name="runbookType">Type of content to save (published or draft)</param>
+        /// <returns></returns>
+        Task<OperationStatus> SaveRunbookContentAsync(RunbookModelProxy runbook, string runbookContent, RunbookType runbookType);
+
+        Task<OperationResult> SaveRunbookAsync(RunbookModelProxy runbook, string runbookContent);
+
+        Task<bool> SaveVariableAsync(VariableModelProxy variable);
+
+        /// <summary>
         /// Delete a object from the backend service
         /// </summary>
         /// <param name="model">Object to delete</param>

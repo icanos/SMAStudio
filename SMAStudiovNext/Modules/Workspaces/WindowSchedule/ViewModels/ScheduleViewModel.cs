@@ -25,6 +25,7 @@ namespace SMAStudiovNext.Modules.WindowSchedule.ViewModels
             }
 
             Owner = schedule.Context.Service;
+            LongRunningOperation.Stop();
         }
 
         public override void CanClose(Action<bool> callback)
@@ -55,6 +56,7 @@ namespace SMAStudiovNext.Modules.WindowSchedule.ViewModels
         {
             await Task.Run(delegate ()
             {
+                LongRunningOperation.Start();
                 model.ViewModel = this;
 
                 try
@@ -70,6 +72,7 @@ namespace SMAStudiovNext.Modules.WindowSchedule.ViewModels
                 // Update the UI to notify that the changes has been saved
                 UnsavedChanges = false;
                 NotifyOfPropertyChange(() => DisplayName);
+                LongRunningOperation.Stop();
             });
         }
 

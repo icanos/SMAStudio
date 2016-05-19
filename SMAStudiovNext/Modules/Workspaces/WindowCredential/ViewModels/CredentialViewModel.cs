@@ -25,6 +25,7 @@ namespace SMAStudiovNext.Modules.WindowCredential.ViewModels
             }
 
             Owner = credential.Context.Service;
+            LongRunningOperation.Stop();
         }
 
         public override void CanClose(Action<bool> callback)
@@ -155,6 +156,7 @@ namespace SMAStudiovNext.Modules.WindowCredential.ViewModels
         {
             await Task.Run(delegate ()
             {
+                LongRunningOperation.Start();
                 model.ViewModel = this;
 
                 try
@@ -170,6 +172,7 @@ namespace SMAStudiovNext.Modules.WindowCredential.ViewModels
                 // Update the UI to notify that the changes has been saved
                 UnsavedChanges = false;
                 NotifyOfPropertyChange(() => DisplayName);
+                LongRunningOperation.Stop();
             });
         }
 

@@ -140,11 +140,11 @@ namespace SMAStudiovNext.Services
 
             if (instance.Model is RunbookModelProxy)
             {
-                operationResult = await SaveAzureRunbook(instance);
+                operationResult = await SaveRunbookAsync(instance.Model as RunbookModelProxy, instance.Content);
             }
             else if (instance.Model is VariableModelProxy)
             {
-                SaveAzureVariable(instance);
+                await SaveVariableAsync(instance as VariableModelProxy);
             }
             else if (instance.Model is CredentialModelProxy)
             {
@@ -585,10 +585,8 @@ namespace SMAStudiovNext.Services
             return true;
         }
 
-        private async Task<OperationResult> SaveAzureRunbook(IViewModel viewModel)
+        public async Task<OperationResult> SaveRunbookAsync(RunbookModelProxy runbook, string runbookContent)
         {
-            var runbook = viewModel.Model as RunbookModelProxy;
-
             if (runbook.RunbookID == Guid.Empty)
             {
                 // New runbook that doesn't exist in Azure Automation yet
@@ -609,7 +607,7 @@ namespace SMAStudiovNext.Services
                 var cryptoProvider = new SHA256CryptoServiceProvider();
                 var encoding = System.Text.Encoding.UTF8;
 
-                var rbBytes = encoding.GetBytes(viewModel.Content);
+                var rbBytes = encoding.GetBytes(runbookContent);
                 var resultHash = cryptoProvider.ComputeHash(rbBytes);
                 var resultHashB64 = Convert.ToBase64String(resultHash);
 
@@ -622,21 +620,25 @@ namespace SMAStudiovNext.Services
             }
 
             // Update the runbook
-            var result = await SendRequestAsync("runbooks/" + runbook.RunbookName.ToUrlSafeString() + "/draft/content", HttpMethod.Put, viewModel.Content, "text/powershell").ConfigureAwait(false);
-
-            //if (!String.IsNullOrEmpty(result))
-            //{
-            //    return await GetOperationResultAsync(result);
-            //}
-
-            // Reset the unsaved changes flag
-            viewModel.UnsavedChanges = false;
+            await SaveRunbookContentAsync(runbook, runbookContent, RunbookType.Draft);
 
             return new OperationResult
             {
                 Status = OperationStatus.Succeeded,
                 HttpStatusCode = HttpStatusCode.OK
             };
+        }
+
+        public async Task<OperationStatus> SaveRunbookContentAsync(RunbookModelProxy runbook, string runbookContent, RunbookType runbookType)
+        {
+            var result = await SendRequestAsync("runbooks/" + runbook.RunbookName.ToUrlSafeString() + "/draft/content", HttpMethod.Put, runbookContent, "text/powershell").ConfigureAwait(false);
+
+            if (runbookType == RunbookType.Published)
+            {
+                await CheckIn(runbook);
+            }
+
+            return OperationStatus.Succeeded;
         }
 
         public Guid? StartRunbook(RunbookModelProxy runbookProxy, List<SMA.NameValuePair> parameters)
@@ -1176,10 +1178,8 @@ namespace SMAStudiovNext.Services
 
         #region Variables
 
-        private void SaveAzureVariable(IViewModel viewModel)
+        public async Task<bool> SaveVariableAsync(VariableModelProxy variable)
         {
-            var variable = viewModel.Model as VariableModelProxy;
-
             var dict = new Dictionary<string, object>();
             var properties = new Dictionary<string, object>();
             properties.Add("isEncrypted", variable.IsEncrypted);
@@ -1189,14 +1189,14 @@ namespace SMAStudiovNext.Services
             if (variable.VariableID == Guid.Empty)
             {
                 // New variable
-                SendRequest("variables/" + variable.Name.ToUrlSafeString(), HttpMethod.Put, JsonConvert.SerializeObject(dict), "application/json");
+                await SendRequestAsync("variables/" + variable.Name.ToUrlSafeString(), HttpMethod.Put, JsonConvert.SerializeObject(dict), "application/json");
             }
             else
             {
-                SendRequest("variables/" + variable.Name.ToUrlSafeString(), new HttpMethod("PATCH"), JsonConvert.SerializeObject(dict), "application/json");
+                await SendRequestAsync("variables/" + variable.Name.ToUrlSafeString(), new HttpMethod("PATCH"), JsonConvert.SerializeObject(dict), "application/json");
             }
 
-            viewModel.UnsavedChanges = false;
+            return true;
         }
 
         #endregion

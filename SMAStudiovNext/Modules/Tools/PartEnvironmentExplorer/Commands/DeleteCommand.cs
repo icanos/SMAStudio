@@ -6,6 +6,7 @@ using SMAStudiovNext.Exceptions;
 using SMAStudiovNext.Models;
 using SMAStudiovNext.Modules.PartEnvironmentExplorer.ViewModels;
 using SMAStudiovNext.Utils;
+using SMAStudiovNext.Core;
 
 namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands
 {
@@ -58,6 +59,7 @@ namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands
 
             if (MessageBox.Show("Are you sure you want to delete the object? This cannot be reverted.", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
+                LongRunningOperation.Start();
                 var item = (ModelProxyBase)(parameter as ResourceContainer).Tag;
 
                 try {
@@ -68,6 +70,8 @@ namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands
                 {
                     GlobalExceptionHandler.Show(ex);
                 }
+
+                LongRunningOperation.Stop();
             }
         }
 

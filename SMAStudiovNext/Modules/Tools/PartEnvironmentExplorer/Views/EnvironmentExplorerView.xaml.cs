@@ -32,6 +32,11 @@ namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Views
             get { return (ResourceContainer)treeView.SelectedItem; }
         }
 
+        public MenuItem CopyButton
+        {
+            get { return btnCopyResource; }
+        }
+
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);

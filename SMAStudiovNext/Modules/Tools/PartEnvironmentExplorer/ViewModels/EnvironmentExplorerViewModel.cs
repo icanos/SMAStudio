@@ -14,6 +14,9 @@ using SMAStudiovNext.Modules.DialogConnectionManager.Windows;
 using SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands;
 using SMAStudiovNext.Modules.PartEnvironmentExplorer.Views;
 using SMAStudiovNext.Utils;
+using System.Windows.Controls;
+using System;
+using SMAStudiovNext.Models;
 
 namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.ViewModels
 {
@@ -76,14 +79,57 @@ namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.ViewModels
         public void OnBackendReady(object sender, ContextUpdatedEventArgs e)
         {
             var context = e.Context;
-
+            
             Execute.OnUIThread(() =>
             {
                 var output = IoC.Get<IOutput>();
                 output.AppendLine("All objects loaded!");
 
                 NotifyOfPropertyChange(() => Items);
+
+                // Add each account to the 'Copy To' button in the context menu
+                if (_view != null)
+                {
+                    if (_view.CopyButton.Items.Count == 0)
+                    {
+                        foreach (var item in Items)
+                        {
+                            var menuItem = new MenuItem();
+                            menuItem.Header = item.Title;
+                            menuItem.Tag = item;
+                            menuItem.Click += CopyToClicked;
+
+                            _view.CopyButton.Items.Add(menuItem);
+                        }
+                    }
+                }
             });
+        }
+
+        private async void CopyToClicked(object sender, EventArgs e)
+        {
+            var menuItem = (MenuItem)sender;
+
+            if (menuItem == null || menuItem.Tag == null)
+                return;
+
+            var selectedItem = _view.SelectedObject;
+
+            if (selectedItem == null)
+                return;
+
+            var tag = selectedItem.Tag;
+            var copyToService = ((menuItem.Tag as ResourceContainer).Tag as BackendContext);
+
+            LongRunningOperation.Start();
+
+            if (tag is RunbookModelProxy)
+            {
+                var runbook = (tag as RunbookModelProxy);
+                await copyToService.Copy(runbook);
+
+                LongRunningOperation.Stop();
+            }
         }
 
         public void Delete(ResourceContainer item)

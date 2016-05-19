@@ -54,7 +54,7 @@
     <ApplicationIcon>settings-icon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>AutomationStudio.pfx</AssemblyOriginatorKeyFile>

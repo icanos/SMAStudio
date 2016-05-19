@@ -209,14 +209,15 @@ namespace SMAStudiovNext.Services
             try {
                 if (instance.Model is RunbookModelProxy)
                 {
-                    SaveSmaRunbook(context, instance);
+                    //SaveSmaRunbook(context, instance);
+                    await SaveRunbookAsync(instance.Model as RunbookModelProxy, instance.Content);
                 }
                 else if (instance.Model is VariableModelProxy)
                 {
                     var proxy = (VariableModelProxy)instance.Model;
-
-                    if (proxy.GetSubType().Equals(typeof(SMA.Variable)))
-                        SaveSmaVariable(context, instance);
+                    await SaveVariableAsync(proxy);
+                    //if (proxy.GetSubType().Equals(typeof(SMA.Variable)))
+                        //SaveSmaVariable(context, instance);
                 }
                 else if (instance.Model is CredentialModelProxy)
                 {
@@ -399,15 +400,16 @@ namespace SMAStudiovNext.Services
             context.SaveChanges();
         }
         
-        private void SaveSmaVariable(OrchestratorApi context, IViewModel instance)
+        public Task<bool> SaveVariableAsync(VariableModelProxy variable)//(OrchestratorApi context, IViewModel instance)
         {
+            var context = GetConnection();
             Logger.DebugFormat("SaveSmaVariable(...)");
 
-            var variable = (SMA.Variable)((VariableModelProxy)instance.Model).Model;
+            var rawVariable = variable.Model as SMA.Variable;
 
             if (variable.VariableID == Guid.Empty)
             {
-                context.AddToVariables(variable);
+                context.AddToVariables(rawVariable);
             }
             else
             {
@@ -418,7 +420,7 @@ namespace SMAStudiovNext.Services
                     // The variable doesn't exist
                     // NOTE: This suggests that the variable may be created in another
                     // environment and then reconnected to another SMA instance. How should this be handled?
-                    context.AddToVariables(variable);
+                    context.AddToVariables(rawVariable);
                 }
 
                 foundVariable.Name = variable.Name;
@@ -433,13 +435,19 @@ namespace SMAStudiovNext.Services
             }
 
             context.SaveChanges();
+
+            return new Task<bool>(() =>
+            {
+                return true;
+            });
         }
 
-        private void SaveSmaRunbook(OrchestratorApi context, IViewModel instance)
+        public Task<OperationResult> SaveRunbookAsync(RunbookModelProxy runbook, string runbookContent)
         {
+            var context = GetConnection();
             Logger.DebugFormat("SaveSmaRunbook(...)");
 
-            var runbook = (SMA.Runbook)((RunbookModelProxy)instance.Model).Model;
+            var rawRunbook = runbook.Model as SMA.Runbook;
 
             if (runbook == null || runbook.RunbookID == Guid.Empty)
             {
@@ -455,7 +463,7 @@ namespace SMAStudiovNext.Services
                 context.AddToRunbookVersions(runbookVersion);
 
                 var ms = new MemoryStream();
-                var bytes = Encoding.UTF8.GetBytes(instance.Content);
+                var bytes = Encoding.UTF8.GetBytes(runbookContent);
                 ms.Write(bytes, 0, bytes.Length);
                 ms.Seek(0, SeekOrigin.Begin);
 
@@ -509,8 +517,9 @@ namespace SMAStudiovNext.Services
                     throw new ApplicationException("Error when saving the object.");
                 }
 
-                instance.Model = new RunbookModelProxy(savedRunbook, _backendContext);
-                runbook = savedRunbook;
+                //instance.Model = new RunbookModelProxy(savedRunbook, _backendContext);
+                //runbook = savedRunbook;
+                rawRunbook = savedRunbook;
             }
 
             try
@@ -519,39 +528,16 @@ namespace SMAStudiovNext.Services
             }
             catch (InvalidOperationException) { /* already attached */ }
 
-            // Save the updated runbook
-            //if (!runbook.DraftRunbookVersionID.HasValue || runbook.DraftRunbookVersionID == Guid.Empty)
-            //{
-            //    runbook.DraftRunbookVersionID = new Guid?(runbook.Edit(context));
-            //}
-
             try
             {
                 if (runbook.DraftRunbookVersionID.HasValue)
                 {
-                    var ms = new MemoryStream();
-                    var bytes = Encoding.UTF8.GetBytes(instance.Content);
-                    ms.Write(bytes, 0, bytes.Length);
-                    ms.Seek(0, SeekOrigin.Begin);
-
-                    var baseStream = (Stream)ms;
-                    var entity = (from rv in context.RunbookVersions
-                                  where (Guid?)rv.RunbookVersionID == runbook.DraftRunbookVersionID
-                                  select rv).FirstOrDefault<RunbookVersion>();
-
-                    try
-                    {
-                        context.AttachTo("Runbooks", runbook);
-                    }
-                    catch (InvalidOperationException) { }
-
-                    context.SetSaveStream(entity, baseStream, true, "application/octet-stream", string.Empty);
-                    context.SaveChanges();
+                    AsyncHelper.RunSync(() => SaveRunbookContentAsync(runbook, runbookContent, RunbookType.Draft));
                 }
 
                 var smaRunbook = context.Runbooks.Where(r => r.RunbookID.Equals(runbook.RunbookID)).FirstOrDefault();
                 smaRunbook.Tags = runbook.Tags;
-                smaRunbook.Description = runbook.Description;
+                smaRunbook.Description = rawRunbook.Description;
 
                 if (runbook.DraftRunbookVersionID.HasValue)
                     smaRunbook.DraftRunbookVersionID = runbook.DraftRunbookVersionID;
@@ -562,7 +548,7 @@ namespace SMAStudiovNext.Services
                 context.UpdateObject(smaRunbook);
                 context.SaveChanges();
 
-                instance.UnsavedChanges = false;
+                //instance.UnsavedChanges = false;
             }
             catch (Exception e)
             {
@@ -570,6 +556,47 @@ namespace SMAStudiovNext.Services
                 //throw new PersistenceException("Unable to save the changes, error: " + e.Message);
                 throw new ApplicationException("Error when saving the runbook. Please refer to the output for more information.", e);
             }
+
+            return new Task<OperationResult>(() =>
+            {
+                return new OperationResult
+                {
+                    HttpStatusCode = HttpStatusCode.OK,
+                    Status = OperationStatus.Succeeded,
+                    RequestUrl = string.Empty
+                };
+            });
+        }
+
+        public async Task<OperationStatus> SaveRunbookContentAsync(RunbookModelProxy runbook, string runbookContent, RunbookType runbookType)
+        {
+            var context = GetConnection();
+
+            var ms = new MemoryStream();
+            var bytes = Encoding.UTF8.GetBytes(runbookContent);
+            ms.Write(bytes, 0, bytes.Length);
+            ms.Seek(0, SeekOrigin.Begin);
+
+            var baseStream = (Stream)ms;
+            var entity = (from rv in context.RunbookVersions
+                            where (Guid?)rv.RunbookVersionID == runbook.DraftRunbookVersionID
+                            select rv).FirstOrDefault<RunbookVersion>();
+
+            try
+            {
+                context.AttachTo("Runbooks", runbook);
+            }
+            catch (InvalidOperationException) { }
+
+            context.SetSaveStream(entity, baseStream, true, "application/octet-stream", string.Empty);
+            context.SaveChanges();
+
+            if (runbookType == RunbookType.Published)
+            {
+                await CheckIn(runbook);
+            }
+
+            return OperationStatus.Succeeded;
         }
 
         public bool Delete(ModelProxyBase model)

@@ -726,13 +726,6 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
             
             if (scriptBlock == null)
             {
-                /*var contentToParse = GetContentInternal(null,
-                    _runbook.DraftRunbookVersionID.HasValue ? RunbookType.Draft : RunbookType.Published, false);
-
-                Token[] tokens;
-                ParseError[] parseErrors;
-
-                scriptBlock = System.Management.Automation.Language.Parser.ParseInput(contentToParse, out tokens, out parseErrors);*/
                 MessageBox.Show("Unable to debug or start the runbook, please close and open the runbook and try again.", "Error");
                 return _parameters;
             }

@@ -1,5 +1,6 @@
 ﻿using SMAStudiovNext.Core;
 using SMAStudiovNext.Utils;
+using System.Windows.Controls;
 
 namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Views
 {
@@ -10,5 +11,7 @@ namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Views
         IBackendContext GetCurrentContext();
 
         ResourceContainer SelectedObject { get; }
+
+        MenuItem CopyButton { get; }
     }
 }

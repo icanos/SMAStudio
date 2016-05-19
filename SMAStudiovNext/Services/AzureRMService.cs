@@ -196,7 +196,28 @@ namespace SMAStudiovNext.Services
 
         public bool Delete(ModelProxyBase model)
         {
-            throw new NotImplementedException();
+            if (model is RunbookModelProxy)
+            {
+                _client.Runbooks.Delete(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount, (model as RunbookModelProxy).RunbookName);
+            }
+            else if (model is VariableModelProxy)
+            {
+                _client.Variables.Delete(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount, (model as VariableModelProxy).Name);
+            }
+            else if (model is ConnectionModelProxy)
+            {
+                _client.Connections.Delete(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount, (model as ConnectionModelProxy).Name);
+            }
+            else if (model is CredentialModelProxy)
+            {
+                _client.PsCredentials.Delete(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount, (model as CredentialModelProxy).Name);
+            }
+            else if (model is ModuleModelProxy)
+            {
+                _client.Modules.Delete(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount, (model as ModuleModelProxy).ModuleName);
+            }
+
+            return true;
         }
 
         public string GetBackendUrl(RunbookType runbookType, RunbookModelProxy runbook)
@@ -809,11 +830,11 @@ namespace SMAStudiovNext.Services
 
             if (instance.Model is RunbookModelProxy)
             {
-                operationResult = await SaveAzureRunbookAsync(instance);
+                operationResult = await SaveRunbookAsync(instance.Model as RunbookModelProxy, instance.Content);
             }
             else if (instance.Model is VariableModelProxy)
             {
-                await SaveAzureVariableAsync(instance);
+                await SaveVariableAsync(instance.Model as VariableModelProxy);
             }
             else if (instance.Model is CredentialModelProxy)
             {
@@ -844,11 +865,9 @@ namespace SMAStudiovNext.Services
             return operationResult;
         }
 
-        private async Task<OperationResult> SaveAzureRunbookAsync(IViewModel viewModel)
+        public async Task<OperationResult> SaveRunbookAsync(RunbookModelProxy runbook, string runbookContent)
         {
-            var runbook = (viewModel.Model as RunbookModelProxy);
             var runbookCreated = false;
-            var runbookNeedsCreation = false;
             var response = default(RunbookCreateOrUpdateResponse);
 
             //if (runbook.RunbookID == Guid.Empty)
@@ -864,7 +883,7 @@ namespace SMAStudiovNext.Services
             var details = new RunbookCreateOrUpdateDraftParameters();
             details.Name = runbook.RunbookName;
             details.Location = _connectionData.AzureRMLocation;
-            details.Tags.Add(AutoStudioTagName, runbook.Tags);
+            details.Tags.Add(AutoStudioTagName, runbook.Tags != null ? runbook.Tags : string.Empty);
 
             details.Properties = new RunbookCreateOrUpdateDraftProperties();
             details.Properties.RunbookType = "Script";
@@ -894,35 +913,49 @@ namespace SMAStudiovNext.Services
             }
 
             // Now we need to commit the draft
-            var runbookUpdate = new RunbookDraftUpdateParameters();
-            runbookUpdate.Stream = viewModel.Content;
-            runbookUpdate.Name = runbook.RunbookName;
+            var status = await SaveRunbookContentAsync(runbook, runbookContent, RunbookType.Draft);
 
-            var longRunningOp = default(LongRunningOperationResultResponse);
-            longRunningOp = await _client.RunbookDraft.UpdateAsync(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount, runbookUpdate);
-
-            var status = OperationStatus.InProgress;
-            if (longRunningOp.Status == Microsoft.Azure.OperationStatus.Failed)
-                status = OperationStatus.Failed;
-            else if (longRunningOp.Status == Microsoft.Azure.OperationStatus.Succeeded)
-                status = OperationStatus.Succeeded;
-
-            // Reset the unsaved changes flag (if ok or in progress)
-            if (status != OperationStatus.Failed)
-                viewModel.UnsavedChanges = false;
+            // Make sure that we add the runbook to our Env Explorer
+            if (runbook.RunbookID == Guid.Empty)
+            {
+                Context.Start();
+            }
 
             return new OperationResult
             {
-                HttpStatusCode = longRunningOp.StatusCode,
+                HttpStatusCode = System.Net.HttpStatusCode.OK,
                 Status = status,
-                RequestUrl = longRunningOp.OperationStatusLink
+                RequestUrl = string.Empty
             };
         }
 
-        private async Task SaveAzureVariableAsync(IViewModel viewModel)
+        public async Task<OperationStatus> SaveRunbookContentAsync(RunbookModelProxy runbook, string runbookContent, RunbookType runbookType)
         {
-            var variable = viewModel.Model as VariableModelProxy;
+            var longRunningOp = default(LongRunningOperationResultResponse);
 
+            var runbookUpdate = new RunbookDraftUpdateParameters();
+            runbookUpdate.Stream = runbookContent;
+            runbookUpdate.Name = runbook.RunbookName;
+
+            longRunningOp = await _client.RunbookDraft.UpdateAsync(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount, runbookUpdate);
+
+            if (runbookType == RunbookType.Published)
+            {
+                await CheckIn(runbook);
+            }
+
+            if (longRunningOp.Status == Microsoft.Azure.OperationStatus.Failed)
+                return OperationStatus.Failed;
+            else if (longRunningOp.Status == Microsoft.Azure.OperationStatus.InProgress)
+                return OperationStatus.InProgress;
+            else if (longRunningOp.Status == Microsoft.Azure.OperationStatus.Succeeded)
+                return OperationStatus.Succeeded;
+
+            return OperationStatus.Failed;
+        }
+
+        public async Task<bool> SaveVariableAsync(VariableModelProxy variable)
+        {
             var variableToSave = new VariableCreateOrUpdateParameters();
             variableToSave.Name = variable.Name;
 
@@ -934,11 +967,11 @@ namespace SMAStudiovNext.Services
 
             if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError)
             {
-                viewModel.UnsavedChanges = true;
                 _output.AppendLine("Unable to save the variable at the moment, please verify your connectivity and try again.");
+                return false;
             }
-            else
-                viewModel.UnsavedChanges = false;
+
+            return true;
         }
 
         private async Task SaveAzureCredentialAsync(IViewModel viewModel)
