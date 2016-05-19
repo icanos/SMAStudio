@@ -17,6 +17,7 @@ using SMAStudiovNext.Utils;
 using System.Windows.Controls;
 using System;
 using SMAStudiovNext.Models;
+using System.Windows;
 
 namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.ViewModels
 {
@@ -130,6 +131,8 @@ namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.ViewModels
 
                 LongRunningOperation.Stop();
             }
+            else
+                MessageBox.Show("Sorry, currently only runbooks are supported in the copy feature.", "Currently in work");
         }
 
         public void Delete(ResourceContainer item)
