@@ -102,9 +102,14 @@ namespace SMAStudiovNext.Core
             return Service.GetStructure();
         }
 
-        public async Task Copy(RunbookModelProxy runbook)
+        public async Task<bool> Copy(RunbookModelProxy runbook)
         {
             var newRunbook = default(RunbookModelProxy);
+
+            if (runbook.Context.Equals(this))
+            {
+                return false;
+            }
 
             switch (runbook.Context.ContextType)
             {
@@ -141,6 +146,8 @@ namespace SMAStudiovNext.Core
 
             AddToRunbooks(newRunbook);
             Start();
+
+            return true;
         }
 
         public void AddToRunbooks(RunbookModelProxy runbook)

@@ -34,8 +34,11 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor
         {
             foreach (var bookmark in _bookmarks.ToList())
             {
-                bookmark.CleanUp();
-                _bookmarks.Remove(bookmark);
+                if (bookmark.BookmarkType != BookmarkType.Breakpoint)
+                {
+                    bookmark.CleanUp();
+                    _bookmarks.Remove(bookmark);
+                }
             }
         }
 

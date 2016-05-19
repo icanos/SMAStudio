@@ -160,6 +160,8 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging
 
             IsActiveDebugging = false;
             DebuggerFinished?.Invoke(this, new EventArgs());
+
+            Stop();
         }
         
         public void StepOver()
@@ -182,6 +184,17 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging
             ResumeDebugger(DebuggerResumeAction.Stop);
             IsActiveDebugging = false;
 
+            if (_pipelineResultTask != null)
+                _pipelineResultTask.TrySetCanceled();
+
+            if (_pipelineExecutionTask != null)
+                _pipelineExecutionTask.TrySetCanceled();
+
+            if (_cancellationTokenSource != null)
+                _cancellationTokenSource.Cancel();
+
+            _pipelineExecutionTask = null;
+            _pipelineResultTask = null;
             //DebuggerFinished?.Invoke(this, new EventArgs());
         }
 

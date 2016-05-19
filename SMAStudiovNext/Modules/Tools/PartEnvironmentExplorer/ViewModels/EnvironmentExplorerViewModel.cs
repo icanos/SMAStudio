@@ -127,7 +127,12 @@ namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.ViewModels
             if (tag is RunbookModelProxy)
             {
                 var runbook = (tag as RunbookModelProxy);
-                await copyToService.Copy(runbook);
+                var result = await copyToService.Copy(runbook);
+
+                if (!result)
+                {
+                    MessageBox.Show("You can only copy the resource between different accounts.", "Error");
+                }
 
                 LongRunningOperation.Stop();
             }

@@ -102,6 +102,8 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 
         private void DebuggerStopped(object sender, DebugEventArgs e)
         {
+            LongRunningOperation.Stop();
+
             var line = default(DocumentLine);
             _isWaitingForDebugInput = true;
             Refresh();
@@ -694,7 +696,8 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
             }
             catch (TaskCanceledException) { }
 
-            context?.Parse(contentToParse);
+            if (!_debuggerService.IsActiveDebugging)
+                context?.Parse(contentToParse);
         }
         
         /// <summary>
@@ -956,6 +959,9 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
             if (!result)
                 return;
 
+            LongRunningOperation.Start();
+            _statusManager.SetText("Starting a debug session...");
+
             // Clear any code analysis warnings etc
             _bookmarkManager.ClearErrorsAndWarnings();
 
@@ -968,6 +974,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
                 dialog.Inputs.Select(input => new KeyValuePair<string, object>(input.Text, (input as ParameterCompletionData).Value)).ToList();
 
             await _debuggerService.Start(inputs);
+
             NotifyOfPropertyChange("DisplayName");
             Refresh();
         }
