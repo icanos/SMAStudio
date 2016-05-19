@@ -2,14 +2,14 @@
 using Gemini.Framework;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
-using Gemini.Modules.Output;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SMAStudiovNext.Core;
-using SMAStudiovNext.Core.Exceptions;
 using SMAStudiovNext.Core.Tracing;
 using SMAStudiovNext.Icons;
 using SMAStudiovNext.Models;
+using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
+using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
 using SMAStudiovNext.Utils;
 using SMAStudiovNext.Vendor.Azure;
 using System;
@@ -22,12 +22,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Xml.Linq;
-using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
-using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
 
 namespace SMAStudiovNext.Services
 {
@@ -144,26 +140,70 @@ namespace SMAStudiovNext.Services
             }
             else if (instance.Model is VariableModelProxy)
             {
-                await SaveVariableAsync(instance as VariableModelProxy);
+                if (await SaveVariableAsync(instance as VariableModelProxy))
+                {
+                    operationResult = new OperationResult
+                    {
+                        Status = OperationStatus.Succeeded,
+                        HttpStatusCode = System.Net.HttpStatusCode.OK
+                    };
+                }
             }
             else if (instance.Model is CredentialModelProxy)
             {
-                SaveAzureCredential(instance);
+                if (await SaveCredentialAsync(instance.Model as CredentialModelProxy))
+                {
+                    operationResult = new OperationResult
+                    {
+                        Status = OperationStatus.Succeeded,
+                        HttpStatusCode = System.Net.HttpStatusCode.OK
+                    };
+                }
             }
             else if (instance.Model is ScheduleModelProxy)
             {
-                SaveAzureSchedule(instance);
+                if (await SaveScheduleAsync(instance.Model as ScheduleModelProxy))
+                {
+                    operationResult = new OperationResult
+                    {
+                        Status = OperationStatus.Succeeded,
+                        HttpStatusCode = System.Net.HttpStatusCode.OK
+                    };
+                }
             }
             else if (instance.Model is ModuleModelProxy)
             {
-                SaveAzureModule(instance);
+                if (await SaveModuleAsync(instance.Model as ModuleModelProxy))
+                {
+                    operationResult = new OperationResult
+                    {
+                        Status = OperationStatus.Succeeded,
+                        HttpStatusCode = System.Net.HttpStatusCode.OK
+                    };
+                }
             }
             else if (instance.Model is ConnectionModelProxy)
             {
-                SaveAzureConnection(instance);
+                if (await SaveConnectionAsync(instance.Model as ConnectionModelProxy))
+                {
+                    operationResult = new OperationResult
+                    {
+                        Status = OperationStatus.Succeeded,
+                        HttpStatusCode = System.Net.HttpStatusCode.OK
+                    };
+                }
             }
             else
                 throw new NotImplementedException();
+
+            if (operationResult == null)
+            {
+                operationResult = new OperationResult
+                {
+                    Status = OperationStatus.Failed,
+                    HttpStatusCode = System.Net.HttpStatusCode.InternalServerError
+                };
+            }
 
             // And lastly, open the document (or put focus on it if its open)
             var shell = IoC.Get<IShell>();
@@ -976,10 +1016,8 @@ namespace SMAStudiovNext.Services
 
         #region Credentials
 
-        private void SaveAzureCredential(IViewModel viewModel)
+        public async Task<bool> SaveCredentialAsync(CredentialModelProxy credential)
         {
-            var credential = viewModel.Model as CredentialModelProxy;
-
             var dict = new Dictionary<string, object>();
             var properties = new Dictionary<string, object>();
             properties.Add("userName", credential.UserName);
@@ -989,24 +1027,22 @@ namespace SMAStudiovNext.Services
             if (credential.CredentialID == Guid.Empty)
             {
                 // New variable
-                SendRequest("credentials/" + credential.Name.ToUrlSafeString(), HttpMethod.Put, JsonConvert.SerializeObject(dict), "application/json");
+                await SendRequestAsync("credentials/" + credential.Name.ToUrlSafeString(), HttpMethod.Put, JsonConvert.SerializeObject(dict), "application/json");
             }
             else
             {
-                SendRequest("credentials/" + credential.Name.ToUrlSafeString(), new HttpMethod("PATCH"), JsonConvert.SerializeObject(dict), "application/json");
+                await SendRequestAsync("credentials/" + credential.Name.ToUrlSafeString(), new HttpMethod("PATCH"), JsonConvert.SerializeObject(dict), "application/json");
             }
 
-            viewModel.UnsavedChanges = false;
+            return true;
         }
 
         #endregion
 
         #region Connections
 
-        private void SaveAzureConnection(IViewModel viewModel)
+        public async Task<bool> SaveConnectionAsync(ConnectionModelProxy connection)
         {
-            var connection = viewModel.Model as ConnectionModelProxy;
-
             var dict = new Dictionary<string, object>();
             var properties = new Dictionary<string, object>();
             properties.Add("description", connection.Description);
@@ -1026,9 +1062,9 @@ namespace SMAStudiovNext.Services
             dict.Add("name", connection.Name);
             dict.Add("properties", properties);
 
-            SendRequest("connections/" + connection.Name.ToUrlSafeString(), HttpMethod.Put, JsonConvert.SerializeObject(dict), "application/json");
+            await SendRequestAsync("connections/" + connection.Name.ToUrlSafeString(), HttpMethod.Put, JsonConvert.SerializeObject(dict), "application/json");
 
-            viewModel.UnsavedChanges = false;
+            return true;
         }
 
         public IList<ConnectionTypeModelProxy> GetConnectionTypes()
@@ -1101,10 +1137,8 @@ namespace SMAStudiovNext.Services
 
         #region Modules
 
-        private void SaveAzureModule(IViewModel viewModel)
+        public async Task<bool> SaveModuleAsync(ModuleModelProxy module)
         {
-            var module = viewModel.Model as ModuleModelProxy;
-
             var dict = new Dictionary<string, object>();
             var properties = new Dictionary<string, object>();
 
@@ -1115,19 +1149,17 @@ namespace SMAStudiovNext.Services
 
             dict.Add("properties", properties);
 
-            SendRequest("modules/" + module.ModuleName.ToUrlSafeString(), HttpMethod.Put, JsonConvert.SerializeObject(dict), "application/json");
+            await SendRequestAsync("modules/" + module.ModuleName.ToUrlSafeString(), HttpMethod.Put, JsonConvert.SerializeObject(dict), "application/json");
 
-            viewModel.UnsavedChanges = false;
+            return true;
         }
 
         #endregion
 
         #region Schedules
 
-        private void SaveAzureSchedule(IViewModel viewModel)
+        public async Task<bool> SaveScheduleAsync(ScheduleModelProxy schedule)
         {
-            var schedule = viewModel.Model as ScheduleModelProxy;
-
             var dict = new Dictionary<string, object>();
             var properties = new Dictionary<string, object>();
 
@@ -1164,14 +1196,14 @@ namespace SMAStudiovNext.Services
             if (schedule.ScheduleID == Guid.Empty)
             {
                 // New variable
-                SendRequest("schedules/" + schedule.Name.ToUrlSafeString(), HttpMethod.Put, JsonConvert.SerializeObject(dict), "application/json");
+                await SendRequestAsync("schedules/" + schedule.Name.ToUrlSafeString(), HttpMethod.Put, JsonConvert.SerializeObject(dict), "application/json");
             }
             else
             {
-                SendRequest("schedules/" + schedule.Name.ToUrlSafeString(), new HttpMethod("PATCH"), JsonConvert.SerializeObject(dict), "application/json");
+                await SendRequestAsync("schedules/" + schedule.Name.ToUrlSafeString(), new HttpMethod("PATCH"), JsonConvert.SerializeObject(dict), "application/json");
             }
 
-            viewModel.UnsavedChanges = false;
+            return true;
         }
 
         #endregion

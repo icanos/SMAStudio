@@ -131,9 +131,48 @@ namespace SMAStudiovNext.Services
         /// <returns></returns>
         Task<OperationStatus> SaveRunbookContentAsync(RunbookModelProxy runbook, string runbookContent, RunbookType runbookType);
 
+        /// <summary>
+        /// Save a new or existing runbook to the backend service
+        /// </summary>
+        /// <param name="runbook">The runbook to save</param>
+        /// <param name="runbookContent">The content to save</param>
+        /// <returns></returns>
         Task<OperationResult> SaveRunbookAsync(RunbookModelProxy runbook, string runbookContent);
 
+        /// <summary>
+        /// Save a new or existing variable to the backend service
+        /// </summary>
+        /// <param name="variable"></param>
+        /// <returns></returns>
         Task<bool> SaveVariableAsync(VariableModelProxy variable);
+
+        /// <summary>
+        /// Save a new or existing connection to the backend service
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        Task<bool> SaveConnectionAsync(ConnectionModelProxy connection);
+
+        /// <summary>
+        /// Save a new or existing credential to the backend service
+        /// </summary>
+        /// <param name="credential"></param>
+        /// <returns></returns>
+        Task<bool> SaveCredentialAsync(CredentialModelProxy credential);
+
+        /// <summary>
+        /// Save a new or existing module to the backend service
+        /// </summary>
+        /// <param name="module"></param>
+        /// <returns></returns>
+        Task<bool> SaveModuleAsync(ModuleModelProxy module);
+
+        /// <summary>
+        /// Save a new or existing schedule to the backend service
+        /// </summary>
+        /// <param name="schedule"></param>
+        /// <returns></returns>
+        Task<bool> SaveScheduleAsync(ScheduleModelProxy schedule);
 
         /// <summary>
         /// Delete a object from the backend service

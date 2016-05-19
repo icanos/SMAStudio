@@ -216,36 +216,26 @@ namespace SMAStudiovNext.Services
                 {
                     var proxy = (VariableModelProxy)instance.Model;
                     await SaveVariableAsync(proxy);
-                    //if (proxy.GetSubType().Equals(typeof(SMA.Variable)))
-                        //SaveSmaVariable(context, instance);
                 }
                 else if (instance.Model is CredentialModelProxy)
                 {
                     var proxy = (CredentialModelProxy)instance.Model;
-
-                    if (proxy.GetSubType().Equals(typeof(SMA.Credential)))
-                        SaveSmaCredential(context, instance);
+                    await SaveCredentialAsync(proxy);
                 }
                 else if (instance.Model is ScheduleModelProxy)
                 {
                     var proxy = (ScheduleModelProxy)instance.Model;
-
-                    if (proxy.GetSubType().Equals(typeof(SMA.Schedule)))
-                        SaveSmaSchedule(context, instance);
+                    await SaveScheduleAsync(proxy);
                 }
                 else if (instance.Model is ConnectionModelProxy)
                 {
                     var proxy = (ConnectionModelProxy)instance.Model;
-
-                    if (proxy.GetSubType().Equals(typeof(SMA.Connection)))
-                        SaveSmaConnection(context, instance);
+                    await SaveConnectionAsync(proxy);
                 }
                 else if (instance.Model is ModuleModelProxy)
                 {
                     var proxy = (ModuleModelProxy)instance.Model;
-
-                    if (proxy.GetSubType().Equals(typeof(SMA.Module)))
-                        SaveSmaModule(context, instance);
+                    await SaveModuleAsync(proxy);
                 }
                 else
                     throw new NotImplementedException();
@@ -256,15 +246,6 @@ namespace SMAStudiovNext.Services
             }
             catch (DataServiceQueryException ex)
             {
-                /*var xml = default(string);
-
-                if (ex.InnerException != null)
-                    xml = ex.InnerException.Message;
-                else
-                    xml = ex.Message;
-
-                Logger.Error("Error when saving the object.", ex);*/
-                //XmlExceptionHandler.Show(xml);
                 throw new ApplicationException("Error when saving the object. Please refer to the output for more information", ex);
             }
 
@@ -278,15 +259,16 @@ namespace SMAStudiovNext.Services
             };
         }
 
-        private void SaveSmaConnection(OrchestratorApi context, IViewModel instance)
+        public Task<bool> SaveConnectionAsync(ConnectionModelProxy connection)
         {
             Logger.DebugFormat("SaveSmaConnection(...)");
 
-            var connection = (SMA.Connection)((ConnectionModelProxy)instance.Model).Model;
+            var context = GetConnection();
+            var rawConnection = connection.Model as SMA.Connection;
 
             if (connection.ConnectionID == Guid.Empty)
             {
-                context.AddToConnections(connection);
+                context.AddToConnections(rawConnection);
             }
             else
             {
@@ -297,7 +279,7 @@ namespace SMAStudiovNext.Services
                     // The connection doesn't exist
                     // NOTE: This suggests that the connection may have been created in another
                     // environment and then reconnected to another SMA instance. How should this be handled?
-                    context.AddToConnections(connection);
+                    context.AddToConnections(rawConnection);
                 }
 
                 foundConnection.Name = connection.Name;
@@ -306,17 +288,23 @@ namespace SMAStudiovNext.Services
             }
 
             context.SaveChanges();
+
+            return new Task<bool>(() =>
+            {
+                return true;
+            });
         }
 
-        private void SaveSmaModule(OrchestratorApi context, IViewModel instance)
+        public Task<bool> SaveModuleAsync(ModuleModelProxy module)
         {
             Logger.DebugFormat("SaveSmaModule(...)");
 
-            var module = (SMA.Module)((ModuleModelProxy)instance.Model).Model;
+            var context = GetConnection();
+            var rawModule = module.Model as SMA.Module;
 
             if (module.ModuleID == Guid.Empty)
             {
-                context.AddToModules(module);
+                context.AddToModules(rawModule);
             }
             else
             {
@@ -327,7 +315,7 @@ namespace SMAStudiovNext.Services
                     // The module doesn't exist
                     // NOTE: This suggests that the module may have been created in another
                     // environment and then reconnected to another SMA instance. How should this be handled?
-                    context.AddToModules(module);
+                    context.AddToModules(rawModule);
                 }
 
                 foundModule.ModuleName = module.ModuleName;
@@ -336,17 +324,23 @@ namespace SMAStudiovNext.Services
             }
 
             context.SaveChanges();
+
+            return new Task<bool>(() =>
+            {
+                return true;
+            });
         }
 
-        private void SaveSmaSchedule(OrchestratorApi context, IViewModel instance)
+        public Task<bool> SaveScheduleAsync(ScheduleModelProxy schedule)
         {
             Logger.DebugFormat("SaveSmaSchedule(...)");
 
-            var schedule = (SMA.Schedule)((ScheduleModelProxy)instance.Model).Model;
+            var context = GetConnection();
+            var rawSchedule = schedule.Model as SMA.Schedule;
 
             if (schedule.ScheduleID == Guid.Empty)
             {
-                context.AddToSchedules(schedule);
+                context.AddToSchedules(rawSchedule);
             }
             else
             {
@@ -357,7 +351,7 @@ namespace SMAStudiovNext.Services
                     // The variable doesn't exist
                     // NOTE: This suggests that the schedule may be created in another
                     // environment and then reconnected to another SMA instance. How should this be handled?
-                    context.AddToSchedules(schedule);
+                    context.AddToSchedules(rawSchedule);
                 }
 
                 foundSchedule.Name = schedule.Name;
@@ -366,17 +360,23 @@ namespace SMAStudiovNext.Services
             }
 
             context.SaveChanges();
+
+            return new Task<bool>(() =>
+            {
+                return true;
+            });
         }
 
-        private void SaveSmaCredential(OrchestratorApi context, IViewModel instance)
+        public Task<bool> SaveCredentialAsync(CredentialModelProxy credential)
         {
             Logger.DebugFormat("SaveSmaCredential(...)");
 
-            var credential = (SMA.Credential)((CredentialModelProxy)instance.Model).Model;
+            var context = GetConnection();
+            var rawCredential = credential.Model as SMA.Credential;
 
             if (credential.CredentialID == Guid.Empty)
             {
-                context.AddToCredentials(credential);
+                context.AddToCredentials(rawCredential);
             }
             else
             {
@@ -387,7 +387,7 @@ namespace SMAStudiovNext.Services
                     // The variable doesn't exist
                     // NOTE: This suggests that the credential may be created in another
                     // environment and then reconnected to another SMA instance. How should this be handled?
-                    context.AddToCredentials(credential);
+                    context.AddToCredentials(rawCredential);
                 }
 
                 foundCredential.Name = credential.Name;
@@ -398,6 +398,11 @@ namespace SMAStudiovNext.Services
             }
 
             context.SaveChanges();
+
+            return new Task<bool>(() =>
+            {
+                return true;
+            });
         }
         
         public Task<bool> SaveVariableAsync(VariableModelProxy variable)//(OrchestratorApi context, IViewModel instance)

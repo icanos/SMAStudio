@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -834,26 +833,70 @@ namespace SMAStudiovNext.Services
             }
             else if (instance.Model is VariableModelProxy)
             {
-                await SaveVariableAsync(instance.Model as VariableModelProxy);
+                if (await SaveVariableAsync(instance.Model as VariableModelProxy))
+                {
+                    operationResult = new OperationResult
+                    {
+                        Status = OperationStatus.Succeeded,
+                        HttpStatusCode = System.Net.HttpStatusCode.OK
+                    };
+                }
             }
             else if (instance.Model is CredentialModelProxy)
             {
-                await SaveAzureCredentialAsync(instance);
+                if (await SaveCredentialAsync(instance.Model as CredentialModelProxy))
+                {
+                    operationResult = new OperationResult
+                    {
+                        Status = OperationStatus.Succeeded,
+                        HttpStatusCode = System.Net.HttpStatusCode.OK
+                    };
+                }
             }
             else if (instance.Model is ScheduleModelProxy)
             {
-                SaveAzureSchedule(instance);
+                if (await SaveScheduleAsync(instance.Model as ScheduleModelProxy))
+                {
+                    operationResult = new OperationResult
+                    {
+                        Status = OperationStatus.Succeeded,
+                        HttpStatusCode = System.Net.HttpStatusCode.OK
+                    };
+                }
             }
             else if (instance.Model is ModuleModelProxy)
             {
-                await SaveAzureModuleAsync(instance);
+                if (await SaveModuleAsync(instance.Model as ModuleModelProxy))
+                {
+                    operationResult = new OperationResult
+                    {
+                        Status = OperationStatus.Succeeded,
+                        HttpStatusCode = System.Net.HttpStatusCode.OK
+                    };
+                }
             }
             else if (instance.Model is ConnectionModelProxy)
             {
-                await SaveAzureConnectionAsync(instance);
+                if (await SaveConnectionAsync(instance.Model as ConnectionModelProxy))
+                {
+                    operationResult = new OperationResult
+                    {
+                        Status = OperationStatus.Succeeded,
+                        HttpStatusCode = System.Net.HttpStatusCode.OK
+                    };
+                }
             }
             else
                 throw new NotImplementedException();
+
+            if (operationResult == null)
+            {
+                operationResult = new OperationResult
+                {
+                    Status = OperationStatus.Failed,
+                    HttpStatusCode = System.Net.HttpStatusCode.InternalServerError
+                };
+            }
 
             // And lastly, open the document (or put focus on it if its open)
             var shell = IoC.Get<IShell>();
@@ -974,10 +1017,8 @@ namespace SMAStudiovNext.Services
             return true;
         }
 
-        private async Task SaveAzureCredentialAsync(IViewModel viewModel)
+        public async Task<bool> SaveCredentialAsync(CredentialModelProxy credential)
         {
-            var credential = viewModel.Model as CredentialModelProxy;
-
             var credToSave = new CredentialCreateOrUpdateParameters();
             credToSave.Name = credential.Name;
 
@@ -989,26 +1030,22 @@ namespace SMAStudiovNext.Services
 
             if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError)
             {
-                viewModel.UnsavedChanges = true;
                 _output.AppendLine("Unable to save the credential at the moment, please verify your connectivity and try again.");
-            }
-            else
-            {
-                viewModel.UnsavedChanges = false;
+                return false;
             }
 
             credential.RawValue = string.Empty;
+
+            return true;
         }
 
-        private void SaveAzureSchedule(IViewModel viewModel)
+        public Task<bool> SaveScheduleAsync(ScheduleModelProxy schedule)
         {
             throw new NotImplementedException("Schedules not supported yet.");
         }
 
-        private async Task SaveAzureModuleAsync(IViewModel viewModel)
+        public async Task<bool> SaveModuleAsync(ModuleModelProxy module)
         {
-            var module = viewModel.Model as ModuleModelProxy;
-
             var contentLink = new ContentLink();
             contentLink.Uri = new Uri(module.ModuleUrl);
             contentLink.Version = module.ModuleVersion;
@@ -1024,19 +1061,15 @@ namespace SMAStudiovNext.Services
 
             if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError)
             {
-                viewModel.UnsavedChanges = true;
                 _output.AppendLine("Unable to save the module at the moment, please verify your connectivity and try again.");
+                return false;
             }
-            else
-            {
-                viewModel.UnsavedChanges = false;
-            }
+
+            return true;
         }
 
-        private async Task SaveAzureConnectionAsync(IViewModel viewModel)
+        public async Task<bool> SaveConnectionAsync(ConnectionModelProxy connection)
         {
-            var connection = viewModel.Model as ConnectionModelProxy;
-
             var connectionToSave = new ConnectionCreateOrUpdateParameters();
             connectionToSave.Name = connection.Name;
 
@@ -1058,13 +1091,11 @@ namespace SMAStudiovNext.Services
 
             if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError)
             {
-                viewModel.UnsavedChanges = true;
                 _output.AppendLine("Unable to save the connection at the moment, please verify your connectivity and try again.");
+                return false;
             }
-            else
-            {
-                viewModel.UnsavedChanges = false;
-            }
+
+            return true;
         }
 
         public Guid? StartRunbook(RunbookModelProxy runbookProxy, List<NameValuePair> parameters)
