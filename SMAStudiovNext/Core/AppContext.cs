@@ -6,6 +6,7 @@ using SMAStudiovNext.Themes;
 using System.Windows.Input;
 using SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands;
 using SMAStudiovNext.Modules.WindowRunbook.Editor.Snippets;
+using SMAStudiovNext.Modules.Tools.FileExplorer.Commands;
 
 namespace SMAStudiovNext.Core
 {

@@ -48,6 +48,11 @@ namespace SMAStudiovNext.Core
         public bool EnableCodeAnalysis { get; set; }
 
         /// <summary>
+        /// Last open folder in the File Explorer
+        /// </summary>
+        public string LastFileExplorerPath { get; set; }
+
+        /// <summary>
         /// List of connections to different SMA or Azure Automation accounts
         /// </summary>
         public List<BackendConnection> Connections { get; set; }

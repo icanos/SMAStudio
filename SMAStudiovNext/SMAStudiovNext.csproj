@@ -247,6 +247,7 @@
     <Compile Include="Commands\PauseCommandDefinition.cs" />
     <Compile Include="Commands\EditPublishedCommandDefinition.cs" />
     <Compile Include="Commands\RelayCommand.cs" />
+    <Compile Include="Commands\ViewFileExplorerCommandDefinition.cs" />
     <Compile Include="Core\BackendContext.cs" />
     <Compile Include="Core\CertificateManager.cs" />
     <Compile Include="Core\Documentation\DocumentationComment.cs" />
@@ -274,7 +275,7 @@
     <Compile Include="Modules\Shell\Views\SettingsSaveView.xaml.cs">
       <DependentUpon>SettingsSaveView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\Tools\PartEnvironmentExplorer\Commands\DocumentationCommand.cs" />
+    <Compile Include="Modules\Tools\EnvironmentExplorer\Commands\DocumentationCommand.cs" />
     <Compile Include="Modules\Shell\Commands\AboutCommandHandler.cs" />
     <Compile Include="Modules\Shell\Commands\NewConnectionObjectCommand.cs" />
     <Compile Include="Modules\Shell\Commands\NewModuleCommand.cs" />
@@ -286,6 +287,14 @@
     </Compile>
     <Compile Include="Modules\Shell\Views\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\Tools\FileExplorer\Commands\LoadFileCommand.cs" />
+    <Compile Include="Modules\Tools\FileExplorer\Commands\ViewFileExplorerCommandHandler.cs" />
+    <Compile Include="Modules\Tools\FileExplorer\MenuDefinitions.cs" />
+    <Compile Include="Modules\Tools\FileExplorer\Models\FileBrowseLink.cs" />
+    <Compile Include="Modules\Tools\FileExplorer\ViewModels\FileExplorerViewModel.cs" />
+    <Compile Include="Modules\Tools\FileExplorer\Views\FileExplorerView.xaml.cs">
+      <DependentUpon>FileExplorerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\Workspaces\WindowConnection\ViewModels\ConnectionViewModel.cs" />
     <Compile Include="Modules\Workspaces\WindowConnection\Views\ConnectionView.xaml.cs">
@@ -394,12 +403,12 @@
     <Compile Include="Modules\Workspaces\WindowCredential\Views\CredentialView.xaml.cs">
       <DependentUpon>CredentialView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\Tools\PartEnvironmentExplorer\Commands\DeleteCommand.cs" />
-    <Compile Include="Modules\Tools\PartEnvironmentExplorer\Commands\HistoryCommand.cs" />
-    <Compile Include="Modules\Tools\PartEnvironmentExplorer\Commands\NewConnectionCommand.cs" />
-    <Compile Include="Modules\Tools\PartEnvironmentExplorer\Commands\PublishCommand.cs" />
-    <Compile Include="Modules\Tools\PartEnvironmentExplorer\Commands\RefreshCommand.cs" />
-    <Compile Include="Modules\Tools\PartEnvironmentExplorer\Views\IEnvironmentExplorerView.cs" />
+    <Compile Include="Modules\Tools\EnvironmentExplorer\Commands\DeleteCommand.cs" />
+    <Compile Include="Modules\Tools\EnvironmentExplorer\Commands\HistoryCommand.cs" />
+    <Compile Include="Modules\Tools\EnvironmentExplorer\Commands\NewConnectionCommand.cs" />
+    <Compile Include="Modules\Tools\EnvironmentExplorer\Commands\PublishCommand.cs" />
+    <Compile Include="Modules\Tools\EnvironmentExplorer\Commands\RefreshCommand.cs" />
+    <Compile Include="Modules\Tools\EnvironmentExplorer\Views\IEnvironmentExplorerView.cs" />
     <Compile Include="Modules\Workspaces\WindowExecutionResult\ToolBarDefinitions.cs" />
     <Compile Include="Modules\Workspaces\WindowExecutionResult\ViewModels\ExecutionResultViewModel.cs" />
     <Compile Include="Modules\Workspaces\WindowExecutionResult\Views\ExecutionResultView.xaml.cs">
@@ -409,9 +418,9 @@
     <Compile Include="Modules\Workspaces\WindowJobHistory\Views\JobHistoryView.xaml.cs">
       <DependentUpon>JobHistoryView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\Tools\PartPropertyGrid\IPropertyGrid.cs" />
-    <Compile Include="Modules\Tools\PartPropertyGrid\ViewModels\PropertyGridViewModel.cs" />
-    <Compile Include="Modules\Tools\PartPropertyGrid\Views\PropertyGridView.xaml.cs">
+    <Compile Include="Modules\Tools\PropertyGrid\IPropertyGrid.cs" />
+    <Compile Include="Modules\Tools\PropertyGrid\ViewModels\PropertyGridViewModel.cs" />
+    <Compile Include="Modules\Tools\PropertyGrid\Views\PropertyGridView.xaml.cs">
       <DependentUpon>PropertyGridView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\Workspaces\WindowRunbook\Resources\Converters.cs" />
@@ -439,7 +448,7 @@
     <Compile Include="Exceptions\PersistenceException.cs" />
     <Compile Include="Core\Settings.cs" />
     <Compile Include="Icons\IconsDescription.cs" />
-    <Compile Include="Modules\Tools\PartEnvironmentExplorer\Commands\LoadCommand.cs" />
+    <Compile Include="Modules\Tools\EnvironmentExplorer\Commands\LoadCommand.cs" />
     <Compile Include="Commands\RunCommandDefinition.cs" />
     <Compile Include="Commands\StopCommandDefinition.cs" />
     <Compile Include="Commands\TestCommandDefinition.cs" />
@@ -505,10 +514,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ViewEnvironmentExplorerCommandDefinition.cs" />
-    <Compile Include="Modules\Tools\PartEnvironmentExplorer\Commands\ViewEnvironmentExplorerCommandHandler.cs" />
-    <Compile Include="Modules\Tools\PartEnvironmentExplorer\MenuDefinitions.cs" />
-    <Compile Include="Modules\Tools\PartEnvironmentExplorer\ViewModels\EnvironmentExplorerViewModel.cs" />
-    <Compile Include="Modules\Tools\PartEnvironmentExplorer\Views\EnvironmentExplorerView.xaml.cs">
+    <Compile Include="Modules\Tools\EnvironmentExplorer\Commands\ViewEnvironmentExplorerCommandHandler.cs" />
+    <Compile Include="Modules\Tools\EnvironmentExplorer\MenuDefinitions.cs" />
+    <Compile Include="Modules\Tools\EnvironmentExplorer\ViewModels\EnvironmentExplorerViewModel.cs" />
+    <Compile Include="Modules\Tools\EnvironmentExplorer\Views\EnvironmentExplorerView.xaml.cs">
       <DependentUpon>EnvironmentExplorerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\Startup\Module.cs" />
@@ -570,6 +579,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Modules\Tools\FileExplorer\Views\FileExplorerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Modules\Workspaces\WindowConnection\Views\ConnectionView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -582,7 +595,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\Tools\PartEnvironmentExplorer\Views\EnvironmentExplorerView.xaml">
+    <Page Include="Modules\Tools\EnvironmentExplorer\Views\EnvironmentExplorerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -594,7 +607,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\Tools\PartPropertyGrid\Views\PropertyGridView.xaml">
+    <Page Include="Modules\Tools\PropertyGrid\Views\PropertyGridView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -692,7 +705,7 @@
     <Folder Include="Modules\Dialogs\DialogStartRun\ViewModels\" />
     <Folder Include="Modules\Tools\ErrorList\ViewModels\" />
     <Folder Include="Modules\Tools\ErrorList\Views\" />
-    <Folder Include="Modules\Tools\PartPropertyGrid\Commands\" />
+    <Folder Include="Modules\Tools\PropertyGrid\Commands\" />
     <Folder Include="Modules\Workspaces\WindowExecutionResult\Command\" />
   </ItemGroup>
   <ItemGroup>
