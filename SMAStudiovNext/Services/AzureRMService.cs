@@ -39,16 +39,14 @@ namespace SMAStudiovNext.Services
         private readonly IBackendContext _backendContext;
         private readonly BackendConnection _connectionData;
         private readonly IDictionary<Guid, List<AccessToken>> _tokens;
-        private readonly WebRequestHandler _webRequestHandler;
         private readonly IOutput _output;
         private readonly List<string> _completionStatusList = new List<string> { "Completed", "Failed", "Stopped" };
 
         private TokenCloudCredentials _accessToken;
         private AutomationManagementClient _client;
-        private X509Certificate2 _certificate = null;
 
         private Dictionary<Guid, Microsoft.Azure.Management.Automation.Models.Job> _jobCache;
-        private Dictionary<Guid, Microsoft.Azure.Management.Automation.Models.TestJob> _testJobCache;
+        private Dictionary<Guid, TestJob> _testJobCache;
 
         public IBackendContext Context
         {
@@ -63,14 +61,6 @@ namespace SMAStudiovNext.Services
             _output = IoC.Get<IOutput>();
             _jobCache = new Dictionary<Guid, Microsoft.Azure.Management.Automation.Models.Job>();
             _testJobCache = new Dictionary<Guid, TestJob>();
-
-            // We need to fetch a token for the backend connection
-            InitializeAsync().Wait();
-
-            /*_certificate = CertificateManager.FindCertificate(_connectionData.AzureCertificateThumbprint);
-            _webRequestHandler = new WebRequestHandler();
-            _webRequestHandler.ClientCertificates.Add(_certificate);
-            _client.HttpClient = new HttpClient(_webRequestHandler);*/
         }
 
         private async Task InitializeAsync()
@@ -560,6 +550,9 @@ namespace SMAStudiovNext.Services
         {
             if (SettingsService.CurrentSettings == null)
                 return;
+
+            // We need to fetch a token for the backend connection
+            InitializeAsync().Wait();
 
             var runbooksResponse = _client.Runbooks.List(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount);
 
