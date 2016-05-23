@@ -1,11 +1,32 @@
-# SMA Studio
+# Automation Studio
+SMA Studio has changed name to Automation Studio, since it supports more than just SMA these days.
 
 Download the latest release at the release page. Latest version is 2.0.1 and **Powershell 5.0 is required**!
 
 ## Overview
-SMA Studio is a free IDE for developing and managing a Microsoft System Center Service Management Automation environment as well as Microsoft Azure Automation. It comes with a wide range of great features to ease your work.
+SMA Studio is a free IDE for developing and managing a Microsoft System Center Service Management Automation environment as well as Microsoft Azure Automation (both Classic and Resource Manager). It comes with a wide range of great features to ease your work.
 
-The work on SMA Studio started in June 2014 by Marcus Westin.
+The work on Automation Studio started in June 2014 by Marcus Westin.
+
+## Features
+ - Service Management Automation, Azure Resource Manager and Azure Classic support.
+ - Code Analysis is implemented in drafted runbooks, meaning that you will get help to improve your runbooks based on Microsoft's best practices (ScriptAnalyzerEngine).
+ - Snappy Auto Complete function that works even with runbook parameters across all runbooks in the same connection.
+ - Debugging of runbooks directly inside Automation Studio, no need to copy your runbook to ISE anymore.
+ - Object Inspection when debugging (like the inspection found in Visual Studio).
+ - Bug fixes, bug fixes and bug fixes.
+
+I have certainly missed something.
+
+## Known Issues
+ - **FIXED** SMA connections were not correctly loaded prior to 2.0.1 r2.
+ - When saving a connection, the application may crash, the connection is saved so please restart Automation Studio and it will work.
+ - **FIXED** Environment Explorer takes some time to load all connections (if more than one).
+ - Auto Documentation is currently not working (does not crash Automation Studio, but hangs it in background if you try to close it).
+ - **FIXED** Activity Notifications are not implemented across all resources (only runbooks at the moment).
+ - **FIXED** Debugging is currently not working as expected. Working on improving this currently!
+
+Please notify me if you find more.
 
 ## How to Compile
 Download the source code, open in Visual Studio 2013+ and restore the packages from NuGet to get started.
@@ -13,9 +34,8 @@ Download the source code, open in Visual Studio 2013+ and restore the packages f
 ## System Requirements
 
  - Windows 7+
- - [.NET 4.5](http://www.microsoft.com/en-au/download/details.aspx?id=30653)
- - SMA Environment up and running
- - or a Azure Automation account
+ - [.NET 4.6](http://www.microsoft.com/en-au/download/details.aspx?id=30653)
+ - SMA Environment, Azure Classic or Azure Resource Manager up and running
  - Powershell 5.0
  
 ## Credits
@@ -25,4 +45,4 @@ Download the source code, open in Visual Studio 2013+ and restore the packages f
  
 Forgot anyone? Please notify me.
 
-######Copyright 2014-2015 Marcus Westin. SMA Studio is distributed under the Apache 2.0 License
+######Copyright 2014-2016 Marcus Westin. Automation Studio is distributed under the Apache 2.0 License
