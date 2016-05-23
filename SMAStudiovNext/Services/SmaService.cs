@@ -101,8 +101,8 @@ namespace SMAStudiovNext.Services
                         output.AppendLine("Found Schedules: " + _backendContext.Schedules.Count);
                         output.AppendLine(" ");
 
-                        _backendContext.SignalCompleted();
                         _backendContext.IsReady = true;
+                        _backendContext.SignalCompleted();
                     });
                     //});
                 }
