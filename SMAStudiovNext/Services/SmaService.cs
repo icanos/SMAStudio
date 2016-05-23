@@ -454,7 +454,7 @@ namespace SMAStudiovNext.Services
 
             var rawRunbook = runbook.Model as SMA.Runbook;
 
-            if (runbook == null || runbook.RunbookID == Guid.Empty)
+            if (rawRunbook == null || rawRunbook.RunbookID == Guid.Empty)
             {
                 Logger.DebugFormat("Runbook does not exist yet, generate a new ID and set it as draft.");
 
@@ -529,13 +529,13 @@ namespace SMAStudiovNext.Services
 
             try
             {
-                context.AttachTo("Runbooks", runbook);
+                context.AttachTo("Runbooks", rawRunbook);
             }
             catch (InvalidOperationException) { /* already attached */ }
 
             try
             {
-                if (runbook.DraftRunbookVersionID.HasValue)
+                if (rawRunbook.DraftRunbookVersionID.HasValue)
                 {
                     AsyncHelper.RunSync(() => SaveRunbookContentAsync(runbook, runbookContent, RunbookType.Draft));
                 }
@@ -544,11 +544,11 @@ namespace SMAStudiovNext.Services
                 smaRunbook.Tags = runbook.Tags;
                 smaRunbook.Description = rawRunbook.Description;
 
-                if (runbook.DraftRunbookVersionID.HasValue)
-                    smaRunbook.DraftRunbookVersionID = runbook.DraftRunbookVersionID;
+                if (rawRunbook.DraftRunbookVersionID.HasValue)
+                    smaRunbook.DraftRunbookVersionID = rawRunbook.DraftRunbookVersionID;
 
-                if (runbook.PublishedRunbookVersionID.HasValue)
-                    smaRunbook.PublishedRunbookVersionID = runbook.PublishedRunbookVersionID;
+                if (rawRunbook.PublishedRunbookVersionID.HasValue)
+                    smaRunbook.PublishedRunbookVersionID = rawRunbook.PublishedRunbookVersionID;
 
                 context.UpdateObject(smaRunbook);
                 context.SaveChanges();
@@ -589,7 +589,7 @@ namespace SMAStudiovNext.Services
 
             try
             {
-                context.AttachTo("Runbooks", runbook);
+                context.AttachTo("Runbooks", runbook.Model as SMA.Runbook);
             }
             catch (InvalidOperationException) { }
 
