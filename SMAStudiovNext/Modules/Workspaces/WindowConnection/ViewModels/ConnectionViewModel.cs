@@ -320,6 +320,12 @@ namespace SMAStudiovNext.Modules.WindowConnection.ViewModels
 
                 try
                 {
+                    var contextType = (model.Model as BackendConnection).IsAzure ? ContextType.Azure : ContextType.SMA;
+
+                    if ((model.Model as BackendConnection).IsAzureRM)
+                        contextType = ContextType.AzureRM;
+
+                    model.Context = new BackendContext(contextType, model.Model as BackendConnection);
                     Owner.Save(this, command);
                     Owner.Context.AddToConnections(model);
                 }
