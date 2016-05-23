@@ -1,6 +1,6 @@
 # SMA Studio
 
-Download the latest release at the release page. Latest version is 1.0.1
+Download the latest release at the release page. Latest version is 2.0.1 and **Powershell 5.0 is required**!
 
 ## Overview
 SMA Studio is a free IDE for developing and managing a Microsoft System Center Service Management Automation environment as well as Microsoft Azure Automation. It comes with a wide range of great features to ease your work.
@@ -16,6 +16,7 @@ Download the source code, open in Visual Studio 2013+ and restore the packages f
  - [.NET 4.5](http://www.microsoft.com/en-au/download/details.aspx?id=30653)
  - SMA Environment up and running
  - or a Azure Automation account
+ - Powershell 5.0
  
 ## Credits
  - Gemini (https://github.com/icanos/gemini) UI framework, awesome work!
