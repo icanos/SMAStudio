@@ -4,7 +4,7 @@ SMA Studio has changed name to Automation Studio, since it supports more than ju
 Download the latest release at the release page. Latest version is 2.0.1 and **Powershell 5.0 is required**!
 
 ## Overview
-SMA Studio is a free IDE for developing and managing a Microsoft System Center Service Management Automation environment as well as Microsoft Azure Automation (both Classic and Resource Manager). It comes with a wide range of great features to ease your work.
+Automation Studio is a free IDE for developing and managing a Microsoft System Center Service Management Automation environment as well as Microsoft Azure Automation (both Classic and Resource Manager). It comes with a wide range of great features to ease your work.
 
 The work on Automation Studio started in June 2014 by Marcus Westin.
 
@@ -41,7 +41,7 @@ Download the source code, open in Visual Studio 2013+ and restore the packages f
 ## Credits
  - Gemini (https://github.com/icanos/gemini) UI framework, awesome work!
  - GitSharp, bits and parts used from this project for tracking diffs in Draft/Published runbooks
- - Icon for the application and other windows within SMA Studio from http://graphicloads.com/
+ - Icon for the application and other windows within Automation Studio from http://graphicloads.com/
  
 Forgot anyone? Please notify me.
 
