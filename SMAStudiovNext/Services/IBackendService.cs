@@ -5,9 +5,9 @@ using SMAStudiovNext.SMA;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
 using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
 using SMAStudiovNext.Utils;
+using SMAStudiovNext.Core.Editor.Completion;
 
 namespace SMAStudiovNext.Services
 {

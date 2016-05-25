@@ -8,6 +8,9 @@ using SMAStudiovNext.Services;
 
 namespace SMAStudiovNext.Modules.DialogConnectAzure.ViewModels
 {
+    /// <summary>
+    /// DEPRECATED
+    /// </summary>
     public class AzureWindowViewModel : PropertyChangedBase
     {
         private readonly ObservableCollection<CertificateItem> _certificates;
@@ -79,8 +82,9 @@ namespace SMAStudiovNext.Modules.DialogConnectAzure.ViewModels
 
                     SettingsService.CurrentSettings.Connections.Add(connection);
 
-                    var application = IoC.Get<IModule>();
-                    ((Startup.Module)application).StartConnection(connection);
+                    
+                    //var application = IoC.Get<IModule>();
+                    //((Startup.Module)application).StartConnection(connection);
                 });
             }
         }

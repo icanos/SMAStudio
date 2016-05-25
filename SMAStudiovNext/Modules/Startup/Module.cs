@@ -23,7 +23,7 @@ using System.Windows.Media.Imaging;
 using SMAStudiovNext.Exceptions;
 using SMAStudiovNext.Modules.PartEnvironmentExplorer.ViewModels;
 using SMAStudiovNext.Utils;
-using SMAStudiovNext.Modules.WindowRunbook.Editor.Parser;
+using SMAStudiovNext.Core.Editor.Parser;
 
 namespace SMAStudiovNext.Modules.Startup
 {
@@ -121,14 +121,8 @@ namespace SMAStudiovNext.Modules.Startup
             // Initialize all connections
             if (SettingsService.CurrentSettings != null)
             {
-                //AsyncExecution.Run(System.Threading.ThreadPriority.Normal, () =>
-                Task.Run(() =>
-                {
-                    for (int i = 0; i < SettingsService.CurrentSettings.Connections.Count; i++)
-                    {
-                        StartConnection(SettingsService.CurrentSettings.Connections[i]);
-                    }
-                });
+                var contextManager = AppContext.Resolve<IBackendContextManager>();
+                contextManager.Initialize();
             }
 
             if (SettingsService.CurrentSettings.EnableCodeAnalysis)
@@ -149,7 +143,7 @@ namespace SMAStudiovNext.Modules.Startup
             //Shell.OpenDocument(consoleView);
         }
 
-        public void StartConnection(BackendConnection connection)
+        /*public void StartConnection(BackendConnection connection)
         {
             var contextType = ContextType.SMA;
 
@@ -167,23 +161,15 @@ namespace SMAStudiovNext.Modules.Startup
 
             backend.OnLoaded += OnBackendReady;
             //backend.Start();
-
-            /*
-            Execute.OnUIThread(() =>
-            {
-                lock (_lock)
-                {
-                    environment.Items.Add(backend.GetStructure());
-                }
-            });*/
-        }
+            
+        }*/
 
         public IList<IBackendContext> GetContexts()
         {
             return _backendContexts;
         }
 
-        private void OnBackendReady(object sender, ContextUpdatedEventArgs e)
+        /*private void OnBackendReady(object sender, ContextUpdatedEventArgs e)
         {
             var environment = IoC.Get<EnvironmentExplorerViewModel>();
 
@@ -222,7 +208,7 @@ namespace SMAStudiovNext.Modules.Startup
 
             // Cancel the spinner that shows we're loading data
             LongRunningOperation.Stop();
-        }
+        }*/
 
         private void RefreshInspector()
         {

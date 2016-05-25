@@ -3,8 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:resources="clr-namespace:SMAStudiovNext.Modules.WindowRunbook.Resources"
-             xmlns:editor="clr-namespace:SMAStudiovNext.Modules.WindowRunbook.Editor"
+             xmlns:resources="clr-namespace:SMAStudiovNext.Core.Editor.Resources"
+             xmlns:editor="clr-namespace:SMAStudiovNext.Core.Editor"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
@@ -27,8 +27,8 @@
         <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Tags, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,5,5" />
         <TabControl Grid.Row="1" Grid.ColumnSpan="2" TabStripPlacement="Bottom">
             <TabItem Header="Draft">
-                <editor:RunbookEditor x:Name="CodeEditor" Padding="5,5,5,5">
-                    <editor:RunbookEditor.ContextMenu>
+                <editor:CodeEditor x:Name="CodeEditor" Padding="5,5,5,5">
+                    <editor:CodeEditor.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Go To Definition" Command="{Binding GoToDefinitionCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
                                                                           AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext}" />
@@ -40,11 +40,11 @@
                             <MenuItem Command="Copy" />
                             <MenuItem Command="Paste" />
                         </ContextMenu>
-                    </editor:RunbookEditor.ContextMenu>
-                </editor:RunbookEditor>
+                    </editor:CodeEditor.ContextMenu>
+                </editor:CodeEditor>
             </TabItem>
             <TabItem Header="Published">
-                <editor:RunbookEditor x:Name="PublishedCodeEditor" IsReadOnly="True" Padding="5,5,5,5" />
+                <editor:CodeEditor x:Name="PublishedCodeEditor" IsReadOnly="True" Padding="5,5,5,5" />
             </TabItem>
             <TabItem Header="View Changes">
                 <Grid>

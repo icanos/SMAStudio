@@ -5,8 +5,7 @@ using SMAStudiovNext.Services;
 using SMAStudiovNext.Themes;
 using System.Windows.Input;
 using SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands;
-using SMAStudiovNext.Modules.WindowRunbook.Editor.Snippets;
-using SMAStudiovNext.Modules.Tools.FileExplorer.Commands;
+using SMAStudiovNext.Core.Editor.Snippets;
 
 namespace SMAStudiovNext.Core
 {
@@ -22,6 +21,7 @@ namespace SMAStudiovNext.Core
             _container.RegisterInstance<ISnippetsCollection>(new SnippetsCollection());
             _container.RegisterInstance<IStatusManager>(new StatusManager());
             _container.RegisterInstance<IThemeManager>(new ThemeManager());
+            _container.RegisterInstance<IBackendContextManager>(new BackendContextManager(), new ContainerControlledLifetimeManager());
 
             _container.RegisterType<ICommand, LoadCommand>("LoadCommand");
             _container.RegisterType<ICommand, HistoryCommand>("HistoryCommand");

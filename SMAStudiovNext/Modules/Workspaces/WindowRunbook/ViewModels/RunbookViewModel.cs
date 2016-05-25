@@ -24,21 +24,21 @@ using SMAStudiovNext.Models;
 using SMAStudiovNext.Modules.DialogStartRun.Windows;
 using SMAStudiovNext.Modules.WindowExecutionResult.ViewModels;
 using SMAStudiovNext.Modules.WindowJobHistory.ViewModels;
-using SMAStudiovNext.Modules.WindowRunbook.Editor;
-using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
-using SMAStudiovNext.Modules.WindowRunbook.Editor.Debugging;
-using SMAStudiovNext.Modules.WindowRunbook.Editor.Parser;
-using SMAStudiovNext.Modules.WindowRunbook.Editor.Snippets;
 using SMAStudiovNext.Modules.WindowRunbook.Views;
 using SMAStudiovNext.SMA;
 using SMAStudiovNext.Utils;
 using SMAStudiovNext.Vendor.GitSharp;
 using SMAStudiovNext.Modules.Shell.Views;
 using SMAStudiovNext.Modules.Shell.ViewModels;
+using SMAStudiovNext.Core.Editor.Debugging;
+using SMAStudiovNext.Core.Editor;
+using SMAStudiovNext.Core.Editor.Completion;
+using SMAStudiovNext.Core.Editor.Snippets;
+using SMAStudiovNext.Core.Editor.Parser;
 
 namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 {
-    public class RunbookViewModel : Document, IViewModel,
+    public class RunbookViewModel : Document, IViewModel, ICodeViewModel
         ICommandHandler<SaveCommandDefinition>,
         ICommandHandler<PublishCommandDefinition>,
         ICommandHandler<EditPublishedCommandDefinition>,
@@ -290,7 +290,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
         /// <returns>Content of the runbook</returns>
         public string GetContent(RunbookType runbookType, bool forceDownload = false)
         {
-            var editor = default(RunbookEditor);
+            var editor = default(CodeEditor);
 
             if (_view != null)
             {
@@ -300,7 +300,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
             return AsyncHelper.RunSync<string>(() => GetContentInternalAsync(editor, runbookType, forceDownload));
         }
 
-        private string GetContentInternal(RunbookEditor editor, RunbookType runbookType, bool forceDownload)
+        private string GetContentInternal(CodeEditor editor, RunbookType runbookType, bool forceDownload)
         {
             return AsyncHelper.RunSync<string>(() => GetContentInternalAsync(editor, runbookType, forceDownload));
         }
@@ -310,7 +310,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
         /// </summary>
         /// <param name="forceDownload">Set to true to force download of content from backend</param>
         /// <returns>Draft content</returns>
-        private async Task<string> GetContentInternalAsync(RunbookEditor editor, RunbookType runbookType, bool forceDownload)
+        private async Task<string> GetContentInternalAsync(CodeEditor editor, RunbookType runbookType, bool forceDownload)
         {
             var content = string.Empty;
             var currentContent = string.Empty;

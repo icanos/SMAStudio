@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
-using SMAStudiovNext.Modules.WindowRunbook.Editor.Parser;
 using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
 using VisioDrawing = VisioAutomation.VDX.Elements.Drawing;
 using VisioFace = VisioAutomation.VDX.Elements.Face;
@@ -12,6 +11,7 @@ using VisioLine = VisioAutomation.VDX.Elements.Line;
 using VisioPage = VisioAutomation.VDX.Elements.Page;
 using VisioShape = VisioAutomation.VDX.Elements.Shape;
 using VisioTemplate = VisioAutomation.VDX.Template;
+using SMAStudiovNext.Core.Editor.Parser;
 
 namespace SMAStudiovNext.Core.Documentation
 {

@@ -2,8 +2,8 @@
 using System.Collections.ObjectModel;
 using System.Windows;
 using ICSharpCode.AvalonEdit.CodeCompletion;
-using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
 using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
+using SMAStudiovNext.Core.Editor.Completion;
 
 namespace SMAStudiovNext.Modules.DialogStartRun.Windows
 {

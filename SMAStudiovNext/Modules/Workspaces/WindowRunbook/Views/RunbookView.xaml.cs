@@ -1,8 +1,8 @@
-﻿using System.Windows;
+﻿using SMAStudiovNext.Core.Editor;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using SMAStudiovNext.Modules.WindowRunbook.Editor;
 
 namespace SMAStudiovNext.Modules.WindowRunbook.Views
 {
@@ -13,12 +13,12 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Views
     {
         private readonly TextMarkerService _textMarkerService;
 
-        public RunbookEditor TextEditor
+        public CodeEditor TextEditor
         {
             get { return CodeEditor; }
         }
 
-        public RunbookEditor PublishedTextEditor
+        public CodeEditor PublishedTextEditor
         {
             get { return PublishedCodeEditor; }
         }
@@ -42,13 +42,13 @@ namespace SMAStudiovNext.Modules.WindowRunbook.Views
 
         private void OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (!(sender is RunbookEditor))
+            if (!(sender is CodeEditor))
                 return;
 
-            var position = ((RunbookEditor)sender).GetPositionFromPoint(e.GetPosition((IInputElement)sender));
+            var position = ((CodeEditor)sender).GetPositionFromPoint(e.GetPosition((IInputElement)sender));
             if (position.HasValue)
             {
-                ((RunbookEditor)sender).TextArea.Caret.Position = position.Value;
+                ((CodeEditor)sender).TextArea.Caret.Position = position.Value;
             }
         }
 

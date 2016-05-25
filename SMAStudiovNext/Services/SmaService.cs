@@ -17,9 +17,9 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
 using SMAStudiovNext.Modules.WindowRunbook.ViewModels;
 using SMAStudiovNext.Utils;
+using SMAStudiovNext.Core.Editor.Completion;
 
 namespace SMAStudiovNext.Services
 {

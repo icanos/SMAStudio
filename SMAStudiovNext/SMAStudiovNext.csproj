@@ -249,11 +249,14 @@
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Commands\ViewFileExplorerCommandDefinition.cs" />
     <Compile Include="Core\BackendContext.cs" />
+    <Compile Include="Core\BackendContextManager.cs" />
     <Compile Include="Core\CertificateManager.cs" />
     <Compile Include="Core\Documentation\DocumentationComment.cs" />
     <Compile Include="Core\Documentation\DocumentationManager.cs" />
     <Compile Include="Core\Exceptions\CertificateException.cs" />
     <Compile Include="Core\AccessToken.cs" />
+    <Compile Include="Core\IBackendContextManager.cs" />
+    <Compile Include="Core\ICodeViewModel.cs" />
     <Compile Include="Core\LongRunningOperation.cs" />
     <Compile Include="Core\Net\RestPacket.cs" />
     <Compile Include="Core\Tracing\ITracingWriter.cs" />
@@ -312,49 +315,49 @@
     <Compile Include="Modules\Workspaces\WindowModule\Views\ModuleView.xaml.cs">
       <DependentUpon>ModuleView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Bookmark.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\BookmarkEventArgs.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\BookmarkLineTracker.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\BookmarkManager.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Completion\CommandCompletionHelper.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Completion\CompletionEventArgs.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Completion\CompletionProvider.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Completion\EdgeTrackingMode.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Completion\Glyph.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Completion\CompletionUtils.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Debugging\BreakpointEventArgs.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Debugging\DebugEventArgs.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Debugging\DebuggerService.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Debugging\Host\CustomHost.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Debugging\Host\CustomHostUserInterface.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Debugging\LineBreakpoint.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Debugging\StackFrameDetails.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Debugging\VariableContainerDetails.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Debugging\VariableDetails.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Debugging\VariableDetailsBase.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Debugging\VariableScope.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\IconBarMargin.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Inspector\InspectableObject.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Inspector\ObjectInspectorWindow.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Inspector\VariableInspector.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\KeystrokeService.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Parser\AnalysisEventArgs.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Parser\AnalyzerService.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Parser\BracketSearchResult.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Parser\ExpressionType.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Parser\LanguageContext.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Parser\ParseErrorEventArgs.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Parser\TokenBlock.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Renderers\AnalyzerWarningRenderer.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Renderers\BracketHighlightRenderer.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Renderers\DebugMarkerRenderer.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Renderers\IMarkerRenderer.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Renderers\ParseErrorRenderer.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\TextMarker.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\TextMarkerService.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\ToolTipRequestEventArgs.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\InsightService.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\SyntaxHighlightning\ThemedHighlightingColorizer.cs" />
+    <Compile Include="Core\Editor\Bookmark.cs" />
+    <Compile Include="Core\Editor\BookmarkEventArgs.cs" />
+    <Compile Include="Core\Editor\BookmarkLineTracker.cs" />
+    <Compile Include="Core\Editor\BookmarkManager.cs" />
+    <Compile Include="Core\Editor\Completion\CommandCompletionHelper.cs" />
+    <Compile Include="Core\Editor\Completion\CompletionEventArgs.cs" />
+    <Compile Include="Core\Editor\Completion\CompletionProvider.cs" />
+    <Compile Include="Core\Editor\Completion\EdgeTrackingMode.cs" />
+    <Compile Include="Core\Editor\Completion\Glyph.cs" />
+    <Compile Include="Core\Editor\Completion\CompletionUtils.cs" />
+    <Compile Include="Core\Editor\Debugging\BreakpointEventArgs.cs" />
+    <Compile Include="Core\Editor\Debugging\DebugEventArgs.cs" />
+    <Compile Include="Core\Editor\Debugging\DebuggerService.cs" />
+    <Compile Include="Core\Editor\Debugging\Host\CustomHost.cs" />
+    <Compile Include="Core\Editor\Debugging\Host\CustomHostUserInterface.cs" />
+    <Compile Include="Core\Editor\Debugging\LineBreakpoint.cs" />
+    <Compile Include="Core\Editor\Debugging\StackFrameDetails.cs" />
+    <Compile Include="Core\Editor\Debugging\VariableContainerDetails.cs" />
+    <Compile Include="Core\Editor\Debugging\VariableDetails.cs" />
+    <Compile Include="Core\Editor\Debugging\VariableDetailsBase.cs" />
+    <Compile Include="Core\Editor\Debugging\VariableScope.cs" />
+    <Compile Include="Core\Editor\IconBarMargin.cs" />
+    <Compile Include="Core\Editor\Inspector\InspectableObject.cs" />
+    <Compile Include="Core\Editor\Inspector\ObjectInspectorWindow.cs" />
+    <Compile Include="Core\Editor\Inspector\VariableInspector.cs" />
+    <Compile Include="Core\Editor\KeystrokeService.cs" />
+    <Compile Include="Core\Editor\Parser\AnalysisEventArgs.cs" />
+    <Compile Include="Core\Editor\Parser\AnalyzerService.cs" />
+    <Compile Include="Core\Editor\Parser\BracketSearchResult.cs" />
+    <Compile Include="Core\Editor\Parser\ExpressionType.cs" />
+    <Compile Include="Core\Editor\Parser\LanguageContext.cs" />
+    <Compile Include="Core\Editor\Parser\ParseErrorEventArgs.cs" />
+    <Compile Include="Core\Editor\Parser\TokenBlock.cs" />
+    <Compile Include="Core\Editor\Renderers\AnalyzerWarningRenderer.cs" />
+    <Compile Include="Core\Editor\Renderers\BracketHighlightRenderer.cs" />
+    <Compile Include="Core\Editor\Renderers\DebugMarkerRenderer.cs" />
+    <Compile Include="Core\Editor\Renderers\IMarkerRenderer.cs" />
+    <Compile Include="Core\Editor\Renderers\ParseErrorRenderer.cs" />
+    <Compile Include="Core\Editor\TextMarker.cs" />
+    <Compile Include="Core\Editor\TextMarkerService.cs" />
+    <Compile Include="Core\Editor\ToolTipRequestEventArgs.cs" />
+    <Compile Include="Core\Editor\InsightService.cs" />
+    <Compile Include="Core\Editor\SyntaxHighlightning\ThemedHighlightingColorizer.cs" />
     <Compile Include="Modules\Workspaces\WindowRunbook\ViewModels\RunbookViewModel.cs" />
     <Compile Include="Services\AzureRMService.cs" />
     <Compile Include="Themes\IThemeManager.cs" />
@@ -381,9 +384,9 @@
     <Compile Include="Core\StatusManager.cs" />
     <Compile Include="Utils\StringExtensions.cs" />
     <Compile Include="Exceptions\XmlExceptionHandler.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Completion\CompletionResult.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Completion\CompletionData.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Completion\ICompletionProvider.cs" />
+    <Compile Include="Core\Editor\Completion\CompletionResult.cs" />
+    <Compile Include="Core\Editor\Completion\CompletionData.cs" />
+    <Compile Include="Core\Editor\Completion\ICompletionProvider.cs" />
     <Compile Include="Models\CredentialModelProxy.cs" />
     <Compile Include="Models\JobModelProxy.cs" />
     <Compile Include="Models\ModelProxyBase.cs" />
@@ -423,13 +426,12 @@
     <Compile Include="Modules\Tools\PropertyGrid\Views\PropertyGridView.xaml.cs">
       <DependentUpon>PropertyGridView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\Workspaces\WindowRunbook\Resources\Converters.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Completion\ICompletionEntry.cs" />
+    <Compile Include="Core\Editor\Resources\Converters.cs" />
+    <Compile Include="Core\Editor\Completion\ICompletionEntry.cs" />
     <Compile Include="Commands\PublishCommandDefinition.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Resources\PowershellFoldingStrategy.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Snippets\ISnippetsCollection.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Snippets\SnippetsCollection.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\SyntaxHighlightning\HighlightingColorizer.cs" />
+    <Compile Include="Core\Editor\Resources\PowershellFoldingStrategy.cs" />
+    <Compile Include="Core\Editor\Snippets\ISnippetsCollection.cs" />
+    <Compile Include="Core\Editor\Snippets\SnippetsCollection.cs" />
     <Compile Include="Modules\Workspaces\WindowSchedule\ViewModels\ScheduleViewModel.cs" />
     <Compile Include="Modules\Workspaces\WindowSchedule\Views\ScheduleView.xaml.cs">
       <DependentUpon>ScheduleView.xaml</DependentUpon>
@@ -452,7 +454,7 @@
     <Compile Include="Commands\RunCommandDefinition.cs" />
     <Compile Include="Commands\StopCommandDefinition.cs" />
     <Compile Include="Commands\TestCommandDefinition.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\RunbookEditor.cs" />
+    <Compile Include="Core\Editor\CodeEditor.cs" />
     <Compile Include="Modules\Workspaces\WindowRunbook\ToolBarDefinitions.cs" />
     <Compile Include="Modules\Workspaces\WindowRunbook\Views\IRunbookView.cs" />
     <Compile Include="Modules\Workspaces\WindowRunbook\Views\RunbookView.xaml.cs">
@@ -487,7 +489,7 @@
     <Compile Include="Services\SmaService.cs" />
     <Compile Include="Services\SettingsService.cs" />
     <Compile Include="Modules\Dialogs\DialogAddNewItem\Windows\UIAddNewItemDialog.xaml.cs" />
-    <Compile Include="Modules\Workspaces\WindowRunbook\Editor\Snippets\CodeSnippet.cs" />
+    <Compile Include="Core\Editor\Snippets\CodeSnippet.cs" />
     <Compile Include="Vendor\Azure\Connection.cs" />
     <Compile Include="Vendor\Azure\ConnectionField.cs" />
     <Compile Include="Vendor\Azure\ConnectionFieldValue.cs" />
@@ -538,7 +540,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="Modules\Workspaces\WindowRunbook\SyntaxHighlightning\Powershell.xshd">
+    <EmbeddedResource Include="Core\Editor\SyntaxHighlightning\Powershell.xshd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="AutomationStudio.pfx" />
@@ -615,7 +617,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Modules\Workspaces\WindowRunbook\Editor\Inspector\ObjectInspectorWindow.xaml">
+    <Page Include="Core\Editor\Inspector\ObjectInspectorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -707,6 +709,8 @@
     <Folder Include="Modules\Tools\ErrorList\Views\" />
     <Folder Include="Modules\Tools\PropertyGrid\Commands\" />
     <Folder Include="Modules\Workspaces\WindowExecutionResult\Command\" />
+    <Folder Include="Modules\Workspaces\WindowScript\ViewModels\" />
+    <Folder Include="Modules\Workspaces\WindowScript\Views\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icons\Properties.png" />

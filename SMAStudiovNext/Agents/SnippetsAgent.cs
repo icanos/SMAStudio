@@ -5,8 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SMAStudiovNext.Modules.WindowRunbook.Editor.Snippets;
 using SMAStudiovNext.Utils;
+using SMAStudiovNext.Core.Editor.Snippets;
 
 namespace SMAStudiovNext.Agents
 {

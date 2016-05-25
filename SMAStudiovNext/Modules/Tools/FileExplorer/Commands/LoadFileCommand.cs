@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace SMAStudiovNext.Modules.Tools.FileExplorer.Commands
@@ -40,16 +41,28 @@ namespace SMAStudiovNext.Modules.Tools.FileExplorer.Commands
             var path = container.Tag as FileBrowseLink;
             
             var fileInfo = new FileInfo(path.Path);
-
+            
             if (fileInfo.Attributes.HasFlag(FileAttributes.Directory))
             {
                 // We are opening a new folder
                 path.FileExplorer.Items.Clear();
 
-                var backUp = new ResourceContainer("..", new FileBrowseLink(Path.Combine(path.Path, ".."), path.FileExplorer));
+                var backUpPath = new DirectoryInfo(Path.Combine(path.Path, ".."));
+                var backUp = new ResourceContainer("..", new FileBrowseLink(backUpPath.FullName, path.FileExplorer));
                 path.FileExplorer.Items.Add(backUp);
 
-                var dirs = Directory.GetDirectories(path.Path);
+                var dirs = default(string[]);
+                try
+                {
+                    dirs = Directory.GetDirectories(path.Path);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    MessageBox.Show("Access denied.", "Error");
+
+                    path = new FileBrowseLink(backUpPath.FullName, path.FileExplorer);
+                    dirs = Directory.GetDirectories(backUpPath.FullName);
+                }
 
                 foreach (var dir in dirs)
                 {

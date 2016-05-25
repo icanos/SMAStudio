@@ -1,13 +1,12 @@
-﻿using SMAStudiovNext.Modules.WindowRunbook.Editor;
-using System.Windows.Controls;
+﻿using SMAStudiovNext.Core.Editor;
 
 namespace SMAStudiovNext.Modules.WindowRunbook.Views
 {
     public interface IRunbookView
     {
-        RunbookEditor TextEditor { get; }
+        CodeEditor TextEditor { get; }
 
-        RunbookEditor PublishedTextEditor { get; }
+        CodeEditor PublishedTextEditor { get; }
 
         TextMarkerService TextMarkerService { get; }
     }

@@ -15,6 +15,7 @@ using SMAStudiovNext.Services;
 using SMAStudiovNext.Core;
 using SMAStudiovNext.Modules.Shell.ViewModels;
 using System.Windows;
+using Newtonsoft.Json;
 
 namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands
 {
@@ -60,7 +61,24 @@ namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands
                     LongRunningOperation.Start();
 
                     shell.StatusBar.Items[0].Message = "Loading data from " + (viewItem.Tag as IBackendContext).Name + "...";
-                    Task.Run(() => (viewItem.Tag as IBackendContext).Start());
+                    Task.Run(() => {
+                        try
+                        {
+                            (viewItem.Tag as IBackendContext).Start();
+                        }
+                        catch (AggregateException ex)
+                        {
+                            Caliburn.Micro.Execute.OnUIThread(() =>
+                            {
+                                if (ex.InnerException != null)
+                                    MessageBox.Show(ex.InnerException.Message, "Error");
+                                else
+                                    MessageBox.Show(ex.Message, "Error");
+
+                                LongRunningOperation.Stop();
+                            });
+                        }
+                    });
 
                     return;
                 }

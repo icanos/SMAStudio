@@ -11,6 +11,7 @@ using SMAStudiovNext.Modules.Dialogs.DialogConnectionManager;
 using System.Security.Cryptography.X509Certificates;
 using System.IO;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace SMAStudiovNext.Modules.DialogConnectionManager.Windows
 {
@@ -106,12 +107,13 @@ namespace SMAStudiovNext.Modules.DialogConnectionManager.Windows
             var settingsService = AppContext.Resolve<ISettingsService>();
             settingsService.Save();
 
+            // Force the backend context to refresh all service
+            var contextManager = AppContext.Resolve<IBackendContextManager>();
+            var context = contextManager.Load(Connection);
+            Task.Run(() => context.Start());
+
             ConnectionsList.SelectedItem = null;
             NotifyPropertyChanged("IsSelected");
-
-            // Force the backend context to refresh all services
-            var backendContext = AppContext.Resolve<IBackendContext>();
-            backendContext.Start();
 
             Close();
         }
@@ -184,6 +186,12 @@ namespace SMAStudiovNext.Modules.DialogConnectionManager.Windows
         private void ConnectionTypeSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var item = (e.AddedItems[0] as ComboBoxItem);
+
+            if (Connection == null)
+            {
+                MessageBox.Show("You need to create a new connection or edit an existing one before choosing type.", "Connection Manager");
+                return;
+            }
 
             if (item.Content.ToString().Equals("Azure Classic"))
             {

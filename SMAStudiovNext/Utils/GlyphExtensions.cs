@@ -1,6 +1,6 @@
-﻿using System.Windows;
+﻿using SMAStudiovNext.Core.Editor.Completion;
+using System.Windows;
 using System.Windows.Media;
-using SMAStudiovNext.Modules.WindowRunbook.Editor.Completion;
 
 namespace SMAStudiovNext.Utils
 {
