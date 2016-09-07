@@ -121,7 +121,8 @@ namespace SMAStudiovNext.Modules.Startup
             // Initialize all connections
             if (SettingsService.CurrentSettings != null)
             {
-                var contextManager = AppContext.Resolve<IBackendContextManager>();
+                //var contextManager = AppContext.Resolve<IBackendContextManager>();
+                var contextManager = IoC.Get<IBackendContextManager>();
                 contextManager.Initialize();
             }
 

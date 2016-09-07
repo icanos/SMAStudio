@@ -94,7 +94,7 @@ namespace SMAStudiovNext.Core.Editor.Completion
         /// <param name="triggerTag">Counter</param>
         public void GetParameterCompletionData(Token token, string completionWord, long triggerTag)
         {
-            if (_requestTrigger > 0 || _requestTrigger > triggerTag)
+            if (_requestTrigger != 0 || triggerTag <= _requestTrigger)
                 return;
 
             lock (_syncLock)
@@ -179,6 +179,11 @@ namespace SMAStudiovNext.Core.Editor.Completion
 
                         // Add runbooks matching the completion word
                         completionData.AddRange(_backendContext.Runbooks.Where(item => (item.Tag as RunbookModelProxy).RunbookName.StartsWith(completionWord, StringComparison.InvariantCultureIgnoreCase)).Select(item => new KeywordCompletionData((item.Tag as RunbookModelProxy).RunbookName)).ToList());
+
+                        if (completionWord.Contains("$Using:"))
+                        {
+                            // Since the built in code completion doesn't handle $Using: variables, we'll help it by providing it ourself :)
+                        }
 
                     }
 

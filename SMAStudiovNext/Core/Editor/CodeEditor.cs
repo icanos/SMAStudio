@@ -250,7 +250,7 @@ namespace SMAStudiovNext.Core.Editor
         private void InitializeColorizer()
         {
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "SMAStudiovNext.Modules.Workspaces.WindowRunbook.SyntaxHighlightning.Powershell.xshd";
+            var resourceName = "SMAStudiovNext.Core.Editor.SyntaxHighlightning.Powershell.xshd";
 
             var stream = assembly.GetManifestResourceStream(resourceName);
             if (stream != null)

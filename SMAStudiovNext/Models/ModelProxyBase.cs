@@ -57,6 +57,7 @@ namespace SMAStudiovNext.Models
         public object Model
         {
             get { return instance; }
+            set { instance = value; }
         }
 
         public IBackendContext Context

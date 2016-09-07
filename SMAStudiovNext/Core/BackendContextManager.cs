@@ -3,6 +3,7 @@ using SMAStudiovNext.Modules.PartEnvironmentExplorer.ViewModels;
 using SMAStudiovNext.Services;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ namespace SMAStudiovNext.Core
     /// <summary>
     /// Responsible for all backend contexts
     /// </summary>
+    [Export(typeof(IBackendContextManager))]
     public class BackendContextManager : IBackendContextManager
     {
         private IList<BackendContext> _backendContexts;
@@ -55,6 +57,18 @@ namespace SMAStudiovNext.Core
             backend.OnLoaded += OnBackendReady;
 
             return backend;
+        }
+
+        public void Refresh()
+        {
+            foreach (var context in _backendContexts)
+            {
+                if (!context.IsReady)
+                    continue;
+                
+                context.Tags.Clear();
+                context.Start();
+            }
         }
 
         /// <summary>

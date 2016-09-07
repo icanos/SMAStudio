@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="SMAStudiovNext.Modules.Workspaces.WindowScript.Views.ScriptView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SMAStudiovNext.Modules.Workspaces.WindowScript.Views"
+             xmlns:editor="clr-namespace:SMAStudiovNext.Core.Editor"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <editor:CodeEditor x:Name="CodeEditor" Grid.Column="0" Grid.Row="0" Padding="5,5,5,5">
+            <editor:CodeEditor.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Go To Definition" Command="{Binding GoToDefinitionCommand}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,
+                                                                          AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext}" />
+                    <Separator/>
+                    <MenuItem Command="Undo" />
+                    <MenuItem Command="Redo" />
+                    <Separator/>
+                    <MenuItem Command="Cut" />
+                    <MenuItem Command="Copy" />
+                    <MenuItem Command="Paste" />
+                </ContextMenu>
+            </editor:CodeEditor.ContextMenu>
+        </editor:CodeEditor>
+    </Grid>
+</UserControl>

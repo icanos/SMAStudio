@@ -24,20 +24,20 @@ namespace SMAStudiovNext.Core.Editor
         private readonly TextArea _textArea;
         private readonly DebuggerService _debuggerService;
         private readonly BookmarkManager _bookmarkManager;
-        private readonly RunbookViewModel _runbookViewModel;
+        private readonly ICodeViewModel _codeViewModel;
 
         private CompletionWindow _completionWindow = null;
         private long _triggerTag;
         private bool _openedByControlSpace = false;
 
-        public KeystrokeService(RunbookViewModel runbookViewModel, TextArea textArea, ICompletionProvider completionProvider, LanguageContext languageContext, DebuggerService debuggerService, BookmarkManager bookmarkManager)
+        public KeystrokeService(ICodeViewModel codeViewModel, TextArea textArea, ICompletionProvider completionProvider, LanguageContext languageContext, DebuggerService debuggerService, BookmarkManager bookmarkManager)
         {
             _completionProvider = completionProvider;
             _completionProvider.OnCompletionCompleted += OnCompletionResultRetrieved;
             _languageContext = languageContext;
             _debuggerService = debuggerService;
             _bookmarkManager = bookmarkManager;
-            _runbookViewModel = runbookViewModel;
+            _codeViewModel = codeViewModel;
 
             _textArea = textArea;
             _textArea.KeyUp += OnKeyReleased;
@@ -50,7 +50,7 @@ namespace SMAStudiovNext.Core.Editor
             var ch = e.Text[0];
 
             // Set last key stroke
-            _runbookViewModel.LastKeyStroke = DateTime.Now;
+            _codeViewModel.LastKeyStroke = DateTime.Now;
 
             // Notify our language context that the document is dirty and needs a reparsing
             _languageContext.IsDirty = true;
@@ -249,7 +249,7 @@ namespace SMAStudiovNext.Core.Editor
 
         public static bool IsCodeCompletionTrigger(char ch)
         {
-            return ch == '-' || ch == '.' || ch == ':';
+            return ch == '-' || ch == '.' || ch == ':' || ch == '$';
         }
 
         public static bool IsBracketOrParen(char ch)

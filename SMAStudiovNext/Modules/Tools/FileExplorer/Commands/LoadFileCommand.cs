@@ -1,6 +1,9 @@
-﻿using SMAStudiovNext.Icons;
+﻿using Caliburn.Micro;
+using Gemini.Framework.Services;
+using SMAStudiovNext.Icons;
 using SMAStudiovNext.Modules.Tools.FileExplorer.Models;
 using SMAStudiovNext.Modules.Tools.FileExplorer.ViewModels;
+using SMAStudiovNext.Modules.Workspaces.WindowScript.ViewModels;
 using SMAStudiovNext.Utils;
 using System;
 using System.Collections.Generic;
@@ -91,6 +94,8 @@ namespace SMAStudiovNext.Modules.Tools.FileExplorer.Commands
             else
             {
                 // File to open!
+                var shell = IoC.Get<IShell>();
+                shell.OpenDocument(new ScriptViewModel());
             }
         }
     }

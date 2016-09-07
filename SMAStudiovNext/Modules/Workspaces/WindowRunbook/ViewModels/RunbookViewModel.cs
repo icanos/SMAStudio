@@ -38,7 +38,7 @@ using SMAStudiovNext.Core.Editor.Parser;
 
 namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 {
-    public class RunbookViewModel : Document, IViewModel, ICodeViewModel
+    public class RunbookViewModel : Document, IViewModel, ICodeViewModel,
         ICommandHandler<SaveCommandDefinition>,
         ICommandHandler<PublishCommandDefinition>,
         ICommandHandler<EditPublishedCommandDefinition>,
@@ -904,14 +904,12 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
         private async Task Save(Command command)
         {
             LongRunningOperation.Start();
-
-            // Update the UI to notify that the changes has been saved
-            // TODO: REMOVE THIS, SHOULD BE HANDLED BY THE BACKEND SERVICE
             Execute.OnUIThread(() => { UnsavedChanges = false; });
 
             try
             {
-                await _backendContext.Service.Save(this, command).ConfigureAwait(false);
+                await _backendContext.Service.Save(this, command);
+                LongRunningOperation.Stop();
 
                 _runbook.ViewModel = this;
                 _backendContext.AddToRunbooks(_runbook);
@@ -923,8 +921,6 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 
             if (command != null)
                 command.Enabled = true;
-
-            LongRunningOperation.Stop();
         }
 
         void ICommandHandler<SaveCommandDefinition>.Update(Command command)
@@ -1288,6 +1284,11 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
                 _unsavedChanges = value;
                 NotifyOfPropertyChange(() => DisplayName);
             }
+        }
+
+        public string Name
+        {
+            get { return _runbook.RunbookName; }
         }
 
         public override string DisplayName

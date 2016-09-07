@@ -3,6 +3,7 @@ using System.Windows.Input;
 using Caliburn.Micro;
 using Gemini.Framework;
 using SMAStudiovNext.Modules.Startup;
+using SMAStudiovNext.Core;
 
 namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands
 {
@@ -17,14 +18,8 @@ namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands
 
         public void Execute(object parameter)
         {
-            var application = IoC.Get<IModule>();
-            var contexts = (application as Module).GetContexts();
-
-            foreach (var context in contexts)
-            {
-                context.Tags.Clear();
-                context.Start();
-            }
+            var backendContextManager = IoC.Get<IBackendContextManager>();
+            backendContextManager.Refresh();
         }
     }
 }

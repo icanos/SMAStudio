@@ -359,6 +359,10 @@
     <Compile Include="Core\Editor\InsightService.cs" />
     <Compile Include="Core\Editor\SyntaxHighlightning\ThemedHighlightingColorizer.cs" />
     <Compile Include="Modules\Workspaces\WindowRunbook\ViewModels\RunbookViewModel.cs" />
+    <Compile Include="Modules\Workspaces\WindowScript\ViewModels\ScriptViewModel.cs" />
+    <Compile Include="Modules\Workspaces\WindowScript\Views\ScriptView.xaml.cs">
+      <DependentUpon>ScriptView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Services\AzureRMService.cs" />
     <Compile Include="Themes\IThemeManager.cs" />
     <Compile Include="Themes\StylePart.cs" />
@@ -641,6 +645,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Modules\Workspaces\WindowScript\Views\ScriptView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Modules\Workspaces\WindowVariable\Views\VariableView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -709,8 +717,6 @@
     <Folder Include="Modules\Tools\ErrorList\Views\" />
     <Folder Include="Modules\Tools\PropertyGrid\Commands\" />
     <Folder Include="Modules\Workspaces\WindowExecutionResult\Command\" />
-    <Folder Include="Modules\Workspaces\WindowScript\ViewModels\" />
-    <Folder Include="Modules\Workspaces\WindowScript\Views\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icons\Properties.png" />

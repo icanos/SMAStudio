@@ -62,6 +62,20 @@ namespace SMAStudiovNext.Modules.PartEnvironmentExplorer.Commands
                 LongRunningOperation.Start();
                 var item = (ModelProxyBase)(parameter as ResourceContainer).Tag;
 
+                // Make sure that we remove the object from the context as well
+                if (item is RunbookModelProxy)
+                    backendService.Context.Runbooks.Remove(parameter as ResourceContainer);
+                else if (item is ConnectionModelProxy)
+                    backendService.Context.Connections.Remove(parameter as ResourceContainer);
+                else if (item is ScheduleModelProxy)
+                    backendService.Context.Schedules.Remove(parameter as ResourceContainer);
+                else if (item is VariableModelProxy)
+                    backendService.Context.Variables.Remove(parameter as ResourceContainer);
+                else if (item is ModuleModelProxy)
+                    backendService.Context.Modules.Remove(parameter as ResourceContainer);
+                else if (item is CredentialModelProxy)
+                    backendService.Context.Credentials.Remove(parameter as ResourceContainer);
+
                 try {
                     if (backendService.Delete(item))
                         environmentExplorer.Delete(parameter as ResourceContainer);

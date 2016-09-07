@@ -11,5 +11,7 @@ namespace SMAStudiovNext.Core
         void Initialize();
 
         BackendContext Load(BackendConnection connection);
+
+        void Refresh();
     }
 }

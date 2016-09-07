@@ -19,7 +19,7 @@ namespace SMAStudiovNext.Core.Editor.Debugging
 {
     public class DebuggerService : IDisposable
     {
-        private readonly RunbookViewModel _runbookViewModel;
+        private readonly ICodeViewModel _codeViewModel;
         private readonly IList<LineBreakpoint> _breakpoints;
         private Runspace _runspace;
         private PowerShell _powerShell;
@@ -48,7 +48,7 @@ namespace SMAStudiovNext.Core.Editor.Debugging
 
         public DebuggerService(RunbookViewModel runbookViewModel)
         {
-            _runbookViewModel = runbookViewModel;
+            _codeViewModel = runbookViewModel;
             _breakpoints = new List<LineBreakpoint>();
             _variables = new List<VariableDetailsBase>();
             _cancellationTokenSource = new CancellationTokenSource();
@@ -239,8 +239,8 @@ namespace SMAStudiovNext.Core.Editor.Debugging
             var paramBlock = BuildParameterBlock();
             var callString = BuildCallCommand();
 
-            _cachedScriptPath = Path.Combine(AppHelper.CachePath, "scripts", _runbookViewModel.Id + ".ps1");
-            File.WriteAllText(_cachedScriptPath, paramBlock + Environment.NewLine + Environment.NewLine + _runbookViewModel.Content + Environment.NewLine + Environment.NewLine + callString);
+            _cachedScriptPath = Path.Combine(AppHelper.CachePath, "scripts", _codeViewModel.Id + ".ps1");
+            File.WriteAllText(_cachedScriptPath, paramBlock + Environment.NewLine + Environment.NewLine + _codeViewModel.Content + Environment.NewLine + Environment.NewLine + callString);
         }
 
         private void ResumeDebugger(DebuggerResumeAction action)
@@ -577,7 +577,7 @@ namespace SMAStudiovNext.Core.Editor.Debugging
         /// <returns></returns>
         private string BuildParameterBlock()
         {
-            var parameters = _runbookViewModel.GetParameters(string.Empty);
+            var parameters = _codeViewModel.GetParameters(string.Empty);
             var paramBlock = "Param({0})";
             var paramList = parameters.Select(p => p.Text.Replace("-", "$")).ToList();
 
@@ -586,12 +586,12 @@ namespace SMAStudiovNext.Core.Editor.Debugging
 
         private string BuildCallCommand()
         {
-            return _runbookViewModel.Runbook.RunbookName + " " + BuildScriptArguments();
+            return _codeViewModel.Name + " " + BuildScriptArguments();
         }
 
         private string BuildScriptArguments()
         {
-            var parameters = _runbookViewModel.GetParameters(string.Empty);
+            var parameters = _codeViewModel.GetParameters(string.Empty);
             var callString = parameters.Aggregate("", (current, p) => current + (p.Text + " " + p.Text.Replace("-", "$") + " "));
 
             return callString.Trim();

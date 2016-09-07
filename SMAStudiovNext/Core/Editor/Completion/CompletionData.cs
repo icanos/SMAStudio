@@ -126,8 +126,20 @@ namespace SMAStudiovNext.Core.Editor.Completion
             var segment = new TextSegment();
             segment.StartOffset = startOffset;
             segment.EndOffset = caretOffset;
-            
-            textArea.Document.Replace(segment, Name);
+
+            // Check if the completed character is a colon (:) and if it is
+            // remove the $ from the variable name.
+            var idx = startOffset;
+
+            if (idx > 0)
+                idx--;
+
+            var chCompleted = text[idx];
+
+            if (chCompleted == ':' && (this is VariableCompletionData))
+                textArea.Document.Replace(segment, Name.Substring(1));
+            else
+                textArea.Document.Replace(segment, Name);
         }
     }
 

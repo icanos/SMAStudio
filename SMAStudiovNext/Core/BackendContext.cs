@@ -326,8 +326,8 @@ namespace SMAStudiovNext.Core
         
         public void SignalCompleted()
         {
-            if (OnLoaded != null)
-                OnLoaded(this, new ContextUpdatedEventArgs(this));
+            OnLoaded?.Invoke(this, new ContextUpdatedEventArgs(this));
+            NotifyOfPropertyChange(() => Tags);
         }
 
         public bool IsRunbook(string name)

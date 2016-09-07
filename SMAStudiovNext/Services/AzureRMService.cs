@@ -1175,8 +1175,13 @@ namespace SMAStudiovNext.Services
 
             if (_tokens.ContainsKey(tenantId))
             {
-                token = _tokens[tenantId].FirstOrDefault(x => x.resource == AzureBaseUrl);
-                refreshToken = _tokens[tenantId].FirstOrDefault();
+                if (_tokens[tenantId] != null)
+                {
+                    token = _tokens[tenantId].FirstOrDefault(x => x.resource == AzureBaseUrl);
+                    refreshToken = _tokens[tenantId].FirstOrDefault();
+                }
+                else
+                    _tokens.Remove(tenantId);
             }
 
             if (refreshToken == null && _tokens.ContainsKey(default(Guid)))

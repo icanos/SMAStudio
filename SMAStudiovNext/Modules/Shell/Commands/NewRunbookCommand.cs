@@ -39,6 +39,7 @@ namespace SMAStudiovNext.Modules.Shell.Commands
             reader.Close();
                 
             var context = IoC.Get<EnvironmentExplorerViewModel>().GetCurrentContext();
+
             if (context != null)
             {
                 var viewModel = default(RunbookViewModel);
