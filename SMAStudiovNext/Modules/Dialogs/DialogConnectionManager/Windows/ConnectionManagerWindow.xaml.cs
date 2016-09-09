@@ -74,6 +74,9 @@ namespace SMAStudiovNext.Modules.DialogConnectionManager.Windows
 
             if (ConnectionIndex == -1)
             {
+                if (SettingsService.CurrentSettings.Connections == null)
+                    SettingsService.CurrentSettings.Connections = new System.Collections.Generic.List<BackendConnection>();
+
                 SettingsService.CurrentSettings.Connections.Add(Connection);
                 ConnectionIndex = SettingsService.CurrentSettings.Connections.Count - 1;
             }
