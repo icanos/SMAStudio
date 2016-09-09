@@ -198,7 +198,7 @@ namespace SMAStudiovNext.Modules.WindowExecutionResult.ViewModels
                     _runbookViewModel.Runbook.JobID = Guid.Empty;
                     LongRunningOperation.Stop();
                 }
-                catch (ApplicationException ex)
+                catch (Exception ex)
                 {
                     GlobalExceptionHandler.Show(ex);
                     _runbookViewModel.Runbook.JobID = Guid.Empty;
@@ -254,7 +254,7 @@ namespace SMAStudiovNext.Modules.WindowExecutionResult.ViewModels
                 else
                     backendService.ResumeExecution(_runbookViewModel.Model as RunbookModelProxy, _isTestRun);
             }
-            catch (ApplicationException ex)
+            catch (Exception ex)
             {
                 GlobalExceptionHandler.Show(ex);
             }
@@ -285,7 +285,7 @@ namespace SMAStudiovNext.Modules.WindowExecutionResult.ViewModels
 
                 backendService.StopExecution(_runbookViewModel.Model as RunbookModelProxy, _isTestRun);
             }
-            catch (ApplicationException ex)
+            catch (Exception ex)
             {
                 GlobalExceptionHandler.Show(ex);
             }

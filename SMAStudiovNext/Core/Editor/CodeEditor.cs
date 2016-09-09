@@ -33,6 +33,7 @@ namespace SMAStudiovNext.Core.Editor
         private readonly BracketHighlightRenderer _bracketRenderer;
         private readonly LanguageContext _languageContext;
         private ThemedHighlightingColorizer _colorizer;
+        private InlineScriptDocumentTransformer _inlineScriptTransformer;
         private FoldingManager _foldingManager;
         private ToolTip _toolTip;
         private System.Timers.Timer _keystrokeTimer;
@@ -70,6 +71,9 @@ namespace SMAStudiovNext.Core.Editor
             _bracketRenderer = new BracketHighlightRenderer(this.TextArea.TextView, _languageContext);
             TextArea.TextView.BackgroundRenderers.Add(_bracketRenderer);
 
+            _inlineScriptTransformer = new InlineScriptDocumentTransformer(this.TextArea.TextView, _languageContext);
+            TextArea.TextView.BackgroundRenderers.Add(_inlineScriptTransformer);
+
             InitializeColorizer();
         }
 
@@ -90,6 +94,8 @@ namespace SMAStudiovNext.Core.Editor
         {
             _keystrokeTimer.Stop();
             OnTextInputCompleted?.Invoke(this, e);
+
+            _inlineScriptTransformer.Refresh();
         }
 
         private async void HighlightBrackets(object sender, EventArgs eventArgs)

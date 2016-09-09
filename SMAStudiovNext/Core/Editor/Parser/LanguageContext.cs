@@ -132,6 +132,103 @@ namespace SMAStudiovNext.Core.Editor.Parser
         }
 
         /// <summary>
+        /// Checks if the current provided position is inside of a InlineScript block
+        /// </summary>
+        /// <param name="position">Position to check</param>
+        /// <returns>True if in InlineScript, false if not</returns>
+        public bool IsInInlineScript(int position)
+        {
+            var blocks = _tokens.Where(t => t.Extent.StartOffset <= position && t.Extent.EndOffset >= position);
+
+            if (blocks.Count() == 0)
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Get InlineScript block to know which offsets the block spans between
+        /// </summary>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        public Token GetInlineScriptBlock(int position)
+        {
+            // Get the block with the smallest distance between start <-> end
+            /*var block = _tokens
+                .Where(t => t.Extent.StartOffset <= position && t.Extent.EndOffset >= position && t.Kind == TokenKind.)
+                .OrderBy(t => t.Extent.EndOffset - t.Extent.StartOffset)
+                .FirstOrDefault();
+
+            return block;*/
+            return null;
+        }
+
+        /// <summary>
+        /// Returns all InlineScript blocks found in the document
+        /// </summary>
+        /// <returns></returns>
+        public IList<BlockSegment> GetInlineScriptBlocks()
+        {
+            if (_tokens == null)
+                return null;
+
+            var isInInlineScript = false;
+            var blockStart = default(Token);
+            var blockEnd = default(Token);
+            var entries = new List<BlockSegment>();
+
+            var bracesFound = 0;
+
+            // A block of inlinescript consists of InlineScript, RCurly and LCurly. The InlineScript should follow a RCurly, ALWAYS.
+            for (var i = 0; i < _tokens.Length; i++)
+            {
+                var token = _tokens[i];
+
+                if (token.Kind != TokenKind.InlineScript && !isInInlineScript)
+                    continue;
+
+                // If the InlineScript does not directly follow an RCurly, this expression is not a valid
+                // InlineScript block and therefore we continue without any questions.
+                if (token.Kind == TokenKind.InlineScript && _tokens[i + 1].Kind != TokenKind.LCurly && _tokens[i + 2].Kind != TokenKind.LCurly)
+                {
+                    isInInlineScript = false;
+                    continue;
+                }
+                else if (token.Kind == TokenKind.InlineScript && (
+                            _tokens[i + 1].Kind == TokenKind.LCurly ||
+                            _tokens[i + 2].Kind == TokenKind.LCurly
+                        )
+                    )
+                {
+                    isInInlineScript = true;
+                    blockStart = token;
+                }
+
+                if (token.Kind == TokenKind.LCurly)
+                    bracesFound++;
+                else if (token.Kind == TokenKind.RCurly)
+                    bracesFound--;
+
+                if (isInInlineScript && token.Kind == TokenKind.RCurly && bracesFound == 0)
+                {
+                    blockEnd = token;
+                    isInInlineScript = false;
+
+                    // Create a block entry
+                    entries.Add(new BlockSegment
+                    {
+                        StartLineNumber = blockStart.Extent.StartLineNumber,
+                        StartOffset = blockStart.Extent.StartOffset,
+                        EndLineNumber = blockEnd.Extent.EndLineNumber,
+                        EndOffset = blockEnd.Extent.EndOffset
+                    });
+                }
+            }
+
+            return entries;
+        }
+
+        /// <summary>
         /// Get the start end end offset of the InlineScript
         /// </summary>
         /// <param name="position">Position to check</param>
@@ -310,22 +407,7 @@ namespace SMAStudiovNext.Core.Editor.Parser
 
                 return tokenList;
             }
-
-            /*var currentStart = int.MinValue;
-            var currentStop = int.MaxValue;
-            var currentToken = default(Token);
-
-            foreach (var token in tokenList)
-            {
-                if (token.Extent.StartOffset > currentStart && token.Extent.EndOffset < currentStop)
-                {
-                    currentStart = token.Extent.StartOffset;
-                    currentStop = token.Extent.EndOffset;
-                    currentToken = token;
-                }
-            }
-
-            return currentToken;*/
+            
             return tokenList;
         }
 

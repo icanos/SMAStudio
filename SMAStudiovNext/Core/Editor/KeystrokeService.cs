@@ -265,15 +265,17 @@ namespace SMAStudiovNext.Core.Editor
             //Token[] tokens;
             //ParseError[] errors;
             //System.Management.Automation.Language.Parser.ParseInput(lineText, out tokens, out errors);
+            if (line == null || lineText == null || _languageContext == null)
+                return null;
 
             if (_languageContext.Tokens.Length >= 2)
             {
-                var filteredTokens = _languageContext.Tokens.Where(t => t.Extent.StartLineNumber == line.LineNumber && t.Extent.EndOffset <= position).ToList();
+                var filteredTokens = _languageContext.Tokens.Where(t => t.Extent.StartLineNumber == line.LineNumber && t.Extent.EndOffset <= position);
 
-                if (filteredTokens.Count < 1)
+                if (filteredTokens.Count() < 1)
                     return null;
 
-                var token = filteredTokens[filteredTokens.Count - 1];
+                var token = filteredTokens.Last();//[filteredTokens.Count() - 1];
 
                 if (token.TokenFlags == TokenFlags.CommandName)
                     return token;

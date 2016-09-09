@@ -253,6 +253,8 @@
     <Compile Include="Core\CertificateManager.cs" />
     <Compile Include="Core\Documentation\DocumentationComment.cs" />
     <Compile Include="Core\Documentation\DocumentationManager.cs" />
+    <Compile Include="Core\Editor\InlineScriptDocumentTransformer.cs" />
+    <Compile Include="Core\Editor\Parser\BlockSegment.cs" />
     <Compile Include="Core\Exceptions\CertificateException.cs" />
     <Compile Include="Core\AccessToken.cs" />
     <Compile Include="Core\IBackendContextManager.cs" />
