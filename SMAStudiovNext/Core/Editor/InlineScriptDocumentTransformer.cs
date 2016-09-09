@@ -29,6 +29,12 @@ namespace SMAStudiovNext.Core.Editor
 
             // Detect scroll changes
             _textView.ScrollOffsetChanged += _textView_ScrollOffsetChanged;
+            //_textView.VisualLinesChanged += _textView_VisualLinesChanged;
+            //Refresh();
+        }
+
+        private void _textView_VisualLinesChanged(object sender, EventArgs e)
+        {
             Refresh();
         }
 
@@ -71,8 +77,14 @@ namespace SMAStudiovNext.Core.Editor
                     var startLine = textView.GetVisualLine(segment.StartLineNumber);
                     var endLine = textView.GetVisualLine(segment.EndLineNumber);
 
-                    if (startLine == null || endLine == null)
+                    // Make sure that startLine is valid (in view) since that is where we'll start to render
+                    // the background. In case endLine is null, that means that we're outside of the view and
+                    // should render the background to the last visible line.
+                    if (startLine == null)
                         continue;
+
+                    if (endLine == null)
+                        endLine = textView.VisualLines.Last();
 
                     var y = startLine.GetTextLineVisualYPosition(startLine.TextLines[0], VisualYPosition.LineTop) - _textView.ScrollOffset.Y;
                     var yEnd = endLine.GetTextLineVisualYPosition(endLine.TextLines[0], VisualYPosition.LineBottom) - _textView.ScrollOffset.Y;

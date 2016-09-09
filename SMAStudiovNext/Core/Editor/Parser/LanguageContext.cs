@@ -7,6 +7,7 @@ using SMAStudiovNext.Models;
 using SMAStudiovNext.Services;
 using Caliburn.Micro;
 using SMAStudiovNext.Core.Editor.Completion;
+using ICSharpCode.AvalonEdit.Rendering;
 
 namespace SMAStudiovNext.Core.Editor.Parser
 {
@@ -209,7 +210,7 @@ namespace SMAStudiovNext.Core.Editor.Parser
                 else if (token.Kind == TokenKind.RCurly)
                     bracesFound--;
 
-                if (isInInlineScript && token.Kind == TokenKind.RCurly && bracesFound == 0)
+                if ((isInInlineScript && token.Kind == TokenKind.RCurly && bracesFound == 0))
                 {
                     blockEnd = token;
                     isInInlineScript = false;
