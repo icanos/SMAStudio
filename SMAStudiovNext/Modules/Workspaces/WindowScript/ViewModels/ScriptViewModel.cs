@@ -52,7 +52,7 @@ namespace SMAStudiovNext.Modules.Workspaces.WindowScript.ViewModels
         /// </summary>
         /// <param name="completionWord"></param>
         /// <returns></returns>
-        public IList<ICompletionData> GetParameters(string completionWord)
+        public IList<ICompletionData> GetParameters(string completionWord, bool forceParameterUpdate = false)
         {
             throw new NotImplementedException();
         }

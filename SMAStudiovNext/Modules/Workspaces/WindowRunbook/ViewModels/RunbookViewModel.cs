@@ -705,9 +705,9 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
         /// </summary>
         /// <param name="completionWord"></param>
         /// <returns></returns>
-        public IList<ICompletionData> GetParameters(string completionWord)
+        public IList<ICompletionData> GetParameters(string completionWord, bool forceParameterUpdate = false)
         {
-            if (_parameters != null) // check if parameters is cached
+            if (_parameters != null && !forceParameterUpdate) // check if parameters is cached
                 return _parameters;
 
             var completionEntries = new List<ICompletionData>();

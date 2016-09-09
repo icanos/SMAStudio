@@ -9,7 +9,7 @@ namespace SMAStudiovNext.Core
 {
     public interface ICodeViewModel
     {
-        IList<ICompletionData> GetParameters(string completionWord);
+        IList<ICompletionData> GetParameters(string completionWord, bool forceParameterUpdate = false);
 
         Guid Id { get; }
 

@@ -28,7 +28,7 @@ namespace SMAStudiovNext.Modules.DialogStartRun.Windows
 
         private void PrepareRunWindowLoaded(object sender, RoutedEventArgs e)
         {
-            var parameters = _runbookViewModel.GetParameters(null);
+            var parameters = _runbookViewModel.GetParameters(null, true);
 
             foreach (var param in parameters)
                 Inputs.Add(param);
