@@ -74,16 +74,17 @@ namespace SMAStudiovNext.Core.Editor.Completion
         /// <param name="content">Script that we're working with</param>
         /// <param name="lineContent">Content of the current line</param>
         /// <param name="line">Line object from AvaloneEdit</param>
+        /// <param name="runbookToken">Token containing the name of the runbook (if not runbook, null)</param>
         /// <param name="position">Caret offset</param>
         /// <param name="triggerChar">Not used</param>
         /// <param name="triggerTag">Counter</param>
-        public void GetCompletionData(string completionWord, string content, string lineContent, DocumentLine line, int position, char? triggerChar, long triggerTag)
+        public void GetCompletionData(string completionWord, string content, string lineContent, DocumentLine line, Token runbookToken, int position, char? triggerChar, long triggerTag)
         {
             if (_requestTrigger != 0 && triggerTag <= _requestTrigger)
                 return;
 
             DismissGetCompletionResults();
-            ProcessCompletion(content, triggerChar, completionWord, position, triggerTag);
+            ProcessCompletion(content, triggerChar, completionWord, runbookToken, position, triggerTag);
         }
 
         /// <summary>
@@ -92,6 +93,7 @@ namespace SMAStudiovNext.Core.Editor.Completion
         /// <param name="token">Runbook to get suggestions from</param>
         /// <param name="completionWord">Word to complete</param>
         /// <param name="triggerTag">Counter</param>
+        [Obsolete("This method has been replaced by inline functionality in ProcessCompletion. No need to call a method like this explicitly.")]
         public void GetParameterCompletionData(Token token, string completionWord, long triggerTag)
         {
             if (_requestTrigger != 0 || triggerTag <= _requestTrigger)
@@ -134,6 +136,16 @@ namespace SMAStudiovNext.Core.Editor.Completion
             return (_backendContext.Runbooks.FirstOrDefault(item => (item.Tag as RunbookModelProxy).RunbookName.Equals(token.Text, StringComparison.InvariantCultureIgnoreCase)) != null);
         }
 
+        public RunbookModelProxy IsRunbook(string completionWord)
+        {
+            var result = _backendContext.Runbooks.FirstOrDefault(item => (item.Tag as RunbookModelProxy).RunbookName.Equals(completionWord, StringComparison.InvariantCultureIgnoreCase));
+
+            if (result == null)
+                return null;
+
+            return result.Tag as RunbookModelProxy;
+        }
+
         /// <summary>
         /// Processes a completion request by sending it to the powershell completion engine.
         /// </summary>
@@ -141,7 +153,7 @@ namespace SMAStudiovNext.Core.Editor.Completion
         /// <param name="completionWord">Word to complete</param>
         /// <param name="position">Caret offset</param>
         /// <param name="triggerTag">Counter</param>
-        private void ProcessCompletion(string content, char? triggerChar, string completionWord, int position, long triggerTag)
+        private void ProcessCompletion(string content, char? triggerChar, string completionWord, Token runbookToken, int position, long triggerTag)
         {
             lock (_syncLock)
             {
@@ -180,9 +192,24 @@ namespace SMAStudiovNext.Core.Editor.Completion
                         // Add runbooks matching the completion word
                         completionData.AddRange(_backendContext.Runbooks.Where(item => (item.Tag as RunbookModelProxy).RunbookName.StartsWith(completionWord, StringComparison.InvariantCultureIgnoreCase)).Select(item => new KeywordCompletionData((item.Tag as RunbookModelProxy).RunbookName)).ToList());
 
+                        // Add runbook parameters if the completionWord is a runbook name
+                        if (runbookToken != null)
+                        {
+                            var runbook = _backendContext.Runbooks.FirstOrDefault(r => (r.Tag as RunbookModelProxy).RunbookName.Equals(runbookToken.Text, StringComparison.InvariantCultureIgnoreCase));
+
+                            if (runbook != null)
+                            {
+                                var runbookViewModel = (runbook.Tag as RunbookModelProxy).GetViewModel<RunbookViewModel>();
+                                var parameters = runbookViewModel.GetParameters(completionWord);
+
+                                completionData.AddRange(parameters);
+                            }
+                        }
+
                         if (completionWord.Contains("$Using:"))
                         {
                             // Since the built in code completion doesn't handle $Using: variables, we'll help it by providing it ourself :)
+                            // TODO somehow...
                         }
 
                     }

@@ -707,7 +707,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
         /// <returns></returns>
         public IList<ICompletionData> GetParameters(string completionWord, bool forceParameterUpdate = false)
         {
-            if (_parameters != null && !forceParameterUpdate) // check if parameters is cached
+            if (_parameters != null && !forceParameterUpdate && !string.IsNullOrEmpty(completionWord)) // check if parameters is cached
                 return _parameters;
 
             var completionEntries = new List<ICompletionData>();
@@ -715,17 +715,29 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 
             // Check if the content's already been loaded
             ScriptBlockAst scriptBlock = null;
-            Execute.OnUIThread(() =>
+            if (_view != null && (_view.TextEditor != null || _view.PublishedTextEditor != null))
             {
-                if (!string.IsNullOrEmpty(_view?.TextEditor.Text))
+                Execute.OnUIThread(() =>
                 {
-                    scriptBlock = _view.TextEditor.LanguageContext.ScriptBlock;
-                }
-                else
-                {
-                    scriptBlock = _view.PublishedTextEditor.LanguageContext.ScriptBlock;
-                }
-            });
+                    if (!string.IsNullOrEmpty(_view?.TextEditor.Text))
+                    {
+                        scriptBlock = _view.TextEditor.LanguageContext.ScriptBlock;
+                    }
+                    else
+                    {
+                        scriptBlock = _view.PublishedTextEditor.LanguageContext.ScriptBlock;
+                    }
+                });
+            }
+            else
+            {
+                // We need to download the code and get the scriptblock since this is a non loaded runbook.
+                var runbookContent = GetContent(RunbookType.Published, true);
+                var languageContext = new LanguageContext();
+                languageContext.Parse(runbookContent);
+
+                scriptBlock = languageContext.ScriptBlock;
+            }
             
             if (scriptBlock == null)
             {

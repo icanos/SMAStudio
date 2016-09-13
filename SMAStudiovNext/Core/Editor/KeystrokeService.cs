@@ -162,7 +162,7 @@ namespace SMAStudiovNext.Core.Editor
 
             var completionWord = GetWordNextToCaret(lineTextUpToCaret, lineTextUpToCaret.Length - 1);
 
-            var token = default(Token);
+            /*var token = default(Token);
             if ((token = IsPreviousTokenCommand(caretPosition)) != null)
             {
                 // ReSharper disable once AssignmentInConditionalExpression
@@ -178,15 +178,40 @@ namespace SMAStudiovNext.Core.Editor
 
                     return;
                 }
-            }
+            }*/
+
+            //var runbookToken = IsPreviousTokenCommand(caretPosition);
+            var runbookToken = GetCommandFromCaretPosition(caretPosition);
+
+            if (runbookToken != null && !_completionProvider.IsRunbook(runbookToken))
+                runbookToken = null;
 
             Task.Factory.StartNew(() =>
             {
                 Interlocked.Increment(ref _triggerTag);
 
-                _completionProvider.GetCompletionData(completionWord, script, lineTextUpToCaret, null, caretPosition,
+                _completionProvider.GetCompletionData(completionWord, script, lineTextUpToCaret, null, runbookToken, caretPosition,
                     null, _triggerTag);
             });
+        }
+
+        /// <summary>
+        /// Get the command name based on the caret offset
+        /// </summary>
+        /// <param name="caretPosition"></param>
+        /// <returns>Token (of a runbook) or null if none found</returns>
+        private Token GetCommandFromCaretPosition(int caretPosition)
+        {
+            var line = _textArea.Document.GetLineByOffset(caretPosition);
+            var tokens = _languageContext.Tokens.Where(t => 
+                                                    t.Extent.StartLineNumber == line.LineNumber && 
+                                                    t.Extent.EndOffset <= caretPosition && 
+                                                    t.TokenFlags == TokenFlags.CommandName);
+
+            if (tokens.Count() == 0)
+                return null;
+
+            return tokens.Last();
         }
 
         private string GetWordNextToCaret(string lineText, int caretLineOffset)
@@ -195,6 +220,9 @@ namespace SMAStudiovNext.Core.Editor
 
             for (var i = caretLineOffset; i >= 0; i--)
             {
+               // if ((lineText[i] == '-' || lineText[i] == ' ') && word.Length == 0)
+               //     continue;
+
                 if (char.IsLetterOrDigit(lineText[i]) || lineText[i] == '_' || lineText[i] == '$' || lineText[i] == '-')
                 {
                     word = lineText[i] + word;

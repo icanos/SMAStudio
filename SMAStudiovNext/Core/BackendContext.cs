@@ -69,22 +69,29 @@ namespace SMAStudiovNext.Core
         {
             IsReady = false;
 
-            _runbookNameCache.Clear();
+            try
+            {
+                _runbookNameCache.Clear();
 
-            Runbooks.Clear();
-            Credentials.Clear();
-            Schedules.Clear();
-            Variables.Clear();
-            Modules.Clear();
-            Connections.Clear();
-            Tags.Clear();
+                Runbooks.Clear();
+                Credentials.Clear();
+                Schedules.Clear();
+                Variables.Clear();
+                Modules.Clear();
+                Connections.Clear();
+                Tags.Clear();
 
-            Service.Load();
+                Service.Load();
 
-            foreach (var rb in Runbooks)
-                _runbookNameCache.Add((rb.Tag as RunbookModelProxy).RunbookName);
+                foreach (var rb in Runbooks)
+                    _runbookNameCache.Add((rb.Tag as RunbookModelProxy).RunbookName);
 
-            Execute.OnUIThread(() => _statusManager.SetText(""));
+                Execute.OnUIThread(() => _statusManager.SetText(""));
+            }
+            catch (NotSupportedException)
+            {
+                // Ignore for now...
+            }
         }
 
         public ResourceContainer GetStructure()
