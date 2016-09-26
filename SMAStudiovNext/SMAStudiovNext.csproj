@@ -769,7 +769,7 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\PowerShellEditorServices\submodules\PSScriptAnalyzer\Rules\ScriptAnalyzerBuiltinRules.csproj">
+    <ProjectReference Include="..\Libraries\PowerShellEditorServices\submodules\PSScriptAnalyzer\Rules\ScriptAnalyzerBuiltinRules.csproj">
       <Project>{c33b6b9d-e61c-45a3-9103-895fd82a5c1e}</Project>
       <Name>ScriptAnalyzerBuiltinRules</Name>
     </ProjectReference>
