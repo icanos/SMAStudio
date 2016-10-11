@@ -24,7 +24,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptAnalyzerEngine", "Lib
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xceed.Wpf.AvalonDock", "Libraries\Xceed.Wpf.AvalonDock\Xceed.Wpf.AvalonDock.csproj", "{DB81988F-E0F2-45A0-A1FD-8C37F3D35244}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptAnalyzerBuiltinRules", "..\PowerShellEditorServices\submodules\PSScriptAnalyzer\Rules\ScriptAnalyzerBuiltinRules.csproj", "{C33B6B9D-E61C-45A3-9103-895FD82A5C1E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptAnalyzerBuiltinRules", "Libraries\PowerShellEditorServices\submodules\PSScriptAnalyzer\Rules\ScriptAnalyzerBuiltinRules.csproj", "{C33B6B9D-E61C-45A3-9103-895FD82A5C1E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
