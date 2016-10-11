@@ -551,7 +551,16 @@ namespace SMAStudiovNext.Services
                 return;
 
             // We need to fetch a token for the backend connection
-            InitializeAsync().Wait();
+            try
+            {
+                InitializeAsync().Wait();
+            }
+            catch (AggregateException ex)
+            {
+                _backendContext.Exception = ex;
+                _backendContext.IsReady = false;
+                _backendContext.SignalCompleted();
+            }
 
             var runbooksResponse = _client.Runbooks.List(_connectionData.AzureRMGroupName, _connectionData.AzureAutomationAccount);
 

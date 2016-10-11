@@ -417,6 +417,12 @@ namespace SMAStudiovNext.Core
                 //    _statusManager.SetText("");
             }
         }
+
+        public Exception Exception
+        {
+            get;
+            set;
+        }
     }
 
     public class Tag : IEnvironmentExplorerItem

@@ -85,5 +85,7 @@ namespace SMAStudiovNext.Core
         IBackendService Service { get; }
 
         bool IsReady { get; set; }
+
+        Exception Exception { get; set; }
     }
 }

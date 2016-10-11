@@ -90,6 +90,20 @@ namespace SMAStudiovNext.Modules.DialogConnectionManager.Windows
                 conn.SmaPassword = Connection.SmaPassword;
                 conn.SmaUsername = Connection.SmaUsername;
 
+                if (!String.IsNullOrEmpty(conn.SmaConnectionUrl))
+                {
+                    if (!conn.SmaConnectionUrl.Contains(":") && !conn.SmaConnectionUrl.EndsWith("/"))
+                        conn.SmaConnectionUrl += ":9090/00000000-0000-0000-0000-000000000000";
+
+                    if (!conn.SmaConnectionUrl.EndsWith("/") && !conn.SmaConnectionUrl.EndsWith("00000000-0000-0000-0000-000000000000"))
+                        conn.SmaConnectionUrl += "/00000000-0000-0000-0000-000000000000";
+
+                    if (!conn.SmaConnectionUrl.EndsWith("00000000-0000-0000-0000-000000000000"))
+                    {
+                        conn.SmaConnectionUrl += "00000000-0000-0000-0000-000000000000";
+                    }
+                }
+
                 if (!string.IsNullOrEmpty(Connection.AzureRMServicePrincipalCleartextKey))
                 {
                     Connection.AzureRMServicePrincipalCleartextKey = null;

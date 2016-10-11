@@ -920,7 +920,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 
             try
             {
-                await _backendContext.Service.Save(this, command);
+                await _backendContext.Service.Save(this, command).ConfigureAwait(false);
                 LongRunningOperation.Stop();
 
                 _runbook.ViewModel = this;
@@ -997,7 +997,7 @@ namespace SMAStudiovNext.Modules.WindowRunbook.ViewModels
 
         async Task ICommandHandler<SaveCommandDefinition>.Run(Command command)
         {
-            await Save(command);
+            await Save(command).ConfigureAwait(false);
         }
 
         void ICommandHandler<PublishCommandDefinition>.Update(Command command)

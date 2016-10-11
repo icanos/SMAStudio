@@ -7,6 +7,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace SMAStudiovNext.Core
 {
@@ -80,6 +81,24 @@ namespace SMAStudiovNext.Core
         {
             var environment = IoC.Get<EnvironmentExplorerViewModel>();
 
+            foreach (var context in _backendContexts)
+            {
+                if (context.Exception != null)
+                {
+                    Execute.OnUIThread(() =>
+                    {
+                        var message = context.Exception.Message;
+
+                        if (context.Exception.InnerException != null)
+                            message += "\r\n\r\n" + context.Exception.InnerException.Message;
+
+                        MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        AppContext.Resolve<IStatusManager>().SetText("");
+                        LongRunningOperation.Stop();
+                    });
+                }
+            }
+
             // We need to update the environment object
             if (environment != null)
             {
@@ -110,11 +129,14 @@ namespace SMAStudiovNext.Core
                 }
             }
 
-            if (allContextsReady)
-                AppContext.Resolve<IStatusManager>().SetText("");
+            Execute.OnUIThread(() =>
+            {
+                if (allContextsReady)
+                    AppContext.Resolve<IStatusManager>().SetText("");
 
-            // Cancel the spinner that shows we're loading data
-            LongRunningOperation.Stop();
+                // Cancel the spinner that shows we're loading data
+                LongRunningOperation.Stop();
+            });
         }
     }
 }

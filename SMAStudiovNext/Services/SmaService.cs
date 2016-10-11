@@ -210,32 +210,32 @@ namespace SMAStudiovNext.Services
                 if (instance.Model is RunbookModelProxy)
                 {
                     //SaveSmaRunbook(context, instance);
-                    await SaveRunbookAsync(instance.Model as RunbookModelProxy, instance.Content);
+                    await SaveRunbookAsync(instance.Model as RunbookModelProxy, instance.Content).ConfigureAwait(false);
                 }
                 else if (instance.Model is VariableModelProxy)
                 {
                     var proxy = (VariableModelProxy)instance.Model;
-                    await SaveVariableAsync(proxy);
+                    await SaveVariableAsync(proxy).ConfigureAwait(false);
                 }
                 else if (instance.Model is CredentialModelProxy)
                 {
                     var proxy = (CredentialModelProxy)instance.Model;
-                    await SaveCredentialAsync(proxy);
+                    await SaveCredentialAsync(proxy).ConfigureAwait(false);
                 }
                 else if (instance.Model is ScheduleModelProxy)
                 {
                     var proxy = (ScheduleModelProxy)instance.Model;
-                    await SaveScheduleAsync(proxy);
+                    await SaveScheduleAsync(proxy).ConfigureAwait(false);
                 }
                 else if (instance.Model is ConnectionModelProxy)
                 {
                     var proxy = (ConnectionModelProxy)instance.Model;
-                    await SaveConnectionAsync(proxy);
+                    await SaveConnectionAsync(proxy).ConfigureAwait(false);
                 }
                 else if (instance.Model is ModuleModelProxy)
                 {
                     var proxy = (ModuleModelProxy)instance.Model;
-                    await SaveModuleAsync(proxy);
+                    await SaveModuleAsync(proxy).ConfigureAwait(false);
                 }
                 else
                     throw new NotImplementedException();
@@ -249,10 +249,10 @@ namespace SMAStudiovNext.Services
                 throw new ApplicationException("Error when saving the object. Please refer to the output for more information", ex);
             }
 
-            if (command != null)
-                Execute.OnUIThread(() => { command.Enabled = true; });
+            //if (command != null)
+            //    Execute.OnUIThread(() => { command.Enabled = true; });
 
-            LongRunningOperation.Stop();
+            //LongRunningOperation.Stop();
 
             return new OperationResult
             {
@@ -597,6 +597,8 @@ namespace SMAStudiovNext.Services
             catch (InvalidOperationException) { }
 
             context.SetSaveStream(entity, baseStream, true, "application/octet-stream", string.Empty);
+            entity.Runbook.Tags = runbook.Tags;
+
             context.SaveChanges();
 
             if (runbookType == RunbookType.Published)
