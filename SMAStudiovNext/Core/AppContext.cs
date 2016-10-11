@@ -56,7 +56,7 @@ namespace SMAStudiovNext.Core
 
         public static string Version
         {
-            get { return "2.0.2"; }
+            get { return "2.0.3"; }
         }
     }
 }
